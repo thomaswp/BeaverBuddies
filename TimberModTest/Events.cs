@@ -18,10 +18,12 @@ namespace TimberModTest
     {
         public float timeInFixedSecs;
 
-        public ReplayEvent(float timeInFixedSecs)
-        {
-            this.timeInFixedSecs = timeInFixedSecs;
-        }
+        public string type => GetType().Name;
+
+        //public ReplayEvent(float timeInFixedSecs)
+        //{
+        //    this.timeInFixedSecs = timeInFixedSecs;
+        //}
 
         public int CompareTo(ReplayEvent other)
         {
@@ -40,12 +42,12 @@ namespace TimberModTest
         public Vector3Int coordinates;
         public Orientation orientation;
 
-        public BuildingPlacedEvent(float timeInFixedSecs, string prefab, Vector3Int coordinates, Orientation orientation) : base(timeInFixedSecs)
-        {
-            this.prefab = prefab;
-            this.coordinates = coordinates;
-            this.orientation = orientation;
-        }
+        //public BuildingPlacedEvent(float timeInFixedSecs, string prefab, Vector3Int coordinates, Orientation orientation) : base(timeInFixedSecs)
+        //{
+        //    this.prefab = prefab;
+        //    this.coordinates = coordinates;
+        //    this.orientation = orientation;
+        //}
 
         public override void Replay(IReplayContext context)
         {
@@ -60,6 +62,13 @@ namespace TimberModTest
         static bool Prefix(BlockObject prefab, Vector3Int coordinates, Orientation orientation)
         {
             Plugin.Log($"Placing {prefab.name}, {coordinates}, {orientation}");
+
+            ReplayService.RecordEvent(new BuildingPlacedEvent()
+            {
+                prefab = prefab.name,
+                coordinates = coordinates,
+                orientation = orientation,
+            });
 
             // TODO: For reader, return false
             return true;
