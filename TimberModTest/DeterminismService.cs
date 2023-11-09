@@ -18,6 +18,7 @@ namespace TimberModTest
             Plugin.Log($"Hopefully deterministic random number {gen.Range(0, 100)}");
         }
 
+        // TODO: Try NewGameInitializedEvent instead
         [OnEvent]
         public void OnSpeedEvent(CurrentSpeedChangedEvent e)
         {

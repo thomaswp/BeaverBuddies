@@ -72,7 +72,8 @@ namespace TimberModTest
         
         public List<ReplayEvent> ReadEvents()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+            return new List<ReplayEvent>();
         }
 
         public void WriteEvents(params ReplayEvent[] events)
@@ -147,7 +148,7 @@ namespace TimberModTest
 
         public void WriteEvents(params ReplayEvent[] events)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public void Close()

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Timberborn.Common;
+using Timberborn.SingletonSystem;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
 using UnityEngine;
@@ -19,26 +21,38 @@ namespace TimberModTest
     {
         IDayNightCycle _dayNightCycle;
         public int TicksSinceLoad { get; private set; }
+        // TODO: This does seem to work, but since the start time
+        // doesn't appear to be an int value, we end up with some weird
+        // float rounding nonsense and I don't know if the values are
+        // going to end up discrete. Might want to use ticks instead.
         public float TotalTimeInFixedSecons
         {
             get { return _dayNightCycle.HoursPassedToday / 24 * 460; }
         }
 
-        public TickWathcerService(IDayNightCycle dayNightCycle)
+        public TickWathcerService(IDayNightCycle dayNightCycle, EventBus eventBus)
         {
             _dayNightCycle = dayNightCycle;
             TicksSinceLoad = 0;
-            Plugin.Log("" + Time.fixedDeltaTime);
+            //Plugin.Log("" + Time.fixedDeltaTime);
 
+            eventBus.Register(this);
+        }
+
+        [OnEvent]
+        public void OnGameLoaded(NewGameInitializedEvent e)
+        {
+            ReplayService.UpdateInstance();
         }
 
         public void Tick()
         {
             TicksSinceLoad++;
-            if (TicksSinceLoad % 5 == 0)
-            {
-                Plugin.Log($"Tick: {TicksSinceLoad}; Seconds Today: {_dayNightCycle.HoursPassedToday / 24 * 460} Hour: {_dayNightCycle.HoursPassedToday}; Partial Day: {_dayNightCycle.PartialDayNumber}");
-            }
+            //if (TicksSinceLoad % 5 == 0)
+            //{
+            //    Plugin.Log($"Tick: {TicksSinceLoad}; Seconds Today: {_dayNightCycle.HoursPassedToday / 24 * 460} Hour: {_dayNightCycle.HoursPassedToday}; Partial Day: {_dayNightCycle.PartialDayNumber}");
+            //}
+            ReplayService.UpdateInstance();
         }
     }
 }
