@@ -62,7 +62,7 @@ namespace TimberModTest
         private JsonSerializerSettings settings;
         private string filePath;
 
-        FileWriteIO(string filePath)
+        public FileWriteIO(string filePath)
         {
             this.filePath = filePath;
             settings = new JsonSettings();
@@ -112,7 +112,7 @@ namespace TimberModTest
         private List<ReplayEvent> events = new();
         private string filePath;
 
-        FileReadIO(string filePath)
+        public FileReadIO(string filePath)
         {
             this.filePath = filePath;
             settings = new JsonSettings();

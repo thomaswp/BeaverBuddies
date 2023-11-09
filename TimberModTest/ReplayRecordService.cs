@@ -21,13 +21,22 @@ namespace TimberModTest
         {
             _tickWathcerService = tickWathcerService;
             instance = this;
+            io = new FileWriteIO("test.json");
         }
 
-        static public void RecordEvent(ReplayEvent replayEvent)
+        public static void RecordEvent(ReplayEvent replayEvent)
         {
-            replayEvent.timeInFixedSecs = 
-                instance._tickWathcerService.TotalTimeInFixedSecons;
-            instance.io.WriteEvents(replayEvent);
+            instance.RecordEventInternal(replayEvent);
+        }
+
+        void RecordEventInternal(ReplayEvent replayEvent)
+        {
+            if (_tickWathcerService != null)
+            {
+                replayEvent.timeInFixedSecs =
+                    _tickWathcerService.TotalTimeInFixedSecons;
+            }
+            io.WriteEvents(replayEvent);
         }
 
         static void UpdateInstance()

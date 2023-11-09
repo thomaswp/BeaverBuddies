@@ -12,16 +12,33 @@ using Timberborn.BuildingTools;
 using Timberborn.Coordinates;
 using Timberborn.GameDistricts;
 using Timberborn.Metrics;
+using Timberborn.PrefabSystem;
 using Timberborn.TickSystem;
 using Timberborn.WalkingSystem;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static UnityEngine.Tilemaps.Tilemap;
 
 namespace TimberModTest
 {
 
+    [Configurator(SceneEntrypoint.MainMenu)]  // This attribute registers the configurator and tells where it should be loaded
+    public class MenuConfigurator : IConfigurator
+    {
+        public void Configure(IContainerDefinition containerDefinition)
+        {
+            //new ReplayService(null);
+            //ReplayService.RecordEvent(new BuildingPlacedEvent()
+            //{
+            //    prefab = "test",
+            //    coordinates = new Vector3Int(1, 2, 3),
+            //    orientation = Timberborn.Coordinates.Orientation.Cw180,
+            //});
+        }
+    }
+
     [Configurator(SceneEntrypoint.InGame)]  // This attribute registers the configurator and tells where it should be loaded
-    public class ExampleConfigurator : IConfigurator
+    public class ReplayConfigurator : IConfigurator
     {
         public void Configure(IContainerDefinition containerDefinition)
         {
