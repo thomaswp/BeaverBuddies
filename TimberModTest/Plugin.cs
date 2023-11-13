@@ -42,7 +42,7 @@ namespace TimberModTest
     {
         public void Configure(IContainerDefinition containerDefinition)
         {
-            Plugin.Log($"Registering TestService");
+            Plugin.Log($"Registering Services");
             containerDefinition.Bind<DeterminismService>().AsSingleton();
             containerDefinition.Bind<TickWathcerService>().AsSingleton();
             containerDefinition.Bind<ReplayService>().AsSingleton();

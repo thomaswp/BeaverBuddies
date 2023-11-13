@@ -5,11 +5,12 @@ using System.Text;
 using Timberborn.BlockObjectTools;
 using Timberborn.Buildings;
 using Timberborn.BuildingTools;
+using Timberborn.PlantingUI;
 using Timberborn.SingletonSystem;
 
 namespace TimberModTest
 {
-    public class ReplayService : IReplayContext
+    public class ReplayService : IReplayContext, IPostLoadableSingleton
     {
         private readonly TickWathcerService _tickWathcerService;
         private readonly EventBus _eventBus;
@@ -31,17 +32,33 @@ namespace TimberModTest
             EventBus eventBus,
             //IBlockObjectPlacer buildingPlacer,
             BlockObjectPlacerService blockObjectPlacerService,
-            BuildingService buildingService
+            BuildingService buildingService,
+            PlantingSelectionService plantingSelectionService
         )
         {
             _tickWathcerService = AddSingleton(tickWathcerService);
             _eventBus = AddSingleton(eventBus);
             AddSingleton(blockObjectPlacerService);
-            //AddSingleton(buildingPlacer);
             AddSingleton(buildingService);
+            AddSingleton(plantingSelectionService);
             instance = this;
             //io = new FileWriteIO("test.json");
-            io = new FileReadIO("5Jacks.json");
+            io = new FileReadIO("planting.json");
+        }
+
+        public void PostLoad()
+        {
+            // TODO: Make this random, but then send the seed as the first event.
+            Plugin.Log("Setting random state and loading events");
+            UnityEngine.Random.InitState(1234);
+            Update();
+
+            //Plugin.Log(new System.Diagnostics.StackTrace().ToString());
+            //Plugin.Log("All Game events:");
+            //foreach (var key in _eventBus._subscriptions._subscriptions.Keys)
+            //{
+            //    Plugin.Log($"EventBus subscription: {key.Name}");
+            //}
         }
 
         private T AddSingleton<T>(T singleton)

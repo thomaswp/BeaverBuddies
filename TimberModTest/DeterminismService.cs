@@ -12,31 +12,20 @@ namespace TimberModTest
         DeterminismService(EventBus eventBus, IRandomNumberGenerator gen)
         {
             _eventBus = eventBus;
-            Plugin.Log($"Creating test service {eventBus}");
             eventBus.Register(this);
-            UnityEngine.Random.InitState(1234);
-            Plugin.Log($"Hopefully deterministic random number {gen.Range(0, 100)}");
         }
 
-        // TODO: Try NewGameInitializedEvent instead
+        // TODO: For some reason this is still necessary. I don't know if it
+        // works because of the first time (which happens before PostLoad)
+        // or the second time (which happens after PostLoad). Could be either
+        // depending on when the first random thing happens.
+        // Simple idea: ignore this if tick > 0
         [OnEvent]
         public void OnSpeedEvent(CurrentSpeedChangedEvent e)
         {
             Plugin.Log($"Speed changed to: {e.CurrentSpeed}; random reset");
             UnityEngine.Random.InitState(1234);
-            //Plugin.Log("All Game events:");
-            //foreach (var key in _eventBus._subscriptions._subscriptions.Keys)
-            //{
-            //    Plugin.Log($"EventBus subscription: {key.Name}");
-            //}
         }
-
-        //[OnEvent]
-        //public void OnStartEvent(Event e)
-        //{
-        //    Plugin.Log($"Speed changed to: {e.CurrentSpeed}; random reset");
-        //    UnityEngine.Random.InitState(1234);
-        //}
     }
 
 
