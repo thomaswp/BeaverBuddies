@@ -11,6 +11,9 @@ using Timberborn.Buildings;
 using Timberborn.Planting;
 using Timberborn.PlantingUI;
 using System.Linq;
+using Timberborn.Forestry;
+using Timberborn.DropdownSystem;
+using UnityEngine.UIElements;
 
 namespace TimberModTest
 {
@@ -128,8 +131,94 @@ namespace TimberModTest
 
             // TODO: For reader, return false
             return true;
+        }
+    }
 
+    [Serializable]
+    public class TreeCuttingAreaEvent : ReplayEvent
+    {
+        public List<Vector3Int> coordinates;
+        public bool wasAdded;
 
+        public override void Replay(IReplayContext context)
+        {
+            var treeService = context.GetSingleton<TreeCuttingArea>();
+            if (wasAdded)
+            {
+                treeService.AddCoordinates(coordinates);
+            }
+            else
+            {
+                treeService.RemoveCoordinates(coordinates);
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(TreeCuttingArea), nameof(TreeCuttingArea.AddCoordinates))]
+    public class TreeCuttingAreaAddedPatcher
+    {
+        static bool Prefix(IEnumerable<Vector3Int> coordinates)
+        {
+            Plugin.Log($"Adding tree planting coordinate {coordinates.Count()}");
+
+            ReplayService.RecordEvent(new TreeCuttingAreaEvent()
+            {
+                coordinates = new List<Vector3Int>(coordinates),
+                wasAdded = true,
+            });
+
+            // TODO: For reader, return false
+            return true;
+        }
+    }
+
+    [HarmonyPatch(typeof(TreeCuttingArea), nameof(TreeCuttingArea.RemoveCoordinates))]
+    public class TreeCuttingAreaRemovedPatcher
+    {
+        static bool Prefix(IEnumerable<Vector3Int> coordinates)
+        {
+            Plugin.Log($"Removing tree planting coordinate {coordinates.Count()}");
+
+            ReplayService.RecordEvent(new TreeCuttingAreaEvent()
+            {
+                coordinates = new List<Vector3Int>(coordinates),
+                wasAdded = false,
+            });
+
+            // TODO: For reader, return false
+            return true;
+        }
+    }
+
+    // TODO: Probably not the right way to go about this
+    // need to find the _dropdownProvider and see what it does and
+    // replicate that. But could use this to find all of them
+    // GatheringUI, WorkshopsUI, PlantingUI have PrioritizerDropdowns
+    // which are places to start. Likely others.
+    [HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetAndUpdate))]
+    public class DropdownPatcher
+    {
+        static bool Prefix(Dropdown __instance, string newValue)
+        {
+            Plugin.Log($"Dropdown selected {newValue}");
+            Plugin.Log(__instance.name + "," + __instance.fullTypeName);
+            //Plugin.Log(new System.Diagnostics.StackTrace().ToString());
+
+            // TODO: For reader, return false
+            return true;
+        }
+    }
+
+    [HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetItems))]
+    public class DropdownProviderPatcher
+    {
+        static bool Prefix(Dropdown __instance, IDropdownProvider dropdownProvider, Func<string, VisualElement> elementGetter)
+        {
+            Plugin.Log($"Dropdown set {dropdownProvider} {dropdownProvider.GetType().FullName}");
+            //Plugin.Log(new System.Diagnostics.StackTrace().ToString());
+
+            // TODO: For reader, return false
+            return true;
         }
     }
 }

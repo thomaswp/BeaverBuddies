@@ -5,6 +5,7 @@ using System.Text;
 using Timberborn.BlockObjectTools;
 using Timberborn.Buildings;
 using Timberborn.BuildingTools;
+using Timberborn.Forestry;
 using Timberborn.PlantingUI;
 using Timberborn.SingletonSystem;
 
@@ -33,7 +34,8 @@ namespace TimberModTest
             //IBlockObjectPlacer buildingPlacer,
             BlockObjectPlacerService blockObjectPlacerService,
             BuildingService buildingService,
-            PlantingSelectionService plantingSelectionService
+            PlantingSelectionService plantingSelectionService,
+            TreeCuttingArea treeCuttingArea
         )
         {
             _tickWathcerService = AddSingleton(tickWathcerService);
@@ -41,9 +43,12 @@ namespace TimberModTest
             AddSingleton(blockObjectPlacerService);
             AddSingleton(buildingService);
             AddSingleton(plantingSelectionService);
+            AddSingleton(treeCuttingArea);
             instance = this;
+
             //io = new FileWriteIO("test.json");
-            io = new FileReadIO("planting.json");
+            //io = new FileReadIO("planting.json");
+            io = new FileReadIO("trees.json");
         }
 
         public void PostLoad()
