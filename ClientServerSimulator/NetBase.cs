@@ -19,18 +19,27 @@ namespace ClientServerSimulator
 
         public delegate void MessageReceived(string message);
 
-        public event MessageReceived? OnMessageReceived;
+        public event MessageReceived? OnLog;
 
         private readonly ConcurrentQueue<string> toProcess = new();
+        private readonly HashCode currentState = new();
+        public int Hash => currentState.GetHashCode();
 
         public int TickCount { get; private set; }
 
-        protected List<JObject> script;
+        protected List<JObject> scriptedEvents;
+        protected List<JObject> receivedEvents = new List<JObject>();
 
 
         public NetBase(string scriptPath)
         {
-            script = ReadFile(scriptPath);
+            scriptedEvents = ReadFile(scriptPath);
+            Log("Started");
+        }
+
+        protected void Log(string message)
+        {
+            OnLog?.Invoke(message);
         }
 
         public abstract void Start();
@@ -49,7 +58,7 @@ namespace ClientServerSimulator
             return message[TICKS_KEY]!.ToObject<int>();
         }
 
-        protected void InsertInScript(JObject message)
+        protected void InsertInScript(JObject message, List<JObject> script)
         {
             int tick = GetTick(message);
             int index = script.FindIndex(m => GetTick(m) >= tick);
@@ -59,29 +68,55 @@ namespace ClientServerSimulator
                 script.Insert(index, message);
         }
 
-        protected void UpdateSending(TcpClient client)
+        private void ProcessEvents(List<JObject> events, Action<JObject> callback)
         {
-            while (script.Count > 0)
+            while (events.Count > 0)
             {
-                JObject message = script[0];
+                JObject message = events[0];
                 int delay = message[TICKS_KEY]!.ToObject<int>();
                 if (delay > TickCount)
                     break;
 
-                script.RemoveAt(0);
-                string json = message.ToString();
-                byte[] buffer = Encoding.UTF8.GetBytes(json);
-                byte[] header = BitConverter.GetBytes(buffer.Length);
-                if (BitConverter.IsLittleEndian)
-                    Array.Reverse(header);
+                if (delay < TickCount)
+                    Log($"Warning: late event {message["type"]}: {delay} < {TickCount}");
 
-                client.GetStream().Write(header, 0, header.Length);
-                client.GetStream().Write(buffer, 0, buffer.Length);
+                events.RemoveAt(0);
+                callback(message);
             }
+        }
+
+
+        protected virtual void ProcessMyEvent(JObject message)
+        {
+            DoEvent(message);
+        }
+
+        protected virtual void ProcessReceivedEvent(JObject message)
+        {
+            DoEvent(message);
+        }
+
+        protected virtual void DoEvent(JObject message)
+        {
+            currentState.Add(message.ToString());
+        }
+
+        protected void SendEvent(TcpClient client, JObject message)
+        {
+            Log($"Sending event {message["type"]} for tick {GetTick(message)}");
+            string json = message.ToString();
+            byte[] buffer = Encoding.UTF8.GetBytes(json);
+            byte[] header = BitConverter.GetBytes(buffer.Length);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(header);
+
+            client.GetStream().Write(header, 0, header.Length);
+            client.GetStream().Write(buffer, 0, buffer.Length);
         }
 
         protected void StartListening(TcpClient client)
         {
+            Log("Client connected");
             var stream = client.GetStream();
             byte[] headerBuffer = new byte[HEADER_SIZE];
             while (client.Connected)
@@ -103,15 +138,26 @@ namespace ClientServerSimulator
         {
             while (toProcess.TryDequeue(out string? message))
             {
-                OnMessageReceived?.Invoke(message);
+                ReceiveEvent(JObject.Parse(message));
             }
         }
 
+        protected virtual void ReceiveEvent(JObject message)
+        {
+            InsertInScript(message, receivedEvents);
+        }
+
+        protected void Update()
+        {
+            ProcessQueue();
+            ProcessEvents(receivedEvents, ProcessReceivedEvent);
+            ProcessEvents(scriptedEvents, ProcessMyEvent);
+        }
 
         public virtual void TryTick()
         {
             TickCount++;
-            ProcessQueue();
+            Update();
         }
     }
 }

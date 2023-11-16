@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -18,12 +19,19 @@ namespace ClientServerSimulator
             client = new TcpClient();
         }
 
+        protected override void ProcessMyEvent(JObject message)
+        {
+            SendEvent(client, message);
+            // Don't actually do the event - wait for the server to confirm
+            // w/ adjusted Tick
+        }
+
         public override void Start()
         {
             client.Connect(ADDRESS, PORT);
             // Connect a TCP socket at the address
             Thread listen = new Thread(new ThreadStart(() => StartListening(client)));
-            UpdateSending(client);
+            Update();
         }
 
 
@@ -34,9 +42,9 @@ namespace ClientServerSimulator
 
         public override void TryTick()
         {
-            // TODO: Wait if caught up to client
+            // Don't process if we have no received events
+            if (receivedEvents.Count == 0) return;
             base.TryTick();
-            UpdateSending(client);
         }
     }
 }

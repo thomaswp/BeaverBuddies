@@ -21,19 +21,18 @@ namespace ClientServerSimulator
         public Server() : base(SCRIPT_PATH)
         {
             listener = new TcpListener(IPAddress.Parse(ADDRESS), PORT);
-            OnMessageReceived += Server_OnMessageReceived;
         }
 
-        private void Server_OnMessageReceived(string message)
+        protected override void ReceiveEvent(JObject message)
         {
-            JObject obj = new JObject(message);
-            obj[TICKS_KEY] = TickCount;
-            InsertInScript(obj);
+            message[TICKS_KEY] = TickCount;
+            base.ReceiveEvent(message);
         }
 
         public override void Start()
         {
             listener.Start();
+            Log("Server started listening");
             
             Task.Run(() =>
             {
@@ -46,6 +45,13 @@ namespace ClientServerSimulator
             });
         }
 
+        protected override void DoEvent(JObject message)
+        {
+            base.DoEvent(message);
+            Log($"Event at T{GetTick(message).ToString("D4")} [{Hash.ToString("X16")}]: {message["type"]}");
+            
+            clients.ForEach(client => SendEvent(client, message));
+        }
 
         public override void Close()
         {
@@ -55,8 +61,13 @@ namespace ClientServerSimulator
         public override void TryTick()
         {
             base.TryTick();
-            clients.ForEach(client => UpdateSending(client));
-            // TODO: Send a heartbeat
+            if (TickCount % 10 == 0)
+            {
+                JObject message = new JObject();
+                message[TICKS_KEY] = TickCount;
+                message["type"] = "Heartbeat";
+                ProcessMyEvent(message);
+            }
         }
     }
 }
