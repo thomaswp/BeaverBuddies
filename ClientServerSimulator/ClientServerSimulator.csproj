@@ -16,6 +16,9 @@
     <None Update="client.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="save.timber">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="server.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

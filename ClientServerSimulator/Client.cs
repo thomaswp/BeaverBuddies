@@ -31,7 +31,7 @@ namespace ClientServerSimulator
             base.Start();
             client.Connect(ADDRESS, PORT);
             // Connect a TCP socket at the address
-            Task.Run(() => StartListening(client));
+            Task.Run(() => StartListening(client, true));
             Update();
         }
 

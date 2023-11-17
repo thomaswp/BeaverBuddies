@@ -13,6 +13,7 @@ namespace ClientServerSimulator
     internal class Server : NetBase
     {
         const string SCRIPT_PATH = "server.json";
+        const string SAVE_PATH = "save.timber";
 
         private readonly List<TcpClient> clients = new();
 
@@ -32,6 +33,10 @@ namespace ClientServerSimulator
         public override void Start()
         {
             base.Start();
+
+            var bytes = File.ReadAllBytes(SAVE_PATH);
+            AddFileToHash(bytes);
+
             listener.Start();
             Log("Server started listening");
             
@@ -42,9 +47,38 @@ namespace ClientServerSimulator
                     TcpClient client = listener.AcceptTcpClient();
                     // TODO: Send current state!
                     clients.Add(client);
-                    Task.Run(() => StartListening(client));
+                    Task.Run(() =>
+                    {
+                        SendFile(client.GetStream(), bytes);
+                        SendState(client);
+                        StartListening(client, false);
+                    });
                 }
             });
+        }
+
+        private void SendFile(NetworkStream stream, byte[] bytes)
+        {
+            SendLength(stream, bytes.Length);
+            
+            // Send bytes in chunks
+            int chunkSize = MAX_BUFFER_SIZE;
+            for (int i = 0; i < bytes.Length; i += chunkSize)
+            {
+                int length = Math.Min(chunkSize, bytes.Length - i);
+                stream.Write(bytes, i, length);
+            }
+
+            Log($"Sent map with length {bytes.Length} and Hash: {GetHashCode(bytes).ToString("X8")}");
+        }
+
+        private void SendState(TcpClient client)
+        {
+            JObject message = new JObject();
+            message[TICKS_KEY] = 0;
+            message[TYPE_KEY] = SET_STATE_EVENT;
+            message["hash"] = Hash;
+            SendEvent(client, message);
         }
 
         protected override void DoEvent(JObject message)
