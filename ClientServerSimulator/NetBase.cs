@@ -22,8 +22,7 @@ namespace ClientServerSimulator
         public event MessageReceived? OnLog;
 
         private readonly ConcurrentQueue<string> toProcess = new();
-        private readonly HashCode currentState = new();
-        public int Hash => currentState.GetHashCode();
+        public int Hash { get; private set; }
 
         public int TickCount { get; private set; }
 
@@ -61,7 +60,7 @@ namespace ClientServerSimulator
         protected void InsertInScript(JObject message, List<JObject> script)
         {
             int tick = GetTick(message);
-            int index = script.FindIndex(m => GetTick(m) >= tick);
+            int index = script.FindIndex(m => GetTick(m) > tick);
             if (index == -1)
                 script.Add(message);
             else
@@ -98,7 +97,8 @@ namespace ClientServerSimulator
 
         protected virtual void DoEvent(JObject message)
         {
-            currentState.Add(message.ToString());
+            Hash = HashCode.Combine(Hash, message.ToString());
+            Log($"Event at T{GetTick(message).ToString("D4")} [{Hash.ToString("X8")}]: {message["type"]}");
         }
 
         protected void SendEvent(TcpClient client, JObject message)
@@ -154,10 +154,16 @@ namespace ClientServerSimulator
             ProcessEvents(scriptedEvents, ProcessMyEvent);
         }
 
+        protected virtual bool ShouldTick => true;
+
         public virtual void TryTick()
         {
-            TickCount++;
             Update();
+            if (ShouldTick)
+            {
+                TickCount++;
+                Update();
+            }
         }
     }
 }

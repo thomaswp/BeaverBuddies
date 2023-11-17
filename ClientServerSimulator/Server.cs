@@ -48,7 +48,6 @@ namespace ClientServerSimulator
         protected override void DoEvent(JObject message)
         {
             base.DoEvent(message);
-            Log($"Event at T{GetTick(message).ToString("D4")} [{Hash.ToString("X16")}]: {message["type"]}");
             
             clients.ForEach(client => SendEvent(client, message));
         }

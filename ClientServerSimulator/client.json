@@ -1,0 +1,1134 @@
+[{
+  "$type": "TimberModTest.PlantingAreaMarkedEvent, TimberModTest",
+  "inputBlocks": {
+    "$type": "System.Collections.Generic.List`1[[UnityEngine.Vector3Int, UnityEngine.CoreModule]], mscorlib",
+    "$values": [
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 138,
+        "y": 138,
+        "z": 2,
+        "magnitude": 195.171722,
+        "sqrMagnitude": 38092
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 138,
+        "y": 139,
+        "z": 2,
+        "magnitude": 195.880066,
+        "sqrMagnitude": 38369
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 138,
+        "y": 140,
+        "z": 2,
+        "magnitude": 196.590942,
+        "sqrMagnitude": 38648
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 138,
+        "y": 141,
+        "z": 2,
+        "magnitude": 197.304337,
+        "sqrMagnitude": 38929
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 138,
+        "y": 142,
+        "z": 2,
+        "magnitude": 198.0202,
+        "sqrMagnitude": 39212
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 137,
+        "y": 138,
+        "z": 2,
+        "magnitude": 194.465942,
+        "sqrMagnitude": 37817
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 137,
+        "y": 139,
+        "z": 2,
+        "magnitude": 195.176849,
+        "sqrMagnitude": 38094
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 137,
+        "y": 140,
+        "z": 2,
+        "magnitude": 195.890274,
+        "sqrMagnitude": 38373
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 137,
+        "y": 141,
+        "z": 2,
+        "magnitude": 196.6062,
+        "sqrMagnitude": 38654
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 137,
+        "y": 142,
+        "z": 2,
+        "magnitude": 197.3246,
+        "sqrMagnitude": 38937
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 136,
+        "y": 138,
+        "z": 2,
+        "magnitude": 193.762741,
+        "sqrMagnitude": 37544
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 136,
+        "y": 139,
+        "z": 2,
+        "magnitude": 194.476227,
+        "sqrMagnitude": 37821
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 136,
+        "y": 140,
+        "z": 2,
+        "magnitude": 195.192215,
+        "sqrMagnitude": 38100
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 136,
+        "y": 141,
+        "z": 2,
+        "magnitude": 195.91069,
+        "sqrMagnitude": 38381
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 136,
+        "y": 142,
+        "z": 2,
+        "magnitude": 196.631638,
+        "sqrMagnitude": 38664
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 135,
+        "y": 138,
+        "z": 2,
+        "magnitude": 193.062164,
+        "sqrMagnitude": 37273
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 135,
+        "y": 139,
+        "z": 2,
+        "magnitude": 193.778229,
+        "sqrMagnitude": 37550
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 135,
+        "y": 140,
+        "z": 2,
+        "magnitude": 194.49678,
+        "sqrMagnitude": 37829
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 135,
+        "y": 141,
+        "z": 2,
+        "magnitude": 195.217834,
+        "sqrMagnitude": 38110
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 135,
+        "y": 142,
+        "z": 2,
+        "magnitude": 195.941315,
+        "sqrMagnitude": 38393
+      }
+    ]
+  },
+  "ray": {
+    "$type": "UnityEngine.Ray, UnityEngine.CoreModule",
+    "origin": {
+      "x": 140.640686,
+      "y": 150.9166,
+      "z": 27.2807846
+    },
+    "direction": {
+      "x": -0.0837231651,
+      "y": -0.4669015,
+      "z": -0.8803371
+    }
+  },
+  "prefabName": "Carrot",
+  "timeInFixedSecs": 78.46668,
+  "ticksSinceLoad": 0,
+  "type": "PlantingAreaMarkedEvent"
+},{
+  "$type": "TimberModTest.PlantingAreaMarkedEvent, TimberModTest",
+  "inputBlocks": {
+    "$type": "System.Collections.Generic.List`1[[UnityEngine.Vector3Int, UnityEngine.CoreModule]], mscorlib",
+    "$values": [
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 146,
+        "y": 136,
+        "z": 2,
+        "magnitude": 199.539474,
+        "sqrMagnitude": 39816
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 146,
+        "y": 137,
+        "z": 2,
+        "magnitude": 200.222382,
+        "sqrMagnitude": 40089
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 146,
+        "y": 138,
+        "z": 2,
+        "magnitude": 200.907944,
+        "sqrMagnitude": 40364
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 146,
+        "y": 139,
+        "z": 2,
+        "magnitude": 201.59613,
+        "sqrMagnitude": 40641
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 146,
+        "y": 140,
+        "z": 2,
+        "magnitude": 202.286926,
+        "sqrMagnitude": 40920
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 146,
+        "y": 141,
+        "z": 2,
+        "magnitude": 202.9803,
+        "sqrMagnitude": 41201
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 146,
+        "y": 142,
+        "z": 2,
+        "magnitude": 203.676208,
+        "sqrMagnitude": 41484
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 146,
+        "y": 143,
+        "z": 2,
+        "magnitude": 204.374649,
+        "sqrMagnitude": 41769
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 145,
+        "y": 136,
+        "z": 2,
+        "magnitude": 198.80896,
+        "sqrMagnitude": 39525
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 145,
+        "y": 137,
+        "z": 2,
+        "magnitude": 199.494354,
+        "sqrMagnitude": 39798
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 145,
+        "y": 138,
+        "z": 2,
+        "magnitude": 200.182419,
+        "sqrMagnitude": 40073
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 145,
+        "y": 139,
+        "z": 2,
+        "magnitude": 200.8731,
+        "sqrMagnitude": 40350
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 145,
+        "y": 140,
+        "z": 2,
+        "magnitude": 201.56636,
+        "sqrMagnitude": 40629
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 145,
+        "y": 141,
+        "z": 2,
+        "magnitude": 202.2622,
+        "sqrMagnitude": 40910
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 145,
+        "y": 142,
+        "z": 2,
+        "magnitude": 202.960587,
+        "sqrMagnitude": 41193
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 145,
+        "y": 143,
+        "z": 2,
+        "magnitude": 203.661484,
+        "sqrMagnitude": 41478
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 144,
+        "y": 136,
+        "z": 2,
+        "magnitude": 198.0808,
+        "sqrMagnitude": 39236
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 144,
+        "y": 137,
+        "z": 2,
+        "magnitude": 198.7687,
+        "sqrMagnitude": 39509
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 144,
+        "y": 138,
+        "z": 2,
+        "magnitude": 199.459274,
+        "sqrMagnitude": 39784
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 144,
+        "y": 139,
+        "z": 2,
+        "magnitude": 200.152435,
+        "sqrMagnitude": 40061
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 144,
+        "y": 140,
+        "z": 2,
+        "magnitude": 200.8482,
+        "sqrMagnitude": 40340
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 144,
+        "y": 141,
+        "z": 2,
+        "magnitude": 201.546524,
+        "sqrMagnitude": 40621
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 144,
+        "y": 142,
+        "z": 2,
+        "magnitude": 202.247375,
+        "sqrMagnitude": 40904
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 144,
+        "y": 143,
+        "z": 2,
+        "magnitude": 202.950729,
+        "sqrMagnitude": 41189
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 143,
+        "y": 136,
+        "z": 2,
+        "magnitude": 197.355011,
+        "sqrMagnitude": 38949
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 143,
+        "y": 137,
+        "z": 2,
+        "magnitude": 198.045456,
+        "sqrMagnitude": 39222
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 143,
+        "y": 138,
+        "z": 2,
+        "magnitude": 198.738525,
+        "sqrMagnitude": 39497
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 143,
+        "y": 139,
+        "z": 2,
+        "magnitude": 199.4342,
+        "sqrMagnitude": 39774
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 143,
+        "y": 140,
+        "z": 2,
+        "magnitude": 200.132462,
+        "sqrMagnitude": 40053
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 143,
+        "y": 141,
+        "z": 2,
+        "magnitude": 200.833267,
+        "sqrMagnitude": 40334
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 143,
+        "y": 142,
+        "z": 2,
+        "magnitude": 201.536591,
+        "sqrMagnitude": 40617
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 143,
+        "y": 143,
+        "z": 2,
+        "magnitude": 202.242432,
+        "sqrMagnitude": 40902
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 142,
+        "y": 136,
+        "z": 2,
+        "magnitude": 196.631638,
+        "sqrMagnitude": 38664
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 142,
+        "y": 137,
+        "z": 2,
+        "magnitude": 197.3246,
+        "sqrMagnitude": 38937
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 142,
+        "y": 138,
+        "z": 2,
+        "magnitude": 198.0202,
+        "sqrMagnitude": 39212
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 142,
+        "y": 139,
+        "z": 2,
+        "magnitude": 198.7184,
+        "sqrMagnitude": 39489
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 142,
+        "y": 140,
+        "z": 2,
+        "magnitude": 199.419159,
+        "sqrMagnitude": 39768
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 142,
+        "y": 141,
+        "z": 2,
+        "magnitude": 200.122467,
+        "sqrMagnitude": 40049
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 142,
+        "y": 142,
+        "z": 2,
+        "magnitude": 200.828278,
+        "sqrMagnitude": 40332
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 142,
+        "y": 143,
+        "z": 2,
+        "magnitude": 201.536591,
+        "sqrMagnitude": 40617
+      }
+    ]
+  },
+  "ray": {
+    "$type": "UnityEngine.Ray, UnityEngine.CoreModule",
+    "origin": {
+      "x": 144.224777,
+      "y": 154.801529,
+      "z": 27.3569927
+    },
+    "direction": {
+      "x": 0.07537741,
+      "y": -0.5939554,
+      "z": -0.800959
+    }
+  },
+  "prefabName": "Carrot",
+  "timeInFixedSecs": 78.46668,
+  "ticksSinceLoad": 0,
+  "type": "PlantingAreaMarkedEvent"
+},{
+  "$type": "TimberModTest.BuildingPlacedEvent, TimberModTest",
+  "prefabName": "Path.Folktails",
+  "coordinates": {
+    "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+    "x": 130,
+    "y": 139,
+    "z": 3,
+    "magnitude": 190.3418,
+    "sqrMagnitude": 36230
+  },
+  "orientation": 3,
+  "timeInFixedSecs": 83.26673,
+  "ticksSinceLoad": 16,
+  "type": "BuildingPlacedEvent"
+},{
+  "$type": "TimberModTest.BuildingPlacedEvent, TimberModTest",
+  "prefabName": "Path.Folktails",
+  "coordinates": {
+    "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+    "x": 131,
+    "y": 139,
+    "z": 3,
+    "magnitude": 191.026169,
+    "sqrMagnitude": 36491
+  },
+  "orientation": 3,
+  "timeInFixedSecs": 83.26673,
+  "ticksSinceLoad": 16,
+  "type": "BuildingPlacedEvent"
+},{
+  "$type": "TimberModTest.BuildingPlacedEvent, TimberModTest",
+  "prefabName": "Path.Folktails",
+  "coordinates": {
+    "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+    "x": 132,
+    "y": 139,
+    "z": 3,
+    "magnitude": 191.713333,
+    "sqrMagnitude": 36754
+  },
+  "orientation": 3,
+  "timeInFixedSecs": 83.26673,
+  "ticksSinceLoad": 16,
+  "type": "BuildingPlacedEvent"
+},{
+  "$type": "TimberModTest.BuildingPlacedEvent, TimberModTest",
+  "prefabName": "Path.Folktails",
+  "coordinates": {
+    "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+    "x": 133,
+    "y": 139,
+    "z": 3,
+    "magnitude": 192.403229,
+    "sqrMagnitude": 37019
+  },
+  "orientation": 3,
+  "timeInFixedSecs": 83.26673,
+  "ticksSinceLoad": 16,
+  "type": "BuildingPlacedEvent"
+},{
+  "$type": "TimberModTest.BuildingPlacedEvent, TimberModTest",
+  "prefabName": "Path.Folktails",
+  "coordinates": {
+    "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+    "x": 134,
+    "y": 139,
+    "z": 3,
+    "magnitude": 193.095825,
+    "sqrMagnitude": 37286
+  },
+  "orientation": 3,
+  "timeInFixedSecs": 83.26673,
+  "ticksSinceLoad": 16,
+  "type": "BuildingPlacedEvent"
+},{
+  "$type": "TimberModTest.BuildingPlacedEvent, TimberModTest",
+  "prefabName": "Path.Folktails",
+  "coordinates": {
+    "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+    "x": 135,
+    "y": 139,
+    "z": 3,
+    "magnitude": 193.791122,
+    "sqrMagnitude": 37555
+  },
+  "orientation": 3,
+  "timeInFixedSecs": 83.26673,
+  "ticksSinceLoad": 16,
+  "type": "BuildingPlacedEvent"
+},{
+  "$type": "TimberModTest.BuildingPlacedEvent, TimberModTest",
+  "prefabName": "Path.Folktails",
+  "coordinates": {
+    "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+    "x": 136,
+    "y": 139,
+    "z": 3,
+    "magnitude": 194.489075,
+    "sqrMagnitude": 37826
+  },
+  "orientation": 3,
+  "timeInFixedSecs": 83.26673,
+  "ticksSinceLoad": 16,
+  "type": "BuildingPlacedEvent"
+},{
+  "$type": "TimberModTest.BuildingPlacedEvent, TimberModTest",
+  "prefabName": "Path.Folktails",
+  "coordinates": {
+    "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+    "x": 137,
+    "y": 139,
+    "z": 3,
+    "magnitude": 195.189651,
+    "sqrMagnitude": 38099
+  },
+  "orientation": 3,
+  "timeInFixedSecs": 83.26673,
+  "ticksSinceLoad": 16,
+  "type": "BuildingPlacedEvent"
+},{
+  "$type": "TimberModTest.BuildingPlacedEvent, TimberModTest",
+  "prefabName": "Path.Folktails",
+  "coordinates": {
+    "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+    "x": 138,
+    "y": 139,
+    "z": 3,
+    "magnitude": 195.892822,
+    "sqrMagnitude": 38374
+  },
+  "orientation": 3,
+  "timeInFixedSecs": 83.26673,
+  "ticksSinceLoad": 16,
+  "type": "BuildingPlacedEvent"
+},{
+  "$type": "TimberModTest.BuildingPlacedEvent, TimberModTest",
+  "prefabName": "LumberjackFlag.Folktails",
+  "coordinates": {
+    "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+    "x": 134,
+    "y": 138,
+    "z": 3,
+    "magnitude": 192.377228,
+    "sqrMagnitude": 37009
+  },
+  "orientation": 2,
+  "timeInFixedSecs": 92.5668259,
+  "ticksSinceLoad": 47,
+  "type": "BuildingPlacedEvent"
+},{
+  "$type": "TimberModTest.BuildingPlacedEvent, TimberModTest",
+  "prefabName": "LumberjackFlag.Folktails",
+  "coordinates": {
+    "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+    "x": 134,
+    "y": 132,
+    "z": 3,
+    "magnitude": 188.119644,
+    "sqrMagnitude": 35389
+  },
+  "orientation": 2,
+  "timeInFixedSecs": 94.3668442,
+  "ticksSinceLoad": 53,
+  "type": "BuildingPlacedEvent"
+},{
+  "$type": "TimberModTest.BuildingPlacedEvent, TimberModTest",
+  "prefabName": "LumberjackFlag.Folktails",
+  "coordinates": {
+    "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+    "x": 127,
+    "y": 143,
+    "z": 3,
+    "magnitude": 191.277283,
+    "sqrMagnitude": 36587
+  },
+  "orientation": 0,
+  "timeInFixedSecs": 96.76687,
+  "ticksSinceLoad": 61,
+  "type": "BuildingPlacedEvent"
+},{
+  "$type": "TimberModTest.PlantingAreaMarkedEvent, TimberModTest",
+  "inputBlocks": {
+    "$type": "System.Collections.Generic.List`1[[UnityEngine.Vector3Int, UnityEngine.CoreModule]], mscorlib",
+    "$values": [
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 137,
+        "y": 142,
+        "z": 2,
+        "magnitude": 197.3246,
+        "sqrMagnitude": 38937
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 137,
+        "y": 141,
+        "z": 2,
+        "magnitude": 196.6062,
+        "sqrMagnitude": 38654
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 137,
+        "y": 140,
+        "z": 2,
+        "magnitude": 195.890274,
+        "sqrMagnitude": 38373
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 136,
+        "y": 142,
+        "z": 2,
+        "magnitude": 196.631638,
+        "sqrMagnitude": 38664
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 136,
+        "y": 141,
+        "z": 2,
+        "magnitude": 195.91069,
+        "sqrMagnitude": 38381
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 136,
+        "y": 140,
+        "z": 2,
+        "magnitude": 195.192215,
+        "sqrMagnitude": 38100
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 135,
+        "y": 142,
+        "z": 2,
+        "magnitude": 195.941315,
+        "sqrMagnitude": 38393
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 135,
+        "y": 141,
+        "z": 2,
+        "magnitude": 195.217834,
+        "sqrMagnitude": 38110
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 135,
+        "y": 140,
+        "z": 2,
+        "magnitude": 194.49678,
+        "sqrMagnitude": 37829
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 134,
+        "y": 142,
+        "z": 2,
+        "magnitude": 195.253677,
+        "sqrMagnitude": 38124
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 134,
+        "y": 141,
+        "z": 2,
+        "magnitude": 194.527634,
+        "sqrMagnitude": 37841
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 134,
+        "y": 140,
+        "z": 2,
+        "magnitude": 193.804031,
+        "sqrMagnitude": 37560
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 133,
+        "y": 142,
+        "z": 2,
+        "magnitude": 194.568756,
+        "sqrMagnitude": 37857
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 133,
+        "y": 141,
+        "z": 2,
+        "magnitude": 193.840134,
+        "sqrMagnitude": 37574
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 133,
+        "y": 140,
+        "z": 2,
+        "magnitude": 193.113953,
+        "sqrMagnitude": 37293
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 132,
+        "y": 142,
+        "z": 2,
+        "magnitude": 193.886566,
+        "sqrMagnitude": 37592
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 132,
+        "y": 141,
+        "z": 2,
+        "magnitude": 193.15538,
+        "sqrMagnitude": 37309
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 132,
+        "y": 140,
+        "z": 2,
+        "magnitude": 192.4266,
+        "sqrMagnitude": 37028
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 131,
+        "y": 142,
+        "z": 2,
+        "magnitude": 193.207138,
+        "sqrMagnitude": 37329
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 131,
+        "y": 141,
+        "z": 2,
+        "magnitude": 192.473373,
+        "sqrMagnitude": 37046
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 131,
+        "y": 140,
+        "z": 2,
+        "magnitude": 191.74202,
+        "sqrMagnitude": 36765
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 130,
+        "y": 142,
+        "z": 2,
+        "magnitude": 192.530518,
+        "sqrMagnitude": 37068
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 130,
+        "y": 141,
+        "z": 2,
+        "magnitude": 191.794159,
+        "sqrMagnitude": 36785
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 130,
+        "y": 140,
+        "z": 2,
+        "magnitude": 191.0602,
+        "sqrMagnitude": 36504
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 129,
+        "y": 142,
+        "z": 2,
+        "magnitude": 191.85672,
+        "sqrMagnitude": 36809
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 129,
+        "y": 141,
+        "z": 2,
+        "magnitude": 191.117767,
+        "sqrMagnitude": 36526
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 129,
+        "y": 140,
+        "z": 2,
+        "magnitude": 190.3812,
+        "sqrMagnitude": 36245
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 128,
+        "y": 142,
+        "z": 2,
+        "magnitude": 191.185776,
+        "sqrMagnitude": 36552
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 128,
+        "y": 141,
+        "z": 2,
+        "magnitude": 190.444214,
+        "sqrMagnitude": 36269
+      },
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 128,
+        "y": 140,
+        "z": 2,
+        "magnitude": 189.705032,
+        "sqrMagnitude": 35988
+      }
+    ]
+  },
+  "ray": {
+    "$type": "UnityEngine.Ray, UnityEngine.CoreModule",
+    "origin": {
+      "x": 143.027771,
+      "y": 154.924347,
+      "z": 27.3280869
+    },
+    "direction": {
+      "x": -0.194139227,
+      "y": -0.432283729,
+      "z": -0.880591154
+    }
+  },
+  "prefabName": "Sunflower",
+  "timeInFixedSecs": 102.466927,
+  "ticksSinceLoad": 80,
+  "type": "PlantingAreaMarkedEvent"
+},{
+  "$type": "TimberModTest.PlantingAreaMarkedEvent, TimberModTest",
+  "inputBlocks": {
+    "$type": "System.Collections.Generic.List`1[[UnityEngine.Vector3Int, UnityEngine.CoreModule]], mscorlib",
+    "$values": [
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 131,
+        "y": 145,
+        "z": 2,
+        "magnitude": 195.422623,
+        "sqrMagnitude": 38190
+      }
+    ]
+  },
+  "ray": {
+    "$type": "UnityEngine.Ray, UnityEngine.CoreModule",
+    "origin": {
+      "x": 140.049927,
+      "y": 151.822769,
+      "z": 27.2089615
+    },
+    "direction": {
+      "x": -0.330866784,
+      "y": -0.24793227,
+      "z": -0.91052556
+    }
+  },
+  "prefabName": "Potato",
+  "timeInFixedSecs": 106.066963,
+  "ticksSinceLoad": 92,
+  "type": "PlantingAreaMarkedEvent"
+},{
+  "$type": "TimberModTest.PlantingAreaMarkedEvent, TimberModTest",
+  "inputBlocks": {
+    "$type": "System.Collections.Generic.List`1[[UnityEngine.Vector3Int, UnityEngine.CoreModule]], mscorlib",
+    "$values": [
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 130,
+        "y": 146,
+        "z": 2,
+        "magnitude": 195.499359,
+        "sqrMagnitude": 38220
+      }
+    ]
+  },
+  "ray": {
+    "$type": "UnityEngine.Ray, UnityEngine.CoreModule",
+    "origin": {
+      "x": 139.982941,
+      "y": 151.962265,
+      "z": 27.16517
+    },
+    "direction": {
+      "x": -0.349243075,
+      "y": -0.200061917,
+      "z": -0.915425837
+    }
+  },
+  "prefabName": "Potato",
+  "timeInFixedSecs": 106.966972,
+  "ticksSinceLoad": 95,
+  "type": "PlantingAreaMarkedEvent"
+},{
+  "$type": "TimberModTest.PlantingAreaMarkedEvent, TimberModTest",
+  "inputBlocks": {
+    "$type": "System.Collections.Generic.List`1[[UnityEngine.Vector3Int, UnityEngine.CoreModule]], mscorlib",
+    "$values": [
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 129,
+        "y": 147,
+        "z": 2,
+        "magnitude": 195.5863,
+        "sqrMagnitude": 38254
+      }
+    ]
+  },
+  "ray": {
+    "$type": "UnityEngine.Ray, UnityEngine.CoreModule",
+    "origin": {
+      "x": 139.839661,
+      "y": 152.047775,
+      "z": 27.1721764
+    },
+    "direction": {
+      "x": -0.391867965,
+      "y": -0.170562014,
+      "z": -0.90407306
+    }
+  },
+  "prefabName": "Potato",
+  "timeInFixedSecs": 107.566978,
+  "ticksSinceLoad": 97,
+  "type": "PlantingAreaMarkedEvent"
+},{
+  "$type": "TimberModTest.PlantingAreaMarkedEvent, TimberModTest",
+  "inputBlocks": {
+    "$type": "System.Collections.Generic.List`1[[UnityEngine.Vector3Int, UnityEngine.CoreModule]], mscorlib",
+    "$values": [
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 129,
+        "y": 145,
+        "z": 2,
+        "magnitude": 194.087616,
+        "sqrMagnitude": 37670
+      }
+    ]
+  },
+  "ray": {
+    "$type": "UnityEngine.Ray, UnityEngine.CoreModule",
+    "origin": {
+      "x": 139.876144,
+      "y": 151.85556,
+      "z": 27.2510014
+    },
+    "direction": {
+      "x": -0.385834962,
+      "y": -0.235891879,
+      "z": -0.8919004
+    }
+  },
+  "prefabName": "Potato",
+  "timeInFixedSecs": 108.166992,
+  "ticksSinceLoad": 99,
+  "type": "PlantingAreaMarkedEvent"
+},{
+  "$type": "TimberModTest.PlantingAreaMarkedEvent, TimberModTest",
+  "inputBlocks": {
+    "$type": "System.Collections.Generic.List`1[[UnityEngine.Vector3Int, UnityEngine.CoreModule]], mscorlib",
+    "$values": [
+      {
+        "$type": "UnityEngine.Vector3Int, UnityEngine.CoreModule",
+        "x": 131,
+        "y": 147,
+        "z": 2,
+        "magnitude": 196.911148,
+        "sqrMagnitude": 38774
+      }
+    ]
+  },
+  "ray": {
+    "$type": "UnityEngine.Ray, UnityEngine.CoreModule",
+    "origin": {
+      "x": 140.045624,
+      "y": 151.999863,
+      "z": 27.1266327
+    },
+    "direction": {
+      "x": -0.3281318,
+      "y": -0.187419221,
+      "z": -0.9258529
+    }
+  },
+  "prefabName": "Potato",
+  "timeInFixedSecs": 108.766991,
+  "ticksSinceLoad": 101,
+  "type": "PlantingAreaMarkedEvent"
+}
+]

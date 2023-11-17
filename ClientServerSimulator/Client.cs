@@ -30,7 +30,7 @@ namespace ClientServerSimulator
         {
             client.Connect(ADDRESS, PORT);
             // Connect a TCP socket at the address
-            Thread listen = new Thread(new ThreadStart(() => StartListening(client)));
+            Task.Run(() => StartListening(client));
             Update();
         }
 
@@ -40,11 +40,6 @@ namespace ClientServerSimulator
             client.Close();
         }
 
-        public override void TryTick()
-        {
-            // Don't process if we have no received events
-            if (receivedEvents.Count == 0) return;
-            base.TryTick();
-        }
+        protected override bool ShouldTick => receivedEvents.Count > 0;
     }
 }
