@@ -103,7 +103,7 @@ namespace ClientServerSimulator
 
         protected void SendEvent(TcpClient client, JObject message)
         {
-            Log($"Sending event {message["type"]} for tick {GetTick(message)}");
+            //Log($"Sending event {message["type"]} for tick {GetTick(message)}");
             string json = message.ToString();
             byte[] buffer = Encoding.UTF8.GetBytes(json);
             byte[] header = BitConverter.GetBytes(buffer.Length);
@@ -116,7 +116,7 @@ namespace ClientServerSimulator
 
         protected void StartListening(TcpClient client)
         {
-            Log("Client connected");
+            //Log("Client connected");
             var stream = client.GetStream();
             byte[] headerBuffer = new byte[HEADER_SIZE];
             while (client.Connected)

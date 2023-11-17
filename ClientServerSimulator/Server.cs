@@ -39,6 +39,7 @@ namespace ClientServerSimulator
                 while (true)
                 {
                     TcpClient client = listener.AcceptTcpClient();
+                    // TODO: Send current state!
                     clients.Add(client);
                     Task.Run(() => StartListening(client));
                 }
