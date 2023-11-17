@@ -31,6 +31,7 @@ namespace ClientServerSimulator
 
         public override void Start()
         {
+            base.Start();
             listener.Start();
             Log("Server started listening");
             

@@ -28,6 +28,7 @@ namespace ClientServerSimulator
 
         public override void Start()
         {
+            base.Start();
             client.Connect(ADDRESS, PORT);
             // Connect a TCP socket at the address
             Task.Run(() => StartListening(client));

@@ -26,6 +26,8 @@ namespace ClientServerSimulator
 
         public int TickCount { get; private set; }
 
+        public bool Started { get; private set; }
+
         protected List<JObject> scriptedEvents;
         protected List<JObject> receivedEvents = new List<JObject>();
 
@@ -41,7 +43,11 @@ namespace ClientServerSimulator
             OnLog?.Invoke(message);
         }
 
-        public abstract void Start();
+        public virtual void Start()
+        {
+            Started = true;
+        }
+
         public abstract void Close();
 
         protected List<JObject> ReadFile(string path)
@@ -103,7 +109,7 @@ namespace ClientServerSimulator
 
         protected void SendEvent(TcpClient client, JObject message)
         {
-            //Log($"Sending event {message["type"]} for tick {GetTick(message)}");
+            Log($"Sending event {message["type"]} for tick {GetTick(message)}");
             string json = message.ToString();
             byte[] buffer = Encoding.UTF8.GetBytes(json);
             byte[] header = BitConverter.GetBytes(buffer.Length);
@@ -147,8 +153,9 @@ namespace ClientServerSimulator
             InsertInScript(message, receivedEvents);
         }
 
-        protected void Update()
+        public void Update()
         {
+            if (!Started) return;
             ProcessQueue();
             ProcessEvents(receivedEvents, ProcessReceivedEvent);
             ProcessEvents(scriptedEvents, ProcessMyEvent);
@@ -158,6 +165,7 @@ namespace ClientServerSimulator
 
         public virtual void TryTick()
         {
+            if (!Started) return;
             Update();
             if (ShouldTick)
             {

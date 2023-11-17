@@ -37,6 +37,7 @@
             this.textBoxServer = new System.Windows.Forms.TextBox();
             this.textBoxClient = new System.Windows.Forms.TextBox();
             this.timerClient = new System.Windows.Forms.Timer(this.components);
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.nudServerSpeed)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudClientSpeed)).BeginInit();
             this.SuspendLayout();
@@ -115,6 +116,11 @@
             // 
             this.timerClient.Tick += new System.EventHandler(this.timerClient_Tick);
             // 
+            // timer1
+            // 
+            this.timer1.Enabled = true;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -146,5 +152,6 @@
         private TextBox textBoxServer;
         private TextBox textBoxClient;
         private System.Windows.Forms.Timer timerClient;
+        private System.Windows.Forms.Timer timer1;
     }
 }

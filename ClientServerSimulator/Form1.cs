@@ -67,8 +67,14 @@ namespace ClientServerSimulator
             timer.Enabled = speed > 0;
             if (speed != 0)
             {
-                timer.Interval = 100 / speed;
+                timer.Interval = 300 / speed;
             }
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            client.Update();
+            server.Update();
         }
     }
 }
