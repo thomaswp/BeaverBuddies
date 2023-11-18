@@ -54,9 +54,12 @@ namespace ClientServerSimulator
     internal class ServerDriver : DriverBase<TimberServer>
     {
         const string SCRIPT_PATH = "server.json";
+        const string SAVE_PATH = "save.timber";
 
-        public ServerDriver() : base(SCRIPT_PATH, new TimberServer(PORT))
+        public ServerDriver() : base(SCRIPT_PATH, new TimberServer(PORT, 
+            () => File.ReadAllBytesAsync(SAVE_PATH)))
         {
+            
         }
     }
 }

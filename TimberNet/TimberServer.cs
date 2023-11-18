@@ -7,21 +7,24 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using Newtonsoft.Json.Linq;
+using System.IO;
+using System.Security.Cryptography;
 
 namespace ClientServerSimulator
-{
-    internal class TimberServer : TimberNetBase
+{ 
+
+    public class TimberServer : TimberNetBase
     {
-        const string SCRIPT_PATH = "server.json";
-        const string SAVE_PATH = "save.timber";
 
-        private readonly List<TcpClient> clients = new();
+        private readonly List<TcpClient> clients = new List<TcpClient>();
 
-        readonly TcpListener listener;
+        private readonly TcpListener listener;
+        private readonly Func<Task<byte[]>> mapProvider;
 
-        public TimberServer(int port)
+        public TimberServer(int port, Func<Task<byte[]>> mapProvider)
         {
             listener = new TcpListener(IPAddress.Parse(HOST_ADDRESS), port);
+            this.mapProvider = mapProvider;
         }
 
         protected override void ReceiveEvent(JObject message)
@@ -34,9 +37,6 @@ namespace ClientServerSimulator
         {
             base.Start();
 
-            var bytes = File.ReadAllBytes(SAVE_PATH);
-            AddFileToHash(bytes);
-
             listener.Start();
             Log("Server started listening");
             
@@ -47,9 +47,9 @@ namespace ClientServerSimulator
                     TcpClient client = listener.AcceptTcpClient();
                     // TODO: Send current state!
                     clients.Add(client);
-                    Task.Run(() =>
+                    Task.Run(async () =>
                     {
-                        SendFile(client.GetStream(), bytes);
+                        await SendMap(client.GetStream());
                         SendState(client);
                         StartListening(client, false);
                     });
@@ -57,19 +57,21 @@ namespace ClientServerSimulator
             });
         }
 
-        private void SendFile(NetworkStream stream, byte[] bytes)
+        private async Task SendMap(NetworkStream stream)
         {
-            SendLength(stream, bytes.Length);
+
+            byte[] mapBytes = await mapProvider();
+            SendLength(stream, mapBytes.Length);
             
             // Send bytes in chunks
             int chunkSize = MAX_BUFFER_SIZE;
-            for (int i = 0; i < bytes.Length; i += chunkSize)
+            for (int i = 0; i < mapBytes.Length; i += chunkSize)
             {
-                int length = Math.Min(chunkSize, bytes.Length - i);
-                stream.Write(bytes, i, length);
+                int length = Math.Min(chunkSize, mapBytes.Length - i);
+                stream.Write(mapBytes, i, length);
             }
 
-            Log($"Sent map with length {bytes.Length} and Hash: {GetHashCode(bytes).ToString("X8")}");
+            Log($"Sent map with length {mapBytes.Length} and Hash: {GetHashCode(mapBytes).ToString("X8")}");
         }
 
         private void SendState(TcpClient client)

@@ -2,11 +2,10 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
 
 namespace ClientServerSimulator
 {
@@ -25,8 +24,8 @@ namespace ClientServerSimulator
         public event MessageReceived? OnLog;
         public event MapReceived? OnMapReceived;
 
-        private readonly ConcurrentQueue<string> receivedEventQueue = new();
-        private readonly ConcurrentQueue<string> logQueue = new();
+        private readonly ConcurrentQueue<string> receivedEventQueue = new ConcurrentQueue<string>();
+        private readonly ConcurrentQueue<string> logQueue = new ConcurrentQueue<string>();
         private byte[]? mapBytes = null;
 
         public int Hash { get; private set; }
