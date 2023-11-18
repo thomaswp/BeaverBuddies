@@ -7,7 +7,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 
-namespace ClientServerSimulator
+namespace TimberNet
 {
     public abstract class TimberNetBase
     {
@@ -84,7 +84,7 @@ namespace ClientServerSimulator
                 script.Insert(index, message);
         }
 
-        public static void ProcessEventsForTick(int tick, List<JObject> events, Action<JObject> callback)
+        public static IEnumerable<JObject> PopEventsForTick(int tick, List<JObject> events)
         {
             while (events.Count > 0)
             {
@@ -94,34 +94,43 @@ namespace ClientServerSimulator
                     break;
 
                 events.RemoveAt(0);
-                callback(message);
+                yield return message;
             }
 
         }
 
-        protected void ProcessEvents(List<JObject> events, Action<JObject> callback)
+        private List<JObject> PopEventsToProcess(List<JObject> events)
         {
-            if (events.Count == 0) return;
+            if (events.Count == 0) return new List<JObject>();
             JObject firstEvent = events[0];
             int firstEventTick = GetTick(firstEvent);
             if (firstEventTick < TickCount)
                 Log($"Warning: late event {GetType(firstEvent)}: {firstEventTick} < {TickCount}");
 
-            ProcessEventsForTick(TickCount, events, callback);
+            return new List<JObject>(PopEventsForTick(TickCount, events));
         }
 
+        /**
+         * If the Net can accept a user-initiated event, it process it
+         * (e.g., sends it to clients) and returns true. 
+         * Otherwise it returns false.
+         */
         public virtual bool TryUserInitiatedEvent(JObject message)
         {
-            AcceptEvent(message);
+            AddEventToHash(message);
             return true;
         }
 
+        /**
+         * Process a validated event from a peer that is ready to happen on
+         * the Update() thread.
+         */
         protected virtual void ProcessReceivedEvent(JObject message)
         {
-            AcceptEvent(message);
+            AddEventToHash(message);
         }
 
-        protected virtual void AcceptEvent(JObject message)
+        protected void AddEventToHash(JObject message)
         {
             if (GetType(message) == SET_STATE_EVENT)
             {
@@ -245,24 +254,24 @@ namespace ClientServerSimulator
             mapBytes = null;
         }
 
-        public virtual void Update()
+        public virtual List<JObject> UpdateAndReadEvents()
         {
             UpdateLogs();
-            if (!Started) return;
+            if (!Started) return new List<JObject>();
             ProcessReceivedMap();
             ProcessReceivedEventsQueue();
-            ProcessEvents(receivedEvents, ProcessReceivedEvent);
+            List<JObject> toProcess = PopEventsToProcess(this.receivedEvents);
+            toProcess.ForEach(ProcessReceivedEvent);
+            return toProcess;
         }
 
         protected virtual bool ShouldTick => true;
 
         public virtual bool TryTick()
         {
-            Update();
             if (!Started) return false;
             if (!ShouldTick) return false;
             TickCount++;
-            Update();
             return true;
         }
     }

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Mono.Cecil;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -9,44 +10,6 @@ using System.Threading;
 
 namespace TimberModTest
 {
-    public interface EventIO
-    {
-        List<ReplayEvent> ReadEvents();
-
-        void WriteEvents(params ReplayEvent[] events);
-
-        void Close();
-    }
-
-    //class EventWrapper
-    //{
-    //    public string type;
-    //    public ReplayEvent data;
-
-    //    private static Type[] types = {
-    //        typeof(BuildingPlacedEvent)
-    //    };
-
-    //    static EventWrapper FromEvent(ReplayEvent replayEvent)
-    //    {
-    //        return new EventWrapper()
-    //        {
-    //            type = replayEvent.GetType().Name,
-    //            data = replayEvent
-    //        };
-    //    }
-
-    //    public string ToJSON()
-    //    {
-    //        return JsonConvert.SerializeObject(this);
-    //    }
-
-    //    static ReplayEvent ToEvent(string json)
-    //    {
-    //        EventWrapper wrapper = JsonConvert.DeserializeObject<EventWrapper>(json);
-
-    //    }
-    //}
 
     class JsonSettings : JsonSerializerSettings
     {
@@ -54,6 +17,18 @@ namespace TimberModTest
         {
             Formatting = Formatting.Indented;
             TypeNameHandling = TypeNameHandling.All;
+        }
+
+        public static readonly JsonSettings Default = new JsonSettings();
+
+        public static T Deserialize<T>(string json)
+        {
+            return JsonConvert.DeserializeObject<T>(json, Default);
+        }
+
+        public static string Serialize<T>(T obj)
+        {
+            return JsonConvert.SerializeObject(obj, Default);
         }
     }
     
@@ -70,7 +45,7 @@ namespace TimberModTest
         }
 
         
-        public List<ReplayEvent> ReadEvents()
+        public List<ReplayEvent> UpdateAndReadEvents()
         {
             //throw new NotImplementedException();
             return new List<ReplayEvent>();
@@ -139,7 +114,7 @@ namespace TimberModTest
 
         }
 
-        public List<ReplayEvent> ReadEvents()
+        public List<ReplayEvent> UpdateAndReadEvents()
         {
             var list = new List<ReplayEvent>(events);
             events.Clear();

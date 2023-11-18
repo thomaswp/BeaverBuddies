@@ -1,4 +1,4 @@
-namespace ClientServerSimulator
+namespace TimberNet
 {
     internal static class Program
     {

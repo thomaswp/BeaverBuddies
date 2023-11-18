@@ -1,4 +1,4 @@
-﻿namespace ClientServerSimulator
+﻿namespace TimberNet
 {
     partial class Form1
     {

@@ -9,7 +9,7 @@ using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace ClientServerSimulator
+namespace TimberNet
 {
     internal abstract class DriverBase<T> where T : TimberNetBase
     {
@@ -33,12 +33,14 @@ namespace ClientServerSimulator
 
         public void Update()
         {
-            netBase.Update();
+            netBase.UpdateAndReadEvents();
             if (!netBase.Started) return;
             // Go through scripted events and if they're ready to go, pretend
             // the user initiated them
-            TimberNetBase.ProcessEventsForTick(netBase.TickCount, scriptedEvents, 
-                message => netBase.TryUserInitiatedEvent(message));
+            foreach (JObject message in TimberNetBase.PopEventsForTick(netBase.TickCount, scriptedEvents))
+            {
+                netBase.TryUserInitiatedEvent(message);
+            }
         }
     }
 

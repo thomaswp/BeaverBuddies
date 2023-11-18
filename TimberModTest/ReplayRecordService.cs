@@ -126,7 +126,7 @@ namespace TimberModTest
 
         private void Update()
         {
-            eventsToReplay.AddRange(io.ReadEvents());
+            eventsToReplay.AddRange(io.UpdateAndReadEvents());
             eventsToReplay.Sort();
             ReplayEvents();
         }

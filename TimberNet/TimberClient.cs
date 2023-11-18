@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ClientServerSimulator
+namespace TimberNet
 {
     public class TimberClient : TimberNetBase
     {
@@ -37,7 +37,7 @@ namespace ClientServerSimulator
             client.Connect(address, port);
             // Connect a TCP socket at the address
             Task.Run(() => StartListening(client, true));
-            Update();
+            UpdateAndReadEvents();
         }
 
 

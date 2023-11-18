@@ -10,7 +10,7 @@ using Newtonsoft.Json.Linq;
 using System.IO;
 using System.Security.Cryptography;
 
-namespace ClientServerSimulator
+namespace TimberNet
 { 
 
     public class TimberServer : TimberNetBase
@@ -83,10 +83,21 @@ namespace ClientServerSimulator
             SendEvent(client, message);
         }
 
-        protected override void AcceptEvent(JObject message)
+        protected override void ProcessReceivedEvent(JObject message)
         {
-            base.AcceptEvent(message);
-            
+            base.ProcessReceivedEvent(message);
+            SendEventToClients(message);
+        }
+
+        public override bool TryUserInitiatedEvent(JObject message)
+        {
+            if (!base.TryUserInitiatedEvent(message)) return false;
+            SendEventToClients(message);
+            return true;
+        }
+
+        private void SendEventToClients(JObject message)
+        {
             clients.ForEach(client => SendEvent(client, message));
         }
 
@@ -103,7 +114,8 @@ namespace ClientServerSimulator
                 JObject message = new JObject();
                 message[TICKS_KEY] = TickCount;
                 message["type"] = "Heartbeat";
-                AcceptEvent(message);
+                // Simulate the user doing this
+                TryUserInitiatedEvent(message);
             }
             return true;
         }

@@ -3,7 +3,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using TextBox = System.Windows.Forms.TextBox;
 using Timer = System.Windows.Forms.Timer;
 
-namespace ClientServerSimulator
+namespace TimberNet
 {
     public partial class Form1 : Form
     {
