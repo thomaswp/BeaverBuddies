@@ -10,7 +10,7 @@ using Newtonsoft.Json.Linq;
 
 namespace ClientServerSimulator
 {
-    internal class Server : NetBase
+    internal class TimberServer : TimberNetBase
     {
         const string SCRIPT_PATH = "server.json";
         const string SAVE_PATH = "save.timber";
@@ -19,9 +19,9 @@ namespace ClientServerSimulator
 
         readonly TcpListener listener;
 
-        public Server() : base(SCRIPT_PATH)
+        public TimberServer(int port)
         {
-            listener = new TcpListener(IPAddress.Parse(ADDRESS), PORT);
+            listener = new TcpListener(IPAddress.Parse(HOST_ADDRESS), port);
         }
 
         protected override void ReceiveEvent(JObject message)
@@ -81,9 +81,9 @@ namespace ClientServerSimulator
             SendEvent(client, message);
         }
 
-        protected override void DoEvent(JObject message)
+        protected override void AcceptEvent(JObject message)
         {
-            base.DoEvent(message);
+            base.AcceptEvent(message);
             
             clients.ForEach(client => SendEvent(client, message));
         }
@@ -93,16 +93,17 @@ namespace ClientServerSimulator
             listener.Stop();
         }
 
-        public override void TryTick()
+        public override bool TryTick()
         {
-            base.TryTick();
+            if (!base.TryTick()) return false;
             if (TickCount % 10 == 0)
             {
                 JObject message = new JObject();
                 message[TICKS_KEY] = TickCount;
                 message["type"] = "Heartbeat";
-                ProcessMyEvent(message);
+                AcceptEvent(message);
             }
+            return true;
         }
     }
 }

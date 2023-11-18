@@ -38,6 +38,8 @@
             this.textBoxClient = new System.Windows.Forms.TextBox();
             this.timerClient = new System.Windows.Forms.Timer(this.components);
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.labelServerTick = new System.Windows.Forms.Label();
+            this.labelClientTick = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.nudServerSpeed)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudClientSpeed)).BeginInit();
             this.SuspendLayout();
@@ -94,6 +96,7 @@
             // 
             // textBoxServer
             // 
+            this.textBoxServer.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.textBoxServer.Location = new System.Drawing.Point(12, 50);
             this.textBoxServer.Multiline = true;
             this.textBoxServer.Name = "textBoxServer";
@@ -104,6 +107,7 @@
             // 
             // textBoxClient
             // 
+            this.textBoxClient.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.textBoxClient.Location = new System.Drawing.Point(399, 52);
             this.textBoxClient.Multiline = true;
             this.textBoxClient.Name = "textBoxClient";
@@ -121,11 +125,29 @@
             this.timer1.Enabled = true;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // labelServerTick
+            // 
+            this.labelServerTick.AutoSize = true;
+            this.labelServerTick.Location = new System.Drawing.Point(219, 25);
+            this.labelServerTick.Name = "labelServerTick";
+            this.labelServerTick.Size = new System.Drawing.Size(0, 15);
+            this.labelServerTick.TabIndex = 6;
+            // 
+            // labelClientTick
+            // 
+            this.labelClientTick.AutoSize = true;
+            this.labelClientTick.Location = new System.Drawing.Point(608, 26);
+            this.labelClientTick.Name = "labelClientTick";
+            this.labelClientTick.Size = new System.Drawing.Size(0, 15);
+            this.labelClientTick.TabIndex = 7;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.labelClientTick);
+            this.Controls.Add(this.labelServerTick);
             this.Controls.Add(this.textBoxClient);
             this.Controls.Add(this.textBoxServer);
             this.Controls.Add(this.nudClientSpeed);
@@ -153,5 +175,7 @@
         private TextBox textBoxClient;
         private System.Windows.Forms.Timer timerClient;
         private System.Windows.Forms.Timer timer1;
+        private Label labelServerTick;
+        private Label labelClientTick;
     }
 }

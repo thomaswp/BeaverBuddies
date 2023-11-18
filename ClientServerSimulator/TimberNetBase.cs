@@ -5,52 +5,48 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
-using System.Text.Json.Nodes;
 using System.Threading.Tasks;
-using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
 
 namespace ClientServerSimulator
 {
-    public abstract class NetBase
+    public abstract class TimberNetBase
     {
-        public const int PORT = 25565;
-        public const string ADDRESS = "127.0.0.1";
         public const int HEADER_SIZE = 4;
         public const string TICKS_KEY = "ticksSinceLoad";
         public const string TYPE_KEY = "type";
         public const string SET_STATE_EVENT = "SetState";
         public const int MAX_BUFFER_SIZE = 8192; // 8K
+        public const string HOST_ADDRESS = "127.0.0.1";
 
         public delegate void MessageReceived(string message);
+        public delegate void MapReceived(byte[] mapBytes);
 
         public event MessageReceived? OnLog;
+        public event MapReceived? OnMapReceived;
 
-        private readonly ConcurrentQueue<string> toProcess = new();
+        private readonly ConcurrentQueue<string> receivedEventQueue = new();
         private readonly ConcurrentQueue<string> logQueue = new();
+        private byte[]? mapBytes = null;
+
         public int Hash { get; private set; }
 
         public int TickCount { get; private set; }
 
         public bool Started { get; private set; }
 
-        protected List<JObject> scriptedEvents;
         protected List<JObject> receivedEvents = new List<JObject>();
 
+        public abstract void Close();
 
-        public NetBase(string scriptPath)
+        public TimberNetBase()
         {
-            scriptedEvents = ReadScriptFile(scriptPath);
             Log("Started");
         }
 
         protected void Log(string message)
         {
             Log(message, TickCount, Hash);
-        }
-
-        protected void Log(string message, int ticks)
-        {
-            Log(message, ticks, Hash);
         }
 
         protected void Log(string message, int ticks, int hash)
@@ -62,14 +58,6 @@ namespace ClientServerSimulator
         public virtual void Start()
         {
             Started = true;
-        }
-
-        public abstract void Close();
-
-        protected List<JObject> ReadScriptFile(string path)
-        {
-            string json = File.ReadAllText(path);
-            return JArray.Parse(json).Cast<JObject>().ToList();
         }
 
         protected int GetTick(JObject message)
@@ -97,35 +85,44 @@ namespace ClientServerSimulator
                 script.Insert(index, message);
         }
 
-        private void ProcessEvents(List<JObject> events, Action<JObject> callback)
+        public static void ProcessEventsForTick(int tick, List<JObject> events, Action<JObject> callback)
         {
             while (events.Count > 0)
             {
                 JObject message = events[0];
                 int delay = message[TICKS_KEY]!.ToObject<int>();
-                if (delay > TickCount)
+                if (delay > tick)
                     break;
-
-                if (delay < TickCount)
-                    Log($"Warning: late event {message["type"]}: {delay} < {TickCount}");
 
                 events.RemoveAt(0);
                 callback(message);
             }
+
         }
 
-
-        protected virtual void ProcessMyEvent(JObject message)
+        protected void ProcessEvents(List<JObject> events, Action<JObject> callback)
         {
-            DoEvent(message);
+            if (events.Count == 0) return;
+            JObject firstEvent = events[0];
+            int firstEventTick = GetTick(firstEvent);
+            if (firstEventTick < TickCount)
+                Log($"Warning: late event {GetType(firstEvent)}: {firstEventTick} < {TickCount}");
+
+            ProcessEventsForTick(TickCount, events, callback);
+        }
+
+        public virtual bool TryUserInitiatedEvent(JObject message)
+        {
+            AcceptEvent(message);
+            return true;
         }
 
         protected virtual void ProcessReceivedEvent(JObject message)
         {
-            DoEvent(message);
+            AcceptEvent(message);
         }
 
-        protected virtual void DoEvent(JObject message)
+        protected virtual void AcceptEvent(JObject message)
         {
             if (GetType(message) == SET_STATE_EVENT)
             {
@@ -182,7 +179,7 @@ namespace ClientServerSimulator
                 stream.Read(buffer, 0, messageLength);
 
                 string message = Encoding.UTF8.GetString(buffer);
-                toProcess.Enqueue(message);
+                receivedEventQueue.Enqueue(message);
                 messageCount++;
             }
         }
@@ -218,11 +215,12 @@ namespace ClientServerSimulator
             byte[] mapBytes = ms.ToArray();
             AddFileToHash(mapBytes);
             Log($"Received map with length {mapBytes.Length} and Hash: {GetHashCode(mapBytes).ToString("X8")}");
+            this.mapBytes = mapBytes;
         }
 
-        private void ProcessQueue()
+        private void ProcessReceivedEventsQueue()
         {
-            while (toProcess.TryDequeue(out string? message))
+            while (receivedEventQueue.TryDequeue(out string? message))
             {
                 ReceiveEvent(JObject.Parse(message));
             }
@@ -241,26 +239,32 @@ namespace ClientServerSimulator
             }
         }
 
-        public void Update()
+        private void ProcessReceivedMap()
+        {
+            if (mapBytes == null) return;
+            OnMapReceived?.Invoke(mapBytes);
+            mapBytes = null;
+        }
+
+        public virtual void Update()
         {
             UpdateLogs();
             if (!Started) return;
-            ProcessQueue();
+            ProcessReceivedMap();
+            ProcessReceivedEventsQueue();
             ProcessEvents(receivedEvents, ProcessReceivedEvent);
-            ProcessEvents(scriptedEvents, ProcessMyEvent);
         }
 
         protected virtual bool ShouldTick => true;
 
-        public virtual void TryTick()
+        public virtual bool TryTick()
         {
             Update();
-            if (!Started) return;
-            if (ShouldTick)
-            {
-                TickCount++;
-                Update();
-            }
+            if (!Started) return false;
+            if (!ShouldTick) return false;
+            TickCount++;
+            Update();
+            return true;
         }
     }
 }

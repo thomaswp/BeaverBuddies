@@ -8,20 +8,25 @@ using System.Threading.Tasks;
 
 namespace ClientServerSimulator
 {
-    public class Client : NetBase
+    public class TimberClient : TimberNetBase
     {
-        const string SCRIPT_PATH = "client.json";
 
         private readonly TcpClient client;
 
-        public Client() : base(SCRIPT_PATH)
+        public readonly string address;
+        public readonly int port;
+
+        public TimberClient(string address, int port) : base()
         {
             client = new TcpClient();
+            this.address = address;
+            this.port = port;
         }
 
-        protected override void ProcessMyEvent(JObject message)
+        public override bool TryUserInitiatedEvent(JObject message)
         {
             SendEvent(client, message);
+            return false;
             // Don't actually do the event - wait for the server to confirm
             // w/ adjusted Tick
         }
@@ -29,7 +34,7 @@ namespace ClientServerSimulator
         public override void Start()
         {
             base.Start();
-            client.Connect(ADDRESS, PORT);
+            client.Connect(address, port);
             // Connect a TCP socket at the address
             Task.Run(() => StartListening(client, true));
             Update();

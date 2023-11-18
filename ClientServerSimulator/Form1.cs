@@ -1,23 +1,34 @@
 using System.Diagnostics;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using TextBox = System.Windows.Forms.TextBox;
 using Timer = System.Windows.Forms.Timer;
 
 namespace ClientServerSimulator
 {
     public partial class Form1 : Form
     {
-        Client client;
-        Server server;
+        ClientDriver clientDriver;
+        ServerDriver serverDriver;
+        TimberClient client;
+        TimberServer server;
 
         public Form1()
         {
             InitializeComponent();
 
-            client = new Client();
-            server = new Server();
+            clientDriver = new ClientDriver();
+            serverDriver = new ServerDriver();
 
-            client.OnLog += message => this.textBoxClient.Text += message + "\r\n";
-            server.OnLog += message => this.textBoxServer.Text += message + "\r\n";
+            client = clientDriver.netBase;
+            server = serverDriver.netBase;
+
+            client.OnLog += message => Log(message, textBoxClient);
+            server.OnLog += message => Log(message, textBoxServer);
+        }
+
+        private void Log(string message, TextBox textBox)
+        {
+            textBox.AppendText(message + "\r\n");
         }
 
         private void Log(string message)
@@ -73,8 +84,10 @@ namespace ClientServerSimulator
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            client.Update();
-            server.Update();
+            clientDriver.Update();
+            serverDriver.Update();
+            labelClientTick.Text = "Tick: " + client.TickCount;
+            labelServerTick.Text = "Tick: " + server.TickCount;
         }
     }
 }
