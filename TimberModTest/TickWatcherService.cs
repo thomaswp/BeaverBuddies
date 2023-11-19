@@ -42,7 +42,7 @@ namespace TimberModTest
         [OnEvent]
         public void OnGameLoaded(NewGameInitializedEvent e)
         {
-            ReplayService.UpdateInstance();
+            //ReplayService.UpdateInstance();
         }
 
         public void Tick()
@@ -52,7 +52,7 @@ namespace TimberModTest
             //{
             //    Plugin.Log($"Tick: {TicksSinceLoad}; Seconds Today: {_dayNightCycle.HoursPassedToday / 24 * 460} Hour: {_dayNightCycle.HoursPassedToday}; Partial Day: {_dayNightCycle.PartialDayNumber}");
             //}
-            ReplayService.UpdateInstance();
+            //ReplayService.UpdateInstance();
         }
     }
 }

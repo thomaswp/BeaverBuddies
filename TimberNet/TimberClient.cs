@@ -16,6 +16,8 @@ namespace TimberNet
         public readonly string address;
         public readonly int port;
 
+        public override bool ShouldTick => base.ShouldTick && receivedEvents.Count > 0;
+
         public TimberClient(string address, int port) : base()
         {
             client = new TcpClient();
@@ -37,7 +39,6 @@ namespace TimberNet
             client.Connect(address, port);
             // Connect a TCP socket at the address
             Task.Run(() => StartListening(client, true));
-            UpdateAndReadEvents();
         }
 
 
@@ -45,7 +46,5 @@ namespace TimberNet
         {
             client.Close();
         }
-
-        protected override bool ShouldTick => receivedEvents.Count > 0;
     }
 }

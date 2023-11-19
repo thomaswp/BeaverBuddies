@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.AxHost;
 
 namespace TimberNet
 {
@@ -18,6 +19,8 @@ namespace TimberNet
 
         protected List<JObject> scriptedEvents;
         public readonly T netBase;
+
+        int ticks = 0;
 
         public DriverBase(string scriptPath, T netBase)
         {
@@ -31,13 +34,21 @@ namespace TimberNet
             return JArray.Parse(json).Cast<JObject>().ToList();
         }
 
+        public virtual void TryTick()
+        {
+            if (!netBase.ShouldTick) return;
+            ticks++;
+            netBase.ReadEvents(ticks);
+        }
+
         public void Update()
         {
-            netBase.UpdateAndReadEvents();
+            // We discard read events, since they're already logged
+            netBase.ReadEvents(ticks);
             if (!netBase.Started) return;
             // Go through scripted events and if they're ready to go, pretend
             // the user initiated them
-            foreach (JObject message in TimberNetBase.PopEventsForTick(netBase.TickCount, scriptedEvents))
+            foreach (JObject message in TimberNetBase.PopEventsForTick(netBase.TickCount, scriptedEvents, TimberNetBase.GetTick))
             {
                 netBase.TryUserInitiatedEvent(message);
             }
@@ -62,6 +73,15 @@ namespace TimberNet
             () => File.ReadAllBytesAsync(SAVE_PATH)))
         {
             
+        }
+
+        public override void TryTick()
+        {
+            base.TryTick();
+            if (netBase.Started && netBase.TickCount % 10 == 0)
+            {
+                netBase.SendHeartbeat();
+            }
         }
     }
 }

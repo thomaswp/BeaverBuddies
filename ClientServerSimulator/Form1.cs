@@ -53,12 +53,12 @@ namespace TimberNet
 
         private void timerServer_Tick(object sender, EventArgs e)
         {
-            server.TryTick();
+            serverDriver.TryTick();
         }
 
         private void timerClient_Tick(object sender, EventArgs e)
         {
-            client.TryTick();
+            clientDriver.TryTick();
         }
 
         private void nudServerSpeed_ValueChanged(object sender, EventArgs e)

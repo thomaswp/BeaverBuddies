@@ -106,18 +106,13 @@ namespace TimberNet
             listener.Stop();
         }
 
-        public override bool TryTick()
+        public void SendHeartbeat()
         {
-            if (!base.TryTick()) return false;
-            if (TickCount % 10 == 0)
-            {
-                JObject message = new JObject();
-                message[TICKS_KEY] = TickCount;
-                message["type"] = "Heartbeat";
-                // Simulate the user doing this
-                TryUserInitiatedEvent(message);
-            }
-            return true;
+            JObject message = new JObject();
+            message[TICKS_KEY] = TickCount;
+            message["type"] = "Heartbeat";
+            // Simulate the user doing this
+            TryUserInitiatedEvent(message);
         }
     }
 }

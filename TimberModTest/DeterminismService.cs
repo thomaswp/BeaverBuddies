@@ -1,7 +1,13 @@
-﻿using Timberborn.Common;
+﻿using HarmonyLib;
+using System.Diagnostics;
+using Timberborn.BlockSystem;
+using Timberborn.BuildingTools;
+using Timberborn.Common;
 using Timberborn.ConstructibleSystem;
+using Timberborn.GameSaveRepositorySystem;
 using Timberborn.SingletonSystem;
 using Timberborn.TimeSystem;
+using UnityEngine;
 
 namespace TimberModTest
 {
@@ -24,9 +30,30 @@ namespace TimberModTest
         public void OnSpeedEvent(CurrentSpeedChangedEvent e)
         {
             Plugin.Log($"Speed changed to: {e.CurrentSpeed}; random reset");
-            UnityEngine.Random.InitState(1234);
+            Random.InitState(1234);
         }
     }
+
+    //[HarmonyPatch(typeof(Random), nameof(Random.InitState))]
+    //public class RandomPatcher
+    //{
+    //    static void Prefix()
+    //    {
+    //        Plugin.Log($"Random.InitState");
+    //        Plugin.LogStackTrace();
+
+    //    }
+    //}
+
+    //[HarmonyPatch(typeof(GameSaveDeserializer), nameof(GameSaveDeserializer.Load))]
+    //public class LoadPatcher
+    //{
+    //    static void Prefix()
+    //    {
+    //        Plugin.Log($"GameSaveDeserializer.Load");
+    //        Plugin.LogStackTrace();
+    //    }
+    //}
 
 
 }

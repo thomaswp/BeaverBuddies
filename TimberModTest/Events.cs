@@ -41,13 +41,13 @@ namespace TimberModTest
             //return timeInFixedSecs.CompareTo(other.timeInFixedSecs);
             return ticksSinceLoad.CompareTo(other.ticksSinceLoad);
         }
-
-        public void SetTime(TickWathcerService tickWathcerService)
-        {
-            if (tickWathcerService == null) return;
-            timeInFixedSecs = tickWathcerService.TotalTimeInFixedSecons;
-            ticksSinceLoad = tickWathcerService.TicksSinceLoad;
-        }
+        
+        //public void SetTime(TickWathcerService tickWathcerService)
+        //{
+        //    if (tickWathcerService == null) return;
+        //    timeInFixedSecs = tickWathcerService.TotalTimeInFixedSecons;
+        //    ticksSinceLoad = tickWathcerService.TicksSinceLoad;
+        //}
 
         public abstract void Replay(IReplayContext context);
     }

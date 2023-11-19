@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Runtime.ConstrainedExecution;
 using System.Text;
@@ -8,28 +9,26 @@ using Timberborn.BuildingTools;
 using Timberborn.Forestry;
 using Timberborn.PlantingUI;
 using Timberborn.SingletonSystem;
+using Timberborn.TickSystem;
 
 namespace TimberModTest
 {
-    public class ReplayService : IReplayContext, IPostLoadableSingleton
+    public class ReplayService : IReplayContext, IPostLoadableSingleton, IUpdatableSingleton, ITickableSingleton
     {
-        private readonly TickWathcerService _tickWathcerService;
+        //private readonly TickWathcerService _tickWathcerService;
         private readonly EventBus _eventBus;
-        //public readonly IBlockObjectPlacer buildingPlacer;
-        //public readonly BuildingService buildingService;
-
-        // TODO: Ideally there would be a way for this not to be static
-        // but the events are generated from static patch events that won't
-        // have consistent access to any service, so I need something to be static.
-        private static ReplayService instance;
 
         private List<object> singletons = new();
 
         private List<ReplayEvent> eventsToReplay = new List<ReplayEvent>();
-        private EventIO io;
+        private EventIO io => EventIO.Get();
+
+        private int ticksSinceLoad = 0;
+
+        private static ConcurrentQueue<ReplayEvent> eventsToSend = new ConcurrentQueue<ReplayEvent>();
 
         public ReplayService(
-            TickWathcerService tickWathcerService,
+            //TickWathcerService tickWathcerService,
             EventBus eventBus,
             //IBlockObjectPlacer buildingPlacer,
             BlockObjectPlacerService blockObjectPlacerService,
@@ -38,17 +37,16 @@ namespace TimberModTest
             TreeCuttingArea treeCuttingArea
         )
         {
-            _tickWathcerService = AddSingleton(tickWathcerService);
+            //_tickWathcerService = AddSingleton(tickWathcerService);
             _eventBus = AddSingleton(eventBus);
             AddSingleton(blockObjectPlacerService);
             AddSingleton(buildingService);
             AddSingleton(plantingSelectionService);
             AddSingleton(treeCuttingArea);
-            instance = this;
 
             //io = new FileWriteIO("test.json");
             //io = new FileReadIO("planting.json");
-            io = new FileReadIO("trees.json");
+            //io = new FileReadIO("trees.json");
         }
 
         public void PostLoad()
@@ -56,14 +54,7 @@ namespace TimberModTest
             // TODO: Make this random, but then send the seed as the first event.
             Plugin.Log("Setting random state and loading events");
             UnityEngine.Random.InitState(1234);
-            Update();
-
-            //Plugin.Log(new System.Diagnostics.StackTrace().ToString());
-            //Plugin.Log("All Game events:");
-            //foreach (var key in _eventBus._subscriptions._subscriptions.Keys)
-            //{
-            //    Plugin.Log($"EventBus subscription: {key.Name}");
-            //}
+            UpdateSingleton();
         }
 
         private T AddSingleton<T>(T singleton)
@@ -84,23 +75,18 @@ namespace TimberModTest
 
         public static void RecordEvent(ReplayEvent replayEvent)
         {
-            instance.RecordEventInternal(replayEvent);
-        }
-
-        void RecordEventInternal(ReplayEvent replayEvent)
-        {
-            replayEvent.SetTime(_tickWathcerService);
-            io.WriteEvents(replayEvent);
-        }
-
-        public static void UpdateInstance()
-        {
-            instance.Update();
+            eventsToSend.Enqueue(replayEvent);
         }
 
         private void ReplayEvents()
         {
-            int currentTick = _tickWathcerService.TicksSinceLoad;
+            // TODO: Need a way when replaying to avoid
+            // recording any of these events again (since the
+            // server does so on its own automatically)
+            // (Though alternatively... it may be better to do it
+            // this way so things stay more synced, and since some
+            // events may need to be canceled if they fail...)
+            int currentTick = ticksSinceLoad;
             for (int i = 0; i < eventsToReplay.Count; i++)
             {
                 ReplayEvent replayEvent = eventsToReplay[i];
@@ -116,20 +102,42 @@ namespace TimberModTest
                 eventsToReplay.RemoveAt(i);
                 i--;
 
-                if (eventsToReplay.Count == 0)
-                {
-                    Plugin.Log("Events complete: should pause!");
-                    // TODO: Pause
-                }
+                // TODO: EventIO Should say when to stop
+                //if (eventsToReplay.Count == 0)
+                //{
+                //    Plugin.Log("Events complete: should pause!");
+                //    // TODO: Pause
+                //}
             }
         }
 
-        private void Update()
+        private void SendEvents()
         {
-            eventsToReplay.AddRange(io.UpdateAndReadEvents());
-            eventsToReplay.Sort();
-            ReplayEvents();
+            while (eventsToSend.TryDequeue(out ReplayEvent replayEvent))
+            {
+                replayEvent.ticksSinceLoad = ticksSinceLoad;
+                EventIO.Get().WriteEvents(replayEvent);
+            }
         }
 
+        private void ReceiveEvents()
+        {
+            eventsToReplay.AddRange(io.ReadEvents(ticksSinceLoad));
+            eventsToReplay.Sort();
+        }
+
+        public void UpdateSingleton()
+        {
+            io.Update();
+            ReceiveEvents();
+            ReplayEvents();
+            SendEvents();
+        }
+
+        public void Tick()
+        {
+            UpdateSingleton();
+            ticksSinceLoad++;
+        }
     }
 }

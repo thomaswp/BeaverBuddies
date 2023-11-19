@@ -3,6 +3,7 @@ using BepInEx.Logging;
 using Bindito.Core;
 using HarmonyLib;
 using Newtonsoft.Json;
+using System.Diagnostics;
 using TimberApi.ConfiguratorSystem;
 using TimberApi.ConsoleSystem;
 using TimberApi.ModSystem;
@@ -42,10 +43,20 @@ namespace TimberModTest
     {
         public void Configure(IContainerDefinition containerDefinition)
         {
-            Plugin.Log($"Registering Services");
+            Plugin.Log($"Registering In Game Services");
             containerDefinition.Bind<DeterminismService>().AsSingleton();
-            containerDefinition.Bind<TickWathcerService>().AsSingleton();
+            //containerDefinition.Bind<TickWathcerService>().AsSingleton();
             containerDefinition.Bind<ReplayService>().AsSingleton();
+        }
+    }
+
+    [Configurator(SceneEntrypoint.MainMenu)]
+    public class ConnectionMenuConfigurator : IConfigurator
+    {
+        public void Configure(IContainerDefinition containerDefinition)
+        {
+            Plugin.Log($"Registering Main Menu Services");
+            containerDefinition.Bind<ClientConnectionService>().AsSingleton();
         }
     }
 
@@ -61,23 +72,16 @@ namespace TimberModTest
             logger = consoleWriter;
             Log($"Plugin {PluginGuid} is loaded!");
             new Harmony(PluginGuid).PatchAll();
-
-            //string json = JsonConvert.SerializeObject(new BuildingPlacedEvent()
-            //{
-            //    prefab = "test",
-            //    coordinates = new Vector3Int(1, 2, 3),
-            //    orientation = Orientation.Cw180,
-            //});
-            //Log("JSON!");
-            //Log(json);
-            //BuildingPlacedEvent e = JsonConvert.DeserializeObject<BuildingPlacedEvent>(json);
-            //Log("" + e.coordinates.y);
-            //Log("" + e.orientation);
         }
 
         public static void Log(string message)
         {
             logger.LogWarning(message);
+        }
+
+        public static void LogStackTrace()
+        {
+            Log(new StackTrace().ToString());
         }
     }
 }

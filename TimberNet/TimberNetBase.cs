@@ -34,6 +34,8 @@ namespace TimberNet
 
         public bool Started { get; private set; }
 
+        public virtual bool ShouldTick => Started;
+
         protected List<JObject> receivedEvents = new List<JObject>();
 
         public abstract void Close();
@@ -59,14 +61,14 @@ namespace TimberNet
             Started = true;
         }
 
-        protected int GetTick(JObject message)
+        public static int GetTick(JObject message)
         {
             if (message[TICKS_KEY] == null)
                 throw new Exception($"Message does not contain {TICKS_KEY} key");
             return message[TICKS_KEY]!.ToObject<int>();
         }
 
-        protected string GetType(JObject message)
+        public static string GetType(JObject message)
         {
             var type = message["type"];
             if (type == null)
@@ -84,19 +86,20 @@ namespace TimberNet
                 script.Insert(index, message);
         }
 
-        public static IEnumerable<JObject> PopEventsForTick(int tick, List<JObject> events)
+        public static List<T> PopEventsForTick<T>(int tick, List<T> events, Func<T, int> getTick)
         {
+            List<T> list = new List<T>();
             while (events.Count > 0)
             {
-                JObject message = events[0];
-                int delay = message[TICKS_KEY]!.ToObject<int>();
+                T message = events[0];
+                int delay = getTick(message);
                 if (delay > tick)
                     break;
 
                 events.RemoveAt(0);
-                yield return message;
+                list.Add(message);
             }
-
+            return list;
         }
 
         private List<JObject> PopEventsToProcess(List<JObject> events)
@@ -107,7 +110,7 @@ namespace TimberNet
             if (firstEventTick < TickCount)
                 Log($"Warning: late event {GetType(firstEvent)}: {firstEventTick} < {TickCount}");
 
-            return new List<JObject>(PopEventsForTick(TickCount, events));
+            return PopEventsForTick(TickCount, events, GetTick);
         }
 
         /**
@@ -239,7 +242,7 @@ namespace TimberNet
             InsertInScript(message, receivedEvents);
         }
 
-        private void UpdateLogs()
+        private void ProcessLogs()
         {
             while (logQueue.TryDequeue(out string? log))
             {
@@ -254,25 +257,30 @@ namespace TimberNet
             mapBytes = null;
         }
 
-        public virtual List<JObject> UpdateAndReadEvents()
+        /**
+         * Updates, processing queued logs, maps and events.
+         */
+        public void Update()
         {
-            UpdateLogs();
-            if (!Started) return new List<JObject>();
+            ProcessLogs();
+            if (!Started) return;
             ProcessReceivedMap();
             ProcessReceivedEventsQueue();
-            List<JObject> toProcess = PopEventsToProcess(this.receivedEvents);
-            toProcess.ForEach(ProcessReceivedEvent);
-            return toProcess;
+
         }
 
-        protected virtual bool ShouldTick => true;
-
-        public virtual bool TryTick()
+        /**
+         * Reads received events that should be processed by the game
+         * and deletes and returns.
+         * Will call update before processing events.
+         */
+        public virtual List<JObject> ReadEvents(int ticksSinceLoad)
         {
-            if (!Started) return false;
-            if (!ShouldTick) return false;
-            TickCount++;
-            return true;
+            TickCount = ticksSinceLoad;
+            Update();
+            List<JObject> toProcess = PopEventsToProcess(receivedEvents);
+            toProcess.ForEach(ProcessReceivedEvent);
+            return toProcess;
         }
     }
 }

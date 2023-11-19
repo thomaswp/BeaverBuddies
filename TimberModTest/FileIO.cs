@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using TimberNet;
 
 namespace TimberModTest
 {
@@ -45,11 +46,12 @@ namespace TimberModTest
         }
 
         
-        public List<ReplayEvent> UpdateAndReadEvents()
+        public List<ReplayEvent> ReadEvents(int ticksSinceLoad)
         {
-            //throw new NotImplementedException();
             return new List<ReplayEvent>();
         }
+
+        public void Update() { }
 
         public void WriteEvents(params ReplayEvent[] events)
         {
@@ -96,6 +98,8 @@ namespace TimberModTest
             ReadFileEvents();
         }
 
+        public void Update() { }
+
         void ReadFileEvents()
         {
             if (File.Exists(filePath))
@@ -114,11 +118,9 @@ namespace TimberModTest
 
         }
 
-        public List<ReplayEvent> UpdateAndReadEvents()
+        public List<ReplayEvent> ReadEvents(int ticksSinceLoad)
         {
-            var list = new List<ReplayEvent>(events);
-            events.Clear();
-            return list;
+            return TimberNetBase.PopEventsForTick(ticksSinceLoad, events, e => e.ticksSinceLoad);
         }
 
         public void WriteEvents(params ReplayEvent[] events)
