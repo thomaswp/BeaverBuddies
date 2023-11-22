@@ -13,6 +13,8 @@ namespace TimberModTest
     public class ClientEventIO : EventIO
     {
 
+        public bool PlayRecordedEvents => false;
+
         public readonly TimberClient client;
 
         public ClientEventIO(string address, int port, MapReceived mapReceivedCallback)
@@ -30,7 +32,14 @@ namespace TimberModTest
 
         private ReplayEvent ToEvent(JObject obj)
         {
-            return JsonSettings.Deserialize<ReplayEvent>(obj.ToString());
+            Plugin.Log($"Recieving {obj}");
+            try
+            {
+                return JsonSettings.Deserialize<ReplayEvent>(obj.ToString());
+            } catch (Exception ex) {
+                Plugin.Log(ex.ToString());
+            }
+            return null;
         }
 
         public void Update()
@@ -41,7 +50,9 @@ namespace TimberModTest
         public List<ReplayEvent> ReadEvents(int ticksSinceLoad)
         {
             return client.ReadEvents(ticksSinceLoad)
-                .Select(ToEvent).ToList();
+                .Select(ToEvent)
+                .Where(e => e != null)
+                .ToList();
         }
 
         public void WriteEvents(params ReplayEvent[] events)

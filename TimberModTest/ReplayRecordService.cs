@@ -20,12 +20,13 @@ namespace TimberModTest
 
         private List<object> singletons = new();
 
-        private List<ReplayEvent> eventsToReplay = new List<ReplayEvent>();
         private EventIO io => EventIO.Get();
 
         private int ticksSinceLoad = 0;
 
         private static ConcurrentQueue<ReplayEvent> eventsToSend = new ConcurrentQueue<ReplayEvent>();
+
+        public static bool IsReplayingEvents { get; private set; } = false;
 
         public ReplayService(
             //TickWathcerService tickWathcerService,
@@ -54,7 +55,6 @@ namespace TimberModTest
             // TODO: Make this random, but then send the seed as the first event.
             Plugin.Log("Setting random state and loading events");
             UnityEngine.Random.InitState(1234);
-            UpdateSingleton();
         }
 
         private T AddSingleton<T>(T singleton)
@@ -80,6 +80,8 @@ namespace TimberModTest
 
         private void ReplayEvents()
         {
+            List<ReplayEvent> eventsToReplay = io.ReadEvents(ticksSinceLoad);
+
             // TODO: Need a way when replaying to avoid
             // recording any of these events again (since the
             // server does so on its own automatically)
@@ -87,6 +89,7 @@ namespace TimberModTest
             // this way so things stay more synced, and since some
             // events may need to be canceled if they fail...)
             int currentTick = ticksSinceLoad;
+            IsReplayingEvents = true;
             for (int i = 0; i < eventsToReplay.Count; i++)
             {
                 ReplayEvent replayEvent = eventsToReplay[i];
@@ -98,17 +101,16 @@ namespace TimberModTest
                     Plugin.Log($"Event past time: {eventTime} < {currentTick}");
                 }
                 Plugin.Log($"Replaying event [{replayEvent.ticksSinceLoad}]: {replayEvent.type}");
-                replayEvent.Replay(this);
-                eventsToReplay.RemoveAt(i);
-                i--;
-
-                // TODO: EventIO Should say when to stop
-                //if (eventsToReplay.Count == 0)
-                //{
-                //    Plugin.Log("Events complete: should pause!");
-                //    // TODO: Pause
-                //}
+                try
+                {
+                    replayEvent.Replay(this);
+                } catch (Exception e)
+                {
+                    Plugin.Log($"Failed to replay event: {e}");
+                    Plugin.Log(e.ToString());
+                }
             }
+            IsReplayingEvents = false;
         }
 
         private void SendEvents()
@@ -120,16 +122,9 @@ namespace TimberModTest
             }
         }
 
-        private void ReceiveEvents()
-        {
-            eventsToReplay.AddRange(io.ReadEvents(ticksSinceLoad));
-            eventsToReplay.Sort();
-        }
-
         public void UpdateSingleton()
         {
             io.Update();
-            ReceiveEvents();
             ReplayEvents();
             SendEvents();
         }

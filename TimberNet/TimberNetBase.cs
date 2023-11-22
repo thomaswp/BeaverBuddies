@@ -15,6 +15,7 @@ namespace TimberNet
         public const string TICKS_KEY = "ticksSinceLoad";
         public const string TYPE_KEY = "type";
         public const string SET_STATE_EVENT = "SetState";
+        public const string HEARTBEAT_EVENT = "Heartbeat";
         public const int MAX_BUFFER_SIZE = 8192; // 8K
         public const string HOST_ADDRESS = "127.0.0.1";
 
@@ -269,6 +270,17 @@ namespace TimberNet
 
         }
 
+        protected virtual List<JObject> FilterEvents(List<JObject> events)
+        {
+            return events.Where(ShouldReadEvent).ToList();
+        }
+
+        protected virtual bool ShouldReadEvent(JObject message)
+        { 
+            string type = GetType(message);
+            return !(type == SET_STATE_EVENT || type == HEARTBEAT_EVENT);
+        }
+
         /**
          * Reads received events that should be processed by the game
          * and deletes and returns.
@@ -280,7 +292,7 @@ namespace TimberNet
             Update();
             List<JObject> toProcess = PopEventsToProcess(receivedEvents);
             toProcess.ForEach(ProcessReceivedEvent);
-            return toProcess;
+            return FilterEvents(toProcess);
         }
     }
 }

@@ -16,6 +16,8 @@ namespace TimberModTest
 
         void Close();
 
+        bool PlayRecordedEvents { get; }
+
         private static EventIO instance;
         public static EventIO Get() { return instance; }
         public static void Set(EventIO io) { instance = io; }

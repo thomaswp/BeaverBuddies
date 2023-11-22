@@ -24,7 +24,7 @@ namespace TimberModTest
 
         public static T Deserialize<T>(string json)
         {
-            return JsonConvert.DeserializeObject<T>(json, Default);
+            return (T)JsonConvert.DeserializeObject(json, Default);
         }
 
         public static string Serialize<T>(T obj)
@@ -35,6 +35,8 @@ namespace TimberModTest
     
     public class FileWriteIO : EventIO
     {
+        public bool PlayRecordedEvents => true;
+
         private JsonSerializerSettings settings;
         private string filePath;
 
@@ -86,6 +88,8 @@ namespace TimberModTest
 
     public class FileReadIO : EventIO
     {
+        public bool PlayRecordedEvents => true;
+
         private JsonSerializerSettings settings;
         private List<ReplayEvent> events = new();
         private string filePath;

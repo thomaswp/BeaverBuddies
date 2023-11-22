@@ -73,7 +73,7 @@
             // 
             // buttonStartClient
             // 
-            this.buttonStartClient.Location = new System.Drawing.Point(399, 23);
+            this.buttonStartClient.Location = new System.Drawing.Point(496, 21);
             this.buttonStartClient.Name = "buttonStartClient";
             this.buttonStartClient.Size = new System.Drawing.Size(75, 23);
             this.buttonStartClient.TabIndex = 2;
@@ -83,7 +83,7 @@
             // 
             // nudClientSpeed
             // 
-            this.nudClientSpeed.Location = new System.Drawing.Point(480, 23);
+            this.nudClientSpeed.Location = new System.Drawing.Point(577, 21);
             this.nudClientSpeed.Maximum = new decimal(new int[] {
             3,
             0,
@@ -102,18 +102,18 @@
             this.textBoxServer.Name = "textBoxServer";
             this.textBoxServer.ReadOnly = true;
             this.textBoxServer.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxServer.Size = new System.Drawing.Size(365, 373);
+            this.textBoxServer.Size = new System.Drawing.Size(452, 373);
             this.textBoxServer.TabIndex = 4;
             // 
             // textBoxClient
             // 
             this.textBoxClient.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.textBoxClient.Location = new System.Drawing.Point(399, 52);
+            this.textBoxClient.Location = new System.Drawing.Point(496, 50);
             this.textBoxClient.Multiline = true;
             this.textBoxClient.Name = "textBoxClient";
             this.textBoxClient.ReadOnly = true;
             this.textBoxClient.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxClient.Size = new System.Drawing.Size(324, 371);
+            this.textBoxClient.Size = new System.Drawing.Size(411, 371);
             this.textBoxClient.TabIndex = 5;
             // 
             // timerClient
@@ -136,7 +136,7 @@
             // labelClientTick
             // 
             this.labelClientTick.AutoSize = true;
-            this.labelClientTick.Location = new System.Drawing.Point(608, 26);
+            this.labelClientTick.Location = new System.Drawing.Point(705, 24);
             this.labelClientTick.Name = "labelClientTick";
             this.labelClientTick.Size = new System.Drawing.Size(0, 15);
             this.labelClientTick.TabIndex = 7;
@@ -145,7 +145,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(934, 450);
             this.Controls.Add(this.labelClientTick);
             this.Controls.Add(this.labelServerTick);
             this.Controls.Add(this.textBoxClient);

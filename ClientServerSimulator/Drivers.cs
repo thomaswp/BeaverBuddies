@@ -41,7 +41,7 @@ namespace TimberNet
             netBase.ReadEvents(ticks);
         }
 
-        public void Update()
+        public virtual void Update()
         {
             // We discard read events, since they're already logged
             netBase.ReadEvents(ticks);
@@ -73,6 +73,13 @@ namespace TimberNet
             () => File.ReadAllBytesAsync(SAVE_PATH)))
         {
             
+        }
+
+        public override void Update()
+        {
+            netBase.Update();
+            if (netBase.ClientCount == 0) return;
+            base.Update();
         }
 
         public override void TryTick()

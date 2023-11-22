@@ -21,6 +21,8 @@ namespace TimberNet
         private readonly TcpListener listener;
         private readonly Func<Task<byte[]>> mapProvider;
 
+        public int ClientCount => clients.Count;
+
         public TimberServer(int port, Func<Task<byte[]>> mapProvider)
         {
             listener = new TcpListener(IPAddress.Parse(HOST_ADDRESS), port);
@@ -98,6 +100,14 @@ namespace TimberNet
 
         private void SendEventToClients(JObject message)
         {
+            for (int i = 0; i < clients.Count; i++)
+            {
+                if (!clients[i].Connected)
+                {
+                    clients.RemoveAt(i);
+                    i--;
+                }
+            }
             clients.ForEach(client => SendEvent(client, message));
         }
 
@@ -110,7 +120,7 @@ namespace TimberNet
         {
             JObject message = new JObject();
             message[TICKS_KEY] = TickCount;
-            message["type"] = "Heartbeat";
+            message[TYPE_KEY] = HEARTBEAT_EVENT;
             // Simulate the user doing this
             TryUserInitiatedEvent(message);
         }
