@@ -36,6 +36,7 @@ namespace TimberModTest
     public class FileWriteIO : EventIO
     {
         public bool PlayRecordedEvents => true;
+        public bool IsOutOfEvents => false;
 
         private JsonSerializerSettings settings;
         private string filePath;
@@ -89,6 +90,7 @@ namespace TimberModTest
     public class FileReadIO : EventIO
     {
         public bool PlayRecordedEvents => true;
+        public bool IsOutOfEvents => events.Count == 0;
 
         private JsonSerializerSettings settings;
         private List<ReplayEvent> events = new();

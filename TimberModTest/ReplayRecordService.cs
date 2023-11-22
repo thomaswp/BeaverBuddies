@@ -10,6 +10,7 @@ using Timberborn.Forestry;
 using Timberborn.PlantingUI;
 using Timberborn.SingletonSystem;
 using Timberborn.TickSystem;
+using Timberborn.TimeSystem;
 
 namespace TimberModTest
 {
@@ -17,6 +18,7 @@ namespace TimberModTest
     {
         //private readonly TickWathcerService _tickWathcerService;
         private readonly EventBus _eventBus;
+        private readonly SpeedManager _speedManager;
 
         private List<object> singletons = new();
 
@@ -31,6 +33,7 @@ namespace TimberModTest
         public ReplayService(
             //TickWathcerService tickWathcerService,
             EventBus eventBus,
+            SpeedManager speedManager,
             //IBlockObjectPlacer buildingPlacer,
             BlockObjectPlacerService blockObjectPlacerService,
             BuildingService buildingService,
@@ -40,6 +43,7 @@ namespace TimberModTest
         {
             //_tickWathcerService = AddSingleton(tickWathcerService);
             _eventBus = AddSingleton(eventBus);
+            _speedManager = AddSingleton(speedManager);
             AddSingleton(blockObjectPlacerService);
             AddSingleton(buildingService);
             AddSingleton(plantingSelectionService);
@@ -127,6 +131,14 @@ namespace TimberModTest
             io.Update();
             ReplayEvents();
             SendEvents();
+            // TODO: Should also prevent speed change to 1+ in this case
+            if (io.IsOutOfEvents)
+            {
+                if (_speedManager.CurrentSpeed != 0)
+                {
+                    _speedManager.ChangeSpeed(0);
+                }
+            }
         }
 
         public void Tick()

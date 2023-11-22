@@ -14,6 +14,7 @@ namespace TimberModTest
     {
 
         public bool PlayRecordedEvents => false;
+        public bool IsOutOfEvents => !client.ShouldTick;
 
         public readonly TimberClient client;
 
