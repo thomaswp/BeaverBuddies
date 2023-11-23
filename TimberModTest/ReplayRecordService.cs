@@ -1,6 +1,9 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Runtime.ConstrainedExecution;
 using System.Text;
 using Timberborn.BlockObjectTools;
@@ -11,6 +14,7 @@ using Timberborn.PlantingUI;
 using Timberborn.SingletonSystem;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
+using UnityEngine;
 
 namespace TimberModTest
 {
@@ -25,6 +29,7 @@ namespace TimberModTest
         private EventIO io => EventIO.Get();
 
         private int ticksSinceLoad = 0;
+        private int speedAtPause = 0;
 
         private static ConcurrentQueue<ReplayEvent> eventsToSend = new ConcurrentQueue<ReplayEvent>();
 
@@ -131,20 +136,37 @@ namespace TimberModTest
             io.Update();
             ReplayEvents();
             SendEvents();
-            // TODO: Should also prevent speed change to 1+ in this case
-            if (io.IsOutOfEvents)
+
+            // TODO: Should have a more intelligent speed buffering algorith...
+            if (io.IsOutOfEvents && _speedManager.CurrentSpeed != 0)
             {
-                if (_speedManager.CurrentSpeed != 0)
-                {
-                    _speedManager.ChangeSpeed(0);
-                }
+                speedAtPause = _speedManager.CurrentSpeed;
+                _speedManager.ChangeSpeed(0);
+            }
+            else if (!io.IsOutOfEvents && speedAtPause != 0 && 
+                _speedManager.CurrentSpeed == 0)
+            {
+                _speedManager.ChangeSpeed(speedAtPause);
+                speedAtPause = 0;
             }
         }
 
+        //private Stopwatch tickTimer = new Stopwatch();
         public void Tick()
         {
+            //Plugin.Log($"Tick in {tickTimer.ElapsedMilliseconds}ms");
             UpdateSingleton();
             ticksSinceLoad++;
+            //tickTimer.Restart();
+        }
+    }
+
+    [HarmonyPatch(typeof(SpeedManager), nameof(SpeedManager.ChangeSpeed))]
+    public class SpeedChangePatcher
+    {
+        static void Prefix(ref int speed)
+        {
+            if (EventIO.Get().IsOutOfEvents) speed = 0;
         }
     }
 }

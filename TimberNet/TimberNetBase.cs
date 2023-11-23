@@ -163,7 +163,13 @@ namespace TimberNet
 
             var stream = client.GetStream();
             SendLength(stream, buffer.Length);
-            client.GetStream().Write(buffer, 0, buffer.Length);
+            try
+            {
+                client.GetStream().Write(buffer, 0, buffer.Length);
+            } catch (Exception e)
+            {
+                Log($"Error sending event: {e.Message}");
+            }
         }
 
         protected void StartListening(TcpClient client, bool isClient)

@@ -85,10 +85,7 @@ namespace TimberNet
         public override void TryTick()
         {
             base.TryTick();
-            if (netBase.Started && netBase.TickCount % 10 == 0)
-            {
-                netBase.SendHeartbeat();
-            }
+            netBase.SendHeartbeat();
         }
     }
 }
