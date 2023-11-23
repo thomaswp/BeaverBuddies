@@ -33,7 +33,7 @@ namespace TimberModTest
 
         private ReplayEvent ToEvent(JObject obj)
         {
-            Plugin.Log($"Recieving {obj}");
+            //Plugin.Log($"Recieving {obj}");
             try
             {
                 return JsonSettings.Deserialize<ReplayEvent>(obj.ToString());
