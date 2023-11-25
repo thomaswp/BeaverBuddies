@@ -11,7 +11,14 @@ namespace TimberModTest
 {
     public class ServerEventIO : NetIOBase<TimberServer>
     {
+        // At some point we may need to change this to false if
+        // playing recoded events instantly creates different effects
+        // than waiting until the end of a tick, but for now we assume
+        // it doesn't.
         public override bool PlayRecordedEvents => true;
+        // Anything that happens on the server should be recorded and
+        // sent to the clients.
+        public override bool RecordReplayedEvents => true;
 
         public ServerEventIO(int port, Func<Task<byte[]>> mapProvider)
         {

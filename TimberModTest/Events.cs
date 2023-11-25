@@ -98,10 +98,7 @@ namespace TimberModTest
     {
         static bool Prefix(BlockObject prefab, Vector3Int coordinates, Orientation orientation)
         {
-            // TODO: Rather than having the server auto-relay events to clients,
-            // wait for the event to get replayed and (if successful) then relay.
-            if (ReplayService.IsReplayingEvents) return true;
-
+            if (EventIO.SkipRecording) return true;
             Plugin.Log($"Placing {prefab.name}, {coordinates}, {orientation}");
 
             //System.Diagnostics.StackTrace t = new System.Diagnostics.StackTrace();
@@ -114,7 +111,7 @@ namespace TimberModTest
                 orientation = orientation,
             });
 
-            return EventIO.Get().PlayRecordedEvents;
+            return EventIO.ShouldPlayRecordedEvents;
         }
     }
 
@@ -137,7 +134,7 @@ namespace TimberModTest
     {
         static bool Prefix(IEnumerable<Vector3Int> inputBlocks, Ray ray, string prefabName)
         {
-            if (ReplayService.IsReplayingEvents) return true;
+            if (EventIO.SkipRecording) return true;
 
             Plugin.Log($"Planting {inputBlocks.Count()} of {prefabName}");
 
@@ -151,7 +148,7 @@ namespace TimberModTest
                 inputBlocks = new List<Vector3Int>(inputBlocks)
             });
 
-            return EventIO.Get().PlayRecordedEvents;
+            return EventIO.ShouldPlayRecordedEvents;
         }
     }
 
@@ -180,8 +177,7 @@ namespace TimberModTest
     {
         static bool Prefix(IEnumerable<Vector3Int> coordinates)
         {
-            if (ReplayService.IsReplayingEvents) return true;
-
+            if (EventIO.SkipRecording) return true;
             Plugin.Log($"Adding tree planting coordinate {coordinates.Count()}");
 
             ReplayService.RecordEvent(new TreeCuttingAreaEvent()
@@ -190,7 +186,7 @@ namespace TimberModTest
                 wasAdded = true,
             });
 
-            return EventIO.Get().PlayRecordedEvents;
+            return EventIO.ShouldPlayRecordedEvents;
         }
     }
 
@@ -199,8 +195,7 @@ namespace TimberModTest
     {
         static bool Prefix(IEnumerable<Vector3Int> coordinates)
         {
-            if (ReplayService.IsReplayingEvents) return true;
-
+            if (EventIO.SkipRecording) return true;
             Plugin.Log($"Removing tree planting coordinate {coordinates.Count()}");
 
             ReplayService.RecordEvent(new TreeCuttingAreaEvent()
@@ -209,7 +204,7 @@ namespace TimberModTest
                 wasAdded = false,
             });
 
-            return EventIO.Get().PlayRecordedEvents;
+            return EventIO.ShouldPlayRecordedEvents;
         }
     }
 

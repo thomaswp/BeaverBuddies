@@ -1,14 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Text.Json.Nodes;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using static System.Windows.Forms.AxHost;
 
 namespace TimberNet
 {
@@ -20,7 +10,7 @@ namespace TimberNet
         protected List<JObject> scriptedEvents;
         public readonly T netBase;
 
-        int ticks = 0;
+        protected int ticks = 0;
 
         public DriverBase(string scriptPath, T netBase)
         {
@@ -34,23 +24,28 @@ namespace TimberNet
             return JArray.Parse(json).Cast<JObject>().ToList();
         }
 
+        protected virtual void ReadEvents()
+        {
+            netBase.ReadEvents(ticks);
+        }
+
         public virtual void TryTick()
         {
             if (!netBase.ShouldTick) return;
             ticks++;
-            netBase.ReadEvents(ticks);
+            ReadEvents();
         }
 
         public virtual void Update()
         {
             // We discard read events, since they're already logged
-            netBase.ReadEvents(ticks);
+            ReadEvents();
             if (!netBase.Started) return;
             // Go through scripted events and if they're ready to go, pretend
             // the user initiated them
             foreach (JObject message in TimberNetBase.PopEventsForTick(netBase.TickCount, scriptedEvents, TimberNetBase.GetTick))
             {
-                netBase.TryUserInitiatedEvent(message);
+                netBase.DoUserInitiatedEvent(message);
             }
         }
     }
@@ -86,6 +81,17 @@ namespace TimberNet
             initEvent["timeInFixedSeconds"] = 0.0;
             initEvent["seed"] = 1234;
             return () => initEvent;
+        }
+
+        protected override void ReadEvents()
+        {
+            // Immediately send out any received events as if
+            // the user had done them.
+            var events = netBase.ReadEvents(ticks);
+            foreach (JObject message in events)
+            {
+                netBase.DoUserInitiatedEvent(message);
+            }
         }
 
         public override void Update()

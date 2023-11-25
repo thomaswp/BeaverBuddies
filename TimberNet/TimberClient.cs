@@ -25,12 +25,17 @@ namespace TimberNet
             this.port = port;
         }
 
-        public override bool TryUserInitiatedEvent(JObject message)
+        public override void DoUserInitiatedEvent(JObject message)
         {
+            // Don't actually do the event (i.e. add it to the hash)
+            // Wait for the server to confirm w/ adjusted Tick
             SendEvent(client, message);
-            return false;
-            // Don't actually do the event - wait for the server to confirm
-            // w/ adjusted Tick
+        }
+
+        protected override void ProcessReceivedEvent(JObject message)
+        {
+            base.ProcessReceivedEvent(message);
+            AddEventToHash(message);
         }
 
         public override void Start()

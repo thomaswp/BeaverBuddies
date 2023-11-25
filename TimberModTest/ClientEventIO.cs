@@ -13,7 +13,13 @@ namespace TimberModTest
     public class ClientEventIO : NetIOBase<TimberClient>
     {
 
+        // The client doesn't get to do anything from the user directy.
+        // It has to wait until an event is received from the server.
         public override bool PlayRecordedEvents => false;
+        // If the client receives an event to replay, no matter where it
+        // originated, it shouldn't send it *back* to the server, since the
+        // server is what send the event.
+        public override bool RecordReplayedEvents => false;
 
         public ClientEventIO(string address, int port, MapReceived mapReceivedCallback)
         {

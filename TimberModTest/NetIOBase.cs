@@ -14,6 +14,7 @@ namespace TimberModTest
 
         protected T netBase;
         public abstract bool PlayRecordedEvents { get; }
+        public abstract bool RecordReplayedEvents { get; }
         public bool IsOutOfEvents => !netBase.ShouldTick;
 
         public void Close()
@@ -54,7 +55,7 @@ namespace TimberModTest
             {
                 // TODO: It is silly to convert to JObject here, but not sure if there's
                 // a better way to do it.
-                netBase.TryUserInitiatedEvent(JObject.Parse(JsonSettings.Serialize(e)));
+                netBase.DoUserInitiatedEvent(JObject.Parse(JsonSettings.Serialize(e)));
             }
         }
     }

@@ -115,23 +115,19 @@ namespace TimberNet
         }
 
         /**
-         * If the Net can accept a user-initiated event, it process it
-         * (e.g., sends it to clients) and returns true. 
-         * Otherwise it returns false.
+         * Process an event that the user initiated.
          */
-        public virtual bool TryUserInitiatedEvent(JObject message)
+        public virtual void DoUserInitiatedEvent(JObject message)
         {
             AddEventToHash(message);
-            return true;
         }
 
         /**
-         * Process a validated event from a peer that is ready to happen on
-         * the Update() thread.
-         */
+        * Process a validated event from a peer that is ready to happen on
+        * the Update() thread.
+        */
         protected virtual void ProcessReceivedEvent(JObject message)
         {
-            AddEventToHash(message);
         }
 
         protected void AddEventToHash(JObject message)
@@ -233,7 +229,7 @@ namespace TimberNet
             return code;
         }
 
-        protected void AddFileToHash(byte[] bytes)
+        private void AddFileToHash(byte[] bytes)
         {
             AddToHash(bytes);
         }
@@ -271,6 +267,10 @@ namespace TimberNet
             }
         }
 
+        /**
+         * Called when an event is received from a connected Net
+         * and ready to be added to the queue for processing.
+         */
         protected virtual void ReceiveEvent(JObject message)
         {
             InsertInScript(message, receivedEvents);
@@ -303,12 +303,12 @@ namespace TimberNet
 
         }
 
-        protected virtual List<JObject> FilterEvents(List<JObject> events)
+        private List<JObject> FilterEvents(List<JObject> events)
         {
             return events.Where(ShouldReadEvent).ToList();
         }
 
-        protected virtual bool ShouldReadEvent(JObject message)
+        private bool ShouldReadEvent(JObject message)
         { 
             string type = GetType(message);
             return !(type == SET_STATE_EVENT || type == HEARTBEAT_EVENT);
@@ -324,7 +324,7 @@ namespace TimberNet
             TickCount = ticksSinceLoad;
             Update();
             List<JObject> toProcess = PopEventsToProcess(receivedEvents);
-            toProcess.ForEach(ProcessReceivedEvent);
+            toProcess.ForEach(e => ProcessReceivedEvent(e));
             return FilterEvents(toProcess);
         }
     }

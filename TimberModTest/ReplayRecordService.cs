@@ -61,9 +61,6 @@ namespace TimberModTest
 
         public void PostLoad()
         {
-            // TODO: Make this random, but then send the seed as the first event.
-            //Plugin.Log("Setting random state and loading events");
-            //UnityEngine.Random.InitState(1234);
             Plugin.Log("PostLoad");
         }
 
@@ -92,12 +89,6 @@ namespace TimberModTest
         {
             List<ReplayEvent> eventsToReplay = io.ReadEvents(ticksSinceLoad);
 
-            // TODO: Need a way when replaying to avoid
-            // recording any of these events again (since the
-            // server does so on its own automatically)
-            // (Though alternatively... it may be better to do it
-            // this way so things stay more synced, and since some
-            // events may need to be canceled if they fail...)
             int currentTick = ticksSinceLoad;
             IsReplayingEvents = true;
             for (int i = 0; i < eventsToReplay.Count; i++)

@@ -26,7 +26,7 @@ namespace TimberModTest
         public void PostLoad()
         {
             //TODO: make a UI!
-            return;
+            if (!EventIO.IsClient) return;
             Plugin.Log("Connecting client");
             try
             {

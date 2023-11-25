@@ -57,7 +57,7 @@ namespace TimberNet
                         if (initEventProvider != null)
                         {
                             JObject initEvent = initEventProvider();
-                            TryUserInitiatedEvent(initEvent);
+                            DoUserInitiatedEvent(initEvent);
                         }
                         StartListening(client, false);
                     });
@@ -91,18 +91,10 @@ namespace TimberNet
             SendEvent(client, message);
         }
 
-        protected override void ProcessReceivedEvent(JObject message)
+        public override void DoUserInitiatedEvent(JObject message)
         {
-            // TODO: Move this logic to the drivers
-            base.ProcessReceivedEvent(message);
+            base.DoUserInitiatedEvent(message);
             SendEventToClients(message);
-        }
-
-        public override bool TryUserInitiatedEvent(JObject message)
-        {
-            if (!base.TryUserInitiatedEvent(message)) return false;
-            SendEventToClients(message);
-            return true;
         }
 
         private void SendEventToClients(JObject message)
@@ -129,7 +121,7 @@ namespace TimberNet
             message[TICKS_KEY] = TickCount;
             message[TYPE_KEY] = HEARTBEAT_EVENT;
             // Simulate the user doing this
-            TryUserInitiatedEvent(message);
+            DoUserInitiatedEvent(message);
         }
     }
 }
