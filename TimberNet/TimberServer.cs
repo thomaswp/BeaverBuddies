@@ -22,6 +22,10 @@ namespace TimberNet
         private readonly Func<Task<byte[]>> mapProvider;
         private readonly Func<JObject>? initEventProvider;
 
+        public int HeartbeatInterval { get; set; } = 1;
+
+        private int ticksAtLastHeartbeat = 0;
+
         public int ClientCount => clients.Count;
 
         public TimberServer(int port, Func<Task<byte[]>> mapProvider, Func<JObject>? initEventProvider)
@@ -113,6 +117,16 @@ namespace TimberNet
         public override void Close()
         {
             listener.Stop();
+        }
+
+        public override List<JObject> ReadEvents(int ticksSinceLoad)
+        {
+            if (ticksSinceLoad - ticksAtLastHeartbeat >= HeartbeatInterval)
+            {
+                ticksAtLastHeartbeat = ticksSinceLoad;
+                SendHeartbeat();
+            }
+            return base.ReadEvents(ticksSinceLoad);
         }
 
         public void SendHeartbeat()

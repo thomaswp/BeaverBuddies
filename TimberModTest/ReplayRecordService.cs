@@ -82,6 +82,9 @@ namespace TimberModTest
 
         public static void RecordEvent(ReplayEvent replayEvent)
         {
+            // During a replay, we save things manually, only if they're
+            // successful.
+            if (IsReplayingEvents) return;
             eventsToSend.Enqueue(replayEvent);
         }
 
@@ -105,6 +108,12 @@ namespace TimberModTest
                 try
                 {
                     replayEvent.Replay(this);
+                    // Only send the event if it played successfully and
+                    // the IO says we shouldn't skip recording
+                    if (!EventIO.SkipRecording)
+                    { 
+                        eventsToSend.Enqueue(replayEvent);
+                    }
                 } catch (Exception e)
                 {
                     Plugin.Log($"Failed to replay event: {e}");

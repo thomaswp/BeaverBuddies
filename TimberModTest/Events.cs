@@ -98,7 +98,6 @@ namespace TimberModTest
     {
         static bool Prefix(BlockObject prefab, Vector3Int coordinates, Orientation orientation)
         {
-            if (EventIO.SkipRecording) return true;
             Plugin.Log($"Placing {prefab.name}, {coordinates}, {orientation}");
 
             //System.Diagnostics.StackTrace t = new System.Diagnostics.StackTrace();
@@ -134,8 +133,6 @@ namespace TimberModTest
     {
         static bool Prefix(IEnumerable<Vector3Int> inputBlocks, Ray ray, string prefabName)
         {
-            if (EventIO.SkipRecording) return true;
-
             Plugin.Log($"Planting {inputBlocks.Count()} of {prefabName}");
 
             //System.Diagnostics.StackTrace t = new System.Diagnostics.StackTrace();
@@ -177,7 +174,6 @@ namespace TimberModTest
     {
         static bool Prefix(IEnumerable<Vector3Int> coordinates)
         {
-            if (EventIO.SkipRecording) return true;
             Plugin.Log($"Adding tree planting coordinate {coordinates.Count()}");
 
             ReplayService.RecordEvent(new TreeCuttingAreaEvent()
@@ -195,7 +191,6 @@ namespace TimberModTest
     {
         static bool Prefix(IEnumerable<Vector3Int> coordinates)
         {
-            if (EventIO.SkipRecording) return true;
             Plugin.Log($"Removing tree planting coordinate {coordinates.Count()}");
 
             ReplayService.RecordEvent(new TreeCuttingAreaEvent()

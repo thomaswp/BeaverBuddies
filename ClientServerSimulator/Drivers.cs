@@ -100,11 +100,5 @@ namespace TimberNet
             if (netBase.ClientCount == 0) return;
             base.Update();
         }
-
-        public override void TryTick()
-        {
-            base.TryTick();
-            netBase.SendHeartbeat();
-        }
     }
 }
