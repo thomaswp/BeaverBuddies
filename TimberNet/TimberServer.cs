@@ -20,13 +20,15 @@ namespace TimberNet
 
         private readonly TcpListener listener;
         private readonly Func<Task<byte[]>> mapProvider;
+        private readonly Func<JObject>? initEventProvider;
 
         public int ClientCount => clients.Count;
 
-        public TimberServer(int port, Func<Task<byte[]>> mapProvider)
+        public TimberServer(int port, Func<Task<byte[]>> mapProvider, Func<JObject>? initEventProvider)
         {
             listener = new TcpListener(IPAddress.Parse(HOST_ADDRESS), port);
             this.mapProvider = mapProvider;
+            this.initEventProvider = initEventProvider;
         }
 
         protected override void ReceiveEvent(JObject message)
@@ -47,12 +49,16 @@ namespace TimberNet
                 while (true)
                 {
                     TcpClient client = listener.AcceptTcpClient();
-                    // TODO: Send current state!
                     clients.Add(client);
                     Task.Run(async () =>
                     {
                         await SendMap(client.GetStream());
                         SendState(client);
+                        if (initEventProvider != null)
+                        {
+                            JObject initEvent = initEventProvider();
+                            TryUserInitiatedEvent(initEvent);
+                        }
                         StartListening(client, false);
                     });
                 }

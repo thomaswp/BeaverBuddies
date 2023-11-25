@@ -70,7 +70,7 @@ namespace TimberNet
         const string SAVE_PATH = "save.timber";
 
         public ServerDriver() : base(SCRIPT_PATH, new TimberServer(PORT, 
-            () => File.ReadAllBytesAsync(SAVE_PATH)))
+            () => File.ReadAllBytesAsync(SAVE_PATH), null))
         {
             
         }

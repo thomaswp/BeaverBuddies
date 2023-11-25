@@ -62,8 +62,8 @@ namespace TimberModTest
         public void PostLoad()
         {
             // TODO: Make this random, but then send the seed as the first event.
-            Plugin.Log("Setting random state and loading events");
-            UnityEngine.Random.InitState(1234);
+            //Plugin.Log("Setting random state and loading events");
+            //UnityEngine.Random.InitState(1234);
         }
 
         private T AddSingleton<T>(T singleton)
@@ -133,6 +133,7 @@ namespace TimberModTest
 
         public void UpdateSingleton()
         {
+            if (io == null) return;
             io.Update();
             ReplayEvents();
             SendEvents();

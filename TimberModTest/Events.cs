@@ -58,6 +58,17 @@ namespace TimberModTest
     }
 
     [Serializable]
+    public class RandomStateSetEvent : ReplayEvent
+    {
+        public int seed;
+
+        public override void Replay(IReplayContext context)
+        {
+            UnityEngine.Random.InitState(seed);
+        }
+    }
+
+    [Serializable]
     public class BuildingPlacedEvent : ReplayEvent
     {
         public string prefabName;
