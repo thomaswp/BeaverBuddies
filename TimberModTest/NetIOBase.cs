@@ -13,7 +13,7 @@ namespace TimberModTest
     {
 
         protected T netBase;
-        public abstract bool PlayRecordedEvents { get; }
+        public abstract bool PlayUserEvents { get; }
         public abstract bool RecordReplayedEvents { get; }
         public bool IsOutOfEvents => !netBase.ShouldTick;
 

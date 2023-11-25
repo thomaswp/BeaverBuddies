@@ -35,7 +35,7 @@ namespace TimberModTest
     
     public class FileWriteIO : EventIO
     {
-        public bool PlayRecordedEvents => true;
+        public bool PlayUserEvents => true;
         // Will probably never happen, since nothing to replay
         public bool RecordReplayedEvents => true;
         public bool IsOutOfEvents => false;
@@ -91,7 +91,7 @@ namespace TimberModTest
 
     public class FileReadIO : EventIO
     {
-        public bool PlayRecordedEvents => true;
+        public bool PlayUserEvents => true;
         // Shouldn't need to record anything
         public bool RecordReplayedEvents => false;
         public bool IsOutOfEvents => events.Count == 0;

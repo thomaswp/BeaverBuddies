@@ -15,7 +15,7 @@ namespace TimberModTest
         // playing recoded events instantly creates different effects
         // than waiting until the end of a tick, but for now we assume
         // it doesn't.
-        public override bool PlayRecordedEvents => true;
+        public override bool PlayUserEvents => true;
         // Anything that happens on the server should be recorded and
         // sent to the clients.
         public override bool RecordReplayedEvents => true;

@@ -22,7 +22,7 @@ namespace TimberModTest
          * Return true if the game should carry out a user-initiated
          * event that is being recorded.
          */
-        bool PlayRecordedEvents { get; }
+        bool PlayUserEvents { get; }
         
         /**
          * Return true if the game should record a received event
@@ -35,13 +35,23 @@ namespace TimberModTest
         public static EventIO Get() { return instance; }
         public static void Set(EventIO io) { instance = io; }
 
-        public static bool ShouldPlayRecordedEvents
+        /**
+         * Returns true if the game should carry out user-initiated
+         * events.
+         */
+        public static bool ShouldPlayUserEvents
         {
             get
             {
+                // If the events are being replayed, we should
+                // always play them (i.e. they're not user-initiated).
+                if (ReplayService.IsReplayingEvents)
+                {
+                    return true;
+                }
                 EventIO io = Get();
                 if (io == null) return true;
-                return io.PlayRecordedEvents;
+                return io.PlayUserEvents;
             }
         }
 
