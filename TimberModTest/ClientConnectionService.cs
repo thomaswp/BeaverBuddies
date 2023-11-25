@@ -57,7 +57,7 @@ namespace TimberModTest
         public void UpdateSingleton()
         {
             if (client == null) return;
-            Plugin.Log("Updating client!");
+            //Plugin.Log("Updating client!");
             client.Update();
         }
     }

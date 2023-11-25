@@ -169,6 +169,8 @@ namespace TimberModTest
         }
     }
 
+    // TODO: These events seem to only replay successfully if the
+    // tool is open...
     [HarmonyPatch(typeof(TreeCuttingArea), nameof(TreeCuttingArea.AddCoordinates))]
     public class TreeCuttingAreaAddedPatcher
     {
