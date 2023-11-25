@@ -64,6 +64,7 @@ namespace TimberModTest
             // TODO: Make this random, but then send the seed as the first event.
             //Plugin.Log("Setting random state and loading events");
             //UnityEngine.Random.InitState(1234);
+            Plugin.Log("PostLoad");
         }
 
         private T AddSingleton<T>(T singleton)
@@ -131,8 +132,17 @@ namespace TimberModTest
             }
         }
 
+        // TODO: Find a better callback way of waiting until initial game
+        // loading and randomization is done.
+        private int waitUpdates = 2;
+
         public void UpdateSingleton()
         {
+            if (waitUpdates > 0)
+            {
+                waitUpdates--;
+                return;
+            }
             if (io == null) return;
             io.Update();
             ReplayEvents();

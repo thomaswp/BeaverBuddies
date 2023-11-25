@@ -70,9 +70,22 @@ namespace TimberNet
         const string SAVE_PATH = "save.timber";
 
         public ServerDriver() : base(SCRIPT_PATH, new TimberServer(PORT, 
-            () => File.ReadAllBytesAsync(SAVE_PATH), null))
+            () => File.ReadAllBytesAsync(SAVE_PATH), CreateInitEvent()))
         {
             
+        }
+
+        private static Func<JObject> CreateInitEvent()
+        {
+            // We create the event out of JSON manually because
+            // we want to test CreateInitEvent, rather than just putting it in the script
+            JObject initEvent = new JObject();
+            initEvent["$type"] = "TimberModTest.RandomStateSetEvent, TimberModTest";
+            initEvent["type"] = "RandomStateSetEvent";
+            initEvent["ticksSinceLoad"] = 0;
+            initEvent["timeInFixedSeconds"] = 0.0;
+            initEvent["seed"] = 1234;
+            return () => initEvent;
         }
 
         public override void Update()

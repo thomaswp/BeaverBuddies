@@ -64,6 +64,7 @@ namespace TimberModTest
 
         public override void Replay(IReplayContext context)
         {
+            Plugin.Log($"Seeting seed to {seed}");
             UnityEngine.Random.InitState(seed);
         }
     }

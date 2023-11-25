@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Timberborn.Core;
 using Timberborn.GameSaveRepositorySystem;
 using Timberborn.GameSceneLoading;
 using Timberborn.SingletonSystem;
@@ -41,7 +42,8 @@ namespace TimberModTest
         private void LoadMap(byte[] mapBytes)
         {
             Plugin.Log("Loading map");
-            string saveName = Guid.NewGuid().ToString();
+            //string saveName = Guid.NewGuid().ToString();
+            string saveName = TimberNetBase.GetHashCode(mapBytes).ToString("X8");
             SaveReference saveRef = new SaveReference("Online Games", saveName);
             Stream stream = _gameSaveRepository.CreateSaveSkippingNameValidation(saveRef);
             stream.Write(mapBytes);

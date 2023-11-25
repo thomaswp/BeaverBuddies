@@ -217,7 +217,7 @@ namespace TimberNet
             Hash = CombineHash(Hash, GetHashCode(bytes));
         }
 
-        protected int GetHashCode(byte[] bytes)
+        public static int GetHashCode(byte[] bytes)
         {
             int code = 0;
             foreach (byte b in bytes)
@@ -255,7 +255,13 @@ namespace TimberNet
         {
             while (receivedEventQueue.TryDequeue(out string? message))
             {
-                ReceiveEvent(JObject.Parse(message));
+                try
+                {
+                    ReceiveEvent(JObject.Parse(message));
+                } catch (Exception e)
+                {
+                    Log($"Error receiving event: {e.Message}");
+                }
             }
         }
 
