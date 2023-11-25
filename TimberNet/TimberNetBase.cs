@@ -17,7 +17,6 @@ namespace TimberNet
         public const string SET_STATE_EVENT = "SetState";
         public const string HEARTBEAT_EVENT = "Heartbeat";
         public const int MAX_BUFFER_SIZE = 8192; // 8K
-        public const string HOST_ADDRESS = "127.0.0.1";
 
         public delegate void MessageReceived(string message);
         public delegate void MapReceived(byte[] mapBytes);

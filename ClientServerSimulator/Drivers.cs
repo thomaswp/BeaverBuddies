@@ -4,7 +4,7 @@ namespace TimberNet
 {
     internal abstract class DriverBase<T> where T : TimberNetBase
     {
-        public const string ADDRESS = TimberNetBase.HOST_ADDRESS;
+        public const string LOCALHOST = "127.0.0.1";
         public const int PORT = 25565;
 
         protected List<JObject> scriptedEvents;
@@ -54,7 +54,7 @@ namespace TimberNet
     {
         const string SCRIPT_PATH = "client.json";
 
-        public ClientDriver() : base(SCRIPT_PATH, new TimberClient(ADDRESS, PORT))
+        public ClientDriver() : base(SCRIPT_PATH, new TimberClient(LOCALHOST, PORT))
         {
         }
     }

@@ -13,6 +13,9 @@ namespace TimberModTest
 {
     public class ClientConnectionService : IUpdatableSingleton, IPostLoadableSingleton
     {
+
+        public const string LOCALHOST = "127.0.0.1";
+
         private GameSceneLoader _gameSceneLoader;
         private GameSaveRepository _gameSaveRepository;
         private ClientEventIO client;
@@ -30,7 +33,7 @@ namespace TimberModTest
             Plugin.Log("Connecting client");
             try
             {
-                client = new ClientEventIO(TimberServer.HOST_ADDRESS, 25565, LoadMap);
+                client = new ClientEventIO(LOCALHOST, 25565, LoadMap);
                 EventIO.Set(client);
 
             } catch (Exception ex)

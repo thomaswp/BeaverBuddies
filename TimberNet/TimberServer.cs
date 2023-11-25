@@ -30,7 +30,7 @@ namespace TimberNet
 
         public TimberServer(int port, Func<Task<byte[]>> mapProvider, Func<JObject>? initEventProvider)
         {
-            listener = new TcpListener(IPAddress.Parse(HOST_ADDRESS), port);
+            listener = new TcpListener(IPAddress.Any, port);
             this.mapProvider = mapProvider;
             this.initEventProvider = initEventProvider;
         }
