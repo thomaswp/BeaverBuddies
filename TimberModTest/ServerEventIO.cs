@@ -11,7 +11,7 @@ namespace TimberModTest
 {
     public class ServerEventIO : NetIOBase<TimberServer>
     {
-        public override bool PlayRecordedEvents => false;
+        public override bool PlayRecordedEvents => true;
 
         public ServerEventIO(int port, Func<Task<byte[]>> mapProvider)
         {

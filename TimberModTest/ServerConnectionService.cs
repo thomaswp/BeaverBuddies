@@ -61,7 +61,7 @@ namespace TimberModTest
         public void PostLoad()
         {
             // TODO: have a UI :D
-            return;
+            //return;
             Start();
         }
 

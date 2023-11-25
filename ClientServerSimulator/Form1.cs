@@ -25,7 +25,7 @@ namespace TimberNet
             client.OnLog += message => Log(message, textBoxClient);
             server.OnLog += message => Log(message, textBoxServer);
 
-            server.Start();
+            //server.Start();
         }
 
         private void Log(string message, TextBox textBox)

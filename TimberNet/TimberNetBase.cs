@@ -180,7 +180,13 @@ namespace TimberNet
             int messageCount = 0;
             while (client.Connected)
             {
-                stream.Read(headerBuffer, 0, headerBuffer.Length);
+                try
+                {
+                    stream.Read(headerBuffer, 0, headerBuffer.Length);
+                } catch
+                {
+                    break;
+                }
                 if (BitConverter.IsLittleEndian)
                     Array.Reverse(headerBuffer);
 

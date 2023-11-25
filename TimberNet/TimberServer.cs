@@ -93,6 +93,7 @@ namespace TimberNet
 
         protected override void ProcessReceivedEvent(JObject message)
         {
+            // TODO: Move this logic to the drivers
             base.ProcessReceivedEvent(message);
             SendEventToClients(message);
         }

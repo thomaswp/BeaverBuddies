@@ -98,6 +98,8 @@ namespace TimberModTest
     {
         static bool Prefix(BlockObject prefab, Vector3Int coordinates, Orientation orientation)
         {
+            // TODO: Rather than having the server auto-relay events to clients,
+            // wait for the event to get replayed and (if successful) then relay.
             if (ReplayService.IsReplayingEvents) return true;
 
             Plugin.Log($"Placing {prefab.name}, {coordinates}, {orientation}");
