@@ -29,7 +29,7 @@ namespace TimberNet
         private readonly ConcurrentQueue<string> logQueue = new ConcurrentQueue<string>();
         private byte[]? mapBytes = null;
 
-        public int Hash { get; private set; }
+        public int Hash { get; private set; } = 17;
 
         public int TickCount { get; private set; }
 
@@ -142,7 +142,7 @@ namespace TimberNet
             }
             else
             {
-                Hash = HashCode.Combine(Hash, message.ToString());
+                AddToHash(message.ToString());
             }
             Log($"Event: {GetType(message)}");
         }
@@ -202,19 +202,34 @@ namespace TimberNet
             }
         }
 
+        public static int CombineHash(int h1, int h2)
+        {
+            return h1 * 31 + h2;
+        }
+
+        private void AddToHash(string str)
+        {
+            AddToHash(Encoding.UTF8.GetBytes(str));
+        }
+
+        private void AddToHash(byte[] bytes)
+        {
+            Hash = CombineHash(Hash, GetHashCode(bytes));
+        }
+
         protected int GetHashCode(byte[] bytes)
         {
             int code = 0;
             foreach (byte b in bytes)
             {
-                code = HashCode.Combine(code, b);
+                code = CombineHash(code, b);
             }
             return code;
         }
 
         protected void AddFileToHash(byte[] bytes)
         {
-            Hash = HashCode.Combine(Hash, GetHashCode(bytes));
+            AddToHash(bytes);
         }
 
         private void ReceiveFile(NetworkStream stream, int messageLength)
