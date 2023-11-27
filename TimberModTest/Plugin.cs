@@ -45,7 +45,6 @@ namespace TimberModTest
         {
             Plugin.Log($"Registering In Game Services");
             //containerDefinition.Bind<DeterminismService>().AsSingleton();
-            //containerDefinition.Bind<TickWathcerService>().AsSingleton();
             containerDefinition.Bind<ReplayService>().AsSingleton();
             containerDefinition.Bind<ServerConnectionService>().AsSingleton();
         }

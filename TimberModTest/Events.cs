@@ -14,6 +14,7 @@ using System.Linq;
 using Timberborn.Forestry;
 using Timberborn.DropdownSystem;
 using UnityEngine.UIElements;
+using Timberborn.TimeSystem;
 
 namespace TimberModTest
 {
@@ -66,6 +67,30 @@ namespace TimberModTest
         {
             Plugin.Log($"Seeting seed to {seed}");
             UnityEngine.Random.InitState(seed);
+        }
+
+        public static RandomStateSetEvent CreateAndExecute()
+        {
+            int seed = UnityEngine.Random.RandomRangeInt(int.MinValue, int.MaxValue);
+            RandomStateSetEvent message = new RandomStateSetEvent()
+            {
+                seed = seed
+            };
+            // TODO: Not certain if this is the right time, or if it should be enqueued
+            message.Replay(null);
+            return message;
+        }
+    }
+
+    [Serializable]
+    public class SpeedSetEvent : ReplayEvent
+    {
+        public int speed;
+
+        public override void Replay(IReplayContext context)
+        {
+            SpeedManager sm = context.GetSingleton<SpeedManager>();
+            if (sm.CurrentSpeed != speed) sm.ChangeSpeed(speed);
         }
     }
 

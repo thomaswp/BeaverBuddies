@@ -100,5 +100,15 @@ namespace TimberNet
             if (netBase.ClientCount == 0) return;
             base.Update();
         }
+
+        public override void TryTick()
+        {
+            if (!netBase.ShouldTick) return;
+            if (ticks == 0)
+            {
+                netBase.DoUserInitiatedEvent(CreateInitEvent()());
+            }
+            base.TryTick();
+        }
     }
 }

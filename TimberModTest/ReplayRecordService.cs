@@ -30,6 +30,7 @@ namespace TimberModTest
 
         private int ticksSinceLoad = 0;
         private int speedAtPause = 0;
+        private bool changingSpeed = false;
 
         private static ConcurrentQueue<ReplayEvent> eventsToSend = new ConcurrentQueue<ReplayEvent>();
 
@@ -53,6 +54,8 @@ namespace TimberModTest
             AddSingleton(buildingService);
             AddSingleton(plantingSelectionService);
             AddSingleton(treeCuttingArea);
+
+            _eventBus.Register(this);
 
             //io = new FileWriteIO("test.json");
             //io = new FileReadIO("planting.json");
@@ -149,6 +152,7 @@ namespace TimberModTest
             SendEvents();
 
             // TODO: Should have a more intelligent speed buffering algorith...
+            changingSpeed = true;
             if (io.IsOutOfEvents && _speedManager.CurrentSpeed != 0)
             {
                 speedAtPause = _speedManager.CurrentSpeed;
@@ -160,6 +164,13 @@ namespace TimberModTest
                 _speedManager.ChangeSpeed(speedAtPause);
                 speedAtPause = 0;
             }
+            changingSpeed = false;
+        }
+
+        public void OnSpeedChange(CurrentSpeedChangedEvent e)
+        {
+            if (changingSpeed) return;
+            speedAtPause = e.CurrentSpeed;
         }
 
         //private Stopwatch tickTimer = new Stopwatch();
@@ -175,9 +186,34 @@ namespace TimberModTest
     [HarmonyPatch(typeof(SpeedManager), nameof(SpeedManager.ChangeSpeed))]
     public class SpeedChangePatcher
     {
-        static void Prefix(ref int speed)
+
+        private static int times1 = 0;
+
+        static void Prefix(SpeedManager __instance, ref int speed)
         {
             if (EventIO.Get().IsOutOfEvents) speed = 0;
+
+            // TODO: This works, but for some reason when I do it anytime beforehand
+            // it does not, so something is acting randomly in between and changing
+            // the seed. Could try printing the random state on update or start of play
+            // to confirm this...
+            if (speed != 0 && times1 == 0)
+            {
+                Plugin.Log("Setting seed on play");
+                //ReplayService.RecordEvent(RandomStateSetEvent.CreateAndExecute());
+                UnityEngine.Random.InitState(1234);
+                times1++;
+            }
+
+            // TODO: Do all the good replay ifs as in other events
+            // and make sure this isn't triggered programmatically
+            //if (__instance.CurrentSpeed != speed)
+            //{
+            //    ReplayService.RecordEvent(new SpeedSetEvent()
+            //    {
+            //        speed = speed
+            //    });
+            //}
         }
     }
 }

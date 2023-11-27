@@ -8,7 +8,7 @@ namespace TimberModTest
     public interface EventIO
     {
         // TODO: Remove
-        public static bool IsClient = true;
+        public static bool IsClient = false;
 
         void Update();
 

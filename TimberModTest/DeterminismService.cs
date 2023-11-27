@@ -29,8 +29,12 @@ namespace TimberModTest
         [OnEvent]
         public void OnSpeedEvent(CurrentSpeedChangedEvent e)
         {
-            Plugin.Log($"Speed changed to: {e.CurrentSpeed}; random reset");
-            Random.InitState(1234);
+            if (e.CurrentSpeed != 0)
+            {
+
+                Plugin.Log($"Speed changed to: {e.CurrentSpeed}; random reset");
+                Random.InitState(1234);
+            }
         }
     }
 
