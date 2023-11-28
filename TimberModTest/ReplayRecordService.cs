@@ -207,12 +207,17 @@ namespace TimberModTest
 
         private void LogStateCheck()
         {
-            // TODO: Only in debug mode!
-            MemoryStream ms = new MemoryStream();
-            _gameSaver.Save(ms);
-            byte[] bytes = ms.ToArray();
-            int hash = TimberNetBase.GetHashCode(bytes);
-            Plugin.Log($"State Check [T{ticksSinceLoad}]: {hash.ToString("X8")}");
+            // TODO: This doesn't work yet.
+            // There is definitely a timestamp in the save, which is part of
+            // the issue. Need to test by saving to a file and unzipping/comparing.
+            // There may also be tiny amounts of nondeterminism somewhere
+            // (possibly harmless, and possibly problematic).
+            // And it may be there are small rounding errors on things like seconds.
+            //MemoryStream ms = new MemoryStream();
+            //_gameSaver.Save(ms);
+            //byte[] bytes = ms.ToArray();
+            //int hash = TimberNetBase.GetHashCode(bytes);
+            //Plugin.Log($"State Check [T{ticksSinceLoad}]: {hash.ToString("X8")}");
         }
     }
 
