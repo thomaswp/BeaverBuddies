@@ -68,7 +68,7 @@ namespace TimberModTest
     public static class DeterminismController
     {
         private static HashSet<System.Type> activeNonGamePatchers = new HashSet<System.Type>();
-        private static HashSet<System.Type> activeNonTickGamePatchers = new HashSet<System.Type>();
+        //private static HashSet<System.Type> activeNonTickGamePatchers = new HashSet<System.Type>();
         public static bool IsTicking = false;
 
         public static bool ShouldFreezeSeed 
@@ -76,25 +76,37 @@ namespace TimberModTest
             get
             {
                 bool areActiveNonGamePatchers = activeNonGamePatchers.Count > 0;
-                bool areActiveGamePatchers = activeNonTickGamePatchers.Count > 0;
+                //bool areActiveGamePatchers = activeNonTickGamePatchers.Count > 0;
 
-                if (areActiveNonGamePatchers && areActiveGamePatchers)
-                {
-                    // Should never happen, but just in case...
-                    Plugin.Log("Somehow in both non-game and game code?");
-                    Plugin.LogStackTrace();
-                    return false;
-                }
+                //if (areActiveNonGamePatchers && areActiveGamePatchers)
+                //{
+                //    // Should never happen, but just in case...
+                //    Plugin.Log("Somehow in both non-game and game code?");
+                //    Plugin.LogStackTrace();
+                //    return false;
+                //}
 
+                // TODO: Actually, any time this happens, it should be happening
+                // during a tick, so once I add that logic, I can remove this logic
+                // and just log any game code that's running outside of a tick
+                // since it shouldn't be, whether random or not!
                 // If this is game code, use game random
-                if (areActiveGamePatchers) return false;
-                // If this is non-game code, don't
+                //if (areActiveGamePatchers) return false;
+
+
+
+                // If this is non-game code, don't use the Game's random
                 if (areActiveNonGamePatchers) return true;
+
                 // If we're ticking, it's likely game code, and hopefully
                 // we've caught any non-game code that can run during a tick!
                 if (IsTicking) return false;
 
-                // If we're not ticking, and random is happening from an
+                // If we are replaying/playing events recorded from this
+                // user or other clients, we should always use the game's random.
+                if (ReplayService.IsReplayingEvents) return false;
+
+                // If we're not ticking/replaying, and random is happening from an
                 // unknown source, log it so we can classify it.
                 LogUnknownRandomCalled();
 
@@ -116,17 +128,17 @@ namespace TimberModTest
             }
         }
 
-        public static bool SetNonTickGamePatcherActive(System.Type patcherType, bool active)
-        {
-            if (active)
-            {
-                return activeNonTickGamePatchers.Add(patcherType);
-            }
-            else
-            {
-                return activeNonTickGamePatchers.Remove(patcherType);
-            }
-        }
+        //public static bool SetNonTickGamePatcherActive(System.Type patcherType, bool active)
+        //{
+        //    if (active)
+        //    {
+        //        return activeNonTickGamePatchers.Add(patcherType);
+        //    }
+        //    else
+        //    {
+        //        return activeNonTickGamePatchers.Remove(patcherType);
+        //    }
+        //}
         
         private static System.Random random = new System.Random();
 
@@ -264,19 +276,19 @@ namespace TimberModTest
         }
     }
 
-    [HarmonyPatch(typeof(WateredNaturalResource), nameof(WateredNaturalResource.GenerateRandomDaysToDry))]
-    public class WateredNaturalResourcePatcher
-    {
-        static void Prefix()
-        {
-            DeterminismController.SetNonTickGamePatcherActive(typeof(WateredNaturalResourcePatcher), true);
-        }
+    //[HarmonyPatch(typeof(WateredNaturalResource), nameof(WateredNaturalResource.GenerateRandomDaysToDry))]
+    //public class WateredNaturalResourcePatcher
+    //{
+    //    static void Prefix()
+    //    {
+    //        DeterminismController.SetNonTickGamePatcherActive(typeof(WateredNaturalResourcePatcher), true);
+    //    }
 
-        static void Postfix()
-        {
-            DeterminismController.SetNonTickGamePatcherActive(typeof(WateredNaturalResourcePatcher), false);
-        }
-    }
+    //    static void Postfix()
+    //    {
+    //        DeterminismController.SetNonTickGamePatcherActive(typeof(WateredNaturalResourcePatcher), false);
+    //    }
+    //}
 
     [HarmonyPatch(typeof(Ticker), nameof(Ticker.Update))]
     public class TickerPatcher

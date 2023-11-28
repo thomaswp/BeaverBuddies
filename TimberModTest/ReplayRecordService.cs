@@ -38,6 +38,7 @@ namespace TimberModTest
         private bool changingSpeed = false;
 
         private static ConcurrentQueue<ReplayEvent> eventsToSend = new ConcurrentQueue<ReplayEvent>();
+        private static ConcurrentQueue<ReplayEvent> eventsToPlay = new ConcurrentQueue<ReplayEvent>();
 
         public static bool IsLoaded { get; private set; } = false;
 
@@ -95,12 +96,30 @@ namespace TimberModTest
             // During a replay, we save things manually, only if they're
             // successful.
             if (IsReplayingEvents) return;
-            eventsToSend.Enqueue(replayEvent);
+
+            UserEventBehavior behavior = UserEventBehavior.Send;
+            EventIO io = EventIO.Get();
+            if (io != null)
+            {
+                behavior = io.UserEventBehavior;
+            }
+            if (behavior == UserEventBehavior.QueuePlay)
+            {
+                eventsToPlay.Enqueue(replayEvent);
+            }
+            else
+            {
+                eventsToSend.Enqueue(replayEvent);
+            }
         }
 
         private void ReplayEvents()
         {
             List<ReplayEvent> eventsToReplay = io.ReadEvents(ticksSinceLoad);
+            while (eventsToPlay.TryDequeue(out ReplayEvent replayEvent))
+            {
+                eventsToReplay.Add(replayEvent);
+            }
 
             int currentTick = ticksSinceLoad;
             IsReplayingEvents = true;

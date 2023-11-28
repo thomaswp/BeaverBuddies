@@ -135,7 +135,7 @@ namespace TimberModTest
                 orientation = orientation,
             });
 
-            return EventIO.ShouldPlayUserEvents;
+            return EventIO.ShouldPlayPatchedEvents;
         }
     }
 
@@ -170,7 +170,7 @@ namespace TimberModTest
                 inputBlocks = new List<Vector3Int>(inputBlocks)
             });
 
-            return EventIO.ShouldPlayUserEvents;
+            return EventIO.ShouldPlayPatchedEvents;
         }
     }
 
@@ -209,7 +209,7 @@ namespace TimberModTest
                 wasAdded = true,
             });
 
-            return EventIO.ShouldPlayUserEvents;
+            return EventIO.ShouldPlayPatchedEvents;
         }
     }
 
@@ -226,7 +226,7 @@ namespace TimberModTest
                 wasAdded = false,
             });
 
-            return EventIO.ShouldPlayUserEvents;
+            return EventIO.ShouldPlayPatchedEvents;
         }
     }
 

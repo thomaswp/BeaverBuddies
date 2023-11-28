@@ -13,8 +13,8 @@ namespace TimberModTest
     {
 
         protected T netBase;
-        public abstract bool PlayUserEvents { get; }
         public abstract bool RecordReplayedEvents { get; }
+        public abstract UserEventBehavior UserEventBehavior { get; }
         public bool IsOutOfEvents => !netBase.ShouldTick;
 
         public void Close()
@@ -49,7 +49,7 @@ namespace TimberModTest
                 .ToList();
         }
 
-        public void WriteEvents(params ReplayEvent[] events)
+        public virtual void WriteEvents(params ReplayEvent[] events)
         {
             foreach (ReplayEvent e in events)
             {

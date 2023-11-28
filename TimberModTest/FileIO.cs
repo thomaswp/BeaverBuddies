@@ -35,9 +35,8 @@ namespace TimberModTest
     
     public class FileWriteIO : EventIO
     {
-        public bool PlayUserEvents => true;
-        // Will probably never happen, since nothing to replay
         public bool RecordReplayedEvents => true;
+        public UserEventBehavior UserEventBehavior => UserEventBehavior.Play;
         public bool IsOutOfEvents => false;
 
         private JsonSerializerSettings settings;
@@ -91,7 +90,7 @@ namespace TimberModTest
 
     public class FileReadIO : EventIO
     {
-        public bool PlayUserEvents => true;
+        public UserEventBehavior UserEventBehavior => UserEventBehavior.Play;
         // Shouldn't need to record anything
         public bool RecordReplayedEvents => false;
         public bool IsOutOfEvents => events.Count == 0;
