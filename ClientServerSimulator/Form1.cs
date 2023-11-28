@@ -45,12 +45,16 @@ namespace TimberNet
 
         private void buttonStartServer_Click(object sender, EventArgs e)
         {
+            if (server.Started) return;
             server.Start();
+            buttonStartServer.Enabled = false;
         }
 
         private void buttonStartClient_Click(object sender, EventArgs e)
         {
+            if (client.Started) return;
             client.Start();
+            buttonStartClient.Enabled = false;
         }
 
         private void timerServer_Tick(object sender, EventArgs e)

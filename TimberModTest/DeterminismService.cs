@@ -194,6 +194,20 @@ namespace TimberModTest
         }
     }
 
+    [HarmonyPatch(typeof(SoundEmitter), nameof(SoundEmitter.Update))]
+    public class SoundEmitterPatcher
+    {
+        static void Prefix()
+        {
+            DeterminismController.IsPlayingSound = true;
+        }
+
+        static void Postfix()
+        {
+            DeterminismController.IsPlayingSound = false;
+        }
+    }
+
     [HarmonyPatch(typeof(Ticker), nameof(Ticker.Update))]
     public class TickerPatcher
     {
