@@ -1,11 +1,14 @@
 ﻿using HarmonyLib;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Timberborn.BlockSystem;
 using Timberborn.BuildingTools;
 using Timberborn.Common;
 using Timberborn.ConstructibleSystem;
 using Timberborn.GameSaveRepositorySystem;
+using Timberborn.GameScene;
 using Timberborn.InputSystem;
+using Timberborn.NaturalResourcesMoisture;
 using Timberborn.SingletonSystem;
 using Timberborn.SoundSystem;
 using Timberborn.TickSystem;
@@ -64,24 +67,64 @@ namespace TimberModTest
 
     public static class DeterminismController
     {
-        public static bool IsInInputUpdate = false;
-        public static bool IsPlayingSound = false;
+        private static HashSet<System.Type> activeNonGamePatchers = new HashSet<System.Type>();
+        private static HashSet<System.Type> activeNonTickGamePatchers = new HashSet<System.Type>();
         public static bool IsTicking = false;
 
         public static bool ShouldFreezeSeed 
         {
             get
             {
-                // If there's randomness occurring outside of a tick
-                // that isn't already accounted for, we should log it!
-                if (!IsTicking && !(IsPlayingSound || IsInInputUpdate))
+                bool areActiveNonGamePatchers = activeNonGamePatchers.Count > 0;
+                bool areActiveGamePatchers = activeNonTickGamePatchers.Count > 0;
+
+                if (areActiveNonGamePatchers && areActiveGamePatchers)
                 {
-                    LogUnknownRandomCalled();
+                    // Should never happen, but just in case...
+                    Plugin.Log("Somehow in both non-game and game code?");
+                    Plugin.LogStackTrace();
+                    return false;
                 }
 
-                // Freeze the random seed outside of ticking, as well as
-                // for any input- or sound-related event
-                return !IsTicking || IsPlayingSound || IsInInputUpdate;
+                // If this is game code, use game random
+                if (areActiveGamePatchers) return false;
+                // If this is non-game code, don't
+                if (areActiveNonGamePatchers) return true;
+                // If we're ticking, it's likely game code, and hopefully
+                // we've caught any non-game code that can run during a tick!
+                if (IsTicking) return false;
+
+                // If we're not ticking, and random is happening from an
+                // unknown source, log it so we can classify it.
+                LogUnknownRandomCalled();
+
+                // And ultimately return true, assuming it's non-game code,
+                // though we can't be sure and need to investigate.
+                return true;
+            }
+        }
+
+        public static bool SetNonGamePatcherActive(System.Type patcherType, bool active)
+        {
+            if (active)
+            {
+                return activeNonGamePatchers.Add(patcherType);
+            }
+            else
+            {
+                return activeNonGamePatchers.Remove(patcherType);
+            }
+        }
+
+        public static bool SetNonTickGamePatcherActive(System.Type patcherType, bool active)
+        {
+            if (active)
+            {
+                return activeNonTickGamePatchers.Add(patcherType);
+            }
+            else
+            {
+                return activeNonTickGamePatchers.Remove(patcherType);
             }
         }
         
@@ -169,14 +212,13 @@ namespace TimberModTest
         // Just as a test, muck random sounds!
         static void Prefix()
         {
-            //state = Random.state;
-            DeterminismController.IsInInputUpdate = true;
+            DeterminismController.SetNonGamePatcherActive(typeof(InputPatcher), true);
         }
 
         static void Postfix()
         {
             //Random.state = state;
-            DeterminismController.IsInInputUpdate = false;
+            DeterminismController.SetNonGamePatcherActive(typeof(InputPatcher), false);
         }
     }
 
@@ -185,12 +227,12 @@ namespace TimberModTest
     {
         static void Prefix()
         {
-            DeterminismController.IsPlayingSound = true;
+            DeterminismController.SetNonGamePatcherActive(typeof(SoundsPatcher), true);
         }
 
         static void Postfix()
         {
-            DeterminismController.IsPlayingSound = false;
+            DeterminismController.SetNonGamePatcherActive(typeof(SoundsPatcher), false);
         }
     }
 
@@ -199,12 +241,40 @@ namespace TimberModTest
     {
         static void Prefix()
         {
-            DeterminismController.IsPlayingSound = true;
+            DeterminismController.SetNonGamePatcherActive(typeof(SoundEmitter), true);
         }
 
         static void Postfix()
         {
-            DeterminismController.IsPlayingSound = false;
+            DeterminismController.SetNonGamePatcherActive(typeof(SoundEmitter), false);
+        }
+    }
+
+    [HarmonyPatch(typeof(DateSalter), nameof(DateSalter.GenerateRandomNumber))]
+    public class DateSalterPatcher
+    {
+        static void Prefix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(DateSalterPatcher), true);
+        }
+
+        static void Postfix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(DateSalterPatcher), false);
+        }
+    }
+
+    [HarmonyPatch(typeof(WateredNaturalResource), nameof(WateredNaturalResource.GenerateRandomDaysToDry))]
+    public class WateredNaturalResourcePatcher
+    {
+        static void Prefix()
+        {
+            DeterminismController.SetNonTickGamePatcherActive(typeof(WateredNaturalResourcePatcher), true);
+        }
+
+        static void Postfix()
+        {
+            DeterminismController.SetNonTickGamePatcherActive(typeof(WateredNaturalResourcePatcher), false);
         }
     }
 

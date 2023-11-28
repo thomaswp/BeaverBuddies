@@ -7,8 +7,8 @@ namespace TimberModTest
 {
     public interface EventIO
     {
-        // TODO: Remove
-        public static bool IsClient = true;
+        // TODO: Remove and put in a config file until we can make a UI
+        public static bool IsClient = false;
 
         void Update();
 
