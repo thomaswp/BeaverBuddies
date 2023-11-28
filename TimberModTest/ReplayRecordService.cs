@@ -3,17 +3,21 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.ConstrainedExecution;
 using System.Text;
 using Timberborn.BlockObjectTools;
 using Timberborn.Buildings;
 using Timberborn.BuildingTools;
+using Timberborn.Common;
 using Timberborn.Forestry;
+using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.PlantingUI;
 using Timberborn.SingletonSystem;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
+using TimberNet;
 using UnityEngine;
 
 namespace TimberModTest
@@ -23,6 +27,7 @@ namespace TimberModTest
         //private readonly TickWathcerService _tickWathcerService;
         private readonly EventBus _eventBus;
         private readonly SpeedManager _speedManager;
+        private readonly GameSaver _gameSaver;
 
         private List<object> singletons = new();
 
@@ -34,13 +39,14 @@ namespace TimberModTest
 
         private static ConcurrentQueue<ReplayEvent> eventsToSend = new ConcurrentQueue<ReplayEvent>();
 
+        public static bool IsLoaded { get; private set; } = false;
+
         public static bool IsReplayingEvents { get; private set; } = false;
 
         public ReplayService(
-            //TickWathcerService tickWathcerService,
             EventBus eventBus,
             SpeedManager speedManager,
-            //IBlockObjectPlacer buildingPlacer,
+            GameSaver gameSaver,
             BlockObjectPlacerService blockObjectPlacerService,
             BuildingService buildingService,
             PlantingSelectionService plantingSelectionService,
@@ -50,6 +56,7 @@ namespace TimberModTest
             //_tickWathcerService = AddSingleton(tickWathcerService);
             _eventBus = AddSingleton(eventBus);
             _speedManager = AddSingleton(speedManager);
+            _gameSaver = AddSingleton(gameSaver);
             AddSingleton(blockObjectPlacerService);
             AddSingleton(buildingService);
             AddSingleton(plantingSelectionService);
@@ -146,6 +153,14 @@ namespace TimberModTest
                 waitUpdates--;
                 return;
             }
+            if (waitUpdates == 0)
+            {
+                IsLoaded = true;
+                // Determinism just for testing
+                UnityEngine.Random.InitState(1234);
+                Plugin.Log("Setting random state to 1234");
+                waitUpdates = -1;
+            }
             if (io == null) return;
             io.Update();
             ReplayEvents();
@@ -176,10 +191,28 @@ namespace TimberModTest
         //private Stopwatch tickTimer = new Stopwatch();
         public void Tick()
         {
+            // TODO: Should probably save and send the random seed each time
+            // and if it doesn't match, resync
+
             //Plugin.Log($"Tick in {tickTimer.ElapsedMilliseconds}ms");
             UpdateSingleton();
             ticksSinceLoad++;
             //tickTimer.Restart();
+
+            if (ticksSinceLoad % 100 == 0)
+            {
+                LogStateCheck();
+            }
+        }
+
+        private void LogStateCheck()
+        {
+            // TODO: Only in debug mode!
+            MemoryStream ms = new MemoryStream();
+            _gameSaver.Save(ms);
+            byte[] bytes = ms.ToArray();
+            int hash = TimberNetBase.GetHashCode(bytes);
+            Plugin.Log($"State Check [T{ticksSinceLoad}]: {hash.ToString("X8")}");
         }
     }
 
@@ -187,23 +220,19 @@ namespace TimberModTest
     public class SpeedChangePatcher
     {
 
-        private static int times1 = 0;
+        //private static int times1 = 0;
 
         static void Prefix(SpeedManager __instance, ref int speed)
         {
             if (EventIO.Get().IsOutOfEvents) speed = 0;
 
-            // TODO: This works, but for some reason when I do it anytime beforehand
-            // it does not, so something is acting randomly in between and changing
-            // the seed. Could try printing the random state on update or start of play
-            // to confirm this...
-            if (speed != 0 && times1 == 0)
-            {
-                Plugin.Log("Setting seed on play");
-                //ReplayService.RecordEvent(RandomStateSetEvent.CreateAndExecute());
-                UnityEngine.Random.InitState(1234);
-                times1++;
-            }
+            //if (speed != 0 && times1 == 0)
+            //{
+            //    Plugin.Log("Setting seed on play");
+            //    //ReplayService.RecordEvent(RandomStateSetEvent.CreateAndExecute());
+            //    UnityEngine.Random.InitState(1234);
+            //    times1++;
+            //}
 
             // TODO: Do all the good replay ifs as in other events
             // and make sure this isn't triggered programmatically
@@ -216,4 +245,6 @@ namespace TimberModTest
             //}
         }
     }
+
+
 }

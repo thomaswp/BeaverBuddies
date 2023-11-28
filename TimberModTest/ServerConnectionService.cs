@@ -14,13 +14,13 @@ namespace TimberModTest
     {
         private ServerEventIO io;
 
-        private GameSaver _gaveSaver;
+        private GameSaver _gameSaver;
 
         private TaskCompletionSource<byte[]> mapLodingSource;
 
         public ServerConnectionService(GameSaver gameSaver)
         {
-            _gaveSaver = gameSaver;
+            _gameSaver = gameSaver;
 
         }
 
@@ -53,7 +53,7 @@ namespace TimberModTest
         {
             if (mapLodingSource == null) return;
             MemoryStream ms = new MemoryStream();
-            _gaveSaver.Save(ms);
+            _gameSaver.Save(ms);
             mapLodingSource.TrySetResult(ms.ToArray());
             mapLodingSource = null;
         }

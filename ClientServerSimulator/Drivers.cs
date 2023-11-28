@@ -104,10 +104,10 @@ namespace TimberNet
         public override void TryTick()
         {
             if (!netBase.ShouldTick) return;
-            if (ticks == 0)
-            {
-                netBase.DoUserInitiatedEvent(CreateInitEvent()());
-            }
+            //if (ticks == 0)
+            //{
+            //    netBase.DoUserInitiatedEvent(CreateInitEvent()());
+            //}
             base.TryTick();
         }
     }

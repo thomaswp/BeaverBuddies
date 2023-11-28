@@ -22,22 +22,6 @@ using static UnityEngine.Tilemaps.Tilemap;
 
 namespace TimberModTest
 {
-
-    [Configurator(SceneEntrypoint.MainMenu)]  // This attribute registers the configurator and tells where it should be loaded
-    public class MenuConfigurator : IConfigurator
-    {
-        public void Configure(IContainerDefinition containerDefinition)
-        {
-            //new ReplayService(null);
-            //ReplayService.RecordEvent(new BuildingPlacedEvent()
-            //{
-            //    prefab = "test",
-            //    coordinates = new Vector3Int(1, 2, 3),
-            //    orientation = Timberborn.Coordinates.Orientation.Cw180,
-            //});
-        }
-    }
-
     [Configurator(SceneEntrypoint.InGame)]  // This attribute registers the configurator and tells where it should be loaded
     public class ReplayConfigurator : IConfigurator
     {
@@ -81,7 +65,7 @@ namespace TimberModTest
 
         public static void LogStackTrace()
         {
-            Log(new StackTrace().ToString());
+            logger.LogInfo(new StackTrace().ToString());
         }
     }
 }

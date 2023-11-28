@@ -22,12 +22,12 @@ namespace TimberModTest
 
         public ServerEventIO(int port, Func<Task<byte[]>> mapProvider)
         {
-            //netBase = new TimberServer(port, mapProvider, () =>
-            //{
-            //    var message = RandomStateSetEvent.CreateAndExecute();
-            //    return JObject.Parse(JsonSettings.Serialize(message));
-            //});
-            netBase = new TimberServer(port, mapProvider, null);
+            netBase = new TimberServer(port, mapProvider, () =>
+            {
+                var message = RandomStateSetEvent.CreateAndExecute();
+                return JObject.Parse(JsonSettings.Serialize(message));
+            });
+            //netBase = new TimberServer(port, mapProvider, null);
             netBase.OnLog += Plugin.Log;
             netBase.OnMapReceived += NetBase_OnClientConnected;
             netBase.Start();
