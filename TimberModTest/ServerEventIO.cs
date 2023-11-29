@@ -18,6 +18,7 @@ namespace TimberModTest
         // The server should wait until the next update to play a
         // user-initiated event, to make sure that the events
         // happen in the same order for the server and clients.
+        // TBH this may not be necessary.
         public override UserEventBehavior UserEventBehavior => UserEventBehavior.QueuePlay;
 
         public ServerEventIO(int port, Func<Task<byte[]>> mapProvider)

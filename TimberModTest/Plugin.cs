@@ -55,7 +55,9 @@ namespace TimberModTest
         {
             logger = consoleWriter;
             Log($"Plugin {PluginGuid} is loaded!");
-            new Harmony(PluginGuid).PatchAll();
+            Harmony harmony = new Harmony(PluginGuid);
+            harmony.PatchAll();
+            //DeterminismPatcher.PatchDeterminism(harmony);
         }
 
         public static void Log(string message)

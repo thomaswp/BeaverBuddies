@@ -9,6 +9,7 @@ using Timberborn.GameSaveRepositorySystem;
 using Timberborn.GameScene;
 using Timberborn.InputSystem;
 using Timberborn.NaturalResourcesMoisture;
+using Timberborn.PlantingUI;
 using Timberborn.SingletonSystem;
 using Timberborn.SoundSystem;
 using Timberborn.TickSystem;
@@ -276,19 +277,20 @@ namespace TimberModTest
         }
     }
 
-    //[HarmonyPatch(typeof(WateredNaturalResource), nameof(WateredNaturalResource.GenerateRandomDaysToDry))]
-    //public class WateredNaturalResourcePatcher
-    //{
-    //    static void Prefix()
-    //    {
-    //        DeterminismController.SetNonTickGamePatcherActive(typeof(WateredNaturalResourcePatcher), true);
-    //    }
+    [HarmonyPatch(typeof(PlantableDescriber), nameof(PlantableDescriber.GetPreviewFromPrefab))]
+    public class PlantableDescriberPatcher
+    {
+        static void Prefix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(PlantableDescriberPatcher), true);
+        }
 
-    //    static void Postfix()
-    //    {
-    //        DeterminismController.SetNonTickGamePatcherActive(typeof(WateredNaturalResourcePatcher), false);
-    //    }
-    //}
+        static void Postfix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(PlantableDescriberPatcher), false);
+        }
+    }
+
 
     [HarmonyPatch(typeof(Ticker), nameof(Ticker.Update))]
     public class TickerPatcher
