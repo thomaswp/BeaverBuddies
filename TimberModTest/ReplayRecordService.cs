@@ -248,7 +248,7 @@ namespace TimberModTest
 
         static void Prefix(SpeedManager __instance, ref int speed)
         {
-            if (EventIO.Get().IsOutOfEvents) speed = 0;
+            if (EventIO.ShouldPauseTicking) speed = 0;
 
             //if (speed != 0 && times1 == 0)
             //{

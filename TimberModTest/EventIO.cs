@@ -14,8 +14,7 @@ namespace TimberModTest
 
     public interface EventIO
     {
-        // TODO: Remove and put in a config file until we can make a UI
-        public static bool IsClient = false;
+        public static ReplayConfig Config { get; set; }
 
         void Update();
 
@@ -42,6 +41,16 @@ namespace TimberModTest
         private static EventIO instance;
         public static EventIO Get() { return instance; }
         public static void Set(EventIO io) { instance = io; }
+
+        public static bool ShouldPauseTicking
+        {
+            get
+            {
+                EventIO io = Get();
+                if (io == null) return false;
+                return io.IsOutOfEvents;
+            }
+        }
 
         /**
          * Returns true if the game should carry out user-initiated

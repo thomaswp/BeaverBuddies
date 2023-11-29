@@ -28,7 +28,7 @@ namespace TimberModTest
         {
             try
             {
-                io = new ServerEventIO(25565, ProvideGameState());
+                io = new ServerEventIO(EventIO.Config.Port, ProvideGameState());
                 EventIO.Set(io);
             } catch (Exception e) {
                 Plugin.Log("Failed to start server");
@@ -61,7 +61,7 @@ namespace TimberModTest
         public void PostLoad()
         {
             // TODO: have a UI :D
-            if (EventIO.IsClient) return;
+            if (EventIO.Config.GetNetMode() != NetMode.Server) return;
             Start();
         }
 

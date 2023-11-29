@@ -29,11 +29,11 @@ namespace TimberModTest
         public void PostLoad()
         {
             //TODO: make a UI!
-            if (!EventIO.IsClient) return;
+            if (EventIO.Config.GetNetMode() != NetMode.Client) return;
             Plugin.Log("Connecting client");
             try
             {
-                client = new ClientEventIO(LOCALHOST, 25565, LoadMap);
+                client = new ClientEventIO(EventIO.Config.ClientConnectionAddress, EventIO.Config.Port, LoadMap);
                 EventIO.Set(client);
 
             } catch (Exception ex)

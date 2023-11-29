@@ -58,6 +58,9 @@ namespace TimberModTest
             Harmony harmony = new Harmony(PluginGuid);
             harmony.PatchAll();
             //DeterminismPatcher.PatchDeterminism(harmony);
+
+            ReplayConfig config = mod.Configs.Get<ReplayConfig>();
+            EventIO.Config = config;
         }
 
         public static void Log(string message)
