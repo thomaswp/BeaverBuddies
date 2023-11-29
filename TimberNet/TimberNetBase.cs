@@ -32,6 +32,16 @@ namespace TimberNet
 
         public int TickCount { get; private set; }
 
+        public int TicksBehind
+        {
+            get
+            {
+                if (receivedEvents.Count == 0)
+                    return 0;
+                return Math.Min(0, GetTick(receivedEvents.Last()) - TickCount);
+            }
+        }
+
         public bool Started { get; private set; }
 
         public virtual bool ShouldTick => Started;

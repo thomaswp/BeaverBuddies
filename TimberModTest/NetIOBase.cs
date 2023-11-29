@@ -16,6 +16,7 @@ namespace TimberModTest
         public abstract bool RecordReplayedEvents { get; }
         public abstract UserEventBehavior UserEventBehavior { get; }
         public bool IsOutOfEvents => !netBase.ShouldTick;
+        public int TicksBehind => netBase.TicksBehind;
 
         public void Close()
         {

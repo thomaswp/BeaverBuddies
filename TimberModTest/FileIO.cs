@@ -38,6 +38,7 @@ namespace TimberModTest
         public bool RecordReplayedEvents => true;
         public UserEventBehavior UserEventBehavior => UserEventBehavior.Play;
         public bool IsOutOfEvents => false;
+        public int TicksBehind => 0;
 
         private JsonSerializerSettings settings;
         private string filePath;
@@ -94,6 +95,7 @@ namespace TimberModTest
         // Shouldn't need to record anything
         public bool RecordReplayedEvents => false;
         public bool IsOutOfEvents => events.Count == 0;
+        public int TicksBehind => 0;
 
         private JsonSerializerSettings settings;
         private List<ReplayEvent> events = new();

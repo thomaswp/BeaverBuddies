@@ -94,6 +94,34 @@ namespace TimberModTest
         }
     }
 
+
+    [HarmonyPatch(typeof(SpeedManager), nameof(SpeedManager.ChangeSpeed))]
+    public class SpeedChangePatcher
+    {
+        private static bool silently = false;
+
+        public static void SetSpeedSilently(SpeedManager speedManager, int speed)
+        {
+            silently = true;
+            speedManager.ChangeSpeed(speed);
+            silently = false;
+        }
+
+        static bool Prefix(SpeedManager __instance, ref int speed)
+        {
+            if (EventIO.ShouldPauseTicking) speed = 0;
+            if (__instance.CurrentSpeed == speed) return true;
+            if (silently) return true;
+
+            ReplayService.RecordEvent(new SpeedSetEvent()
+            {
+                speed = speed
+            });
+            return EventIO.ShouldPlayPatchedEvents;
+        }
+    }
+
+
     [Serializable]
     public class BuildingPlacedEvent : ReplayEvent
     {

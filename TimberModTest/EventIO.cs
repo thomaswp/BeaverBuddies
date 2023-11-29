@@ -37,6 +37,7 @@ namespace TimberModTest
         UserEventBehavior UserEventBehavior { get; }
 
         bool IsOutOfEvents { get; }
+        int TicksBehind { get; }
 
         private static EventIO instance;
         public static EventIO Get() { return instance; }

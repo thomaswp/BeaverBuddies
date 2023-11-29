@@ -34,8 +34,7 @@ namespace TimberModTest
         private EventIO io => EventIO.Get();
 
         private int ticksSinceLoad = 0;
-        private int speedAtPause = 0;
-        private bool changingSpeed = false;
+        private int targetSpeed = 0;
 
         private static ConcurrentQueue<ReplayEvent> eventsToSend = new ConcurrentQueue<ReplayEvent>();
         private static ConcurrentQueue<ReplayEvent> eventsToPlay = new ConcurrentQueue<ReplayEvent>();
@@ -184,27 +183,37 @@ namespace TimberModTest
             io.Update();
             ReplayEvents();
             SendEvents();
-
-            // TODO: Should have a more intelligent speed buffering algorith...
-            changingSpeed = true;
-            if (io.IsOutOfEvents && _speedManager.CurrentSpeed != 0)
-            {
-                speedAtPause = _speedManager.CurrentSpeed;
-                _speedManager.ChangeSpeed(0);
-            }
-            else if (!io.IsOutOfEvents && speedAtPause != 0 && 
-                _speedManager.CurrentSpeed == 0)
-            {
-                _speedManager.ChangeSpeed(speedAtPause);
-                speedAtPause = 0;
-            }
-            changingSpeed = false;
+            UpdateSpeed();
         }
 
-        public void OnSpeedChange(CurrentSpeedChangedEvent e)
+        public void SetTargetSpeed(int speed)
         {
-            if (changingSpeed) return;
-            speedAtPause = e.CurrentSpeed;
+            targetSpeed = speed;
+            UpdateSpeed();
+        }
+
+        private void UpdateSpeed()
+        {
+            // TODO: Should have a more intelligent speed buffering algorith...
+            if (io.IsOutOfEvents && _speedManager.CurrentSpeed != 0)
+            {
+                SpeedChangePatcher.SetSpeedSilently(_speedManager, 0);
+            }
+            if (io.IsOutOfEvents) return;
+
+            int targetSpeed = this.targetSpeed;
+            int ticksBehind = io.TicksBehind;
+
+            // If we're behind, speed up to match.
+            if (ticksBehind > targetSpeed)
+            {
+                targetSpeed = Math.Min(ticksBehind, 3);
+            }
+
+            if (_speedManager.CurrentSpeed != targetSpeed)
+            {
+                SpeedChangePatcher.SetSpeedSilently(_speedManager, targetSpeed);
+            }
         }
 
         //private Stopwatch tickTimer = new Stopwatch();
@@ -239,36 +248,4 @@ namespace TimberModTest
             //Plugin.Log($"State Check [T{ticksSinceLoad}]: {hash.ToString("X8")}");
         }
     }
-
-    [HarmonyPatch(typeof(SpeedManager), nameof(SpeedManager.ChangeSpeed))]
-    public class SpeedChangePatcher
-    {
-
-        //private static int times1 = 0;
-
-        static void Prefix(SpeedManager __instance, ref int speed)
-        {
-            if (EventIO.ShouldPauseTicking) speed = 0;
-
-            //if (speed != 0 && times1 == 0)
-            //{
-            //    Plugin.Log("Setting seed on play");
-            //    //ReplayService.RecordEvent(RandomStateSetEvent.CreateAndExecute());
-            //    UnityEngine.Random.InitState(1234);
-            //    times1++;
-            //}
-
-            // TODO: Do all the good replay ifs as in other events
-            // and make sure this isn't triggered programmatically
-            //if (__instance.CurrentSpeed != speed)
-            //{
-            //    ReplayService.RecordEvent(new SpeedSetEvent()
-            //    {
-            //        speed = speed
-            //    });
-            //}
-        }
-    }
-
-
 }
