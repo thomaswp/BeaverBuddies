@@ -227,6 +227,8 @@ namespace TimberModTest
 
         public override void Replay(IReplayContext context)
         {
+            // TODO: Looks like this doesn't work until the receiver
+            // has at least opened the tool tray. Need to test more.
             var treeService = context.GetSingleton<TreeCuttingArea>();
             if (wasAdded)
             {
