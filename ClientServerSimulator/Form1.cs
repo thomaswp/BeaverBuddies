@@ -25,6 +25,9 @@ namespace TimberNet
             client.OnLog += message => Log(message, textBoxClient);
             server.OnLog += message => Log(message, textBoxServer);
 
+            clientDriver.OnTargetSpeedChanged += speed => this.nudClientSpeed.Value = speed;
+            serverDriver.OnTargetSpeedChanged += speed => this.nudServerSpeed.Value = speed;
+
             //server.Start();
         }
 

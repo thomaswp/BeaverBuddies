@@ -208,13 +208,13 @@ namespace TimberModTest
             // If we're behind, speed up to match.
             if (ticksBehind > targetSpeed)
             {
-                targetSpeed = Math.Min(ticksBehind, 3);
-                Plugin.Log($"Upping target speed to: {targetSpeed}");
+                targetSpeed = Math.Min(ticksBehind, 4);
+                //Plugin.Log($"Upping target speed to: {targetSpeed}");
             }
 
             if (_speedManager.CurrentSpeed != targetSpeed)
             {
-                Plugin.Log($"Setting speed to target speed: {targetSpeed}");
+                //Plugin.Log($"Setting speed to target speed: {targetSpeed}");
                 SpeedChangePatcher.SetSpeedSilently(_speedManager, targetSpeed);
             }
         }

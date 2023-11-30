@@ -2,6 +2,8 @@
 
 namespace TimberNet
 {
+    public delegate void TargetSpeedChanged(int speed);
+
     internal abstract class DriverBase<T> where T : TimberNetBase
     {
         public const string LOCALHOST = "127.0.0.1";
@@ -9,6 +11,8 @@ namespace TimberNet
 
         protected List<JObject> scriptedEvents;
         public readonly T netBase;
+
+        public event TargetSpeedChanged? OnTargetSpeedChanged;
 
         protected int ticks = 0;
 
@@ -24,9 +28,22 @@ namespace TimberNet
             return JArray.Parse(json).Cast<JObject>().ToList();
         }
 
-        protected virtual void ReadEvents()
+        private void ReadEvents()
         {
-            netBase.ReadEvents(ticks);
+            var events = netBase.ReadEvents(ticks);
+            foreach (JObject message in events)
+            {
+                ProcessEvent(message);
+            }
+        }
+
+        protected virtual void ProcessEvent(JObject message)
+        {
+            if (TimberNetBase.GetType(message) == "SpeedSetEvent")
+            {
+                int speed = message["speed"]!.ToObject<int>();
+                OnTargetSpeedChanged?.Invoke(speed);
+            }
         }
 
         public virtual void TryTick()
@@ -83,15 +100,10 @@ namespace TimberNet
             return () => initEvent;
         }
 
-        protected override void ReadEvents()
+        protected override void ProcessEvent(JObject message)
         {
-            // Immediately send out any received events as if
-            // the user had done them.
-            var events = netBase.ReadEvents(ticks);
-            foreach (JObject message in events)
-            {
-                netBase.DoUserInitiatedEvent(message);
-            }
+            base.ProcessEvent(message);
+            netBase.DoUserInitiatedEvent(message);
         }
 
         public override void Update()

@@ -62,7 +62,7 @@
             // 
             this.nudServerSpeed.Location = new System.Drawing.Point(93, 21);
             this.nudServerSpeed.Maximum = new decimal(new int[] {
-            3,
+            4,
             0,
             0,
             0});
@@ -85,7 +85,7 @@
             // 
             this.nudClientSpeed.Location = new System.Drawing.Point(577, 21);
             this.nudClientSpeed.Maximum = new decimal(new int[] {
-            3,
+            4,
             0,
             0,
             0});
