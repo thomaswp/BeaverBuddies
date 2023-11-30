@@ -204,7 +204,7 @@ namespace TimberModTest
             int targetSpeed = this.TargetSpeed;
             int ticksBehind = io.TicksBehind;
 
-            Plugin.Log($"Ticks behind {ticksBehind}");
+            //Plugin.Log($"Ticks behind {ticksBehind}");
             // If we're behind, speed up to match.
             if (ticksBehind > targetSpeed)
             {
