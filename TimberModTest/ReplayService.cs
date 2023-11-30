@@ -34,7 +34,7 @@ namespace TimberModTest
         private EventIO io => EventIO.Get();
 
         private int ticksSinceLoad = 0;
-        private int targetSpeed = 0;
+        public int TargetSpeed  { get; private set; } = 0;
 
         private static ConcurrentQueue<ReplayEvent> eventsToSend = new ConcurrentQueue<ReplayEvent>();
         private static ConcurrentQueue<ReplayEvent> eventsToPlay = new ConcurrentQueue<ReplayEvent>();
@@ -61,6 +61,8 @@ namespace TimberModTest
             AddSingleton(buildingService);
             AddSingleton(plantingSelectionService);
             AddSingleton(treeCuttingArea);
+
+            AddSingleton(this);
 
             _eventBus.Register(this);
 
@@ -188,30 +190,31 @@ namespace TimberModTest
 
         public void SetTargetSpeed(int speed)
         {
-            targetSpeed = speed;
+            TargetSpeed = speed;
             UpdateSpeed();
         }
 
         private void UpdateSpeed()
         {
-            // TODO: Should have a more intelligent speed buffering algorith...
             if (io.IsOutOfEvents && _speedManager.CurrentSpeed != 0)
             {
                 SpeedChangePatcher.SetSpeedSilently(_speedManager, 0);
             }
             if (io.IsOutOfEvents) return;
-
-            int targetSpeed = this.targetSpeed;
+            int targetSpeed = this.TargetSpeed;
             int ticksBehind = io.TicksBehind;
 
+            Plugin.Log($"Ticks behind {ticksBehind}");
             // If we're behind, speed up to match.
             if (ticksBehind > targetSpeed)
             {
                 targetSpeed = Math.Min(ticksBehind, 3);
+                Plugin.Log($"Upping target speed to: {targetSpeed}");
             }
 
             if (_speedManager.CurrentSpeed != targetSpeed)
             {
+                Plugin.Log($"Setting speed to target speed: {targetSpeed}");
                 SpeedChangePatcher.SetSpeedSilently(_speedManager, targetSpeed);
             }
         }

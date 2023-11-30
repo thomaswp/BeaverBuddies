@@ -38,7 +38,7 @@ namespace TimberNet
             {
                 if (receivedEvents.Count == 0)
                     return 0;
-                return Math.Min(0, GetTick(receivedEvents.Last()) - TickCount);
+                return Math.Max(0, GetTick(receivedEvents.Last()) - TickCount);
             }
         }
 

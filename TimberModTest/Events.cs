@@ -90,7 +90,15 @@ namespace TimberModTest
         public override void Replay(IReplayContext context)
         {
             SpeedManager sm = context.GetSingleton<SpeedManager>();
+            Plugin.Log($"Event: Changing speed from {sm.CurrentSpeed} to {speed}");
             if (sm.CurrentSpeed != speed) sm.ChangeSpeed(speed);
+
+            ReplayService replayService = context.GetSingleton<ReplayService>();
+            if (speed != replayService.TargetSpeed)
+            {
+                Plugin.Log($"Event: Changing target speed from {replayService.TargetSpeed} to {speed}");
+                replayService.SetTargetSpeed(speed);
+            }
         }
     }
 
@@ -109,15 +117,24 @@ namespace TimberModTest
 
         static bool Prefix(SpeedManager __instance, ref int speed)
         {
-            if (EventIO.ShouldPauseTicking) speed = 0;
+            // No need to log speed changes to current speed
             if (__instance.CurrentSpeed == speed) return true;
+            // Also don't log if we're silent
             if (silently) return true;
 
             ReplayService.RecordEvent(new SpeedSetEvent()
             {
                 speed = speed
             });
-            return EventIO.ShouldPlayPatchedEvents;
+
+            if (EventIO.ShouldPlayPatchedEvents)
+            {
+                // If this will actually change the speed, make sure
+                // we shouldn't pause instead.
+                if (EventIO.ShouldPauseTicking) speed = 0;
+                return true;
+            }
+            return false;
         }
     }
 
