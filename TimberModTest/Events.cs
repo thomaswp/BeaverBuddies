@@ -27,6 +27,7 @@ namespace TimberModTest
     {
         public float timeInFixedSecs;
         public int ticksSinceLoad;
+        public int? randomS0Before;
 
         public string type => GetType().Name;
 

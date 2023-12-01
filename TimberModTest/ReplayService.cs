@@ -110,7 +110,7 @@ namespace TimberModTest
             }
             else
             {
-                eventsToSend.Enqueue(replayEvent);
+                SendEvent(replayEvent);
             }
         }
 
@@ -135,14 +135,26 @@ namespace TimberModTest
                     Plugin.Log($"Event past time: {eventTime} < {currentTick}");
                 }
                 Plugin.Log($"Replaying event [{replayEvent.ticksSinceLoad}]: {replayEvent.type}");
+                
+                // If this event was played (e.g. on the server) and recorded a 
+                // random state, make sure we're in the same state.
+                if (replayEvent.randomS0Before != null)
+                {
+                    int s0 = UnityEngine.Random.state.s0;
+                    if (s0 != replayEvent.randomS0Before)
+                    {
+                        Plugin.Log($"Random state mismatch: {s0} != {replayEvent.randomS0Before}");
+                        // TODO: Resync!
+                    }
+                }
                 try
                 {
                     replayEvent.Replay(this);
                     // Only send the event if it played successfully and
                     // the IO says we shouldn't skip recording
                     if (!EventIO.SkipRecording)
-                    { 
-                        eventsToSend.Enqueue(replayEvent);
+                    {
+                        SendEvent(replayEvent);
                     }
                 } catch (Exception e)
                 {
@@ -151,6 +163,18 @@ namespace TimberModTest
                 }
             }
             IsReplayingEvents = false;
+        }
+
+        private static void SendEvent(ReplayEvent replayEvent)
+        {
+            // Only set the random state if this recoded event is
+            // actually going to be played.
+            if (EventIO.ShouldPlayPatchedEvents)
+            {
+                replayEvent.randomS0Before = UnityEngine.Random.state.s0;
+                Plugin.Log($"Recording event s0: {replayEvent.randomS0Before}");
+            }
+            eventsToSend.Enqueue(replayEvent);
         }
 
         private void SendEvents()
