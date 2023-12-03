@@ -123,7 +123,7 @@ namespace TimberModTest
                 }
                 catch (Exception e)
                 {
-                    Plugin.Log("Failed to load json: " + e.Message);
+                    Plugin.LogError("Failed to load json: " + e.Message);
                 }
             }
 

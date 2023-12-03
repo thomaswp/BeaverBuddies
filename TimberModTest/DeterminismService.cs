@@ -169,7 +169,7 @@ namespace TimberModTest
         {
             if (!ReplayService.IsLoaded) return;
             
-            Plugin.Log("Unknown random called outside of tick");
+            Plugin.LogWarning("Unknown random called outside of tick");
             Plugin.LogStackTrace();
         }
     }

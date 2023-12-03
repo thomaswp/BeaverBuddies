@@ -30,7 +30,7 @@ namespace TimberModTest
                 case MODE_NONE:
                     return NetMode.None;
                 default:
-                    Plugin.Log("Unknown netowrking mode: " + Mode);
+                    Plugin.LogWarning("Unknown netowrking mode: " + Mode);
                     return NetMode.None;
             }
         }

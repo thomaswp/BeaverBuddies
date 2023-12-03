@@ -40,6 +40,8 @@ namespace TimberModTest
         private EventIO io => EventIO.Get();
 
         private int ticksSinceLoad = 0;
+
+        public static bool ShouldInterruptTicking { get; private set; } = false;
         public int TargetSpeed  { get; private set; } = 0;
 
         private static ConcurrentQueue<ReplayEvent> eventsToSend = new ConcurrentQueue<ReplayEvent>();
@@ -124,9 +126,9 @@ namespace TimberModTest
 
         private void ReplayEvents()
         {
-            if (TickableBucketServicePatcher.currentBucket != 0)
+            if (TickableBucketServiceTick1Patcher.currentBucket != 0)
             {
-                Plugin.Log($"Warning, replaying events when bucket != 0: {TickableBucketServicePatcher.currentBucket}");
+                Plugin.LogWarning($"Warning, replaying events when bucket != 0: {TickableBucketServiceTick1Patcher.currentBucket}");
             }
 
             List<ReplayEvent> eventsToReplay = io.ReadEvents(ticksSinceLoad);
@@ -146,9 +148,9 @@ namespace TimberModTest
                     break;
                 if (eventTime < currentTick)
                 {
-                    Plugin.Log($"Event past time: {eventTime} < {currentTick}");
+                    Plugin.LogWarning($"Event past time: {eventTime} < {currentTick}");
                 }
-                Plugin.Log($"Replaying event [{replayEvent.ticksSinceLoad}]: {replayEvent.type}");
+                //Plugin.Log($"Replaying event [{replayEvent.ticksSinceLoad}]: {replayEvent.type}");
                 
                 // If this event was played (e.g. on the server) and recorded a 
                 // random state, make sure we're in the same state.
@@ -157,7 +159,7 @@ namespace TimberModTest
                     int s0 = UnityEngine.Random.state.s0;
                     if (s0 != replayEvent.randomS0Before)
                     {
-                        Plugin.Log($"Random state mismatch: {s0} != {replayEvent.randomS0Before}");
+                        Plugin.LogWarning($"Random state mismatch: {s0} != {replayEvent.randomS0Before}");
                         // TODO: Resync!
                     }
                 }
@@ -172,8 +174,8 @@ namespace TimberModTest
                     }
                 } catch (Exception e)
                 {
-                    Plugin.Log($"Failed to replay event: {e}");
-                    Plugin.Log(e.ToString());
+                    Plugin.LogError($"Failed to replay event: {e}");
+                    Plugin.LogError(e.ToString());
                 }
             }
             IsReplayingEvents = false;
@@ -233,6 +235,9 @@ namespace TimberModTest
         public void SetTargetSpeed(int speed)
         {
             TargetSpeed = speed;
+            // If we're paused, we should interrupt the ticking, so we end
+            // before more of the tick happens.
+            ShouldInterruptTicking = speed == 0;
             UpdateSpeed();
         }
 
@@ -338,13 +343,29 @@ namespace TimberModTest
     }
 
     [HarmonyPatch(typeof(TickableBucketService), nameof(TickableBucketService.TickNextBucket))]
-    static class TickableBucketServicePatcher
+    static class TickableBucketServiceTick1Patcher
     {
         public static int currentBucket;
 
         static void Prefix(TickableBucketService __instance)
         {
             currentBucket = __instance._nextTickedBucketIndex;
+        }
+    }
+
+    [HarmonyPatch(typeof(TickableBucketService), nameof(TickableBucketService.TickBuckets))]
+    static class TickableBucketServiceTickUpdatePatcher
+    {
+        static bool Prefix(TickableBucketService __instance, int numberOfBucketsToTick)
+        {
+            while (!ReplayService.ShouldInterruptTicking &&
+                numberOfBucketsToTick-- > 0)
+            {
+                __instance.TickNextBucket();
+            }
+
+            // Replace the default behavior entirely
+            return false;
         }
     }
 }
