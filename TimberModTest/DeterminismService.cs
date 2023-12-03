@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Timberborn.BlockSystem;
@@ -9,12 +10,15 @@ using Timberborn.GameSaveRepositorySystem;
 using Timberborn.GameScene;
 using Timberborn.InputSystem;
 using Timberborn.NaturalResourcesMoisture;
+using Timberborn.NeedSystem;
 using Timberborn.PlantingUI;
 using Timberborn.SingletonSystem;
 using Timberborn.SoundSystem;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
 using UnityEngine;
+using static UnityEngine.UIElements.UIR.Allocator2D;
+using static UnityEngine.UIElements.UIR.Implementation.UIRStylePainter;
 
 namespace TimberModTest
 {
@@ -299,11 +303,15 @@ namespace TimberModTest
         {
             DeterminismController.IsTicking = true;
         }
-
         static void Postfix()
         {
             DeterminismController.IsTicking = false;
         }
     }
 
+    //TODO: Need to confirm that entity IDs are consistent and get added
+    // to a consistent bucket
+    // (based on possibly random or system-dependednt hash codes)
+    //TickableBucketService.GetEntityBucketIndex determines this
+    //By default, 128 buckets
 }

@@ -29,6 +29,14 @@ namespace TimberModTest
         }
     }
 
+    // TODO: Need to figure out about water, which happens in parallel
+    // and therefore not in a deterministic order, whether it uses any
+    // randomness. If so, that could throw things off.
+    // Could solve by pulling a string of random numbers at the start
+    // of the parallel tick for it to use each time (more than it could use)
+    // and it can use them in order.
+    // Look at WaterSimulationController
+
     // TODO: Can't figure out how to create a dynamic patch
     // and it's not a high priority right now, so not using this
     public static class DeterminismPatcher

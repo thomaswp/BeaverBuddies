@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -19,10 +20,15 @@ using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
 using TimberNet;
 using UnityEngine;
+using static Timberborn.TickSystem.TickableSingletonService;
 
 namespace TimberModTest
 {
-    public class ReplayService : IReplayContext, IPostLoadableSingleton, IUpdatableSingleton, ITickableSingleton
+    public interface IEarlyTickableSingleton : ITickableSingleton
+    {
+    }
+
+    public class ReplayService : IReplayContext, IPostLoadableSingleton, IUpdatableSingleton, IEarlyTickableSingleton
     {
         //private readonly TickWathcerService _tickWathcerService;
         private readonly EventBus _eventBus;
@@ -62,6 +68,8 @@ namespace TimberModTest
             AddSingleton(plantingSelectionService);
             AddSingleton(treeCuttingArea);
 
+            // TODO: I think there's a SingletonRegistry that may
+            // be able to do this.
             AddSingleton(this);
 
             _eventBus.Register(this);
@@ -116,9 +124,15 @@ namespace TimberModTest
 
         private void ReplayEvents()
         {
+            if (TickableBucketServicePatcher.currentBucket != 0)
+            {
+                Plugin.Log($"Warning, replaying events when bucket != 0: {TickableBucketServicePatcher.currentBucket}");
+            }
+
             List<ReplayEvent> eventsToReplay = io.ReadEvents(ticksSinceLoad);
             while (eventsToPlay.TryDequeue(out ReplayEvent replayEvent))
             {
+                replayEvent.ticksSinceLoad = ticksSinceLoad;
                 eventsToReplay.Add(replayEvent);
             }
 
@@ -172,7 +186,7 @@ namespace TimberModTest
             if (EventIO.ShouldPlayPatchedEvents)
             {
                 replayEvent.randomS0Before = UnityEngine.Random.state.s0;
-                Plugin.Log($"Recording event s0: {replayEvent.randomS0Before}");
+                //Plugin.Log($"Recording event s0: {replayEvent.randomS0Before}");
             }
             eventsToSend.Enqueue(replayEvent);
         }
@@ -207,7 +221,11 @@ namespace TimberModTest
             }
             if (io == null) return;
             io.Update();
-            ReplayEvents();
+            // Only replay events on Update if we're paused by the user.
+            if (_speedManager.CurrentSpeed == 0 && TargetSpeed == 0)
+            {
+                ReplayEvents();
+            }
             SendEvents();
             UpdateSpeed();
         }
@@ -243,16 +261,18 @@ namespace TimberModTest
             }
         }
 
-        //private Stopwatch tickTimer = new Stopwatch();
+        // This will always happen at the very begining of a tick before
+        // anything else has happened, and after everything from the prior
+        // tick (including parallel things) has finished.
         public void Tick()
         {
-            // TODO: Should probably save and send the random seed each time
-            // and if it doesn't match, resync
-
-            //Plugin.Log($"Tick in {tickTimer.ElapsedMilliseconds}ms");
             UpdateSingleton();
+            // Replay events at the end of a tick always
+            ReplayEvents();
             ticksSinceLoad++;
-            //tickTimer.Restart();
+
+            // Puase at the end of a tick if we're out of events
+            UpdateSpeed();
 
             if (ticksSinceLoad % 100 == 0)
             {
@@ -273,6 +293,58 @@ namespace TimberModTest
             //byte[] bytes = ms.ToArray();
             //int hash = TimberNetBase.GetHashCode(bytes);
             //Plugin.Log($"State Check [T{ticksSinceLoad}]: {hash.ToString("X8")}");
+        }
+    }
+
+    [HarmonyPatch(typeof(TickableBucketService), nameof(TickableBucketService.FinishFullTick))]
+    static class TickableBucketService_FinishFullTick_Patch
+    {
+        static void Postfix(TickableBucketService __instance)
+        {
+            Plugin.Log("Finishing full tick");
+            Plugin.LogStackTrace();
+        }
+    }
+
+    [HarmonyPatch(typeof(TickableSingletonService), nameof(TickableSingletonService.Load))]
+    static class TickableSingletonServicePatcher
+    {
+        static void Postfix(TickableSingletonService __instance)
+        {
+            // Ensure late singletons come first
+            // Create a new list, since the variable is immutable
+            var tickableSingletons = new List<MeteredSingleton>(__instance._tickableSingletons);
+            var earlySingletons = tickableSingletons
+                .Where(s => s._tickableSingleton is IEarlyTickableSingleton).ToList();
+            foreach ( var earlySingleton in earlySingletons)
+            {
+                tickableSingletons.Remove(earlySingleton);
+            }
+            tickableSingletons.InsertRange(0, earlySingletons);
+            __instance._tickableSingletons = tickableSingletons.ToImmutableArray();
+
+            //Plugin.Log("Loading tickables");
+            //foreach (var singleton in __instance._tickableSingletons)
+            //{
+            //    var realSingleton = singleton._tickableSingleton;
+            //    Plugin.Log($"Singleton: {realSingleton.GetType().Name}");
+            //}
+            //Plugin.Log("Loading parallel tickables");
+            //foreach (var singleton in __instance._parallelTickableSingletons)
+            //{
+            //    Plugin.Log($"Parallel: {singleton.GetType().Name}");
+            //}
+        }
+    }
+
+    [HarmonyPatch(typeof(TickableBucketService), nameof(TickableBucketService.TickNextBucket))]
+    static class TickableBucketServicePatcher
+    {
+        public static int currentBucket;
+
+        static void Prefix(TickableBucketService __instance)
+        {
+            currentBucket = __instance._nextTickedBucketIndex;
         }
     }
 }
