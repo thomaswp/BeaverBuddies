@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.ConstrainedExecution;
 using System.Text;
+using System.Threading;
 using Timberborn.BlockObjectTools;
 using Timberborn.Buildings;
 using Timberborn.BuildingTools;
@@ -113,6 +114,7 @@ namespace TimberModTest
         public void PostLoad()
         {
             Plugin.Log("PostLoad");
+            DeterminismController.UnityThread = Thread.CurrentThread;
         }
 
         private T AddSingleton<T>(T singleton)

@@ -2,6 +2,7 @@
 using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using Timberborn.BlockSystem;
 using Timberborn.BuildingTools;
 using Timberborn.Common;
@@ -17,88 +18,29 @@ using Timberborn.SoundSystem;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
 using UnityEngine;
-using static UnityEngine.UIElements.UIR.Allocator2D;
-using static UnityEngine.UIElements.UIR.Implementation.UIRStylePainter;
 
 namespace TimberModTest
 {
-    public class DeterminismService
-    {
-        EventBus _eventBus;
-
-        DeterminismService(EventBus eventBus, IRandomNumberGenerator gen)
-        {
-            _eventBus = eventBus;
-            eventBus.Register(this);
-        }
-
-        // TODO: For some reason this is still necessary. I don't know if it
-        // works because of the first time (which happens before PostLoad)
-        // or the second time (which happens after PostLoad). Could be either
-        // depending on when the first random thing happens.
-        // Simple idea: ignore this if tick > 0
-        [OnEvent]
-        public void OnSpeedEvent(CurrentSpeedChangedEvent e)
-        {
-            if (e.CurrentSpeed != 0)
-            {
-
-                Plugin.Log($"Speed changed to: {e.CurrentSpeed}; random reset");
-                Random.InitState(1234);
-            }
-        }
-    }
-
-    //[HarmonyPatch(typeof(Random), nameof(Random.InitState))]
-    //public class RandomPatcher
-    //{
-    //    static void Prefix()
-    //    {
-    //        Plugin.Log($"Random.InitState");
-    //        Plugin.LogStackTrace();
-
-    //    }
-    //}
-
-    //[HarmonyPatch(typeof(GameSaveDeserializer), nameof(GameSaveDeserializer.Load))]
-    //public class LoadPatcher
-    //{
-    //    static void Prefix()
-    //    {
-    //        Plugin.Log($"GameSaveDeserializer.Load");
-    //        Plugin.LogStackTrace();
-    //    }
-    //}
 
     public static class DeterminismController
     {
         private static HashSet<System.Type> activeNonGamePatchers = new HashSet<System.Type>();
-        //private static HashSet<System.Type> activeNonTickGamePatchers = new HashSet<System.Type>();
         public static bool IsTicking = false;
+        public static Thread UnityThread;
 
         public static bool ShouldFreezeSeed 
         {
             get
             {
+                // Calls from a non-game thread should never use the game's random
+                // though if they are game-related we may need a solution for that...
+                if (UnityThread != null && Thread.CurrentThread != UnityThread)
+                {
+                    LogUnknownRandomCalled();
+                    return true;
+                }
+
                 bool areActiveNonGamePatchers = activeNonGamePatchers.Count > 0;
-                //bool areActiveGamePatchers = activeNonTickGamePatchers.Count > 0;
-
-                //if (areActiveNonGamePatchers && areActiveGamePatchers)
-                //{
-                //    // Should never happen, but just in case...
-                //    Plugin.Log("Somehow in both non-game and game code?");
-                //    Plugin.LogStackTrace();
-                //    return false;
-                //}
-
-                // TODO: Actually, any time this happens, it should be happening
-                // during a tick, so once I add that logic, I can remove this logic
-                // and just log any game code that's running outside of a tick
-                // since it shouldn't be, whether random or not!
-                // If this is game code, use game random
-                //if (areActiveGamePatchers) return false;
-
-
 
                 // If this is non-game code, don't use the Game's random
                 if (areActiveNonGamePatchers) return true;
