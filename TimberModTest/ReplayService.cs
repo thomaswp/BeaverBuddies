@@ -28,6 +28,27 @@ namespace TimberModTest
     {
     }
 
+    /**
+     * Represents a group of events that should be sent
+     * and received together, to ensure all events for a tick
+     * are present before they are played.
+     */
+    class GroupedEvent : ReplayEvent
+    {
+        public List<ReplayEvent> events;
+
+        public GroupedEvent(List<ReplayEvent> events)
+        {
+            // Make a copy
+            this.events = events.ToList();
+        }
+
+        public override void Replay(IReplayContext context)
+        {
+            throw new NotImplementedException("Do not directly replay grouped events");
+        }
+    }
+
     public class ReplayService : IReplayContext, IPostLoadableSingleton, IUpdatableSingleton, IEarlyTickableSingleton
     {
         //private readonly TickWathcerService _tickWathcerService;
@@ -120,7 +141,7 @@ namespace TimberModTest
             }
             else
             {
-                SendEvent(replayEvent);
+                EnqueueEventForSending(replayEvent);
             }
         }
 
@@ -132,6 +153,11 @@ namespace TimberModTest
             }
 
             List<ReplayEvent> eventsToReplay = io.ReadEvents(ticksSinceLoad);
+            // Spread grouped events into a flat list because we need to
+            // replay each individually (since we only record them if successful).
+            eventsToReplay = eventsToReplay
+                .SelectMany(e => e is GroupedEvent grouped ? grouped.events.ToArray() : new ReplayEvent[] { e })
+                .ToList();
             while (eventsToPlay.TryDequeue(out ReplayEvent replayEvent))
             {
                 replayEvent.ticksSinceLoad = ticksSinceLoad;
@@ -170,7 +196,7 @@ namespace TimberModTest
                     // the IO says we shouldn't skip recording
                     if (!EventIO.SkipRecording)
                     {
-                        SendEvent(replayEvent);
+                        EnqueueEventForSending(replayEvent);
                     }
                 } catch (Exception e)
                 {
@@ -181,7 +207,7 @@ namespace TimberModTest
             IsReplayingEvents = false;
         }
 
-        private static void SendEvent(ReplayEvent replayEvent)
+        private static void EnqueueEventForSending(ReplayEvent replayEvent)
         {
             // Only set the random state if this recoded event is
             // actually going to be played.
@@ -195,11 +221,15 @@ namespace TimberModTest
 
         private void SendEvents()
         {
+            List<ReplayEvent> events = new List<ReplayEvent>();
             while (eventsToSend.TryDequeue(out ReplayEvent replayEvent))
             {
                 replayEvent.ticksSinceLoad = ticksSinceLoad;
-                EventIO.Get().WriteEvents(replayEvent);
+                events.Add(replayEvent);
             }
+            GroupedEvent group = new GroupedEvent(events);
+            group.ticksSinceLoad = ticksSinceLoad;
+            EventIO.Get().WriteEvents(group);
         }
 
         // TODO: Find a better callback way of waiting until initial game
@@ -271,13 +301,12 @@ namespace TimberModTest
         // tick (including parallel things) has finished.
         public void Tick()
         {
-            UpdateSingleton();
             // Replay events at the end of a tick always
             ReplayEvents();
             ticksSinceLoad++;
 
-            // Puase at the end of a tick if we're out of events
-            UpdateSpeed();
+            // Update to send events and pause if needed
+            UpdateSingleton();
 
             if (ticksSinceLoad % 100 == 0)
             {

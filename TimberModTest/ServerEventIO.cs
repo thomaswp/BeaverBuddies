@@ -6,6 +6,7 @@ using static TimberNet.TimberNetBase;
 using TimberNet;
 using Timberborn.Beavers;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace TimberModTest
 {

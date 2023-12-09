@@ -119,16 +119,6 @@ namespace TimberNet
             listener.Stop();
         }
 
-        public override List<JObject> ReadEvents(int ticksSinceLoad)
-        {
-            if (ticksSinceLoad - ticksAtLastHeartbeat >= HeartbeatInterval)
-            {
-                ticksAtLastHeartbeat = ticksSinceLoad;
-                SendHeartbeat();
-            }
-            return base.ReadEvents(ticksSinceLoad);
-        }
-
         public void SendHeartbeat()
         {
             JObject message = new JObject();
