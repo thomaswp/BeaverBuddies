@@ -36,6 +36,7 @@ namespace TimberModTest
     public class FileWriteIO : EventIO
     {
         public bool RecordReplayedEvents => true;
+        public bool ShouldSendHeartbeat => false;
         public UserEventBehavior UserEventBehavior => UserEventBehavior.Play;
         public bool IsOutOfEvents => false;
         public int TicksBehind => 0;
@@ -92,6 +93,7 @@ namespace TimberModTest
     public class FileReadIO : EventIO
     {
         public UserEventBehavior UserEventBehavior => UserEventBehavior.Play;
+        public bool ShouldSendHeartbeat => false;
         // Shouldn't need to record anything
         public bool RecordReplayedEvents => false;
         public bool IsOutOfEvents => events.Count == 0;

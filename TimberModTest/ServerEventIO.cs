@@ -16,6 +16,9 @@ namespace TimberModTest
         // sent to the clients.
         public override bool RecordReplayedEvents => true;
 
+        // Servers need to send heartbeats so clients know to progress.
+        public override bool ShouldSendHeartbeat => true;
+
         // The server should wait until the next update to play a
         // user-initiated event, to make sure that the events
         // happen in the same order for the server and clients.

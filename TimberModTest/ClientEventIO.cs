@@ -17,6 +17,9 @@ namespace TimberModTest
         // server is what sent the event.
         public override bool RecordReplayedEvents => false;
 
+        // Clients don't need to send heartbeats
+        public override bool ShouldSendHeartbeat => false;
+
         // The client doesn't get to do anything from the user directly.
         // The client should send user-initiated events to the server.
         // It has to wait until an event is received from the server.

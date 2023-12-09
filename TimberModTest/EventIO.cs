@@ -39,6 +39,11 @@ namespace TimberModTest
         bool IsOutOfEvents { get; }
         int TicksBehind { get; }
 
+        /**
+         * Should return true if this IO should send hearbeats on tick
+         */
+        bool ShouldSendHeartbeat {  get; }
+
         private static EventIO instance;
         public static EventIO Get() { return instance; }
         public static void Set(EventIO io) { instance = io; }

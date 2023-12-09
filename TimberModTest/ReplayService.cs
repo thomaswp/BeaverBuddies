@@ -49,6 +49,14 @@ namespace TimberModTest
         }
     }
 
+    class HeartbeatEvent : ReplayEvent
+    {
+        public override void Replay(IReplayContext context)
+        {
+            // No op
+        }
+    }
+
     public class ReplayService : IReplayContext, IPostLoadableSingleton, IUpdatableSingleton, IEarlyTickableSingleton
     {
         //private readonly TickWathcerService _tickWathcerService;
@@ -227,9 +235,24 @@ namespace TimberModTest
                 replayEvent.ticksSinceLoad = ticksSinceLoad;
                 events.Add(replayEvent);
             }
+            // Don't send an empty list to save bandwidth.
+            if (events.Count == 0) return;
             GroupedEvent group = new GroupedEvent(events);
             group.ticksSinceLoad = ticksSinceLoad;
             EventIO.Get().WriteEvents(group);
+        }
+
+        /**
+         * Replays any pending events from the user or connected users
+         * and then sends successful/pending events to connected users.
+         * This should only be called if the game is paused at the end of
+         * a tick or right at the start of a tick, so that events always
+         * are recorded and replayed at the exact same time in the update loop.
+         */
+        private void DoTickIO()
+        {
+            ReplayEvents();
+            SendEvents();
         }
 
         // TODO: Find a better callback way of waiting until initial game
@@ -254,11 +277,12 @@ namespace TimberModTest
             if (io == null) return;
             io.Update();
             // Only replay events on Update if we're paused by the user.
+            // Also only send events if paused, so the client doesn't play
+            // then before the end of the tick.
             if (_speedManager.CurrentSpeed == 0 && TargetSpeed == 0)
             {
-                ReplayEvents();
+                DoTickIO();
             }
-            SendEvents();
             UpdateSpeed();
         }
 
@@ -301,17 +325,22 @@ namespace TimberModTest
         // tick (including parallel things) has finished.
         public void Tick()
         {
-            // Replay events at the end of a tick always
-            ReplayEvents();
+            if (io == null) return;
+
+            if (io.ShouldSendHeartbeat)
+            {
+                // Add a heartbeat if needed to make sure all ticks have
+                // at least 1 event, so the clients know we're ticking.
+                EnqueueEventForSending(new HeartbeatEvent());
+            }
+            // Replay and send events at the change of a tick always.
+            // For the server, sending events allows clients to keep playing.
+            DoTickIO();
+
             ticksSinceLoad++;
 
-            // Update to send events and pause if needed
-            UpdateSingleton();
-
-            if (ticksSinceLoad % 100 == 0)
-            {
-                LogStateCheck();
-            }
+            // Update speed and pause if needed for the new tick.
+            UpdateSpeed();
         }
 
         private void LogStateCheck()
