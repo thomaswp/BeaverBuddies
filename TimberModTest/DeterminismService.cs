@@ -28,6 +28,21 @@ namespace TimberModTest
         public static bool IsTicking = false;
         public static Thread UnityThread;
 
+        private static readonly List<StackTrace> lastRandomStackTraces = new List<StackTrace>();
+
+        public static void ClearRandomStacks()
+        {
+            lastRandomStackTraces.Clear();
+        }
+
+        public static void PrintRandomStacks()
+        {
+            foreach (StackTrace stack in lastRandomStackTraces)
+            {
+                Plugin.Log(stack.ToString());
+            }
+        }
+
         public static bool ShouldFreezeSeed 
         {
             get
@@ -47,7 +62,12 @@ namespace TimberModTest
 
                 // If we're ticking, it's likely game code, and hopefully
                 // we've caught any non-game code that can run during a tick!
-                if (IsTicking) return false;
+                if (IsTicking)
+                {
+                    // TODO: Make only in "dev mode"
+                    lastRandomStackTraces.Add(new StackTrace());
+                    return false;
+                }
 
                 // If we are replaying/playing events recorded from this
                 // user or other clients, we should always use the game's random.

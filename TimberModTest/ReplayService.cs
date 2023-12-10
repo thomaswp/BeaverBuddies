@@ -197,6 +197,8 @@ namespace TimberModTest
                     {
                         Plugin.LogWarning($"Random state mismatch: {s0} != {replayEvent.randomS0Before}");
                         SetTargetSpeed(0);
+                        SpeedChangePatcher.SetSpeedSilently(_speedManager, 0);
+                        DeterminismController.PrintRandomStacks();
                         break;
                         // TODO: Resync!
                     }
@@ -217,6 +219,10 @@ namespace TimberModTest
                 }
             }
             IsReplayingEvents = false;
+
+            // If we've replayed everythign for this tick and nothing's
+            // triggered a desync, clear the saved stacks.
+            DeterminismController.ClearRandomStacks();
         }
 
         private static void EnqueueEventForSending(ReplayEvent replayEvent)
