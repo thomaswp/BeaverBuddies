@@ -10,7 +10,9 @@ using Timberborn.ConstructibleSystem;
 using Timberborn.GameSaveRepositorySystem;
 using Timberborn.GameScene;
 using Timberborn.InputSystem;
+using Timberborn.NaturalResources;
 using Timberborn.NaturalResourcesMoisture;
+using Timberborn.NaturalResourcesReproduction;
 using Timberborn.NeedSystem;
 using Timberborn.PlantingUI;
 using Timberborn.SingletonSystem;
@@ -280,4 +282,16 @@ namespace TimberModTest
     // TODO: Possibly related: when sleep occurs, the game seems
     // to desync. Not sure what that would happen, since it's just part
     // of the update loop, and I need to do a more definitive test...
+
+    [HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.SpawnNewResources))]
+    public class NRRPatcher
+    {
+        static void Prefix(NaturalResourceReproducer __instance)
+        {
+            foreach (var (reproducibleKey, coordinates) in __instance._newResources)
+            {
+                Plugin.LogWarning($"{reproducibleKey.Id}, {coordinates.ToString()}");
+            }
+        }
+    }
 }
