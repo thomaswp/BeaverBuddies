@@ -196,6 +196,8 @@ namespace TimberModTest
                     if (s0 != replayEvent.randomS0Before)
                     {
                         Plugin.LogWarning($"Random state mismatch: {s0} != {replayEvent.randomS0Before}");
+                        SetTargetSpeed(0);
+                        break;
                         // TODO: Resync!
                     }
                 }
@@ -220,8 +222,8 @@ namespace TimberModTest
         private static void EnqueueEventForSending(ReplayEvent replayEvent)
         {
             // Only set the random state if this recoded event is
-            // actually going to be played.
-            if (EventIO.ShouldPlayPatchedEvents)
+            // actually going to be played, or if it's a heartbeat.
+            if (EventIO.ShouldPlayPatchedEvents || replayEvent is HeartbeatEvent)
             {
                 replayEvent.randomS0Before = UnityEngine.Random.state.s0;
                 //Plugin.Log($"Recording event s0: {replayEvent.randomS0Before}");
