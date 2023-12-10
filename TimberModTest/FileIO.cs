@@ -7,6 +7,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Timberborn.GameSaveRepositorySystem;
+using Timberborn.GameSaveRuntimeSystem;
+using Timberborn.GameSceneLoading;
+using Timberborn.SceneLoading;
+using Timberborn.SingletonSystem;
 using TimberNet;
 
 namespace TimberModTest
@@ -30,6 +35,33 @@ namespace TimberModTest
         public static string Serialize<T>(T obj)
         {
             return JsonConvert.SerializeObject(obj, Default);
+        }
+    }
+
+    public class RecordToFileService : IPostLoadableSingleton
+    {
+        private string fileName;
+        public RecordToFileService(SceneLoader sceneLoader)
+        {
+            var saveRef = sceneLoader.GetSceneParameters<GameSceneParameters>()?.SaveReference;
+            if (saveRef != null)
+            {
+                fileName = saveRef.SaveName + ".json";
+            }
+            else
+            {
+                Plugin.LogError("Unknown save name");
+                fileName = "test.json";
+            }
+
+        }
+
+        public void PostLoad()
+        {
+            if (EventIO.Config.GetNetMode() != NetMode.Record) return;
+            Plugin.Log("Recording to file");
+            EventIO.Set(new FileWriteIO("Replays/" + fileName));
+
         }
     }
     
