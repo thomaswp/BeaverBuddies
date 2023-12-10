@@ -27,6 +27,7 @@ namespace TimberModTest
     {
         public void Configure(IContainerDefinition containerDefinition)
         {
+            if (EventIO.Config.Mode == ReplayConfig.MODE_NONE) return;
             Plugin.Log($"Registering In Game Services");
             //containerDefinition.Bind<DeterminismService>().AsSingleton();
             containerDefinition.Bind<ReplayService>().AsSingleton();
@@ -40,6 +41,7 @@ namespace TimberModTest
     {
         public void Configure(IContainerDefinition containerDefinition)
         {
+            if (EventIO.Config.Mode == ReplayConfig.MODE_NONE) return;
             Plugin.Log($"Registering Main Menu Services");
             containerDefinition.Bind<ClientConnectionService>().AsSingleton();
         }
@@ -56,12 +58,15 @@ namespace TimberModTest
         {
             logger = consoleWriter;
             Log($"Plugin {PluginGuid} is loaded!");
+
+            ReplayConfig config = mod.Configs.Get<ReplayConfig>();
+            EventIO.Config = config;
+            if (config.Mode == ReplayConfig.MODE_NONE) return;
+
             Harmony harmony = new Harmony(PluginGuid);
             harmony.PatchAll();
             //DeterminismPatcher.PatchDeterminism(harmony);
 
-            ReplayConfig config = mod.Configs.Get<ReplayConfig>();
-            EventIO.Config = config;
         }
 
         public static void Log(string message)
