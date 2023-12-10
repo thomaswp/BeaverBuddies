@@ -98,5 +98,15 @@ namespace TimberNet
             labelClientTick.Text = "Tick: " + client.TickCount;
             labelServerTick.Text = "Tick: " + server.TickCount;
         }
+
+        private void buttonStopServer_Click(object sender, EventArgs e)
+        {
+            server.Close();
+        }
+
+        private void buttonStopClient_Click(object sender, EventArgs e)
+        {
+            client.Close();
+        }
     }
 }

@@ -28,6 +28,8 @@ namespace TimberNet
         private readonly ConcurrentQueue<string> logQueue = new ConcurrentQueue<string>();
         private byte[]? mapBytes = null;
 
+        public bool IsStopped { get; private set; } = false;
+
         public int Hash { get; private set; } = 17;
 
         public int TickCount { get; private set; }
@@ -48,7 +50,10 @@ namespace TimberNet
 
         protected List<JObject> receivedEvents = new List<JObject>();
 
-        public abstract void Close();
+        public virtual void Close()
+        {
+            IsStopped = true;
+        }
 
         public TimberNetBase()
         {
@@ -183,7 +188,7 @@ namespace TimberNet
             var stream = client.GetStream();
             byte[] headerBuffer = new byte[HEADER_SIZE];
             int messageCount = 0;
-            while (client.Connected)
+            while (client.Connected && !IsStopped)
             {
                 try
                 {

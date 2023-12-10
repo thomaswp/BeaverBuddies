@@ -40,6 +40,8 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.labelServerTick = new System.Windows.Forms.Label();
             this.labelClientTick = new System.Windows.Forms.Label();
+            this.buttonStopServer = new System.Windows.Forms.Button();
+            this.buttonStopClient = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.nudServerSpeed)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudClientSpeed)).BeginInit();
             this.SuspendLayout();
@@ -141,11 +143,33 @@
             this.labelClientTick.Size = new System.Drawing.Size(0, 15);
             this.labelClientTick.TabIndex = 7;
             // 
+            // buttonStopServer
+            // 
+            this.buttonStopServer.Location = new System.Drawing.Point(219, 19);
+            this.buttonStopServer.Name = "buttonStopServer";
+            this.buttonStopServer.Size = new System.Drawing.Size(75, 23);
+            this.buttonStopServer.TabIndex = 8;
+            this.buttonStopServer.Text = "Stop Server";
+            this.buttonStopServer.UseVisualStyleBackColor = true;
+            this.buttonStopServer.Click += new System.EventHandler(this.buttonStopServer_Click);
+            // 
+            // buttonStopClient
+            // 
+            this.buttonStopClient.Location = new System.Drawing.Point(711, 20);
+            this.buttonStopClient.Name = "buttonStopClient";
+            this.buttonStopClient.Size = new System.Drawing.Size(75, 23);
+            this.buttonStopClient.TabIndex = 9;
+            this.buttonStopClient.Text = "Stop Client";
+            this.buttonStopClient.UseVisualStyleBackColor = true;
+            this.buttonStopClient.Click += new System.EventHandler(this.buttonStopClient_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(934, 450);
+            this.Controls.Add(this.buttonStopClient);
+            this.Controls.Add(this.buttonStopServer);
             this.Controls.Add(this.labelClientTick);
             this.Controls.Add(this.labelServerTick);
             this.Controls.Add(this.textBoxClient);
@@ -177,5 +201,7 @@
         private System.Windows.Forms.Timer timer1;
         private Label labelServerTick;
         private Label labelClientTick;
+        private Button buttonStopServer;
+        private Button buttonStopClient;
     }
 }

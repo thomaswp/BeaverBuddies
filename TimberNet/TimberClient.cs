@@ -49,7 +49,12 @@ namespace TimberNet
 
         public override void Close()
         {
-            client.Close();
+            base.Close();
+            try
+            {
+                client.GetStream().Close();
+                client.Close();
+            } catch { }
         }
     }
 }

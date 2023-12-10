@@ -50,9 +50,16 @@ namespace TimberNet
             
             Task.Run(() =>
             {
-                while (true)
+                while (!IsStopped)
                 {
-                    TcpClient client = listener.AcceptTcpClient();
+                    TcpClient client;
+                    try
+                    {
+                        client = listener.AcceptTcpClient();
+                    } catch (Exception ex)
+                    {
+                        continue;
+                    }
                     clients.Add(client);
                     Task.Run(async () =>
                     {
@@ -116,7 +123,12 @@ namespace TimberNet
 
         public override void Close()
         {
-            listener.Stop();
+            base.Close();
+            try
+            {
+                listener.Stop();
+            }
+            catch { }  
         }
 
         public void SendHeartbeat()

@@ -256,4 +256,8 @@ namespace TimberModTest
     // (based on possibly random or system-dependednt hash codes)
     //TickableBucketService.GetEntityBucketIndex determines this
     //By default, 128 buckets
+
+    // TODO: Possibly related: when sleep occurs, the game seems
+    // to desync. Not sure what that would happen, since it's just part
+    // of the update loop, and I need to do a more definitive test...
 }
