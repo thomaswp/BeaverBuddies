@@ -19,6 +19,7 @@ using Timberborn.SingletonSystem;
 using Timberborn.SoundSystem;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
+using TimberNet;
 using UnityEngine;
 
 namespace TimberModTest
@@ -278,6 +279,8 @@ namespace TimberModTest
     {
         static bool Prefix(ref System.Guid __result)
         {
+            Plugin.LogStackTrace();
+
             byte[] guid = new byte[16];
             for (int i = 0; i < guid.Length; i++)
             {
@@ -300,10 +303,9 @@ namespace TimberModTest
     // of the update loop, and I need to do a more definitive test...
 
     /*
-     * Definite issues:
-     * - new Guid() is not from Unity randomness!!
-     * 
      * Theories:
+     * - new Guids are created on load after save, and before randomness
+     *   is synced, which could have consequences.
      * - Inconsistent update order (e.g. due to hash codes/buckets)
      * - Something isn't saved in the save state (e.g. when to go to bed),
      *   so we get different behavior.
@@ -312,22 +314,28 @@ namespace TimberModTest
      * Ruled out
      * - Unaccounted for calls to Unity random: there were no abnormal
      * calls at the time of desync, so the state was altered beforehand.
+     * 
+     * Fixed:
+     * - Guid.NewGuid now uses Unity's random generator and is deterministic
      */
 
-    //[HarmonyPatch(typeof(TickableEntityBucket), nameof(TickableEntityBucket.TickAll))]
-    //public class TEBPatcher
-    //{
-    //    static void Prefix(TickableEntityBucket __instance)
-    //    {
-    //        string o = "";
-    //        for (int i = 0; i < __instance._tickableEntities.Count; i++)
-    //        {
-    //            var entity = __instance._tickableEntities.Values[i];
-    //            o += $"Will tick: {entity._originalName}, {entity.EntityId}\n";
-    //        }
-    //        Plugin.Log(o);
-    //    }
-    //}
+    [HarmonyPatch(typeof(TickableEntityBucket), nameof(TickableEntityBucket.TickAll))]
+    public class TEBPatcher
+    {
+        public static int Hash { get; private set; }
+
+        static void Prefix(TickableEntityBucket __instance)
+        {
+            string o = "";
+            for (int i = 0; i < __instance._tickableEntities.Count; i++)
+            {
+                var entity = __instance._tickableEntities.Values[i];
+                o += $"Will tick: {entity._originalName}, {entity.EntityId}\n";
+                Hash = TimberNetBase.CombineHash(Hash, entity.EntityId.GetHashCode());
+            }
+            //Plugin.Log(o);
+        }
+    }
 
     //[HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.SpawnNewResources))]
     //public class NRRPatcher

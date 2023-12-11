@@ -348,6 +348,8 @@ namespace TimberModTest
             // For the server, sending events allows clients to keep playing.
             DoTickIO();
 
+            Plugin.Log("Tick order hash: " + TEBPatcher.Hash.ToString("X8"));
+
             ticksSinceLoad++;
 
             // Update speed and pause if needed for the new tick.
