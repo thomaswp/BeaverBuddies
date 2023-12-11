@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using System;
 using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -273,6 +274,22 @@ namespace TimberModTest
         }
     }
 
+    [HarmonyPatch(typeof(Guid), nameof(Guid.NewGuid))]
+    public class GuidPatcher
+    {
+        static bool Prefix(ref Guid __result)
+        {
+            Plugin.LogWarning("Generating new GUID!");
+            byte[] guid = new byte[16];
+            for (int i = 0; i < guid.Length; i++)
+            {
+                guid[i] = (byte)UnityEngine.Random.Range(0, byte.MaxValue + 1);
+            }
+            __result = new Guid(guid);
+            return false;
+        }
+    }
+
     //TODO: Need to confirm that entity IDs are consistent and get added
     // to a consistent bucket
     // (based on possibly random or system-dependednt hash codes)
@@ -298,20 +315,20 @@ namespace TimberModTest
      * calls at the time of desync, so the state was altered beforehand.
      */
 
-    [HarmonyPatch(typeof(TickableEntityBucket), nameof(TickableEntityBucket.TickAll))]
-    public class TEBPatcher
-    {
-        static void Prefix(TickableEntityBucket __instance)
-        {
-            string o = "";
-            for (int i = 0; i < __instance._tickableEntities.Count; i++)
-            {
-                var entity = __instance._tickableEntities.Values[i];
-                o += $"Will tick: {entity._originalName}, {entity.EntityId}\n";
-            }
-            Plugin.Log(o);
-        }
-    }
+    //[HarmonyPatch(typeof(TickableEntityBucket), nameof(TickableEntityBucket.TickAll))]
+    //public class TEBPatcher
+    //{
+    //    static void Prefix(TickableEntityBucket __instance)
+    //    {
+    //        string o = "";
+    //        for (int i = 0; i < __instance._tickableEntities.Count; i++)
+    //        {
+    //            var entity = __instance._tickableEntities.Values[i];
+    //            o += $"Will tick: {entity._originalName}, {entity.EntityId}\n";
+    //        }
+    //        Plugin.Log(o);
+    //    }
+    //}
 
     //[HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.SpawnNewResources))]
     //public class NRRPatcher
