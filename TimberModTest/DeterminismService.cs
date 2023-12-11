@@ -283,15 +283,45 @@ namespace TimberModTest
     // to desync. Not sure what that would happen, since it's just part
     // of the update loop, and I need to do a more definitive test...
 
-    [HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.SpawnNewResources))]
-    public class NRRPatcher
+    /*
+     * Definite issues:
+     * - new Guid() is not from Unity randomness!!
+     * 
+     * Theories:
+     * - Inconsistent update order (e.g. due to hash codes/buckets)
+     * - Something isn't saved in the save state (e.g. when to go to bed),
+     *   so we get different behavior.
+     * - Nondeterminism in the code, e.g. inconsistent dictionary traversal
+     * 
+     * Ruled out
+     * - Unaccounted for calls to Unity random: there were no abnormal
+     * calls at the time of desync, so the state was altered beforehand.
+     */
+
+    [HarmonyPatch(typeof(TickableEntityBucket), nameof(TickableEntityBucket.TickAll))]
+    public class TEBPatcher
     {
-        static void Prefix(NaturalResourceReproducer __instance)
+        static void Prefix(TickableEntityBucket __instance)
         {
-            foreach (var (reproducibleKey, coordinates) in __instance._newResources)
+            string o = "";
+            for (int i = 0; i < __instance._tickableEntities.Count; i++)
             {
-                Plugin.LogWarning($"{reproducibleKey.Id}, {coordinates.ToString()}");
+                var entity = __instance._tickableEntities.Values[i];
+                o += $"Will tick: {entity._originalName}, {entity.EntityId}\n";
             }
+            Plugin.Log(o);
         }
     }
+
+    //[HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.SpawnNewResources))]
+    //public class NRRPatcher
+    //{
+    //    static void Prefix(NaturalResourceReproducer __instance)
+    //    {
+    //        foreach (var (reproducibleKey, coordinates) in __instance._newResources)
+    //        {
+    //            Plugin.LogWarning($"{reproducibleKey.Id}, {coordinates.ToString()}");
+    //        }
+    //    }
+    //}
 }
