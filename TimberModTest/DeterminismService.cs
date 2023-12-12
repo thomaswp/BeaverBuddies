@@ -279,8 +279,6 @@ namespace TimberModTest
     {
         static bool Prefix(ref System.Guid __result)
         {
-            Plugin.LogStackTrace();
-
             byte[] guid = new byte[16];
             for (int i = 0; i < guid.Length; i++)
             {
@@ -304,23 +302,26 @@ namespace TimberModTest
 
     /*
      * Definite issues:
-     * - When a new entity is created, the order of updates diverges
-     *   so likely it is inersted in a different bucket/order, despite
-     *   having the same GUID. Guid.GetHashCode does seem (at least on
-     *   my 2 systems) to be the same, since that's the basis of the 
-     *   update state hash anyway.
      * 
      * Theories:
-     * - new Guids are created on load after save, and before randomness
-     *   is synced, which could have consequences.
-     * - Inconsistent update order (e.g. due to hash codes/buckets)
      * - Something isn't saved in the save state (e.g. when to go to bed),
      *   so we get different behavior.
      * - Nondeterminism in the code, e.g. inconsistent dictionary traversal
      * 
+     * Monitoring:
+     * - When a new entity is created, the order of updates might diverge,
+     *   so likely it is inersted in a different bucket/order, despite
+     *   having the same GUID. Guid.GetHashCode does seem (at least on
+     *   my 2 systems) to be the same, since that's the basis of the 
+     *   update state hash anyway. But I think this is fixed.
+     * 
      * Ruled out
      * - Unaccounted for calls to Unity random: there were no abnormal
      * calls at the time of desync, so the state was altered beforehand.
+     * - new Guids are created on load after save, and before randomness
+     *   is synced, but this seems to just be the patching.
+     * - Inconsistent update order (e.g. due to hash codes/buckets). Seems to
+     *   be consistent.
      * 
      * Fixed:
      * - Guid.NewGuid now uses Unity's random generator and is deterministic
