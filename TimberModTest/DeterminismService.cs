@@ -333,6 +333,7 @@ namespace TimberModTest
 
         static void Postfix(TickableEntityBucket __instance, TickableEntity tickableEntity)
         {
+            if (!ReplayService.IsLoaded) return;
             int index = __instance._tickableEntities.Values.IndexOf(tickableEntity);
             Plugin.Log($"Adding: {tickableEntity.EntityId} at index {index}");
             for (int i = 0; i < __instance._tickableEntities.Count; i++)
