@@ -19,6 +19,8 @@ using Timberborn.SingletonSystem;
 using Timberborn.SoundSystem;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
+using Timberborn.WalkingSystem;
+using Timberborn.WorkSystem;
 using TimberNet;
 using UnityEngine;
 
@@ -290,23 +292,16 @@ namespace TimberModTest
         }
     }
 
-    //TODO: Need to confirm that entity IDs are consistent and get added
-    // to a consistent bucket
-    // (based on possibly random or system-dependednt hash codes)
-    //TickableBucketService.GetEntityBucketIndex determines this
-    //By default, 128 buckets
-
-    // TODO: Possibly related: when sleep occurs, the game seems
-    // to desync. Not sure what that would happen, since it's just part
-    // of the update loop, and I need to do a more definitive test...
-
     /*
+     * When sleep occurs, the game seems to desync.
+     * 
      * Definite issues:
      * 
      * Theories:
      * - Something isn't saved in the save state (e.g. when to go to bed),
      *   so we get different behavior.
      * - Nondeterminism in the code, e.g. inconsistent dictionary traversal
+     * - Floating point rounding issues with movement, etc.
      * 
      * Monitoring:
      * - When a new entity is created, the order of updates might diverge,
@@ -314,6 +309,8 @@ namespace TimberModTest
      *   having the same GUID. Guid.GetHashCode does seem (at least on
      *   my 2 systems) to be the same, since that's the basis of the 
      *   update state hash anyway. But I think this is fixed.
+     * - SlotManager: Was the odd event out once, but can't reproduce it
+     *   so probably a coincidence. Nothing in it seemed to use nondeterminism.
      * 
      * Ruled out
      * - Unaccounted for calls to Unity random: there were no abnormal
@@ -336,10 +333,6 @@ namespace TimberModTest
             if (!ReplayService.IsLoaded) return;
             int index = __instance._tickableEntities.Values.IndexOf(tickableEntity);
             Plugin.Log($"Adding: {tickableEntity.EntityId} at index {index}");
-            for (int i = 0; i < __instance._tickableEntities.Count; i++)
-            {
-                Plugin.Log(__instance._tickableEntities.Values[i].EntityId.ToString());
-            }
         }
     }
 
@@ -356,6 +349,19 @@ namespace TimberModTest
                 var entity = __instance._tickableEntities.Values[i];
                 o += $"Will tick: {entity._originalName}, {entity.EntityId}\n";
                 Hash = TimberNetBase.CombineHash(Hash, entity.EntityId.GetHashCode());
+
+                if (entity._originalName == "BeaverAdult(Clone)" || entity._originalName == "BeaverChild(Clone)")
+                {
+                    var walker = entity._entityComponent.GetComponentFast<Walker>();
+                    var transform = entity._entityComponent.TransformFast;
+                    Vector3 walkerPosition = Vector3.zeroVector;
+                    if (walker != null)
+                    {
+                        var wp = walker?._pathFollower?._transform?.position;
+                        if (wp.HasValue) walkerPosition = wp.Value;
+                    }
+                    Plugin.Log($"{entity.EntityId}: {transform.position} {walkerPosition}");
+                }
             }
             //Plugin.Log(o);
         }
