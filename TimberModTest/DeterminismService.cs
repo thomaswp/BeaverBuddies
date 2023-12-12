@@ -303,6 +303,13 @@ namespace TimberModTest
     // of the update loop, and I need to do a more definitive test...
 
     /*
+     * Definite issues:
+     * - When a new entity is created, the order of updates diverges
+     *   so likely it is inersted in a different bucket/order, despite
+     *   having the same GUID. Guid.GetHashCode does seem (at least on
+     *   my 2 systems) to be the same, since that's the basis of the 
+     *   update state hash anyway.
+     * 
      * Theories:
      * - new Guids are created on load after save, and before randomness
      *   is synced, which could have consequences.
@@ -318,6 +325,21 @@ namespace TimberModTest
      * Fixed:
      * - Guid.NewGuid now uses Unity's random generator and is deterministic
      */
+
+    [HarmonyPatch(typeof(TickableEntityBucket), nameof(TickableEntityBucket.Add))]
+    public class TEBAddPatcher
+    {
+
+        static void Postfix(TickableEntityBucket __instance, TickableEntity tickableEntity)
+        {
+            int index = __instance._tickableEntities.Values.IndexOf(tickableEntity);
+            Plugin.Log($"Adding: {tickableEntity.EntityId} at index {index}");
+            for (int i = 0; i < __instance._tickableEntities.Count; i++)
+            {
+                Plugin.Log(__instance._tickableEntities.Values[i].EntityId.ToString());
+            }
+        }
+    }
 
     [HarmonyPatch(typeof(TickableEntityBucket), nameof(TickableEntityBucket.TickAll))]
     public class TEBPatcher
