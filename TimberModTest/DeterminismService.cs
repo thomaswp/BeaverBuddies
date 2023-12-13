@@ -296,6 +296,24 @@ namespace TimberModTest
      * When sleep occurs, the game seems to desync.
      * 
      * Definite issues:
+     * - Entities get created at one tick but not added until later.
+     *   I'm guessing the add is based on some event callback handled
+     *   in the update rather than in the tick, so when playing at high
+     *   speeds there's not always an update in between ticks, which can
+     *   cause desyncs. Should understand it first and repro, but I think
+     *   the solution might be to make sure an update is called at least
+     *   once per tick. Need to get a stack trace on the entity add.
+     *   See https://www.diffchecker.com/oHJhyVH5/
+     *   Update: It seems that it's called from EntityComponent.Start, which
+     *   according to Unity docs (https://docs.unity3d.com/ScriptReference/MonoBehaviour.Start.html)
+     *   is called at the first update frame where the object exists.
+     *   So essentially any logic that's called on Start needs to wait until
+     *   Tick or we need to make sure frames elapse after every tick or something.
+     *   This will take some thinking :(
+     *   One option is to look at UnityEngine.Object.Instantiate - anytime it's
+     *   called during a tick just make sure that we don't start another round
+     *   of ticking. I think (hopefully) the object will Start() before Update
+     *   would call more ticks, but either way it should be a deterministic 1-2 frames.
      * 
      * Theories:
      * - Something isn't saved in the save state (e.g. when to go to bed),
@@ -333,6 +351,7 @@ namespace TimberModTest
             if (!ReplayService.IsLoaded) return;
             int index = __instance._tickableEntities.Values.IndexOf(tickableEntity);
             Plugin.Log($"Adding: {tickableEntity.EntityId} at index {index}");
+            Plugin.LogStackTrace();
         }
     }
 

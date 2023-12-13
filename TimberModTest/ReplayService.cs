@@ -13,6 +13,7 @@ using Timberborn.BlockObjectTools;
 using Timberborn.Buildings;
 using Timberborn.BuildingTools;
 using Timberborn.Common;
+using Timberborn.EntitySystem;
 using Timberborn.Forestry;
 using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.PlantingUI;
@@ -427,16 +428,49 @@ namespace TimberModTest
     [HarmonyPatch(typeof(TickableBucketService), nameof(TickableBucketService.TickBuckets))]
     static class TickableBucketServiceTickUpdatePatcher
     {
+        private static bool ShouldTick(TickableBucketService __instance, int numberOfBucketsToTick)
+        {
+            // Never tick if we've been interrupted by a forced pause
+            if (ReplayService.ShouldInterruptTicking) return false;
+
+            // If we've created an instance, make sure to go exactly until
+            // the end of this tick, to ensure an update follows immediately.
+            if (EntityComponentInstantiatePatcher.InstanceWasInstantiated)
+            {
+                return __instance._nextTickedBucketIndex != 0;
+            }
+
+            return numberOfBucketsToTick > 0;
+        }
+
         static bool Prefix(TickableBucketService __instance, int numberOfBucketsToTick)
         {
-            while (!ReplayService.ShouldInterruptTicking &&
-                numberOfBucketsToTick-- > 0)
+            while (ShouldTick(__instance, numberOfBucketsToTick--))
             {
                 __instance.TickNextBucket();
             }
 
+            if (EntityComponentInstantiatePatcher.InstanceWasInstantiated)
+            {
+                Plugin.Log($"Finishing full tick; {__instance._nextTickedBucketIndex}");
+            }
+
+            // Clear the flag after each round of updates
+            EntityComponentInstantiatePatcher.InstanceWasInstantiated = false;
+
             // Replace the default behavior entirely
             return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(EntityComponent), nameof(EntityComponent.Instantiate))]
+    static class EntityComponentInstantiatePatcher
+    {
+        public static bool InstanceWasInstantiated = false;
+
+        static void Postfix()
+        {
+            InstanceWasInstantiated = true;
         }
     }
 }
