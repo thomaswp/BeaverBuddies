@@ -9,6 +9,7 @@ using System.Linq;
 using System.Runtime.ConstrainedExecution;
 using System.Text;
 using System.Threading;
+using Timberborn.BaseComponentSystem;
 using Timberborn.BlockObjectTools;
 using Timberborn.Buildings;
 using Timberborn.BuildingTools;
@@ -468,7 +469,7 @@ namespace TimberModTest
     {
         public static bool InstanceWasInstantiated = false;
 
-        static void Postfix()
+        static void Postfix(BaseComponent prefab, Guid id)
         {
             InstanceWasInstantiated = true;
         }
