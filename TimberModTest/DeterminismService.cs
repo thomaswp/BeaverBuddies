@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Threading;
 using Timberborn.BlockSystem;
 using Timberborn.BuildingTools;
+using Timberborn.CharacterMovementSystem;
 using Timberborn.Common;
 using Timberborn.ConstructibleSystem;
 using Timberborn.GameSaveRepositorySystem;
@@ -292,28 +293,60 @@ namespace TimberModTest
         }
     }
 
+    [HarmonyPatch(typeof(MovementAnimator), nameof(MovementAnimator.Update), typeof(float))]
+    public class MovementAnimatorUpdatePathcer
+    {
+        private static float lastTickTime;
+
+        // TODO: This will cause jumping if the animation can't progress until
+        // all items have ticked... ideally this would be per-instance, so
+        // no instance animates past its own next tick point :(
+        public static void EndTick()
+        {
+            lastTickTime = Time.time;
+        }
+
+        static bool Prefix(MovementAnimator __instance, float deltaTime)
+        {
+            UpdateTo(__instance, Mathf.Min(lastTickTime + Time.fixedDeltaTime, Time.time));
+            return false;
+        }
+
+        public static void UpdateToEndOfTick(MovementAnimator __instance)
+        {
+            UpdateTo(__instance, lastTickTime + Time.fixedDeltaTime);
+        }
+
+        private static void UpdateTo(MovementAnimator __instance, float time)
+        {
+            var _animatedPathFollower = __instance._animatedPathFollower;
+            _animatedPathFollower.Update(time);
+            if (!_animatedPathFollower.ReachedDestination())
+            {
+                // the delta here is only for rotation; hopefully not
+                // too important
+                __instance.UpdateTransform(Time.deltaTime);
+            }
+            else if (!_animatedPathFollower.Stopped)
+            {
+                __instance.StopAnimatingMovement();
+            }
+            __instance.InvokeAnimationUpdate();
+        }
+    }
+
     /*
      * When sleep occurs, the game seems to desync.
      * 
      * Definite issues:
-     * - Entities get created at one tick but not added until later.
-     *   I'm guessing the add is based on some event callback handled
-     *   in the update rather than in the tick, so when playing at high
-     *   speeds there's not always an update in between ticks, which can
-     *   cause desyncs. Should understand it first and repro, but I think
-     *   the solution might be to make sure an update is called at least
-     *   once per tick. Need to get a stack trace on the entity add.
-     *   See https://www.diffchecker.com/oHJhyVH5/
-     *   Update: It seems that it's called from EntityComponent.Start, which
-     *   according to Unity docs (https://docs.unity3d.com/ScriptReference/MonoBehaviour.Start.html)
-     *   is called at the first update frame where the object exists.
-     *   So essentially any logic that's called on Start needs to wait until
-     *   Tick or we need to make sure frames elapse after every tick or something.
-     *   This will take some thinking :(
-     *   One option is to look at UnityEngine.Object.Instantiate - anytime it's
-     *   called during a tick just make sure that we don't start another round
-     *   of ticking. I think (hopefully) the object will Start() before Update
-     *   would call more ticks, but either way it should be a deterministic 1-2 frames.
+     * - Movement of Beavers diverges over time, possibly due to rounding
+     *   or more likely something with a non-fixed-time-update.
+     *   The differences start small and grow over time.
+     *   Yup: PathFollower.MoveAlongPath uses Time.time. Should
+     *   check for all instances of this call.
+     *   MovementAnimator is what actually updates the Worker's tranform,
+     *   which occurs (reasonably) on dynamic update, and causes the desyncs
+     *   since transform is used for calculations in the tick logic.
      * 
      * Theories:
      * - Something isn't saved in the save state (e.g. when to go to bed),
@@ -322,11 +355,6 @@ namespace TimberModTest
      * - Floating point rounding issues with movement, etc.
      * 
      * Monitoring:
-     * - When a new entity is created, the order of updates might diverge,
-     *   so likely it is inersted in a different bucket/order, despite
-     *   having the same GUID. Guid.GetHashCode does seem (at least on
-     *   my 2 systems) to be the same, since that's the basis of the 
-     *   update state hash anyway. But I think this is fixed.
      * - SlotManager: Was the odd event out once, but can't reproduce it
      *   so probably a coincidence. Nothing in it seemed to use nondeterminism.
      * 
@@ -340,6 +368,10 @@ namespace TimberModTest
      * 
      * Fixed:
      * - Guid.NewGuid now uses Unity's random generator and is deterministic
+     * - When a new entity is created, the GUID should be deterministic, and
+     *   it should be added deterministically to the TickableBucketService
+     * - When Entities are created, the tick should fully complete (without
+     *   starting any new ticks) so the entity can Start() on the next Update().
      */
 
     [HarmonyPatch(typeof(TickableEntityBucket), nameof(TickableEntityBucket.Add))]
@@ -369,17 +401,17 @@ namespace TimberModTest
                 o += $"Will tick: {entity._originalName}, {entity.EntityId}\n";
                 Hash = TimberNetBase.CombineHash(Hash, entity.EntityId.GetHashCode());
 
+                // Update entity positions before the tick
+                var animator = entity._entityComponent.GetComponentFast<MovementAnimator>();
+                if (animator)
+                {
+                    MovementAnimatorUpdatePathcer.UpdateToEndOfTick(animator);
+                }
+
                 if (entity._originalName == "BeaverAdult(Clone)" || entity._originalName == "BeaverChild(Clone)")
                 {
-                    var walker = entity._entityComponent.GetComponentFast<Walker>();
                     var transform = entity._entityComponent.TransformFast;
-                    Vector3 walkerPosition = Vector3.zeroVector;
-                    if (walker != null)
-                    {
-                        var wp = walker?._pathFollower?._transform?.position;
-                        if (wp.HasValue) walkerPosition = wp.Value;
-                    }
-                    Plugin.Log($"{entity.EntityId}: {transform.position} {walkerPosition}");
+                    Plugin.Log($"{entity.EntityId}: {transform.position} {transform.position.x}");
                 }
             }
             //Plugin.Log(o);
