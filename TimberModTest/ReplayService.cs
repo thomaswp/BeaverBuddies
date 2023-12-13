@@ -18,6 +18,7 @@ using Timberborn.EntitySystem;
 using Timberborn.Forestry;
 using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.PlantingUI;
+using Timberborn.PrefabSystem;
 using Timberborn.SingletonSystem;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
@@ -464,12 +465,12 @@ namespace TimberModTest
         }
     }
 
-    [HarmonyPatch(typeof(EntityService), nameof(EntityService.Instantiate))]
+    [HarmonyPatch(typeof(EntityService), nameof(EntityService.Instantiate), typeof(BaseComponent), typeof(Guid))]
     static class EntityComponentInstantiatePatcher
     {
         public static bool InstanceWasInstantiated = false;
 
-        static void Postfix(BaseComponent prefab, Guid id)
+        static void Postfix()
         {
             InstanceWasInstantiated = true;
         }
