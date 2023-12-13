@@ -463,7 +463,7 @@ namespace TimberModTest
         }
     }
 
-    [HarmonyPatch(typeof(EntityComponent), nameof(EntityComponent.Instantiate))]
+    [HarmonyPatch(typeof(EntityService), nameof(EntityService.Instantiate))]
     static class EntityComponentInstantiatePatcher
     {
         public static bool InstanceWasInstantiated = false;
