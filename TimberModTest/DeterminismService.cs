@@ -2,6 +2,7 @@
 using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using Timberborn.BlockSystem;
 using Timberborn.BuildingTools;
@@ -312,11 +313,6 @@ namespace TimberModTest
      * - Movement of Beavers diverges over time, possibly due to rounding
      *   or more likely something with a non-fixed-time-update.
      *   The differences start small and grow over time.
-     *   Yup: PathFollower.MoveAlongPath uses Time.time. Should
-     *   check for all instances of this call.
-     *   MovementAnimator is what actually updates the Worker's tranform,
-     *   which occurs (reasonably) on dynamic update, and causes the desyncs
-     *   since transform is used for calculations in the tick logic.
      *   I think I've fixed this. Movement still diverges, but it seems
      *   to only happen after the random state changes, so maybe no longer
      *   the main cause. Need to verify though.
@@ -364,15 +360,46 @@ namespace TimberModTest
                 o += $"Will tick: {entity._originalName}, {entity.EntityId}\n";
                 Hash = TimberNetBase.CombineHash(Hash, entity.EntityId.GetHashCode());
 
-                // Update entity positions before the tick
-                var animator = entity._entityComponent.GetComponentFast<MovementAnimator>();
-                if (animator)
+
+                var entityComponent = entity._entityComponent;
+                var pathFollower = entityComponent.GetComponentFast<Walker>()?._pathFollower;
+                var animatedPathFollower = entityComponent.GetComponentFast<MovementAnimator>()?._animatedPathFollower;
+                if (pathFollower != null && animatedPathFollower != null)
                 {
-                    // Update to beyond the end of this tick to ensure the transform
-                    // is at the very end of the path for this tick
-                    animator._animatedPathFollower.Update(Time.time + Time.fixedDeltaTime);
-                    animator.UpdateTransform(Time.fixedDeltaTime);
+                    animatedPathFollower.CurrentPosition = pathFollower._transform.position;
                 }
+
+                // Update entity positions before the tick
+                //var animator = entity._entityComponent.GetComponentFast<MovementAnimator>();
+                //if (animator)
+                //{
+                //    var pathFollower = animator._animatedPathFollower;
+                //if (pathFollower._pathCorners.Count > 0)
+                //{
+
+                //    var positionBefore = pathFollower.CurrentPosition;
+
+                //    // Update to beyond the end of this tick to ensure the transform
+                //    // is at the very end of the path for this tick
+                //    var futureTime = Time.time + Time.fixedDeltaTime;
+                //    pathFollower.Update(futureTime);
+                //    animator.UpdateTransform(Time.fixedDeltaTime);
+
+                //    var currentPos = pathFollower.CurrentPosition;
+                //    var lastCorner = pathFollower._pathCorners.Last();
+                //    if (currentPos != lastCorner.Position)
+                //    {
+                //        Plugin.LogWarning($"Failed to move to end of path.\n" +
+                //            $"Before:     {FVS(positionBefore)}\n" +
+                //            $"Current:    {FVS(currentPos)}\n" +
+                //            $"LastCorner: {FVS(lastCorner.Position)}\n" +
+                //            $"Start time: {pathFollower._pathCorners[0].TimeInSeconds}\n" +
+                //            $"End time:   {lastCorner.TimeInSeconds}\n" +
+                //            $"End time:   {lastCorner.TimeInSeconds}\n" +
+                //            $"Set to:     {}");
+                //    }
+                //}
+                //}
 
                 if (entity._originalName == "BeaverAdult(Clone)" || entity._originalName == "BeaverChild(Clone)")
                 {
@@ -380,7 +407,11 @@ namespace TimberModTest
                     Plugin.Log($"{entity.EntityId}: {transform.position} {transform.position.x}");
                 }
             }
-            //Plugin.Log(o);
+        }
+
+        private static string FVS(Vector3 vector)
+        {
+            return $"{vector.x:F2}, {vector.y:F2}, {vector.z:F2}";
         }
     }
 
