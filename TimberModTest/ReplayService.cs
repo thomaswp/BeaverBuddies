@@ -350,7 +350,6 @@ namespace TimberModTest
             // Replay and send events at the change of a tick always.
             // For the server, sending events allows clients to keep playing.
             DoTickIO();
-            MovementAnimatorUpdatePathcer.EndTick();
 
             Plugin.Log("Tick order hash: " + TEBPatcher.Hash.ToString("X8"));
 

@@ -293,60 +293,12 @@ namespace TimberModTest
         }
     }
 
-    [HarmonyPatch(typeof(MovementAnimator), nameof(MovementAnimator.Update), typeof(float))]
-    public class MovementAnimatorUpdatePathcer
-    {
-        private static float lastTickTime;
-
-        // TODO: This will cause jumping if the animation can't progress until
-        // all items have ticked... ideally this would be per-instance, so
-        // no instance animates past its own next tick point :(
-        public static void EndTick()
-        {
-            lastTickTime = Time.time;
-        }
-
-        static bool Prefix(MovementAnimator __instance, float deltaTime)
-        {
-            UpdateTo(__instance, Mathf.Min(lastTickTime + Time.fixedDeltaTime, Time.time));
-            return false;
-        }
-
-        public static void UpdateToEndOfTick(MovementAnimator __instance)
-        {
-            UpdateTo(__instance, lastTickTime + Time.fixedDeltaTime);
-        }
-
-        private static void UpdateTo(MovementAnimator __instance, float time)
-        {
-            var _animatedPathFollower = __instance._animatedPathFollower;
-            _animatedPathFollower.Update(time);
-            if (!_animatedPathFollower.ReachedDestination())
-            {
-                // the delta here is only for rotation; hopefully not
-                // too important
-                __instance.UpdateTransform(Time.deltaTime);
-            }
-            else if (!_animatedPathFollower.Stopped)
-            {
-                __instance.StopAnimatingMovement();
-            }
-            __instance.InvokeAnimationUpdate();
-        }
-    }
-
     /*
      * When sleep occurs, the game seems to desync.
      * 
      * Definite issues:
-     * - Movement of Beavers diverges over time, possibly due to rounding
-     *   or more likely something with a non-fixed-time-update.
-     *   The differences start small and grow over time.
-     *   Yup: PathFollower.MoveAlongPath uses Time.time. Should
-     *   check for all instances of this call.
-     *   MovementAnimator is what actually updates the Worker's tranform,
-     *   which occurs (reasonably) on dynamic update, and causes the desyncs
-     *   since transform is used for calculations in the tick logic.
+     * - With test map, I'm seeing consistent desync ~ tick 320. Not sure why
+     *   and could be coincidence, but may be causing position divergence.
      * 
      * Theories:
      * - Something isn't saved in the save state (e.g. when to go to bed),
@@ -357,6 +309,17 @@ namespace TimberModTest
      * Monitoring:
      * - SlotManager: Was the odd event out once, but can't reproduce it
      *   so probably a coincidence. Nothing in it seemed to use nondeterminism.
+     * - Movement of Beavers diverges over time, possibly due to rounding
+     *   or more likely something with a non-fixed-time-update.
+     *   The differences start small and grow over time.
+     *   Yup: PathFollower.MoveAlongPath uses Time.time. Should
+     *   check for all instances of this call.
+     *   MovementAnimator is what actually updates the Worker's tranform,
+     *   which occurs (reasonably) on dynamic update, and causes the desyncs
+     *   since transform is used for calculations in the tick logic.
+     *   I think I've fixed this. Movement still diverges, but it seems
+     *   to only happen after the random state changes, so maybe no longer
+     *   the main cause. Need to verify though.
      * 
      * Ruled out
      * - Unaccounted for calls to Unity random: there were no abnormal
@@ -405,7 +368,10 @@ namespace TimberModTest
                 var animator = entity._entityComponent.GetComponentFast<MovementAnimator>();
                 if (animator)
                 {
-                    MovementAnimatorUpdatePathcer.UpdateToEndOfTick(animator);
+                    // Update to beyond the end of this tick to ensure the transform
+                    // is at the very end of the path for this tick
+                    animator._animatedPathFollower.Update(Time.time + Time.fixedDeltaTime);
+                    animator.UpdateTransform(Time.fixedDeltaTime);
                 }
 
                 if (entity._originalName == "BeaverAdult(Clone)" || entity._originalName == "BeaverChild(Clone)")
