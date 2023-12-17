@@ -68,6 +68,8 @@ namespace TimberModTest
         private readonly SpeedManager _speedManager;
         private readonly GameSaver _gameSaver;
 
+        private readonly GameSaveHelper gameSaveHelper;
+
         private List<object> singletons = new();
 
         private EventIO io => EventIO.Get();
@@ -108,6 +110,8 @@ namespace TimberModTest
             AddSingleton(this);
 
             _eventBus.Register(this);
+
+            gameSaveHelper = new GameSaveHelper(gameSaver);
 
             //io = new FileWriteIO("test.json");
             //io = new FileReadIO("planting.json");
@@ -323,7 +327,7 @@ namespace TimberModTest
             // If we're behind, speed up to match.
             if (ticksBehind > targetSpeed)
             {
-                targetSpeed = Math.Min(ticksBehind, 4);
+                targetSpeed = Math.Min(ticksBehind, 10);
                 //Plugin.Log($"Upping target speed to: {targetSpeed}");
             }
 
@@ -351,27 +355,19 @@ namespace TimberModTest
             // For the server, sending events allows clients to keep playing.
             DoTickIO();
 
+            // Log from IO
+            io.Update();
             Plugin.Log("Tick order hash: " + TEBPatcher.Hash.ToString("X8"));
+
+            if (ticksSinceLoad % 20 == 0)
+            {
+                //gameSaveHelper.LogStateCheck(ticksSinceLoad);
+            }
 
             ticksSinceLoad++;
 
             // Update speed and pause if needed for the new tick.
             UpdateSpeed();
-        }
-
-        private void LogStateCheck()
-        {
-            // TODO: This doesn't work yet.
-            // There is definitely a timestamp in the save, which is part of
-            // the issue. Need to test by saving to a file and unzipping/comparing.
-            // There may also be tiny amounts of nondeterminism somewhere
-            // (possibly harmless, and possibly problematic).
-            // And it may be there are small rounding errors on things like seconds.
-            //MemoryStream ms = new MemoryStream();
-            //_gameSaver.Save(ms);
-            //byte[] bytes = ms.ToArray();
-            //int hash = TimberNetBase.GetHashCode(bytes);
-            //Plugin.Log($"State Check [T{ticksSinceLoad}]: {hash.ToString("X8")}");
         }
     }
 
