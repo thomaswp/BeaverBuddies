@@ -300,6 +300,9 @@ namespace TimberModTest
      * Definite issues:
      * - With test map, I'm seeing consistent desync ~ tick 320. Not sure why
      *   and could be coincidence, but may be causing position divergence.
+     *   The first thing that seems to desync is the random seed, suggesting
+     *   either that we aren't detecting some random events *or* that something
+     *   happens on that frame that causes events to happen out of order.
      * 
      * Theories:
      * - Something isn't saved in the save state (e.g. when to go to bed),
