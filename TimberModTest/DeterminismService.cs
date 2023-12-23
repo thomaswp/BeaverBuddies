@@ -354,11 +354,9 @@ namespace TimberModTest
 
         static void Prefix(TickableEntityBucket __instance)
         {
-            string o = "";
             for (int i = 0; i < __instance._tickableEntities.Count; i++)
             {
                 var entity = __instance._tickableEntities.Values[i];
-                o += $"Will tick: {entity._originalName}, {entity.EntityId}\n";
                 EntityUpdateHash = TimberNetBase.CombineHash(EntityUpdateHash, entity.EntityId.GetHashCode());
 
 
