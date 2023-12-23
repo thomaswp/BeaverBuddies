@@ -209,8 +209,13 @@ namespace TimberNet
                     messageCount++;
                     continue;
                 }
+
                 byte[] buffer = new byte[messageLength];
-                stream.Read(buffer, 0, messageLength);
+                int read = 0;
+                while (read < messageLength)
+                {
+                    read += stream.Read(buffer, read, messageLength - read);
+                }
 
                 string message = Encoding.UTF8.GetString(buffer);
                 receivedEventQueue.Enqueue(message);
