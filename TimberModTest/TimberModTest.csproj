@@ -33,6 +33,6 @@
   </ItemGroup>
   
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /y $(ProjectDir)$(OutDir)*  &quot;C:\Program Files (x86)\Steam\steamapps\common\Timberborn\BepInEx\plugins\TimberModTest&quot;" />
+    <Exec Command="xcopy /y &quot;$(ProjectDir)$(OutDir)*&quot;  &quot;C:\Program Files (x86)\Steam\steamapps\common\Timberborn\BepInEx\plugins\TimberModTest&quot;" />
   </Target>
 </Project>
