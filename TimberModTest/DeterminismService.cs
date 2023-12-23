@@ -345,7 +345,7 @@ namespace TimberModTest
             if (!ReplayService.IsLoaded) return;
             int index = __instance._tickableEntities.Values.IndexOf(tickableEntity);
             Plugin.Log($"Adding: {tickableEntity.EntityId} at index {index}");
-            Plugin.LogStackTrace();
+            //Plugin.LogStackTrace();
         }
     }
 

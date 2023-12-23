@@ -212,6 +212,8 @@ namespace TimberModTest
                 }
                 try
                 {
+                    // For these events, make sure to record s0 beforehand
+                    replayEvent.randomS0Before = UnityEngine.Random.state.s0;
                     replayEvent.Replay(this);
                     // Only send the event if it played successfully and
                     // the IO says we shouldn't skip recording
@@ -233,11 +235,20 @@ namespace TimberModTest
             DeterminismController.ClearRandomStacks();
         }
 
+        /**
+         * Readies and event for sending to connected players.
+         * Adds the randomS0 if the event will be played, but assumed
+         * this is called *before* the event is played. If this is 
+         * called after an event is played, the randomS0 should already
+         * be set (it will not be overwritten).
+         */
         private static void EnqueueEventForSending(ReplayEvent replayEvent)
         {
             // Only set the random state if this recoded event is
             // actually going to be played, or if it's a heartbeat.
-            if (EventIO.ShouldPlayPatchedEvents || replayEvent is HeartbeatEvent)
+            // But don't overwrite the random state if it's already set.
+            if (!replayEvent.randomS0Before.HasValue &&
+                (EventIO.ShouldPlayPatchedEvents || replayEvent is HeartbeatEvent))
             {
                 replayEvent.randomS0Before = UnityEngine.Random.state.s0;
                 //Plugin.Log($"Recording event s0: {replayEvent.randomS0Before}");
@@ -443,6 +454,7 @@ namespace TimberModTest
             // the end of this tick, to ensure an update follows immediately.
             if (EntityComponentInstantiatePatcher.InstanceWasInstantiated)
             {
+                Plugin.Log($"Finishing tick: {__instance._nextTickedBucketIndex}");
                 return __instance._nextTickedBucketIndex != 0;
             }
 
@@ -451,6 +463,9 @@ namespace TimberModTest
 
         static bool Prefix(TickableBucketService __instance, int numberOfBucketsToTick)
         {
+            // TODO: I think if number of buckets starts at 0, we mark
+            // instance instantiated and return
+
             while (ShouldTick(__instance, numberOfBucketsToTick--))
             {
                 __instance.TickNextBucket();
