@@ -357,7 +357,8 @@ namespace TimberModTest
 
             // Log from IO
             io.Update();
-            Plugin.Log("Tick order hash: " + TEBPatcher.Hash.ToString("X8"));
+            Plugin.Log($"Tick order hash: {TEBPatcher.EntityUpdateHash.ToString("X8")}; " +
+                $"Move hash: {TEBPatcher.PositionHash.ToString("X8")}");
 
             if (ticksSinceLoad % 20 == 0)
             {

@@ -349,7 +349,8 @@ namespace TimberModTest
     [HarmonyPatch(typeof(TickableEntityBucket), nameof(TickableEntityBucket.TickAll))]
     public class TEBPatcher
     {
-        public static int Hash { get; private set; }
+        public static int EntityUpdateHash { get; private set; }
+        public static int PositionHash { get; private set; }
 
         static void Prefix(TickableEntityBucket __instance)
         {
@@ -358,7 +359,7 @@ namespace TimberModTest
             {
                 var entity = __instance._tickableEntities.Values[i];
                 o += $"Will tick: {entity._originalName}, {entity.EntityId}\n";
-                Hash = TimberNetBase.CombineHash(Hash, entity.EntityId.GetHashCode());
+                EntityUpdateHash = TimberNetBase.CombineHash(EntityUpdateHash, entity.EntityId.GetHashCode());
 
 
                 var entityComponent = entity._entityComponent;
@@ -366,8 +367,13 @@ namespace TimberModTest
                 var animatedPathFollower = entityComponent.GetComponentFast<MovementAnimator>()?._animatedPathFollower;
                 if (pathFollower != null && animatedPathFollower != null)
                 {
+                    // Update the animated path follower to the path follower's
+                    // (hopefully) deterministic position
                     animatedPathFollower.CurrentPosition = pathFollower._transform.position;
+                    PositionHash = TimberNetBase.CombineHash(PositionHash, animatedPathFollower.CurrentPosition.GetHashCode());
                 }
+                // Make sure it updates the model's position as well
+                entityComponent.GetComponentFast<MovementAnimator>()?.UpdateTransform(0);
 
                 // Update entity positions before the tick
                 //var animator = entity._entityComponent.GetComponentFast<MovementAnimator>();
