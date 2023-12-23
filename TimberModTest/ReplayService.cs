@@ -231,7 +231,7 @@ namespace TimberModTest
 
             // If we've replayed everythign for this tick and nothing's
             // triggered a desync, clear the saved stacks.
-            DeterminismController.PrintRandomStacks();
+            //DeterminismController.PrintRandomStacks();
             DeterminismController.ClearRandomStacks();
         }
 
