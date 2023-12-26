@@ -357,16 +357,6 @@ namespace TimberModTest
         }
     }
 
-    [HarmonyPatch(typeof(MovementAnimator), nameof(MovementAnimator.Update), typeof(float))]
-    public class MovementAnimatorUpdatePathcer
-    {
-
-        static bool Prefix()
-        {
-            return false;
-        }
-    }
-
     [HarmonyPatch(typeof(Time), nameof(Time.time), MethodType.Getter)]
     public class TimeTimePatcher
     {
@@ -381,18 +371,6 @@ namespace TimberModTest
         {
             __result = time;
             return false;
-        }
-    }
-
-    [HarmonyPatch(typeof(Time), nameof(Time.deltaTime), MethodType.Getter)]
-    public class TimeDeltaTimePatcher
-    {
-        static void Postfix(ref float __result)
-        {
-            if (__result > 0)
-            {
-                __result = Time.fixedDeltaTime;
-            }
         }
     }
 
