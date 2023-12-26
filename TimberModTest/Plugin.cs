@@ -37,6 +37,7 @@ namespace TimberModTest
             containerDefinition.Bind<ReplayService>().AsSingleton();
             containerDefinition.Bind<ServerConnectionService>().AsSingleton();
             containerDefinition.Bind<RecordToFileService>().AsSingleton();
+            containerDefinition.Bind<TickProgressService>().AsSingleton();
         }
     }
 

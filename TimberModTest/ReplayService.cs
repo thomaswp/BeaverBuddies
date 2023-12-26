@@ -20,6 +20,7 @@ using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.PlantingUI;
 using Timberborn.PrefabSystem;
 using Timberborn.SingletonSystem;
+using Timberborn.StatusSystem;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
 using TimberNet;
@@ -446,6 +447,8 @@ namespace TimberModTest
     [HarmonyPatch(typeof(TickableBucketService), nameof(TickableBucketService.TickBuckets))]
     static class TickableBucketServiceTickUpdatePatcher
     {
+        public static float percentTicked = 0;
+
         private static bool ShouldTick(TickableBucketService __instance, int numberOfBucketsToTick)
         {
             // Never tick if we've been interrupted by a forced pause
@@ -461,6 +464,8 @@ namespace TimberModTest
 
             return numberOfBucketsToTick > 0;
         }
+
+
 
         static bool Prefix(TickableBucketService __instance, int numberOfBucketsToTick)
         {
@@ -485,6 +490,10 @@ namespace TimberModTest
 
             // Clear the flag after each round of updates
             EntityComponentInstantiatePatcher.InstanceWasInstantiated = false;
+
+            percentTicked = 
+                (float) (__instance._nextTickedBucketIndex + (__instance._tickedSingletons ? 1 : 0)) / 
+                (__instance.NumberOfBuckets + 1);
 
             // Replace the default behavior entirely
             return false;
