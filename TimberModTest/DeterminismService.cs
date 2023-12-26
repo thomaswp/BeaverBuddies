@@ -367,6 +367,35 @@ namespace TimberModTest
         }
     }
 
+    [HarmonyPatch(typeof(Time), nameof(Time.time), MethodType.Getter)]
+    public class TimeTimePatcher
+    {
+        private static float time = 0;
+
+        public static void Tick()
+        {
+            time += Time.fixedDeltaTime;
+        }
+
+        static bool Prefix(ref float __result)
+        {
+            __result = time;
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(Time), nameof(Time.deltaTime), MethodType.Getter)]
+    public class TimeDeltaTimePatcher
+    {
+        static void Postfix(ref float __result)
+        {
+            if (__result > 0)
+            {
+                __result = Time.fixedDeltaTime;
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(TickableEntityBucket), nameof(TickableEntityBucket.TickAll))]
     public class TEBPatcher
     {

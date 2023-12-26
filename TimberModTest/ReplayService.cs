@@ -384,6 +384,7 @@ namespace TimberModTest
             }
 
             ticksSinceLoad++;
+            TimeTimePatcher.Tick();
 
             // Update speed and pause if needed for the new tick.
             UpdateSpeed();
