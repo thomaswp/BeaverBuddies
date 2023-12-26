@@ -3,7 +3,10 @@ using BepInEx.Logging;
 using Bindito.Core;
 using HarmonyLib;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 using TimberApi.ConfiguratorSystem;
 using TimberApi.ConsoleSystem;
 using TimberApi.ModSystem;
@@ -14,6 +17,7 @@ using Timberborn.Coordinates;
 using Timberborn.GameDistricts;
 using Timberborn.Metrics;
 using Timberborn.PrefabSystem;
+using Timberborn.SingletonSystem;
 using Timberborn.TickSystem;
 using Timberborn.WalkingSystem;
 using UnityEngine;
@@ -44,6 +48,12 @@ namespace TimberModTest
             if (EventIO.Config.Mode == ReplayConfig.MODE_NONE) return;
             Plugin.Log($"Registering Main Menu Services");
             containerDefinition.Bind<ClientConnectionService>().AsSingleton();
+
+            //ReflectionUtils.PrintChildClasses(typeof(MonoBehaviour), 
+            //    "Start", "Awake", "Update", "FixedUpdate", "LateUpdate", "OnEnable", "OnDisable", "OnDestroy");
+            //ReflectionUtils.PrintChildClasses(typeof(IUpdatableSingleton));
+            //ReflectionUtils.PrintChildClasses(typeof(ILateUpdatableSingleton));
+
         }
     }
 
