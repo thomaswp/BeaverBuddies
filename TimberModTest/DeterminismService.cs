@@ -303,8 +303,14 @@ namespace TimberModTest
      *   The first thing that seems to desync is the random seed, suggesting
      *   either that we aren't detecting some random events *or* that something
      *   happens on that frame that causes events to happen out of order.
+     *   This problem doesn't seem to occur when I force a full tick every update
+     *   suggesting that updating in the middle of a tick can cause.
+     *   However, there's still a desync even with 1-tick-per-update so it
+     *   doesn't seem to be the only issue.
      * 
      * Theories:
+     * - Some code likely still uses Time.deltaTime or Time.time, which will
+     *   lead to inconsistent behavior. This shows up first in position changes.
      * - Something isn't saved in the save state (e.g. when to go to bed),
      *   so we get different behavior.
      * - Nondeterminism in the code, e.g. inconsistent dictionary traversal
@@ -318,7 +324,9 @@ namespace TimberModTest
      *   The differences start small and grow over time.
      *   I think I've fixed this. Movement still diverges, but it seems
      *   to only happen after the random state changes, so maybe no longer
-     *   the main cause. Need to verify though.
+     *   the main cause. Need to verify though. I've also verified that
+     *   removing the MovementAnimator.Update (smooth movement) doesn't
+     *   remove the movement desync (though it does change from frame 320).
      * 
      * Ruled out
      * - Unaccounted for calls to Unity random: there were no abnormal
@@ -346,6 +354,16 @@ namespace TimberModTest
             int index = __instance._tickableEntities.Values.IndexOf(tickableEntity);
             Plugin.Log($"Adding: {tickableEntity.EntityId} at index {index}");
             //Plugin.LogStackTrace();
+        }
+    }
+
+    [HarmonyPatch(typeof(MovementAnimator), nameof(MovementAnimator.Update), typeof(float))]
+    public class MovementAnimatorUpdatePathcer
+    {
+
+        static bool Prefix()
+        {
+            return false;
         }
     }
 

@@ -466,6 +466,11 @@ namespace TimberModTest
             // TODO: I think if number of buckets starts at 0, we mark
             // instance instantiated and return
 
+            if (numberOfBucketsToTick != 0)
+            {
+                numberOfBucketsToTick = __instance.NumberOfBuckets + 1;
+            }
+
             while (ShouldTick(__instance, numberOfBucketsToTick--))
             {
                 __instance.TickNextBucket();
