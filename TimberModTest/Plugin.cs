@@ -14,6 +14,7 @@ using TimberApi.SceneSystem;
 using Timberborn.BlockSystem;
 using Timberborn.BuildingTools;
 using Timberborn.Coordinates;
+using Timberborn.EntityPanelSystem;
 using Timberborn.GameDistricts;
 using Timberborn.Metrics;
 using Timberborn.PrefabSystem;
@@ -54,6 +55,7 @@ namespace TimberModTest
             //    "Start", "Awake", "Update", "FixedUpdate", "LateUpdate", "OnEnable", "OnDisable", "OnDestroy");
             //ReflectionUtils.PrintChildClasses(typeof(IUpdatableSingleton));
             //ReflectionUtils.PrintChildClasses(typeof(ILateUpdatableSingleton));
+            //ReflectionUtils.PrintChildClasses(typeof(IEntityPanelFragment));
 
         }
     }

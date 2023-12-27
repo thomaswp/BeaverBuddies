@@ -21,6 +21,7 @@ using Timberborn.EntitySystem;
 using Timberborn.Workshops;
 using Timberborn.Goods;
 using Timberborn.InventorySystem;
+using Timberborn.BaseComponentSystem;
 
 namespace TimberModTest.Events
 {
@@ -62,6 +63,38 @@ namespace TimberModTest.Events
         public override string ToString()
         {
             return type;
+        }
+
+        protected EntityComponent GetEntityComponent(IReplayContext context, string entityID)
+        {
+            if (!Guid.TryParse(entityID, out Guid guid))
+            {
+                Plugin.LogWarning($"Could not parse guid: {entityID}");
+                return null;
+            }
+            var entity = context.GetSingleton<EntityRegistry>().GetEntity(guid);
+            if (entity == null)
+            {
+                Plugin.LogWarning($"Could not find entity: {entityID}");
+            }
+            return entity;
+        }
+
+        protected T GetComponent<T>(IReplayContext context, string entityID) where T : BaseComponent
+        {
+            var entity = GetEntityComponent(context, entityID);
+            if (entity == null) return null;
+            var component = entity.GetComponentFast<T>();
+            if (component == null)
+            {
+                Plugin.LogWarning($"Could not find component {typeof(T)} on entity {entityID}");
+            }
+            return component;
+        }
+
+        public static string GetEntityID(BaseComponent component)
+        {
+            return component?.GetComponentFast<EntityComponent>()?.EntityId.ToString();
         }
     }
 

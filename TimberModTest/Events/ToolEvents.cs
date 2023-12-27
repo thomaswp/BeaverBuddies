@@ -68,23 +68,11 @@ namespace TimberModTest.Events
         public override void Replay(IReplayContext context)
         {
             var entityService = context.GetSingleton<EntityService>();
-            var entityRegistry = context.GetSingleton<EntityRegistry>();
             foreach (string entityID in entityIDs)
             {
-                if (!Guid.TryParse(entityID, out Guid guid))
-                {
-                    Plugin.LogWarning($"Could not parse guid: {entityID}");
-                    continue;
-                }
-                var entity = entityRegistry.GetEntity(guid);
-                if ((bool)entity)
-                {
-                    entityService.Delete(entity);
-                }
-                else
-                {
-                    Plugin.LogWarning($"Could not find entity: {entityID}");
-                }
+                var entity = GetEntityComponent(context, entityID);
+                if (entity == null) continue;
+                entityService.Delete(entity);
             }
         }
     }
@@ -96,8 +84,7 @@ namespace TimberModTest.Events
         {
             // TODO: If this does work, it may affect other deletions too :(
             List<string> entityIDs = __instance._temporaryBlockObjects
-                    .Select(blockObject => blockObject?.GetComponentFast<EntityComponent>())
-                    .Select(entity => entity?.EntityId.ToString())
+                    .Select(ReplayEvent.GetEntityID)
                     .ToList();
             Plugin.Log($"Deconstructing: {string.Join(", ", entityIDs)}");
 

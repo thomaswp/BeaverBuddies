@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Timberborn.BaseComponentSystem;
 using Timberborn.BlockObjectTools;
 using Timberborn.BlockSystem;
 using Timberborn.Buildings;
+using Timberborn.BuildingsBlocking;
 using Timberborn.BuildingsUI;
 using Timberborn.BuildingTools;
 using Timberborn.Coordinates;
@@ -27,7 +29,7 @@ namespace TimberModTest.Events
 {
 
     [Serializable]
-    abstract class BuildingDropdownEvent<Selector> : ReplayEvent
+    abstract class BuildingDropdownEvent<Selector> : ReplayEvent where Selector : BaseComponent
     {
         public string itemID;
         public string entityID;
@@ -36,25 +38,10 @@ namespace TimberModTest.Events
         {
             if (entityID == null) return;
 
-            var registry = context.GetSingleton<EntityRegistry>();
-            if (!Guid.TryParse(entityID, out var guid))
-            {
-                Plugin.LogWarning("Invalid GUID: " + entityID);
-                return;
-            }
-            var entity = registry.GetEntity(guid);
-            if (entity == null)
-            {
-                Plugin.LogWarning($"Could not find entity with ID {entityID}");
-                return;
-            }
-            var prioritizer = entity.GetComponentFast<Selector>();
-            if (prioritizer == null)
-            {
-                Plugin.LogWarning($"Could not find selector for entity with ID {entityID}");
-                return;
-            }
-            SetValue(context, prioritizer, itemID);
+            
+            var selector = GetComponent<Selector>(context, entityID);
+            if (selector == null) return;
+            SetValue(context, selector, itemID);
         }
 
         protected abstract void SetValue(IReplayContext context, Selector selector, string id);
@@ -84,7 +71,7 @@ namespace TimberModTest.Events
         static bool Prefix(GatherablePrioritizer __instance, Gatherable gatherable)
         {
             var name = gatherable?.GetComponentFast<Prefab>()?.PrefabName;
-            var entityID = __instance.GetComponentFast<EntityComponent>()?.EntityId;
+            string entityID = ReplayEvent.GetEntityID(__instance);
             // Play events directly if they're happening to a non-entity (e.g. prefab);
             if (entityID == null) return true;
 
@@ -92,7 +79,7 @@ namespace TimberModTest.Events
 
             ReplayService.RecordEvent(new GatheringPrioritizedEvent()
             {
-                entityID = entityID?.ToString(),
+                entityID = entityID,
                 itemID = name,
             });
 
@@ -124,14 +111,14 @@ namespace TimberModTest.Events
         static bool Prefix(Manufactory __instance, RecipeSpecification selectedRecipe)
         {
             var id = selectedRecipe?.Id;
-            var entityID = __instance.GetComponentFast<EntityComponent>()?.EntityId;
+            string entityID = ReplayEvent.GetEntityID(__instance);
             // Play events directly if they're happening to a non-entity (e.g. prefab);
             if (entityID == null) return true;
             Plugin.Log($"Setting recipe for {entityID} to: {id}");
 
             ReplayService.RecordEvent(new ManufactoryRecipeSelectedEvent()
             {
-                entityID = entityID?.ToString(),
+                entityID = entityID,
                 itemID = id,
             });
 
@@ -165,14 +152,14 @@ namespace TimberModTest.Events
         static bool Prefix(PlantablePrioritizer __instance, Plantable plantable)
         {
             var id = plantable?.PrefabName;
-            var entityID = __instance.GetComponentFast<EntityComponent>()?.EntityId;
+            string entityID = ReplayEvent.GetEntityID(__instance);
             // Play events directly if they're happening to a non-entity (e.g. prefab);
             if (entityID == null) return true;
             Plugin.Log($"Setting prioritized plant for {entityID} to: {id}");
 
             ReplayService.RecordEvent(new PlantablePrioritizedEvent()
             {
-                entityID = entityID?.ToString(),
+                entityID = entityID,
                 itemID = id,
             });
 
@@ -200,7 +187,7 @@ namespace TimberModTest.Events
     {
         static bool Prefix(SingleGoodAllower __instance, string goodId)
         {
-            var entityID = __instance.GetComponentFast<EntityComponent>()?.EntityId;
+            string entityID = ReplayEvent.GetEntityID(__instance);
             // Play events directly if they're happening to a non-entity (e.g. prefab);
             if (entityID == null) return true;
             Plugin.Log($"Setting allowed good for {entityID} to: {goodId}");
@@ -220,14 +207,14 @@ namespace TimberModTest.Events
     {
         static bool Prefix(SingleGoodAllower __instance)
         {
-            var entityID = __instance.GetComponentFast<EntityComponent>()?.EntityId;
+            string entityID = ReplayEvent.GetEntityID(__instance);
             // Play events directly if they're happening to a non-entity (e.g. prefab);
             if (entityID == null) return true;
             Plugin.Log($"Unsetting good for {entityID}");
 
             ReplayService.RecordEvent(new SingleGoodAllowedEvent()
             {
-                entityID = entityID?.ToString(),
+                entityID = entityID,
                 itemID = null,
             });
 
@@ -243,12 +230,63 @@ namespace TimberModTest.Events
             if (!__instance.SelectedBuildingIsDeletable()) return true;
             if (!__instance._selectedBlockObject) return true;
 
-            string entityID = __instance._selectedBlockObject
-                .GetComponentFast<EntityComponent>()?.EntityId.ToString();
+            string entityID = ReplayEvent.GetEntityID(__instance._selectedBlockObject);
 
             ReplayService.RecordEvent(new BuildingsDeconstructedEvent()
             {
                 entityIDs = new List<string>() { entityID },
+            });
+
+            return EventIO.ShouldPlayPatchedEvents;
+        }
+    }
+
+    class BuildPausedChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public bool wasPaused;
+
+        public override void Replay(IReplayContext context)
+        {
+            var pausable = GetComponent<PausableBuilding>(context, entityID);
+            if (!pausable) return;
+            if (wasPaused) pausable.Pause();
+            else pausable.Resume();
+        }
+    }
+
+    [HarmonyPatch(typeof(PausableBuilding), nameof(PausableBuilding.Pause))]
+    class PausableBuildingPausePatcher
+    {
+        static bool Prefix(PausableBuilding __instance)
+        {
+            // Don't record if already paused
+            if (__instance.Paused) return true;
+            string entityID = ReplayEvent.GetEntityID(__instance);
+
+            ReplayService.RecordEvent(new BuildPausedChangedEvent()
+            {
+                entityID = entityID,
+                wasPaused = true,
+            });
+
+            return EventIO.ShouldPlayPatchedEvents;
+        }
+    }
+
+    [HarmonyPatch(typeof(PausableBuilding), nameof(PausableBuilding.Resume))]
+    class PausableBuildingResumePatcher
+    {
+        static bool Prefix(PausableBuilding __instance)
+        {
+            // Don't record if already unpaused
+            if (!__instance.Paused) return true;
+            string entityID = ReplayEvent.GetEntityID(__instance);
+
+            ReplayService.RecordEvent(new BuildPausedChangedEvent()
+            {
+                entityID = entityID,
+                wasPaused = false,
             });
 
             return EventIO.ShouldPlayPatchedEvents;
