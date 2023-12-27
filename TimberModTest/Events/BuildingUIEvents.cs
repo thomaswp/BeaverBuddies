@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Timberborn.BaseComponentSystem;
 using Timberborn.BlockObjectTools;
 using Timberborn.BlockSystem;
+using Timberborn.BuilderPrioritySystem;
 using Timberborn.Buildings;
 using Timberborn.BuildingsBlocking;
 using Timberborn.BuildingsUI;
@@ -241,7 +242,7 @@ namespace TimberModTest.Events
         }
     }
 
-    class BuildPausedChangedEvent : ReplayEvent
+    class BuildingPausedChangedEvent : ReplayEvent
     {
         public string entityID;
         public bool wasPaused;
@@ -264,7 +265,7 @@ namespace TimberModTest.Events
             if (__instance.Paused) return true;
             string entityID = ReplayEvent.GetEntityID(__instance);
 
-            ReplayService.RecordEvent(new BuildPausedChangedEvent()
+            ReplayService.RecordEvent(new BuildingPausedChangedEvent()
             {
                 entityID = entityID,
                 wasPaused = true,
@@ -283,10 +284,45 @@ namespace TimberModTest.Events
             if (!__instance.Paused) return true;
             string entityID = ReplayEvent.GetEntityID(__instance);
 
-            ReplayService.RecordEvent(new BuildPausedChangedEvent()
+            ReplayService.RecordEvent(new BuildingPausedChangedEvent()
             {
                 entityID = entityID,
                 wasPaused = false,
+            });
+
+            return EventIO.ShouldPlayPatchedEvents;
+        }
+    }
+
+    class BuildingPriorityChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public Timberborn.PrioritySystem.Priority priority;
+
+        public override void Replay(IReplayContext context)
+        {
+            var prioritizer = GetComponent<BuilderPrioritizable>(context, entityID);
+            if (!prioritizer) return;
+            prioritizer.SetPriority(priority);
+        }
+    }
+
+    [HarmonyPatch(typeof(BuilderPrioritizable), nameof(BuilderPrioritizable.SetPriority))]
+    class BuilderPrioritizableSetPriorityPatcher
+    {
+        static bool Prefix(BuilderPrioritizable __instance, Timberborn.PrioritySystem.Priority priority)
+        {
+            if (__instance.Priority == priority) return true;
+
+            string entityID = ReplayEvent.GetEntityID(__instance);
+            // Play events directly if they're happening to a non-entity (e.g. prefab);
+            if (entityID == null) return true;
+            Plugin.Log($"Setting priority for {entityID} to: {priority}");
+
+            ReplayService.RecordEvent(new BuildingPriorityChangedEvent()
+            {
+                entityID = entityID,
+                priority = priority,
             });
 
             return EventIO.ShouldPlayPatchedEvents;

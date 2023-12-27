@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using Timberborn.BaseComponentSystem;
 using Timberborn.BlockObjectTools;
+using Timberborn.BuilderPrioritySystem;
 using Timberborn.Buildings;
 using Timberborn.BuildingTools;
 using Timberborn.Common;

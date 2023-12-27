@@ -639,6 +639,7 @@ Timberborn.ConstructionSitesUI.ConstructionSiteDebugFragment:
 Timberborn.ConstructionSitesUI.ConstructionSiteFragment:
 Timberborn.DemolishingUI.DemolishableFragment:
 Timberborn.DemolishingUI.DemolishablePriorityFragment:
+* TODO
 Timberborn.DeteriorationSystemUI.DeteriorableDebugFragment:
 Timberborn.DeteriorationSystemUI.DeteriorableFragment:
 Timberborn.DistributionSystemUI.DistrictCrossingFragment:
@@ -646,10 +647,12 @@ Timberborn.DistributionSystemUI.DistrictCrossingInventoryFragment:
 Timberborn.DwellingSystemUI.DwellingDebugFragment:
 Timberborn.DwellingSystemUI.DwellingUserFragment:
 Timberborn.ExplosionsUI.DynamiteFragment:
+* TODO
 Timberborn.FieldsUI.FarmHouseFragment:
 Timberborn.GameDistrictsUI.DistrictCenterFragment:
 Timberborn.GatheringUI.GatherableFragment:
 Timberborn.GatheringUI.GatherablePrioritizerFragment:
+* Done
 Timberborn.GoodConsumingBuildingSystemUI.GoodConsumingBuildingFragment:
 Timberborn.GoodStackSystemUI.GoodStackFragment:
 Timberborn.GrowingUI.GrowableFragment:
@@ -660,8 +663,10 @@ Timberborn.MechanicalSystemUI.BatteryFragment:
 Timberborn.MechanicalSystemUI.MechanicalNodeFragment:
 Timberborn.NaturalResourcesMoistureUI.NaturalResourceMoistureFragment:
 Timberborn.PlantingUI.PlantablePrioritizerFragment:
+* TODO
 Timberborn.PowerGeneratingUI.AdjustableStrengthPowerGeneratorFragment:
 Timberborn.RecoveredGoodSystemUI.DeleteRecoveredGoodStackFragment:
+* TODO
 Timberborn.RecoveredGoodSystemUI.RecoveredGoodStackFragment:
 Timberborn.ReproductionUI.BreedingPodFragment:
 Timberborn.RuinsModelShuffling.RuinModelShufflingFragment:
@@ -670,10 +675,12 @@ Timberborn.ScienceSystemUI.ScienceNeedingBuildingFragment:
 Timberborn.SimpleOutputBuildingsUI.SimpleOutputInventoryFragment:
 Timberborn.StatusSystemUI.StatusListFragment:
 Timberborn.StockpilePriorityUISystem.StockpilePriorityFragment:
+* TODO
 Timberborn.StockpilesUI.StockpileInventoryDebugFragment:
 Timberborn.StockpilesUI.StockpileInventoryFragment:
 Timberborn.StockpileVisualizationUI.StockpileGoodColumnVisualizerDebugFragment:
 Timberborn.WaterBuildingsUI.FloodgateFragment:
+* TODO
 Timberborn.WaterBuildingsUI.StreamGaugeFragment:
 Timberborn.WaterSourceSystemUI.WaterSourceFragment:
 Timberborn.WellbeingUI.WellbeingFragment:
