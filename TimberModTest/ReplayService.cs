@@ -155,6 +155,7 @@ namespace TimberModTest
             // During a replay, we save things manually, only if they're
             // successful.
             if (IsReplayingEvents) return;
+            if (!IsLoaded) return;
 
             string json = JsonSettings.Serialize(replayEvent);
             Plugin.Log($"RecordEvent: {json}");
