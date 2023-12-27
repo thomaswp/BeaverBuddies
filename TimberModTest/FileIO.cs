@@ -12,6 +12,7 @@ using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.GameSceneLoading;
 using Timberborn.SceneLoading;
 using Timberborn.SingletonSystem;
+using TimberModTest.Events;
 using TimberNet;
 
 namespace TimberModTest

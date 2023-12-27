@@ -19,6 +19,7 @@ using Timberborn.NaturalResourcesMoisture;
 using Timberborn.NaturalResourcesReproduction;
 using Timberborn.NeedSystem;
 using Timberborn.PlantingUI;
+using Timberborn.RecoveredGoodSystem;
 using Timberborn.SingletonSystem;
 using Timberborn.SoundSystem;
 using Timberborn.StockpileVisualization;
@@ -278,6 +279,20 @@ namespace TimberModTest
         static void Postfix()
         {
             DeterminismController.SetNonGamePatcherActive(typeof(StockpileGoodPileVisualizerPatcher), false);
+        }
+    }
+
+    [HarmonyPatch(typeof(RecoveredGoodStackFactory), nameof(RecoveredGoodStackFactory.RandomizeRotation))]
+    public class RecoveredGoodStackFactoryPatcher
+    {
+        static void Prefix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(RecoveredGoodStackFactoryPatcher), true);
+        }
+
+        static void Postfix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(RecoveredGoodStackFactoryPatcher), false);
         }
     }
 

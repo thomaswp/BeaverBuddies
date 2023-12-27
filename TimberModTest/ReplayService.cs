@@ -24,6 +24,7 @@ using Timberborn.SingletonSystem;
 using Timberborn.StatusSystem;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
+using TimberModTest.Events;
 using TimberNet;
 using UnityEngine;
 using static Timberborn.TickSystem.TickableSingletonService;
@@ -99,6 +100,7 @@ namespace TimberModTest
             TreeCuttingArea treeCuttingArea,
             ISingletonRepository singletonRepository,
             EntityRegistry entityRegistry,
+            EntityService entityService,
             RecipeSpecificationService recipeSpecificationService
         )
         {
@@ -112,6 +114,7 @@ namespace TimberModTest
             AddSingleton(plantingSelectionService);
             AddSingleton(treeCuttingArea);
             AddSingleton(entityRegistry);
+            AddSingleton(entityService);
             AddSingleton(recipeSpecificationService);
 
             // TODO: I think there's a SingletonRegistry that may

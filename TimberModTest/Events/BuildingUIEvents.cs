@@ -4,6 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Timberborn.BlockObjectTools;
+using Timberborn.BlockSystem;
+using Timberborn.Buildings;
+using Timberborn.BuildingTools;
+using Timberborn.Coordinates;
+using Timberborn.DeconstructionSystemUI;
 using Timberborn.DropdownSystem;
 using Timberborn.EntitySystem;
 using Timberborn.Gathering;
@@ -13,14 +19,14 @@ using Timberborn.Planting;
 using Timberborn.PrefabSystem;
 using Timberborn.Workshops;
 using TimberModTest;
+using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace ClientServerSimulator
+namespace TimberModTest.Events
 {
 
-
     [Serializable]
-    public abstract class BuildingDropdownEvent<Selector> : ReplayEvent
+    abstract class BuildingDropdownEvent<Selector> : ReplayEvent
     {
         public string itemID;
         public string entityID;
@@ -53,7 +59,7 @@ namespace ClientServerSimulator
         protected abstract void SetValue(IReplayContext context, Selector selector, string id);
     }
 
-    public class GatheringPrioritizedEvent : BuildingDropdownEvent<GatherablePrioritizer>
+    class GatheringPrioritizedEvent : BuildingDropdownEvent<GatherablePrioritizer>
     {
         protected override void SetValue(IReplayContext context, GatherablePrioritizer prioritizer, string prefabName)
         {
@@ -72,7 +78,7 @@ namespace ClientServerSimulator
     }
 
     [HarmonyPatch(typeof(GatherablePrioritizer), nameof(GatherablePrioritizer.PrioritizeGatherable))]
-    public class GatherablePrioritizerPatcher
+    class GatherablePrioritizerPatcher
     {
         static bool Prefix(GatherablePrioritizer __instance, Gatherable gatherable)
         {
@@ -93,7 +99,7 @@ namespace ClientServerSimulator
         }
     }
 
-    public class ManufactoryRecipeSelectedEvent : BuildingDropdownEvent<Manufactory>
+    class ManufactoryRecipeSelectedEvent : BuildingDropdownEvent<Manufactory>
     {
         protected override void SetValue(IReplayContext context, Manufactory prioritizer, string itemID)
         {
@@ -112,7 +118,7 @@ namespace ClientServerSimulator
     }
 
     [HarmonyPatch(typeof(Manufactory), nameof(Manufactory.SetRecipe))]
-    public class ManufactorySetRecipePatcher
+    class ManufactorySetRecipePatcher
     {
         static bool Prefix(Manufactory __instance, RecipeSpecification selectedRecipe)
         {
@@ -132,7 +138,7 @@ namespace ClientServerSimulator
         }
     }
 
-    public class PlantablePrioritizedEvent : BuildingDropdownEvent<PlantablePrioritizer>
+    class PlantablePrioritizedEvent : BuildingDropdownEvent<PlantablePrioritizer>
     {
         protected override void SetValue(IReplayContext context, PlantablePrioritizer prioritizer, string itemID)
         {
@@ -140,7 +146,7 @@ namespace ClientServerSimulator
             if (itemID != null)
             {
                 var planterBuilding = prioritizer.GetComponentFast<PlanterBuilding>();
-                plantable = planterBuilding?.AllowedPlantables.SingleOrDefault((Plantable plantable) => plantable.PrefabName == itemID);
+                plantable = planterBuilding?.AllowedPlantables.SingleOrDefault((plantable) => plantable.PrefabName == itemID);
 
                 if (plantable == null)
                 {
@@ -153,7 +159,7 @@ namespace ClientServerSimulator
     }
 
     [HarmonyPatch(typeof(PlantablePrioritizer), nameof(PlantablePrioritizer.PrioritizePlantable))]
-    public class PlantablePrioritizerPatcher
+    class PlantablePrioritizerPatcher
     {
         static bool Prefix(PlantablePrioritizer __instance, Plantable plantable)
         {
@@ -173,7 +179,7 @@ namespace ClientServerSimulator
         }
     }
 
-    public class SingleGoodAllowedEvent : BuildingDropdownEvent<SingleGoodAllower>
+    class SingleGoodAllowedEvent : BuildingDropdownEvent<SingleGoodAllower>
     {
         protected override void SetValue(IReplayContext context, SingleGoodAllower prioritizer, string itemID)
         {
@@ -189,7 +195,7 @@ namespace ClientServerSimulator
     }
 
     [HarmonyPatch(typeof(SingleGoodAllower), nameof(SingleGoodAllower.Allow))]
-    public class SingleGoodAllowerAllowPatcher
+    class SingleGoodAllowerAllowPatcher
     {
         static bool Prefix(SingleGoodAllower __instance, string goodId)
         {
@@ -209,7 +215,7 @@ namespace ClientServerSimulator
     }
 
     [HarmonyPatch(typeof(SingleGoodAllower), nameof(SingleGoodAllower.Disallow))]
-    public class SingleGoodAllowerDisallowPatcher
+    class SingleGoodAllowerDisallowPatcher
     {
         static bool Prefix(SingleGoodAllower __instance)
         {
@@ -228,13 +234,9 @@ namespace ClientServerSimulator
         }
     }
 
-    // TODO: Probably not the right way to go about this
-    // need to find the _dropdownProvider and see what it does and
-    // replicate that. But could use this to find all of them
-    // GatheringUI, WorkshopsUI, PlantingUI have PrioritizerDropdowns
-    // which are places to start. Likely others.
+    // For debuggin only - to figure out where dropdowns are being set
     [HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetAndUpdate))]
-    public class DropdownPatcher
+    class DropdownPatcher
     {
         static bool Prefix(Dropdown __instance, string newValue)
         {
@@ -247,8 +249,9 @@ namespace ClientServerSimulator
         }
     }
 
+    // For debuggin only - to figure out where dropdowns are being set
     [HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetItems))]
-    public class DropdownProviderPatcher
+    class DropdownProviderPatcher
     {
         static bool Prefix(Dropdown __instance, IDropdownProvider dropdownProvider, Func<string, VisualElement> elementGetter)
         {
