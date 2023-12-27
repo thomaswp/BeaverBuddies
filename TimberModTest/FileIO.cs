@@ -21,6 +21,7 @@ namespace TimberModTest
     {
         public JsonSettings()
         {
+            // TODO: Undo for production
             Formatting = Formatting.Indented;
             TypeNameHandling = TypeNameHandling.All;
         }

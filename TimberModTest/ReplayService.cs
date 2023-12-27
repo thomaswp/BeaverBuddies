@@ -17,6 +17,7 @@ using Timberborn.Common;
 using Timberborn.EntitySystem;
 using Timberborn.Forestry;
 using Timberborn.GameSaveRuntimeSystem;
+using Timberborn.Goods;
 using Timberborn.PlantingUI;
 using Timberborn.PrefabSystem;
 using Timberborn.SingletonSystem;
@@ -68,6 +69,7 @@ namespace TimberModTest
         private readonly EventBus _eventBus;
         private readonly SpeedManager _speedManager;
         private readonly GameSaver _gameSaver;
+        private readonly ISingletonRepository _singletonRepository;
 
         private readonly GameSaveHelper gameSaveHelper;
 
@@ -94,17 +96,23 @@ namespace TimberModTest
             BlockObjectPlacerService blockObjectPlacerService,
             BuildingService buildingService,
             PlantingSelectionService plantingSelectionService,
-            TreeCuttingArea treeCuttingArea
+            TreeCuttingArea treeCuttingArea,
+            ISingletonRepository singletonRepository,
+            EntityRegistry entityRegistry,
+            RecipeSpecificationService recipeSpecificationService
         )
         {
             //_tickWathcerService = AddSingleton(tickWathcerService);
             _eventBus = AddSingleton(eventBus);
             _speedManager = AddSingleton(speedManager);
             _gameSaver = AddSingleton(gameSaver);
+            _singletonRepository = AddSingleton(singletonRepository);
             AddSingleton(blockObjectPlacerService);
             AddSingleton(buildingService);
             AddSingleton(plantingSelectionService);
             AddSingleton(treeCuttingArea);
+            AddSingleton(entityRegistry);
+            AddSingleton(recipeSpecificationService);
 
             // TODO: I think there's a SingletonRegistry that may
             // be able to do this.
@@ -138,7 +146,8 @@ namespace TimberModTest
                 if (singleton is T)
                     return (T)singleton;
             }
-            return default;
+            // TODO: This doesn't seem to work
+            return _singletonRepository.GetSingletons<T>().FirstOrDefault();
         }
 
         public static void RecordEvent(ReplayEvent replayEvent)
@@ -146,6 +155,9 @@ namespace TimberModTest
             // During a replay, we save things manually, only if they're
             // successful.
             if (IsReplayingEvents) return;
+
+            string json = JsonSettings.Serialize(replayEvent);
+            Plugin.Log($"RecordEvent: {json}");
 
             UserEventBehavior behavior = UserEventBehavior.Send;
             EventIO io = EventIO.Get();
@@ -300,8 +312,8 @@ namespace TimberModTest
             {
                 IsLoaded = true;
                 // Determinism just for testing
-                UnityEngine.Random.InitState(1234);
-                Plugin.Log("Setting random state to 1234");
+                //UnityEngine.Random.InitState(1234);
+                //Plugin.Log("Setting random state to 1234");
                 waitUpdates = -1;
             }
             if (io == null) return;

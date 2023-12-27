@@ -15,6 +15,12 @@ using Timberborn.Forestry;
 using Timberborn.DropdownSystem;
 using UnityEngine.UIElements;
 using Timberborn.TimeSystem;
+using Timberborn.Gathering;
+using Timberborn.PrefabSystem;
+using Timberborn.EntitySystem;
+using Timberborn.Workshops;
+using Timberborn.Goods;
+using Timberborn.InventorySystem;
 
 namespace TimberModTest
 {
@@ -275,38 +281,6 @@ namespace TimberModTest
             });
 
             return EventIO.ShouldPlayPatchedEvents;
-        }
-    }
-
-    // TODO: Probably not the right way to go about this
-    // need to find the _dropdownProvider and see what it does and
-    // replicate that. But could use this to find all of them
-    // GatheringUI, WorkshopsUI, PlantingUI have PrioritizerDropdowns
-    // which are places to start. Likely others.
-    [HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetAndUpdate))]
-    public class DropdownPatcher
-    {
-        static bool Prefix(Dropdown __instance, string newValue)
-        {
-            Plugin.Log($"Dropdown selected {newValue}");
-            Plugin.Log(__instance.name + "," + __instance.fullTypeName);
-            //Plugin.Log(new System.Diagnostics.StackTrace().ToString());
-
-            // TODO: For reader, return false
-            return true;
-        }
-    }
-
-    [HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetItems))]
-    public class DropdownProviderPatcher
-    {
-        static bool Prefix(Dropdown __instance, IDropdownProvider dropdownProvider, Func<string, VisualElement> elementGetter)
-        {
-            Plugin.Log($"Dropdown set {dropdownProvider} {dropdownProvider.GetType().FullName}");
-            //Plugin.Log(new System.Diagnostics.StackTrace().ToString());
-
-            // TODO: For reader, return false
-            return true;
         }
     }
 }

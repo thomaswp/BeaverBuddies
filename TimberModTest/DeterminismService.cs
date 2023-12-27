@@ -21,6 +21,7 @@ using Timberborn.NeedSystem;
 using Timberborn.PlantingUI;
 using Timberborn.SingletonSystem;
 using Timberborn.SoundSystem;
+using Timberborn.StockpileVisualization;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
 using Timberborn.WalkingSystem;
@@ -263,6 +264,20 @@ namespace TimberModTest
         static void Postfix()
         {
             DeterminismController.SetNonGamePatcherActive(typeof(PlantableDescriberPatcher), false);
+        }
+    }
+
+    [HarmonyPatch(typeof(StockpileGoodPileVisualizer), nameof(StockpileGoodPileVisualizer.Awake))]
+    public class StockpileGoodPileVisualizerPatcher
+    {
+        static void Prefix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(StockpileGoodPileVisualizerPatcher), true);
+        }
+
+        static void Postfix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(StockpileGoodPileVisualizerPatcher), false);
         }
     }
 
