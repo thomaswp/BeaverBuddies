@@ -18,6 +18,7 @@ using Timberborn.EntityPanelSystem;
 using Timberborn.GameDistricts;
 using Timberborn.Metrics;
 using Timberborn.PrefabSystem;
+using Timberborn.PrioritySystem;
 using Timberborn.SingletonSystem;
 using Timberborn.TickSystem;
 using Timberborn.WalkingSystem;
@@ -55,7 +56,6 @@ namespace TimberModTest
             //    "Start", "Awake", "Update", "FixedUpdate", "LateUpdate", "OnEnable", "OnDisable", "OnDestroy");
             //ReflectionUtils.PrintChildClasses(typeof(IUpdatableSingleton));
             //ReflectionUtils.PrintChildClasses(typeof(ILateUpdatableSingleton));
-            //ReflectionUtils.PrintChildClasses(typeof(IEntityPanelFragment));
 
         }
     }

@@ -21,7 +21,9 @@ using Timberborn.Goods;
 using Timberborn.InventorySystem;
 using Timberborn.Planting;
 using Timberborn.PrefabSystem;
+using Timberborn.PrioritySystem;
 using Timberborn.Workshops;
+using Timberborn.WorkSystem;
 using TimberModTest;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -294,17 +296,37 @@ namespace TimberModTest.Events
         }
     }
 
-    class BuildingPriorityChangedEvent : ReplayEvent
+    abstract class PriorityChangedEvent<T> : ReplayEvent where T : BaseComponent, IPrioritizable
     {
         public string entityID;
         public Timberborn.PrioritySystem.Priority priority;
 
         public override void Replay(IReplayContext context)
         {
-            var prioritizer = GetComponent<BuilderPrioritizable>(context, entityID);
+            var prioritizer = GetComponent<T>(context, entityID);
             if (!prioritizer) return;
             prioritizer.SetPriority(priority);
         }
+
+        public static bool DoPrefix(BaseComponent __instance, Timberborn.PrioritySystem.Priority priority, Func<PriorityChangedEvent<T>> constructor)
+        {
+            string entityID = GetEntityID(__instance);
+            // Play events directly if they're happening to a non-entity (e.g. prefab);
+            if (entityID == null) return true;
+            Plugin.Log($"Setting priority for {entityID} to: {priority}");
+
+            var evt = constructor();
+            evt.entityID = entityID;
+            evt.priority = priority;
+
+            ReplayService.RecordEvent(evt);
+
+            return EventIO.ShouldPlayPatchedEvents;
+        }
+    }
+
+    class ConstructionPriorityChangedEvent : PriorityChangedEvent<BuilderPrioritizable>
+    {
     }
 
     [HarmonyPatch(typeof(BuilderPrioritizable), nameof(BuilderPrioritizable.SetPriority))]
@@ -313,19 +335,23 @@ namespace TimberModTest.Events
         static bool Prefix(BuilderPrioritizable __instance, Timberborn.PrioritySystem.Priority priority)
         {
             if (__instance.Priority == priority) return true;
+            return PriorityChangedEvent<BuilderPrioritizable>
+                .DoPrefix(__instance, priority, () => new ConstructionPriorityChangedEvent());
+        }
+    }
+    
+    class WorkplacePriorityChangedEvent : PriorityChangedEvent<WorkplacePriority>
+    {
+    }
 
-            string entityID = ReplayEvent.GetEntityID(__instance);
-            // Play events directly if they're happening to a non-entity (e.g. prefab);
-            if (entityID == null) return true;
-            Plugin.Log($"Setting priority for {entityID} to: {priority}");
-
-            ReplayService.RecordEvent(new BuildingPriorityChangedEvent()
-            {
-                entityID = entityID,
-                priority = priority,
-            });
-
-            return EventIO.ShouldPlayPatchedEvents;
+    [HarmonyPatch(typeof(WorkplacePriority), nameof(WorkplacePriority.SetPriority))]
+    class WorkplacePrioritySetPriorityPatcher
+    {
+        static bool Prefix(WorkplacePriority __instance, Timberborn.PrioritySystem.Priority priority)
+        {
+            if (__instance.Priority == priority) return true;
+            return PriorityChangedEvent<WorkplacePriority>
+                .DoPrefix(__instance, priority, () => new WorkplacePriorityChangedEvent());
         }
     }
 
