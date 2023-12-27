@@ -117,7 +117,7 @@ namespace TimberModTest.Events
     }
 
     [Serializable]
-    public class PlantingAreaMarkedEvent : ReplayEvent
+    class PlantingAreaMarkedEvent : ReplayEvent
     {
         public List<Vector3Int> inputBlocks;
         public Ray ray;
@@ -131,7 +131,7 @@ namespace TimberModTest.Events
     }
 
     [HarmonyPatch(typeof(PlantingSelectionService), nameof(PlantingSelectionService.MarkArea))]
-    public class PlantingAreaMarkedPatcher
+    class PlantingAreaMarkedPatcher
     {
         static bool Prefix(IEnumerable<Vector3Int> inputBlocks, Ray ray, string prefabName)
         {
@@ -152,7 +152,7 @@ namespace TimberModTest.Events
     }
 
     [Serializable]
-    public class TreeCuttingAreaEvent : ReplayEvent
+    class TreeCuttingAreaEvent : ReplayEvent
     {
         public List<Vector3Int> coordinates;
         public bool wasAdded;
@@ -176,7 +176,7 @@ namespace TimberModTest.Events
     // TODO: These events seem to only replay successfully if the
     // tool is open...
     [HarmonyPatch(typeof(TreeCuttingArea), nameof(TreeCuttingArea.AddCoordinates))]
-    public class TreeCuttingAreaAddedPatcher
+    class TreeCuttingAreaAddedPatcher
     {
         static bool Prefix(IEnumerable<Vector3Int> coordinates)
         {
@@ -193,7 +193,7 @@ namespace TimberModTest.Events
     }
 
     [HarmonyPatch(typeof(TreeCuttingArea), nameof(TreeCuttingArea.RemoveCoordinates))]
-    public class TreeCuttingAreaRemovedPatcher
+    class TreeCuttingAreaRemovedPatcher
     {
         static bool Prefix(IEnumerable<Vector3Int> coordinates)
         {

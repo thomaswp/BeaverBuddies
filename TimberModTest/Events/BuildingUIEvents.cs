@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Timberborn.BlockObjectTools;
 using Timberborn.BlockSystem;
 using Timberborn.Buildings;
+using Timberborn.BuildingsUI;
 using Timberborn.BuildingTools;
 using Timberborn.Coordinates;
 using Timberborn.DeconstructionSystemUI;
@@ -228,6 +229,26 @@ namespace TimberModTest.Events
             {
                 entityID = entityID?.ToString(),
                 itemID = null,
+            });
+
+            return EventIO.ShouldPlayPatchedEvents;
+        }
+    }
+
+    [HarmonyPatch(typeof(DeleteBuildingFragment), nameof(DeleteBuildingFragment.DeleteBuilding))]
+    class DeleteBuildingFragmentPatcher
+    {
+        static bool Prefix(DeleteBuildingFragment __instance)
+        {
+            if (!__instance.SelectedBuildingIsDeletable()) return true;
+            if (!__instance._selectedBlockObject) return true;
+
+            string entityID = __instance._selectedBlockObject
+                .GetComponentFast<EntityComponent>()?.EntityId.ToString();
+
+            ReplayService.RecordEvent(new BuildingsDeconstructedEvent()
+            {
+                entityIDs = new List<string>() { entityID },
             });
 
             return EventIO.ShouldPlayPatchedEvents;
