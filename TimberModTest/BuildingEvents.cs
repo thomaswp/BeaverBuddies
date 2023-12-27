@@ -78,6 +78,9 @@ namespace ClientServerSimulator
         {
             var name = gatherable?.GetComponentFast<Prefab>()?.PrefabName;
             var entityID = __instance.GetComponentFast<EntityComponent>()?.EntityId;
+            // Play events directly if they're happening to a non-entity (e.g. prefab);
+            if (entityID == null) return true;
+
             Plugin.Log($"Prioritizing gathering for {entityID} to: {name}");
 
             ReplayService.RecordEvent(new GatheringPrioritizedEvent()
@@ -115,6 +118,8 @@ namespace ClientServerSimulator
         {
             var id = selectedRecipe?.Id;
             var entityID = __instance.GetComponentFast<EntityComponent>()?.EntityId;
+            // Play events directly if they're happening to a non-entity (e.g. prefab);
+            if (entityID == null) return true;
             Plugin.Log($"Setting recipe for {entityID} to: {id}");
 
             ReplayService.RecordEvent(new ManufactoryRecipeSelectedEvent()
@@ -154,6 +159,8 @@ namespace ClientServerSimulator
         {
             var id = plantable?.PrefabName;
             var entityID = __instance.GetComponentFast<EntityComponent>()?.EntityId;
+            // Play events directly if they're happening to a non-entity (e.g. prefab);
+            if (entityID == null) return true;
             Plugin.Log($"Setting prioritized plant for {entityID} to: {id}");
 
             ReplayService.RecordEvent(new PlantablePrioritizedEvent()
@@ -187,6 +194,8 @@ namespace ClientServerSimulator
         static bool Prefix(SingleGoodAllower __instance, string goodId)
         {
             var entityID = __instance.GetComponentFast<EntityComponent>()?.EntityId;
+            // Play events directly if they're happening to a non-entity (e.g. prefab);
+            if (entityID == null) return true;
             Plugin.Log($"Setting allowed good for {entityID} to: {goodId}");
 
             ReplayService.RecordEvent(new SingleGoodAllowedEvent()
@@ -205,6 +214,8 @@ namespace ClientServerSimulator
         static bool Prefix(SingleGoodAllower __instance)
         {
             var entityID = __instance.GetComponentFast<EntityComponent>()?.EntityId;
+            // Play events directly if they're happening to a non-entity (e.g. prefab);
+            if (entityID == null) return true;
             Plugin.Log($"Unsetting good for {entityID}");
 
             ReplayService.RecordEvent(new SingleGoodAllowedEvent()
