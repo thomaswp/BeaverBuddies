@@ -25,19 +25,17 @@ namespace TimberModTest.Events
         public Vector3Int coordinates;
         public Orientation orientation;
 
-        //public BuildingPlacedEvent(float timeInFixedSecs, string prefab, Vector3Int coordinates, Orientation orientation) : base(timeInFixedSecs)
-        //{
-        //    this.prefab = prefab;
-        //    this.coordinates = coordinates;
-        //    this.orientation = orientation;
-        //}
-
         public override void Replay(IReplayContext context)
         {
             var buildingPrefab = GetBuilding(context, prefabName);
             var blockObject = buildingPrefab.GetComponentFast<BlockObject>();
             var placer = context.GetSingleton<BlockObjectPlacerService>().GetMatchingPlacer(blockObject);
             placer.Place(blockObject, coordinates, orientation);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Placing {prefabName}, {coordinates}, {orientation}";
         }
     }
 
@@ -47,20 +45,17 @@ namespace TimberModTest.Events
     {
         static bool Prefix(BlockObject prefab, Vector3Int coordinates, Orientation orientation)
         {
-            string prefabName = ReplayEvent.GetBuildingName(prefab);
-            Plugin.Log($"Placing {prefabName}, {coordinates}, {orientation}");
-
-            //System.Diagnostics.StackTrace t = new System.Diagnostics.StackTrace();
-            //Plugin.Log(t.ToString());
-
-            ReplayService.RecordEvent(new BuildingPlacedEvent()
+            return ReplayEvent.DoPrefix(() =>
             {
-                prefabName = prefabName,
-                coordinates = coordinates,
-                orientation = orientation,
-            });
+                string prefabName = ReplayEvent.GetBuildingName(prefab);
 
-            return EventIO.ShouldPlayPatchedEvents;
+                return new BuildingPlacedEvent()
+                {
+                    prefabName = prefabName,
+                    coordinates = coordinates,
+                    orientation = orientation,
+                };
+            });
         }
     }
 
@@ -78,6 +73,11 @@ namespace TimberModTest.Events
                 entityService.Delete(entity);
             }
         }
+
+        public override string ToActionString()
+        {
+            return $"Deconstructing: {string.Join(", ", entityIDs)}";
+        }
     }
 
     [HarmonyPatch(typeof(BlockObjectDeletionTool<Building>), nameof(BlockObjectDeletionTool<Building>.DeleteBlockObjects))]
@@ -85,24 +85,26 @@ namespace TimberModTest.Events
     {
         static bool Prefix(BlockObjectDeletionTool<Building> __instance)
         {
-            // TODO: If this does work, it may affect other deletions too :(
-            List<string> entityIDs = __instance._temporaryBlockObjects
-                    .Select(ReplayEvent.GetEntityID)
-                    .ToList();
-            Plugin.Log($"Deconstructing: {string.Join(", ", entityIDs)}");
-
-            ReplayService.RecordEvent(new BuildingsDeconstructedEvent()
+            bool result = ReplayEvent.DoPrefix(() =>
             {
-                entityIDs = entityIDs,
+                // TODO: If this does work, it may affect other deletions too :(
+                List<string> entityIDs = __instance._temporaryBlockObjects
+                        .Select(ReplayEvent.GetEntityID)
+                        .ToList();
+
+                return new BuildingsDeconstructedEvent()
+                {
+                    entityIDs = entityIDs,
+                };
             });
 
-            if (!EventIO.ShouldPlayPatchedEvents)
+            if (!result)
             {
                 // If we cancel the event, clean up the tool
                 __instance._temporaryBlockObjects.Clear();
             }
 
-            return EventIO.ShouldPlayPatchedEvents;
+            return result;
         }
     }
 
@@ -127,6 +129,11 @@ namespace TimberModTest.Events
                 plantingService.MarkArea(inputBlocks, ray, prefabName);
             }
         }
+
+        public override string ToActionString()
+        {
+            return $"Planting {inputBlocks.Count()} of {prefabName}";
+        }
     }
 
     [HarmonyPatch(typeof(PlantingSelectionService), nameof(PlantingSelectionService.MarkArea))]
@@ -134,16 +141,15 @@ namespace TimberModTest.Events
     {
         static bool Prefix(IEnumerable<Vector3Int> inputBlocks, Ray ray, string prefabName)
         {
-            Plugin.Log($"Planting {inputBlocks.Count()} of {prefabName}");
-
-            ReplayService.RecordEvent(new PlantingAreaMarkedEvent()
+            return ReplayEvent.DoPrefix(() =>
             {
-                prefabName = prefabName,
-                ray = ray,
-                inputBlocks = new List<Vector3Int>(inputBlocks)
+                return new PlantingAreaMarkedEvent()
+                {
+                    prefabName = prefabName,
+                    ray = ray,
+                    inputBlocks = new List<Vector3Int>(inputBlocks)
+                };
             });
-
-            return EventIO.ShouldPlayPatchedEvents;
         }
     }
 
@@ -152,16 +158,15 @@ namespace TimberModTest.Events
     {
         static bool Prefix(IEnumerable<Vector3Int> inputBlocks, Ray ray)
         {
-            Plugin.Log($"Removing planting x{inputBlocks.Count()}");
-
-            ReplayService.RecordEvent(new PlantingAreaMarkedEvent()
+            return ReplayEvent.DoPrefix(() =>
             {
-                prefabName = PlantingAreaMarkedEvent.UNMARK,
-                ray = ray,
-                inputBlocks = new List<Vector3Int>(inputBlocks)
+                return new PlantingAreaMarkedEvent()
+                {
+                    prefabName = PlantingAreaMarkedEvent.UNMARK,
+                    ray = ray,
+                    inputBlocks = new List<Vector3Int>(inputBlocks)
+                };
             });
-
-            return EventIO.ShouldPlayPatchedEvents;
         }
     }
 
@@ -184,18 +189,23 @@ namespace TimberModTest.Events
                 demolitionService.UnmarkDemolishablesInArea(blocks, ray);
             }
         }
+
+        public override string ToActionString()
+        {
+            return $"Setting {blocks.Count()} as marked: {markForDemolition}";
+        }
+
         public static bool DoPrefix(IEnumerable<Vector3Int> blocks, Ray ray, bool markForDemolition)
         {
-            Plugin.Log($"Setting {blocks.Count()} as marked: {markForDemolition}");
-
-            ReplayService.RecordEvent(new ClearResourcesMarkedEvent()
+            return DoPrefix(() =>
             {
-                markForDemolition = markForDemolition,
-                ray = ray,
-                blocks = new List<Vector3Int>(blocks)
+                return new ClearResourcesMarkedEvent()
+                {
+                    markForDemolition = markForDemolition,
+                    ray = ray,
+                    blocks = new List<Vector3Int>(blocks)
+                };
             });
-
-            return EventIO.ShouldPlayPatchedEvents;
         }
     }
 
@@ -237,6 +247,12 @@ namespace TimberModTest.Events
                 treeService.RemoveCoordinates(coordinates);
             }
         }
+
+        public override string ToActionString()
+        {
+            string verb = wasAdded ? "Added" : "Removed";
+            return $"{verb} tree planting coordinate {coordinates.Count()}";
+        }
     }
 
     // TODO: These events seem to only replay successfully if the
@@ -246,15 +262,14 @@ namespace TimberModTest.Events
     {
         static bool Prefix(IEnumerable<Vector3Int> coordinates)
         {
-            Plugin.Log($"Adding tree planting coordinate {coordinates.Count()}");
-
-            ReplayService.RecordEvent(new TreeCuttingAreaEvent()
+            return ReplayEvent.DoPrefix(() =>
             {
-                coordinates = new List<Vector3Int>(coordinates),
-                wasAdded = true,
+                return new TreeCuttingAreaEvent()
+                {
+                    coordinates = new List<Vector3Int>(coordinates),
+                    wasAdded = true,
+                };
             });
-
-            return EventIO.ShouldPlayPatchedEvents;
         }
     }
 
@@ -263,15 +278,14 @@ namespace TimberModTest.Events
     {
         static bool Prefix(IEnumerable<Vector3Int> coordinates)
         {
-            Plugin.Log($"Removing tree planting coordinate {coordinates.Count()}");
-
-            ReplayService.RecordEvent(new TreeCuttingAreaEvent()
+            return ReplayEvent.DoPrefix(() =>
             {
-                coordinates = new List<Vector3Int>(coordinates),
-                wasAdded = false,
+                return new TreeCuttingAreaEvent()
+                {
+                    coordinates = new List<Vector3Int>(coordinates),
+                    wasAdded = false,
+                };
             });
-
-            return EventIO.ShouldPlayPatchedEvents;
         }
     }
 
@@ -286,6 +300,11 @@ namespace TimberModTest.Events
             if (building == null) return;
             context.GetSingleton<BuildingUnlockingService>().Unlock(building);
         }
+
+        public override string ToActionString()
+        {
+            return $"Unlocking building: {buildingName}";
+        }
     }
 
     [HarmonyPatch(typeof(BuildingUnlockingService), nameof(BuildingUnlockingService.Unlock))]
@@ -293,14 +312,13 @@ namespace TimberModTest.Events
     {
         static bool Prefix(Building building)
         {
-            Plugin.Log($"Unlocking building: {building.name}");
-
-            ReplayService.RecordEvent(new BuildingUnlockedEvent()
+            return ReplayEvent.DoPrefix(() =>
             {
-                buildingName = building.name,
+                return new BuildingUnlockedEvent()
+                {
+                    buildingName = building.name,
+                };
             });
-
-            return EventIO.ShouldPlayPatchedEvents;
         }
     }
 }
