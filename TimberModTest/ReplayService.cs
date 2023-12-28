@@ -67,7 +67,7 @@ namespace TimberModTest
         }
     }
 
-    public class ReplayService : IReplayContext, IPostLoadableSingleton, IUpdatableSingleton, IEarlyTickableSingleton
+    public class ReplayService : IReplayContext, IPostLoadableSingleton, IUpdatableSingleton
     {
         //private readonly TickWathcerService _tickWathcerService;
         private readonly EventBus _eventBus;
@@ -136,6 +136,8 @@ namespace TimberModTest
             //io = new FileWriteIO("test.json");
             //io = new FileReadIO("planting.json");
             //io = new FileReadIO("trees.json");
+
+            TickRequester.replayService = this;
         }
 
         public void SetTicksSinceLoad(int ticks)
@@ -195,9 +197,9 @@ namespace TimberModTest
 
         private void ReplayEvents()
         {
-            if (TickableBucketServiceTick1Patcher.currentBucket != 0)
+            if (TickableBucketServiceTick1Patcher.nextBucket != 0)
             {
-                Plugin.LogWarning($"Warning, replaying events when bucket != 0: {TickableBucketServiceTick1Patcher.currentBucket}");
+                Plugin.LogWarning($"Warning, replaying events when bucket != 0: {TickableBucketServiceTick1Patcher.nextBucket}");
             }
 
             List<ReplayEvent> eventsToReplay = io.ReadEvents(ticksSinceLoad);
@@ -386,10 +388,10 @@ namespace TimberModTest
             }
         }
 
-        // This will always happen at the very begining of a tick before
+        // This will be called at the very begining of a tick before
         // anything else has happened, and after everything from the prior
         // tick (including parallel things) has finished.
-        public void Tick()
+        public void DoTick()
         {
             if (io == null) return;
 
@@ -434,6 +436,8 @@ namespace TimberModTest
         }
     }
 
+    // TODO: May also need to patch FinishFullTick to not move ahead unless
+    // we want to, but it may be ok because we always pause on a full tick?
     [HarmonyPatch(typeof(TickableBucketService), nameof(TickableBucketService.FinishFullTick))]
     static class TickableBucketService_FinishFullTick_Patch
     {
@@ -460,29 +464,23 @@ namespace TimberModTest
             }
             tickableSingletons.InsertRange(0, earlySingletons);
             __instance._tickableSingletons = tickableSingletons.ToImmutableArray();
-
-            //Plugin.Log("Loading tickables");
-            //foreach (var singleton in __instance._tickableSingletons)
-            //{
-            //    var realSingleton = singleton._tickableSingleton;
-            //    Plugin.Log($"Singleton: {realSingleton.GetType().Name}");
-            //}
-            //Plugin.Log("Loading parallel tickables");
-            //foreach (var singleton in __instance._parallelTickableSingletons)
-            //{
-            //    Plugin.Log($"Parallel: {singleton.GetType().Name}");
-            //}
         }
     }
 
     [HarmonyPatch(typeof(TickableBucketService), nameof(TickableBucketService.TickNextBucket))]
     static class TickableBucketServiceTick1Patcher
     {
-        public static int currentBucket;
+        public static int lastBucket;
+        public static int nextBucket;
 
         static void Prefix(TickableBucketService __instance)
         {
-            currentBucket = __instance._nextTickedBucketIndex;
+            lastBucket = __instance._nextTickedBucketIndex;
+        }
+
+        static void Postfix(TickableBucketService __instance)
+        {
+            nextBucket = __instance._nextTickedBucketIndex;
         }
     }
 
@@ -490,6 +488,8 @@ namespace TimberModTest
     {
         public static bool ShouldInterruptTicking { get; set; } = false;
         public static bool ShouldCompleteFullTick { get; private set; } = false;
+
+        public static ReplayService replayService { get; set; }
 
         // Should be ok non-concurrent - for now only main thread call this
         private static List<Action> onCompletedFullTick = new List<Action>();
@@ -533,16 +533,16 @@ namespace TimberModTest
             {
                 return __instance._nextTickedBucketIndex != 0;
             }
-
             return numberOfBucketsToTick > 0;
         }
 
 
-
         static bool Prefix(TickableBucketService __instance, int numberOfBucketsToTick)
         {
-            // TODO: I think if number of buckets starts at 0, we mark
-            // instance instantiated and return
+            // TODO: I think if number of buckets starts at 0, we should unmark
+            // complete full tick and return because it means we're paused...
+            // Alternatively, I think that we could use the ReplayService version
+            // that only stops ticking if not paused
 
             // Forces 1 tick per update
             //if (numberOfBucketsToTick != 0)
@@ -552,13 +552,46 @@ namespace TimberModTest
 
             while (ShouldTick(__instance, numberOfBucketsToTick--))
             {
-                __instance.TickNextBucket();
+                if (TickReplayServiceOrNextBucket(__instance))
+                {
+                    // Refund a bucket if we ticked the ReplayService
+                    numberOfBucketsToTick++;
+                }
             }
 
             // Tell the TickRequester we've finished this partial (or possibly complete) tick
             TickRequester.OnTickingCompleted();
 
             // Replace the default behavior entirely
+            return false;
+        }
+
+        static bool hasTickedReplayService = false;
+
+        static bool IsAtStartOfTick(TickableBucketService __instance)
+        {
+            return __instance._nextTickedBucketIndex == 0 &&
+                !__instance._tickedSingletons;
+        }
+
+        static bool TickReplayServiceOrNextBucket(TickableBucketService __instance)
+        {
+            if (IsAtStartOfTick(__instance))
+            {
+                // If we're at the start of a tick, and we haven't yet
+                // ticked the ReplayService...
+                if (!hasTickedReplayService)
+                {
+                    // Tick it and stop
+                    hasTickedReplayService = true;
+                    TickRequester.replayService?.DoTick();
+                    return true;
+                }
+                // Otherwise if we're still at the beginning
+                // reset the flag
+                hasTickedReplayService = false;
+            }
+            __instance.TickNextBucket();
             return false;
         }
     }
