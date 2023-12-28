@@ -26,6 +26,7 @@ using Timberborn.StockpileVisualization;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
 using Timberborn.WalkingSystem;
+using Timberborn.Workshops;
 using Timberborn.WorkSystem;
 using TimberNet;
 using UnityEngine;
@@ -293,6 +294,20 @@ namespace TimberModTest
         static void Postfix()
         {
             DeterminismController.SetNonGamePatcherActive(typeof(RecoveredGoodStackFactoryPatcher), false);
+        }
+    }
+
+    [HarmonyPatch(typeof(ObservatoryAnimator), nameof(ObservatoryAnimator.GenerateRandomAngles))]
+    public class ObservatoryAnimatorGenerateRandomAnglesPatcher
+    {
+        static void Prefix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(ObservatoryAnimatorGenerateRandomAnglesPatcher), true);
+        }
+
+        static void Postfix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(ObservatoryAnimatorGenerateRandomAnglesPatcher), false);
         }
     }
 

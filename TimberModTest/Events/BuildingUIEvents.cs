@@ -474,7 +474,7 @@ namespace TimberModTest.Events
         {
             Floodgate floodgate = GetComponent<Floodgate>(context, entityID);
             if (!floodgate) return;
-            floodgate.SetHeight(height);
+            floodgate.SetHeightAndSynchronize(height);
         }
     }
 

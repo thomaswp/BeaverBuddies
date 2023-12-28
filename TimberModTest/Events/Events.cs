@@ -109,7 +109,7 @@ namespace TimberModTest.Events
 
         public static string GetBuildingName(BaseComponent component)
         {
-            return component.GetComponentFast<BlockObject>()?.name;
+            return component.GetComponentFast<Prefab>()?.PrefabName;
         }
     }
 
