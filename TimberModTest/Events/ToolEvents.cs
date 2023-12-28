@@ -112,10 +112,19 @@ namespace TimberModTest.Events
         public Ray ray;
         public string prefabName;
 
+        public const string UNMARK = "Unmark";
+
         public override void Replay(IReplayContext context)
         {
             var plantingService = context.GetSingleton<PlantingSelectionService>();
-            plantingService.MarkArea(inputBlocks, ray, prefabName);
+            if (prefabName == UNMARK)
+            {
+                plantingService.UnmarkArea(inputBlocks, ray);
+            }
+            else
+            {
+                plantingService.MarkArea(inputBlocks, ray, prefabName);
+            }
         }
     }
 
@@ -126,12 +135,27 @@ namespace TimberModTest.Events
         {
             Plugin.Log($"Planting {inputBlocks.Count()} of {prefabName}");
 
-            //System.Diagnostics.StackTrace t = new System.Diagnostics.StackTrace();
-            //Plugin.Log(t.ToString());
-
             ReplayService.RecordEvent(new PlantingAreaMarkedEvent()
             {
                 prefabName = prefabName,
+                ray = ray,
+                inputBlocks = new List<Vector3Int>(inputBlocks)
+            });
+
+            return EventIO.ShouldPlayPatchedEvents;
+        }
+    }
+
+    [HarmonyPatch(typeof(PlantingSelectionService), nameof(PlantingSelectionService.UnmarkArea))]
+    class PlantingAreaUnmarkedPatcher
+    {
+        static bool Prefix(IEnumerable<Vector3Int> inputBlocks, Ray ray)
+        {
+            Plugin.Log($"Removing planting x{inputBlocks.Count()}");
+
+            ReplayService.RecordEvent(new PlantingAreaMarkedEvent()
+            {
+                prefabName = PlantingAreaMarkedEvent.UNMARK,
                 ray = ray,
                 inputBlocks = new List<Vector3Int>(inputBlocks)
             });
