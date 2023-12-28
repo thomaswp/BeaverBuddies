@@ -336,7 +336,10 @@ namespace TimberModTest
                 guid[i] = (byte)UnityEngine.Random.Range(0, byte.MaxValue + 1);
             }
             __result = new System.Guid(guid);
-            Plugin.LogWarning($"Generating new GUID: {__result}");
+            if (ReplayService.IsLoaded)
+            {
+                Plugin.LogWarning($"Generating new GUID: {__result}");
+            }
             return false;
         }
     }

@@ -15,6 +15,7 @@ using Timberborn.BuildingTools;
 using Timberborn.Coordinates;
 using Timberborn.DeconstructionSystemUI;
 using Timberborn.DropdownSystem;
+using Timberborn.Emptying;
 using Timberborn.EntitySystem;
 using Timberborn.Fields;
 using Timberborn.Gathering;
@@ -23,6 +24,8 @@ using Timberborn.InventorySystem;
 using Timberborn.Planting;
 using Timberborn.PrefabSystem;
 using Timberborn.PrioritySystem;
+using Timberborn.StockpilePrioritySystem;
+using Timberborn.StockpilePriorityUISystem;
 using Timberborn.WaterBuildings;
 using Timberborn.Workshops;
 using Timberborn.WorkSystem;
@@ -542,6 +545,140 @@ namespace TimberModTest.Events
         }
     }
 
+    //abstract class StockpilePriorityChangedEvent<Toggler> : ReplayEvent where Toggler : BaseComponent
+    //{
+    //    string entityID;
+    //    bool isActive;
+
+    //    protected abstract void Toggle(Toggler toggler, bool active);
+
+    //    public override void Replay(IReplayContext context)
+    //    {
+    //        Toggle(GetComponent<Toggler>(context, entityID), isActive);
+    //    }
+    //}
+
+    //class EmptiableChangedEvent : StockpilePriorityChangedEvent<Emptiable>
+    //{
+    //    protected override void Toggle(Emptiable emptiable, bool active)
+    //    {
+    //        if (active) emptiable.MarkForEmptying();
+    //        else emptiable.UnmarkForEmptying();
+    //    }
+    //}
+
+    //class GoodObtainerChangedEvent : StockpilePriorityChangedEvent<GoodObtainer>
+    //{
+    //    protected override void Toggle(GoodObtainer obtainer, bool active)
+    //    {
+    //        if (active) obtainer.EnableGoodObtaining();
+    //        else obtainer.DisableGoodObtaining();
+    //    }
+    //}
+
+    //class GoodSupplierChangedEvent : StockpilePriorityChangedEvent<GoodSupplier>
+    //{
+    //    protected override void Toggle(GoodSupplier supplier, bool active)
+    //    {
+    //        if (active) supplier.EnableSupplying();
+    //        else supplier.DisableSupplying();
+    //    }
+    //}
+
+
+    enum StockpilePriority
+    {
+        Accept,
+        Empty,
+        Obtain,
+        Supply
+    }
+
+    [Serializable]
+    class StockpilePriorityChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public StockpilePriority priority;
+
+        public override void Replay(IReplayContext context)
+        {
+            var emptiable = GetComponent<Emptiable>(context, entityID);
+            if (emptiable != null)
+            {
+                if (priority == StockpilePriority.Empty) emptiable.MarkForEmptying();
+                else emptiable.UnmarkForEmptying();
+            }
+
+            var obtainer = GetComponent<GoodObtainer>(context, entityID);
+            if (obtainer != null)
+            {
+                if (priority == StockpilePriority.Obtain) obtainer.EnableGoodObtaining();
+                else obtainer.DisableGoodObtaining();
+            }
+
+            var supplier = GetComponent<GoodSupplier>(context, entityID);
+            if (supplier != null)
+            {
+                if (priority == StockpilePriority.Supply) supplier.EnableSupplying();
+                else supplier.DisableSupplying();
+            }
+        }
+
+        public static bool DoPrefix(StockpilePriorityToggle toggle, StockpilePriority priority)
+        {
+            string entityID = GetEntityID(toggle._goodObtainer);
+            if (entityID == null) return true;
+
+            Plugin.Log($"Setting good priority for {entityID} to: {priority}");
+
+            ReplayService.RecordEvent(new StockpilePriorityChangedEvent()
+            {
+                entityID = entityID,
+                priority = priority,
+            });
+
+            return EventIO.ShouldPlayPatchedEvents;
+        }
+    }
+
+    [HarmonyPatch(typeof(StockpilePriorityToggle), nameof(StockpilePriorityToggle.AcceptClicked))]
+    class StockpilePriorityToggleActive
+    {
+        static bool Prefix(StockpilePriorityToggle __instance)
+        {
+            return StockpilePriorityChangedEvent.DoPrefix(__instance, StockpilePriority.Accept);
+        }
+    }
+
+    [HarmonyPatch(typeof(StockpilePriorityToggle), nameof(StockpilePriorityToggle.EmptyClicked))]
+    class StockpilePriorityToggleEmpty
+    {
+        static bool Prefix(StockpilePriorityToggle __instance)
+        {
+            return StockpilePriorityChangedEvent.DoPrefix(__instance, StockpilePriority.Empty);
+        }
+    }
+
+    [HarmonyPatch(typeof(StockpilePriorityToggle), nameof(StockpilePriorityToggle.ObtainClicked))]
+    class StockpilePriorityToggleObtain
+    {
+        static bool Prefix(StockpilePriorityToggle __instance)
+        {
+            return StockpilePriorityChangedEvent.DoPrefix(__instance, StockpilePriority.Obtain);
+        }
+    }
+
+    [HarmonyPatch(typeof(StockpilePriorityToggle), nameof(StockpilePriorityToggle.SupplyClicked))]
+    class StockpilePriorityToggleSupply
+    {
+        static bool Prefix(StockpilePriorityToggle __instance)
+        {
+            return StockpilePriorityChangedEvent.DoPrefix(__instance, StockpilePriority.Supply);
+        }
+    }
+
+
+
 
     // For debuggin only - to figure out where dropdowns are being set
     [HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetAndUpdate))]
@@ -571,4 +708,6 @@ namespace TimberModTest.Events
             return true;
         }
     }
+
+
 }

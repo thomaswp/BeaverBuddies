@@ -36,13 +36,6 @@ namespace TimberModTest.Events
         public int ticksSinceLoad;
         public int? randomS0Before;
 
-        public string type => GetType().Name;
-
-        //public ReplayEvent(float timeInFixedSecs)
-        //{
-        //    this.timeInFixedSecs = timeInFixedSecs;
-        //}
-
         public int CompareTo(ReplayEvent other)
         {
             if (other == null)
@@ -51,18 +44,11 @@ namespace TimberModTest.Events
             return ticksSinceLoad.CompareTo(other.ticksSinceLoad);
         }
 
-        //public void SetTime(TickWathcerService tickWathcerService)
-        //{
-        //    if (tickWathcerService == null) return;
-        //    timeInFixedSecs = tickWathcerService.TotalTimeInFixedSecons;
-        //    ticksSinceLoad = tickWathcerService.TicksSinceLoad;
-        //}
-
         public abstract void Replay(IReplayContext context);
 
         public override string ToString()
         {
-            return type;
+            return GetType().Name;
         }
 
         protected EntityComponent GetEntityComponent(IReplayContext context, string entityID)
