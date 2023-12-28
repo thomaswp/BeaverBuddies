@@ -22,6 +22,7 @@ using Timberborn.Workshops;
 using Timberborn.Goods;
 using Timberborn.InventorySystem;
 using Timberborn.BaseComponentSystem;
+using Timberborn.BehaviorSystem;
 
 namespace TimberModTest.Events
 {
@@ -51,6 +52,11 @@ namespace TimberModTest.Events
         public override string ToString()
         {
             return type;
+        }
+
+        public virtual string ToActionString()
+        {
+            return $"Doing: {type}";
         }
 
         protected EntityComponent GetEntityComponent(IReplayContext context, string entityID)
@@ -98,6 +104,46 @@ namespace TimberModTest.Events
         public static string GetBuildingName(BaseComponent component)
         {
             return component.GetComponentFast<Prefab>()?.PrefabName;
+        }
+
+        /// <summary>
+        /// Helper method to make overriding recorded actions in game easier.
+        /// </summary>
+        /// <param name="getEvent">
+        /// A function that returns the event to record, or null
+        /// if we should skip recording and do the default method behavior.
+        /// </param>
+        /// <returns>True if the method should use default behavior</returns>
+        public static bool DoPrefix(Func<ReplayEvent> getEvent)
+        {
+            // If we haven't loaded yet, just use default behavior
+            // (e.g. during loading)
+            if (!ReplayService.IsLoaded) return true;
+            
+            // Get the event and if it's null, just use default behavior
+            ReplayEvent message = getEvent();
+            if (message == null) return true;
+
+            // Optional: Log the message
+            Plugin.Log(message.ToActionString());
+
+            // Record the event
+            ReplayService.RecordEvent(message);
+
+            // Return based on the EventIO's desired behavior
+            return EventIO.ShouldPlayPatchedEvents;
+        }
+
+        public static bool DoEntityPrefix(BaseComponent component, Func<string, ReplayEvent> doRecord)
+        {
+            return DoPrefix(() =>
+            {
+                string entityID = GetEntityID(component);
+                // If this is happening to a non-entity (e.g. prefab),
+                // just let the base method handle it
+                if (entityID == null) return null;
+                return doRecord(entityID);
+            });
         }
     }
 

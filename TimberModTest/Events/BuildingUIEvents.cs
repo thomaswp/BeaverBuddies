@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Timberborn.BaseComponentSystem;
 using Timberborn.BlockObjectTools;
 using Timberborn.BlockSystem;
@@ -30,6 +31,7 @@ using Timberborn.WaterBuildings;
 using Timberborn.Workshops;
 using Timberborn.WorkSystem;
 using TimberModTest;
+using Unity.IO.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -71,6 +73,11 @@ namespace TimberModTest.Events
             }
             prioritizer.PrioritizeGatherable(gatherable);
         }
+
+        public override string ToActionString()
+        {
+            return $"Prioritizing gathering for {entityID} to: {itemID}";
+        }
     }
 
     [HarmonyPatch(typeof(GatherablePrioritizer), nameof(GatherablePrioritizer.PrioritizeGatherable))]
@@ -78,20 +85,15 @@ namespace TimberModTest.Events
     {
         static bool Prefix(GatherablePrioritizer __instance, Gatherable gatherable)
         {
-            var name = gatherable?.GetComponentFast<Prefab>()?.PrefabName;
-            string entityID = ReplayEvent.GetEntityID(__instance);
-            // Play events directly if they're happening to a non-entity (e.g. prefab);
-            if (entityID == null) return true;
-
-            Plugin.Log($"Prioritizing gathering for {entityID} to: {name}");
-
-            ReplayService.RecordEvent(new GatheringPrioritizedEvent()
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
             {
-                entityID = entityID,
-                itemID = name,
+                var name = gatherable?.GetComponentFast<Prefab>()?.PrefabName;
+                return new GatheringPrioritizedEvent()
+                {
+                    entityID = entityID,
+                    itemID = name,
+                };
             });
-
-            return EventIO.ShouldPlayPatchedEvents;
         }
     }
 
@@ -111,6 +113,11 @@ namespace TimberModTest.Events
             }
             prioritizer.SetRecipe(recipe);
         }
+
+        public override string ToActionString()
+        {
+            return $"Setting recipe for {entityID} to: {itemID}";
+        }
     }
 
     [HarmonyPatch(typeof(Manufactory), nameof(Manufactory.SetRecipe))]
@@ -118,19 +125,15 @@ namespace TimberModTest.Events
     {
         static bool Prefix(Manufactory __instance, RecipeSpecification selectedRecipe)
         {
-            var id = selectedRecipe?.Id;
-            string entityID = ReplayEvent.GetEntityID(__instance);
-            // Play events directly if they're happening to a non-entity (e.g. prefab);
-            if (entityID == null) return true;
-            Plugin.Log($"Setting recipe for {entityID} to: {id}");
-
-            ReplayService.RecordEvent(new ManufactoryRecipeSelectedEvent()
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
             {
-                entityID = entityID,
-                itemID = id,
+                var id = selectedRecipe?.Id;
+                return new ManufactoryRecipeSelectedEvent()
+                {
+                    entityID = entityID,
+                    itemID = id,
+                };
             });
-
-            return EventIO.ShouldPlayPatchedEvents;
         }
     }
 
@@ -152,6 +155,11 @@ namespace TimberModTest.Events
             }
             prioritizer.PrioritizePlantable(plantable);
         }
+
+        public override string ToActionString()
+        {
+            return $"Setting prioritized plant for {entityID} to: {itemID}";
+        }
     }
 
     [HarmonyPatch(typeof(PlantablePrioritizer), nameof(PlantablePrioritizer.PrioritizePlantable))]
@@ -159,19 +167,16 @@ namespace TimberModTest.Events
     {
         static bool Prefix(PlantablePrioritizer __instance, Plantable plantable)
         {
-            var id = plantable?.PrefabName;
-            string entityID = ReplayEvent.GetEntityID(__instance);
-            // Play events directly if they're happening to a non-entity (e.g. prefab);
-            if (entityID == null) return true;
-            Plugin.Log($"Setting prioritized plant for {entityID} to: {id}");
-
-            ReplayService.RecordEvent(new PlantablePrioritizedEvent()
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
             {
-                entityID = entityID,
-                itemID = id,
-            });
+                var id = plantable?.PrefabName;
 
-            return EventIO.ShouldPlayPatchedEvents;
+                return new PlantablePrioritizedEvent()
+                {
+                    entityID = entityID,
+                    itemID = id,
+                };
+            });
         }
     }
 
@@ -194,20 +199,22 @@ namespace TimberModTest.Events
             }
         }
 
+        public override string ToActionString()
+        {
+            return $"Setting prioritize planting for {entityID} to: {prioritizePlanting}";
+        }
+
         public static bool DoPrefix(FarmHouse farmHouse, bool prioritizePlanting)
         {
             if (farmHouse.PlantingPrioritized == prioritizePlanting) return true;
-
-            string entityID = GetEntityID(farmHouse);
-            Plugin.Log($"Setting prioritize planting for {entityID} to: {prioritizePlanting}");
-
-            ReplayService.RecordEvent(new FarmHousePrioritizePlantingChangedEvent()
+            return DoEntityPrefix(farmHouse, entityID =>
             {
-                entityID = entityID,
-                prioritizePlanting = prioritizePlanting,
+                return new FarmHousePrioritizePlantingChangedEvent()
+                {
+                    entityID = entityID,
+                    prioritizePlanting = prioritizePlanting,
+                };
             });
-
-            return EventIO.ShouldPlayPatchedEvents;
         }
     }
 
@@ -243,6 +250,11 @@ namespace TimberModTest.Events
                 prioritizer.Allow(itemID);
             }
         }
+
+        public override string ToActionString()
+        {
+            return $"Setting allowed good for {entityID} to: {itemID}";
+        }
     }
 
     [HarmonyPatch(typeof(SingleGoodAllower), nameof(SingleGoodAllower.Allow))]
@@ -250,18 +262,14 @@ namespace TimberModTest.Events
     {
         static bool Prefix(SingleGoodAllower __instance, string goodId)
         {
-            string entityID = ReplayEvent.GetEntityID(__instance);
-            // Play events directly if they're happening to a non-entity (e.g. prefab);
-            if (entityID == null) return true;
-            Plugin.Log($"Setting allowed good for {entityID} to: {goodId}");
-
-            ReplayService.RecordEvent(new SingleGoodAllowedEvent()
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
             {
-                entityID = entityID?.ToString(),
-                itemID = goodId,
+                return new SingleGoodAllowedEvent()
+                {
+                    entityID = entityID,
+                    itemID = goodId,
+                };
             });
-
-            return EventIO.ShouldPlayPatchedEvents;
         }
     }
 
@@ -270,18 +278,14 @@ namespace TimberModTest.Events
     {
         static bool Prefix(SingleGoodAllower __instance)
         {
-            string entityID = ReplayEvent.GetEntityID(__instance);
-            // Play events directly if they're happening to a non-entity (e.g. prefab);
-            if (entityID == null) return true;
-            Plugin.Log($"Unsetting good for {entityID}");
-
-            ReplayService.RecordEvent(new SingleGoodAllowedEvent()
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
             {
-                entityID = entityID,
-                itemID = null,
+                return new SingleGoodAllowedEvent()
+                {
+                    entityID = entityID,
+                    itemID = null,
+                };
             });
-
-            return EventIO.ShouldPlayPatchedEvents;
         }
     }
 
@@ -293,14 +297,13 @@ namespace TimberModTest.Events
             if (!__instance.SelectedBuildingIsDeletable()) return true;
             if (!__instance._selectedBlockObject) return true;
 
-            string entityID = ReplayEvent.GetEntityID(__instance._selectedBlockObject);
-
-            ReplayService.RecordEvent(new BuildingsDeconstructedEvent()
+            return ReplayEvent.DoEntityPrefix(__instance._selectedBlockObject, entityID =>
             {
-                entityIDs = new List<string>() { entityID },
+                return new BuildingsDeconstructedEvent()
+                {
+                    entityIDs = new List<string>() { entityID },
+                };
             });
-
-            return EventIO.ShouldPlayPatchedEvents;
         }
     }
 
@@ -316,6 +319,11 @@ namespace TimberModTest.Events
             if (wasPaused) pausable.Pause();
             else pausable.Resume();
         }
+
+        public override string ToActionString()
+        {
+            return $"Building {entityID} paused set to: {wasPaused}";
+        }
     }
 
     [HarmonyPatch(typeof(PausableBuilding), nameof(PausableBuilding.Pause))]
@@ -325,15 +333,14 @@ namespace TimberModTest.Events
         {
             // Don't record if already paused
             if (__instance.Paused) return true;
-            string entityID = ReplayEvent.GetEntityID(__instance);
-
-            ReplayService.RecordEvent(new BuildingPausedChangedEvent()
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
             {
-                entityID = entityID,
-                wasPaused = true,
+                return new BuildingPausedChangedEvent()
+                {
+                    entityID = entityID,
+                    wasPaused = true,
+                };
             });
-
-            return EventIO.ShouldPlayPatchedEvents;
         }
     }
 
@@ -344,15 +351,14 @@ namespace TimberModTest.Events
         {
             // Don't record if already unpaused
             if (!__instance.Paused) return true;
-            string entityID = ReplayEvent.GetEntityID(__instance);
-
-            ReplayService.RecordEvent(new BuildingPausedChangedEvent()
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
             {
-                entityID = entityID,
-                wasPaused = false,
+                return new BuildingPausedChangedEvent()
+                {
+                    entityID = entityID,
+                    wasPaused = false,
+                };
             });
-
-            return EventIO.ShouldPlayPatchedEvents;
         }
     }
 
@@ -368,20 +374,20 @@ namespace TimberModTest.Events
             prioritizer.SetPriority(priority);
         }
 
+        public override string ToActionString()
+        {
+            return $"Setting priority for {entityID} to: {priority}";
+        }
+
         public static bool DoPrefix(BaseComponent __instance, Timberborn.PrioritySystem.Priority priority, Func<PriorityChangedEvent<T>> constructor)
         {
-            string entityID = GetEntityID(__instance);
-            // Play events directly if they're happening to a non-entity (e.g. prefab);
-            if (entityID == null) return true;
-            Plugin.Log($"Setting priority for {entityID} to: {priority}");
-
-            var evt = constructor();
-            evt.entityID = entityID;
-            evt.priority = priority;
-
-            ReplayService.RecordEvent(evt);
-
-            return EventIO.ShouldPlayPatchedEvents;
+            return DoEntityPrefix(__instance, entityID =>
+            {
+                var evt = constructor();
+                evt.entityID = entityID;
+                evt.priority = priority;
+                return evt;
+            });
         }
     }
 
@@ -428,25 +434,26 @@ namespace TimberModTest.Events
             else workplace.DecreaseDesiredWorkers();
         }
 
+        public override string ToActionString()
+        {
+            return $"Changing desired workers for {entityID} - increasing: {increased}";
+        }
+
+
         public static bool DoPrefix(Workplace __instance, bool increased)
         {
-            string entityID = GetEntityID(__instance);
-            // Play events directly if they're happening to a non-entity (e.g. prefab);
-            if (entityID == null) return true;
-
             // Ignore if we're already at max/min workers
             if (increased && __instance.DesiredWorkers >= __instance._workplaceSpecification.MaxWorkers) return true;
             if (!increased && __instance.DesiredWorkers <= 1) return true;
 
-            Plugin.Log($"Changing desired workers for {entityID} - increasing: {increased}");
-
-            ReplayService.RecordEvent(new WorkplaceDesiredWorkersChangedEvent()
+            return DoEntityPrefix(__instance, entityID =>
             {
-                entityID = entityID,
-                increased = increased,
+                return new WorkplaceDesiredWorkersChangedEvent()
+                {
+                    entityID = entityID,
+                    increased = increased,
+                };
             });
-
-            return EventIO.ShouldPlayPatchedEvents;
         }
     }
 
@@ -479,6 +486,11 @@ namespace TimberModTest.Events
             if (!floodgate) return;
             floodgate.SetHeightAndSynchronize(height);
         }
+
+        public override string ToActionString()
+        {
+            return $"Setting floodgate {entityID} height to: {height}";
+        }
     }
 
     [HarmonyPatch(typeof(Floodgate), nameof(Floodgate.SetHeightAndSynchronize))]
@@ -486,23 +498,17 @@ namespace TimberModTest.Events
     {
         static bool Prefix(Floodgate __instance, float newHeight)
         {
-            string entityID = ReplayEvent.GetEntityID(__instance);
-            // Play events directly if they're happening to a non-entity (e.g. prefab);
-            if (entityID == null) return true;
-
             // Ignore if height is already new height
             if (__instance.Height == newHeight) return true;
 
-            Plugin.Log($"Setting floodgate {entityID} height to: {newHeight}");
-
-            ReplayService.RecordEvent(new FloodgateHeightChangedEvent()
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
             {
-                entityID = entityID,
-                height = newHeight,
+                return new FloodgateHeightChangedEvent()
+                {
+                    entityID = entityID,
+                    height = newHeight,
+                };
             });
-
-            return EventIO.ShouldPlayPatchedEvents;
-
         }
     }
 
@@ -517,6 +523,11 @@ namespace TimberModTest.Events
             if (!floodgate) return;
             floodgate.ToggleSynchronization(isSynchronized);
         }
+
+        public override string ToActionString()
+        {
+            return $"Setting floodgate synchronized for {entityID} to: {isSynchronized}";
+        }
     }
 
 
@@ -525,66 +536,20 @@ namespace TimberModTest.Events
     {
         static bool Prefix(Floodgate __instance, bool newValue)
         {
-            string entityID = ReplayEvent.GetEntityID(__instance);
-            // Play events directly if they're happening to a non-entity (e.g. prefab);
-            if (entityID == null) return true;
-
             // Ignore if height is already the same
             if (__instance.IsSynchronized == newValue) return true;
 
-            Plugin.Log($"Setting floodgate synchronized for {entityID} to: {newValue}");
-
-            ReplayService.RecordEvent(new FloodgateSynchronizedChangedEvent()
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
             {
-                entityID = entityID,
-                isSynchronized = newValue,
+                return new FloodgateSynchronizedChangedEvent()
+                {
+                    entityID = entityID,
+                    isSynchronized = newValue,
+                };
             });
-
-            return EventIO.ShouldPlayPatchedEvents;
 
         }
     }
-
-    //abstract class StockpilePriorityChangedEvent<Toggler> : ReplayEvent where Toggler : BaseComponent
-    //{
-    //    string entityID;
-    //    bool isActive;
-
-    //    protected abstract void Toggle(Toggler toggler, bool active);
-
-    //    public override void Replay(IReplayContext context)
-    //    {
-    //        Toggle(GetComponent<Toggler>(context, entityID), isActive);
-    //    }
-    //}
-
-    //class EmptiableChangedEvent : StockpilePriorityChangedEvent<Emptiable>
-    //{
-    //    protected override void Toggle(Emptiable emptiable, bool active)
-    //    {
-    //        if (active) emptiable.MarkForEmptying();
-    //        else emptiable.UnmarkForEmptying();
-    //    }
-    //}
-
-    //class GoodObtainerChangedEvent : StockpilePriorityChangedEvent<GoodObtainer>
-    //{
-    //    protected override void Toggle(GoodObtainer obtainer, bool active)
-    //    {
-    //        if (active) obtainer.EnableGoodObtaining();
-    //        else obtainer.DisableGoodObtaining();
-    //    }
-    //}
-
-    //class GoodSupplierChangedEvent : StockpilePriorityChangedEvent<GoodSupplier>
-    //{
-    //    protected override void Toggle(GoodSupplier supplier, bool active)
-    //    {
-    //        if (active) supplier.EnableSupplying();
-    //        else supplier.DisableSupplying();
-    //    }
-    //}
-
 
     enum StockpilePriority
     {
@@ -624,20 +589,21 @@ namespace TimberModTest.Events
             }
         }
 
+        public override string ToActionString()
+        {
+            return $"Setting good priority for {entityID} to: {priority}";
+        }
+
         public static bool DoPrefix(StockpilePriorityToggle toggle, StockpilePriority priority)
         {
-            string entityID = GetEntityID(toggle._goodObtainer);
-            if (entityID == null) return true;
-
-            Plugin.Log($"Setting good priority for {entityID} to: {priority}");
-
-            ReplayService.RecordEvent(new StockpilePriorityChangedEvent()
+            return DoEntityPrefix(toggle._goodObtainer, entityID =>
             {
-                entityID = entityID,
-                priority = priority,
+                return new StockpilePriorityChangedEvent()
+                {
+                    entityID = entityID,
+                    priority = priority,
+                };
             });
-
-            return EventIO.ShouldPlayPatchedEvents;
         }
     }
 
@@ -679,8 +645,7 @@ namespace TimberModTest.Events
 
 
 
-
-    // For debuggin only - to figure out where dropdowns are being set
+    // For debugging only - to figure out where dropdowns are being set
     [HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetAndUpdate))]
     class DropdownPatcher
     {
@@ -695,7 +660,7 @@ namespace TimberModTest.Events
         }
     }
 
-    // For debuggin only - to figure out where dropdowns are being set
+    // For debugging only - to figure out where dropdowns are being set
     [HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetItems))]
     class DropdownProviderPatcher
     {
