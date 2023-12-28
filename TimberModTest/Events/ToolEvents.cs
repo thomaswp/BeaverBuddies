@@ -8,6 +8,7 @@ using Timberborn.BlockSystem;
 using Timberborn.Buildings;
 using Timberborn.BuildingTools;
 using Timberborn.Coordinates;
+using Timberborn.DemolishingUI;
 using Timberborn.EntitySystem;
 using Timberborn.Forestry;
 using Timberborn.PlantingUI;
@@ -135,6 +136,58 @@ namespace TimberModTest.Events
             });
 
             return EventIO.ShouldPlayPatchedEvents;
+        }
+    }
+
+    [Serializable]
+    class ClearResourcesMarkedEvent : ReplayEvent
+    {
+        public List<Vector3Int> blocks;
+        public Ray ray;
+        public bool markForDemolition;
+
+        public override void Replay(IReplayContext context)
+        {
+            var demolitionService = context.GetSingleton<DemolishableSelectionService>();
+            if (markForDemolition)
+            {
+                demolitionService.MarkDemolishablesInArea(blocks, ray);
+            }
+            else
+            {
+                demolitionService.UnmarkDemolishablesInArea(blocks, ray);
+            }
+        }
+        public static bool DoPrefix(IEnumerable<Vector3Int> blocks, Ray ray, bool markForDemolition)
+        {
+            Plugin.Log($"Setting {blocks.Count()} as marked: {markForDemolition}");
+
+            ReplayService.RecordEvent(new ClearResourcesMarkedEvent()
+            {
+                markForDemolition = markForDemolition,
+                ray = ray,
+                blocks = new List<Vector3Int>(blocks)
+            });
+
+            return EventIO.ShouldPlayPatchedEvents;
+        }
+    }
+
+    [HarmonyPatch(typeof(DemolishableSelectionService), nameof(DemolishableSelectionService.MarkDemolishablesInArea))]
+    class DemolishableSelectionServiceMarkPatcher
+    {
+        static bool Prefix(IEnumerable<Vector3Int> blocks, Ray ray)
+        {
+            return ClearResourcesMarkedEvent.DoPrefix(blocks, ray, true);
+        }
+    }
+
+    [HarmonyPatch(typeof(DemolishableSelectionService), nameof(DemolishableSelectionService.UnmarkDemolishablesInArea))]
+    class DemolishableSelectionServiceUnmarkPatcher
+    {
+        static bool Prefix(IEnumerable<Vector3Int> blocks, Ray ray)
+        {
+            return ClearResourcesMarkedEvent.DoPrefix(blocks, ray, false);
         }
     }
 

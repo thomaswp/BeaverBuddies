@@ -15,6 +15,7 @@ using Timberborn.BuilderPrioritySystem;
 using Timberborn.Buildings;
 using Timberborn.BuildingTools;
 using Timberborn.Common;
+using Timberborn.DemolishingUI;
 using Timberborn.EntitySystem;
 using Timberborn.Forestry;
 using Timberborn.GameSaveRuntimeSystem;
@@ -102,7 +103,8 @@ namespace TimberModTest
             ISingletonRepository singletonRepository,
             EntityRegistry entityRegistry,
             EntityService entityService,
-            RecipeSpecificationService recipeSpecificationService
+            RecipeSpecificationService recipeSpecificationService,
+            DemolishableSelectionService demolishableSelectionService
         )
         {
             //_tickWathcerService = AddSingleton(tickWathcerService);
@@ -117,6 +119,7 @@ namespace TimberModTest
             AddSingleton(entityRegistry);
             AddSingleton(entityService);
             AddSingleton(recipeSpecificationService);
+            AddSingleton(demolishableSelectionService);
 
             // TODO: I think there's a SingletonRegistry that may
             // be able to do this.
