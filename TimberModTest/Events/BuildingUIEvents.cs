@@ -16,6 +16,7 @@ using Timberborn.Coordinates;
 using Timberborn.DeconstructionSystemUI;
 using Timberborn.DropdownSystem;
 using Timberborn.EntitySystem;
+using Timberborn.Fields;
 using Timberborn.Gathering;
 using Timberborn.Goods;
 using Timberborn.InventorySystem;
@@ -170,6 +171,61 @@ namespace TimberModTest.Events
             return EventIO.ShouldPlayPatchedEvents;
         }
     }
+
+    class FarmHousePrioritizePlantingChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public bool prioritizePlanting;
+
+        public override void Replay(IReplayContext context)
+        {
+            var farmhouse = GetComponent<FarmHouse>(context, entityID);
+            if (farmhouse == null) return;
+            if (prioritizePlanting)
+            {
+                farmhouse.PrioritizePlanting();
+            }
+            else
+            {
+                farmhouse.UnprioritizePlanting();
+            }
+        }
+
+        public static bool DoPrefix(FarmHouse farmHouse, bool prioritizePlanting)
+        {
+            if (farmHouse.PlantingPrioritized == prioritizePlanting) return true;
+
+            string entityID = GetEntityID(farmHouse);
+            Plugin.Log($"Setting prioritize planting for {entityID} to: {prioritizePlanting}");
+
+            ReplayService.RecordEvent(new FarmHousePrioritizePlantingChangedEvent()
+            {
+                entityID = entityID,
+                prioritizePlanting = prioritizePlanting,
+            });
+
+            return EventIO.ShouldPlayPatchedEvents;
+        }
+    }
+
+    [HarmonyPatch(typeof(FarmHouse), nameof(FarmHouse.PrioritizePlanting))]
+    class FarmHousePrioritizePlantingPatcher
+    {
+        public static bool Prefix(FarmHouse __instance)
+        {
+            return FarmHousePrioritizePlantingChangedEvent.DoPrefix(__instance, true);
+        }
+    }
+
+    [HarmonyPatch(typeof(FarmHouse), nameof(FarmHouse.UnprioritizePlanting))]
+    class FarmHouseUnprioritizePlantingPatcher
+    {
+        public static bool Prefix(FarmHouse __instance)
+        {
+            return FarmHousePrioritizePlantingChangedEvent.DoPrefix(__instance, false);
+        }
+    }
+
 
     class SingleGoodAllowedEvent : BuildingDropdownEvent<SingleGoodAllower>
     {
