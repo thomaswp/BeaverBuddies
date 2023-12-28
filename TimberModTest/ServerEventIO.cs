@@ -31,6 +31,8 @@ namespace TimberModTest
             netBase = new TimberServer(port, mapProvider, () =>
             {
                 var message = RandomStateSetEvent.CreateAndExecute(ticksSinceLoadProvider());
+                message.ticksSinceLoad = 0;
+                Plugin.Log($"Sending start state: {JsonSettings.Serialize(message)}");
                 return JObject.Parse(JsonSettings.Serialize(message));
             });
             //netBase = new TimberServer(port, mapProvider, null);

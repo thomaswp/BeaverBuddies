@@ -65,10 +65,16 @@ namespace TimberNet
                         if (initEventProvider != null)
                         {
                             JObject initEvent = initEventProvider();
-                            DoUserInitiatedEvent(initEvent);
+                            // Send the event before finishing queueing
+                            // so it is guaranteed to arrive first.
+                            // (This also sends it to other clients.)
+                            DoUserInitiatedEvent(initEvent, true);
                         }
-                        StartListening(client, false);
                         FinishQueuing(client);
+
+                        // This must come last - it is an infinite loop
+                        // until the client disconnects
+                        StartListening(client, false);
                     });
                 }
             });
@@ -85,12 +91,15 @@ namespace TimberNet
 
         private void FinishQueuing(TcpClient client)
         {
+            // Log("finishing queuing");
             lock(queuedMessages)
             {
                 if (queuedMessages.TryGetValue(client, out ConcurrentQueue<JObject> queue))
                 {
+                    // Log($"Found {queue.Count} messages");
                     while (queue.TryDequeue(out JObject message))
                     {
+                        // Log(message.ToString());
                         SendEvent(client, message);
                     }
                     queuedMessages.TryRemove(client, out _);
@@ -108,6 +117,9 @@ namespace TimberNet
 
             byte[] mapBytes = await mapProvider();
 
+            // TODO: This may happen a bit early - it seems possible for
+            // events from a prior frame to get queued. Maybe just need to filter
+            // them on the client side.
             // Start recording messages as soon as the map is saved,
             // while the map is sending
             StartQueuing(client);
@@ -136,13 +148,18 @@ namespace TimberNet
             SendEvent(client, message);
         }
 
-        public override void DoUserInitiatedEvent(JObject message)
+        void DoUserInitiatedEvent(JObject message, bool sendNow)
         {
             base.DoUserInitiatedEvent(message);
-            SendEventToClients(message);
+            SendEventToClients(message, sendNow);
         }
 
-        private void SendEventToClients(JObject message)
+        public override void DoUserInitiatedEvent(JObject message)
+        {
+            DoUserInitiatedEvent(message, false);
+        }
+
+        private void SendEventToClients(JObject message, bool sendNow)
         {
             for (int i = 0; i < clients.Count; i++)
             {
@@ -158,7 +175,14 @@ namespace TimberNet
             {
                 clients.ForEach(client =>
                 {
-                    QueueOrSentToClient(client, message);
+                    if (sendNow)
+                    {
+                        SendEvent(client, message);
+                    }
+                    else
+                    {
+                        QueueOrSentToClient(client, message);
+                    }
                 });
             }
         }
