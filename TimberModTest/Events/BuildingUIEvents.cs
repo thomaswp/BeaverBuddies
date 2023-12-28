@@ -355,6 +355,59 @@ namespace TimberModTest.Events
         }
     }
 
+    class WorkplaceDesiredWorkersChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public bool increased;
+
+        public override void Replay(IReplayContext context)
+        {
+            var workplace = GetComponent<Workplace>(context, entityID);
+            if (!workplace) return;
+            if (increased) workplace.IncreaseDesiredWorkers();
+            else workplace.DecreaseDesiredWorkers();
+        }
+
+        public static bool DoPrefix(Workplace __instance, bool increased)
+        {
+            string entityID = GetEntityID(__instance);
+            // Play events directly if they're happening to a non-entity (e.g. prefab);
+            if (entityID == null) return true;
+
+            // Ignore if we're already at max/min workers
+            if (increased && __instance.DesiredWorkers >= __instance._workplaceSpecification.MaxWorkers) return true;
+            if (!increased && __instance.DesiredWorkers <= 1) return true;
+
+            Plugin.Log($"Changing desired workers for {entityID} - increasing: {increased}");
+
+            ReplayService.RecordEvent(new WorkplaceDesiredWorkersChangedEvent()
+            {
+                entityID = entityID,
+                increased = increased,
+            });
+
+            return EventIO.ShouldPlayPatchedEvents;
+        }
+    }
+
+    [HarmonyPatch(typeof(Workplace), nameof(Workplace.IncreaseDesiredWorkers))]
+    class WorkplaceIncreaseDesiredWorkersPatcher
+    {
+        static bool Prefix(Workplace __instance)
+        {
+            return WorkplaceDesiredWorkersChangedEvent.DoPrefix(__instance, true);
+        }
+    }
+
+    [HarmonyPatch(typeof(Workplace), nameof(Workplace.DecreaseDesiredWorkers))]
+    class WorkplaceDecreaseDesiredWorkersPatcher
+    {
+        static bool Prefix(Workplace __instance)
+        {
+            return WorkplaceDesiredWorkersChangedEvent.DoPrefix(__instance, false);
+        }
+    }
+
     // For debuggin only - to figure out where dropdowns are being set
     [HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetAndUpdate))]
     class DropdownPatcher
