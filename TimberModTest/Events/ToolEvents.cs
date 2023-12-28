@@ -47,14 +47,15 @@ namespace TimberModTest.Events
     {
         static bool Prefix(BlockObject prefab, Vector3Int coordinates, Orientation orientation)
         {
-            Plugin.Log($"Placing {prefab.name}, {coordinates}, {orientation}");
+            string prefabName = ReplayEvent.GetBuildingName(prefab);
+            Plugin.Log($"Placing {prefabName}, {coordinates}, {orientation}");
 
             //System.Diagnostics.StackTrace t = new System.Diagnostics.StackTrace();
             //Plugin.Log(t.ToString());
 
             ReplayService.RecordEvent(new BuildingPlacedEvent()
             {
-                prefabName = prefab.name,
+                prefabName = prefabName,
                 coordinates = coordinates,
                 orientation = orientation,
             });

@@ -36,6 +36,8 @@ namespace TimberModTest.Events
         public int ticksSinceLoad;
         public int? randomS0Before;
 
+        public string type => GetType().Name;
+
         public int CompareTo(ReplayEvent other)
         {
             if (other == null)
@@ -48,7 +50,7 @@ namespace TimberModTest.Events
 
         public override string ToString()
         {
-            return GetType().Name;
+            return type;
         }
 
         protected EntityComponent GetEntityComponent(IReplayContext context, string entityID)
