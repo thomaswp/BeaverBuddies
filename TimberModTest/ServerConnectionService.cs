@@ -20,6 +20,7 @@ namespace TimberModTest
         private ReplayService _replayService;
 
         private TaskCompletionSource<byte[]> mapLoadingSource;
+        private int ticksAtMapLoad;
 
         private bool isLoadingMap = false;
 
@@ -35,7 +36,7 @@ namespace TimberModTest
             {
                 io = new ServerEventIO(EventIO.Config.Port,
                     ProvideGameState(),
-                    () => _replayService.TicksSinceLoad);
+                    () => ticksAtMapLoad);
                 EventIO.Set(io);
             } catch (Exception e) {
                 Plugin.Log("Failed to start server");
@@ -62,7 +63,10 @@ namespace TimberModTest
             if (mapLoadingSource == null) return;
             MemoryStream ms = new MemoryStream();
             _gameSaver.Save(ms);
-            mapLoadingSource.TrySetResult(ms.ToArray());
+            byte[] bytes = ms.ToArray();
+            //Plugin.Log($"Sending map with {bytes.Length} length");
+            ticksAtMapLoad = _replayService.TicksSinceLoad;
+            mapLoadingSource.TrySetResult(bytes);
             mapLoadingSource = null;
         }
 

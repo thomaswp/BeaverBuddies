@@ -17,6 +17,8 @@ namespace TimberNet
     {
 
         private readonly List<TcpClient> clients = new List<TcpClient>();
+        private readonly ConcurrentDictionary<TcpClient, ConcurrentQueue<JObject>> queuedMessages =
+            new ConcurrentDictionary<TcpClient, ConcurrentQueue<JObject>>();
 
         private readonly TcpListener listener;
         private readonly Func<Task<byte[]>> mapProvider;
@@ -56,10 +58,9 @@ namespace TimberNet
                     {
                         continue;
                     }
-                    clients.Add(client);
                     Task.Run(async () =>
                     {
-                        await SendMap(client.GetStream());
+                        await SendMap(client);
                         SendState(client);
                         if (initEventProvider != null)
                         {
@@ -67,15 +68,51 @@ namespace TimberNet
                             DoUserInitiatedEvent(initEvent);
                         }
                         StartListening(client, false);
+                        FinishQueuing(client);
                     });
                 }
             });
         }
 
-        private async Task SendMap(NetworkStream stream)
+        private void StartQueuing (TcpClient client)
         {
+            lock (queuedMessages)
+            {
+                queuedMessages.TryAdd(client, new ConcurrentQueue<JObject>());
+                clients.Add(client);
+            }
+        }
+
+        private void FinishQueuing(TcpClient client)
+        {
+            lock(queuedMessages)
+            {
+                if (queuedMessages.TryGetValue(client, out ConcurrentQueue<JObject> queue))
+                {
+                    while (queue.TryDequeue(out JObject message))
+                    {
+                        SendEvent(client, message);
+                    }
+                    queuedMessages.TryRemove(client, out _);
+                }
+                else
+                {
+                    Log("Warning! Missing client!");
+                }
+            }
+        }
+
+        private async Task SendMap(TcpClient client)
+        {
+            NetworkStream stream = client.GetStream();
 
             byte[] mapBytes = await mapProvider();
+
+            // Start recording messages as soon as the map is saved,
+            // while the map is sending
+            StartQueuing(client);
+
+
             SendLength(stream, mapBytes.Length);
             
             // Send bytes in chunks
@@ -95,6 +132,7 @@ namespace TimberNet
             message[TICKS_KEY] = 0;
             message[TYPE_KEY] = SET_STATE_EVENT;
             message["hash"] = Hash;
+            // Send directly - don't queue
             SendEvent(client, message);
         }
 
@@ -114,7 +152,29 @@ namespace TimberNet
                     i--;
                 }
             }
-            clients.ForEach(client => SendEvent(client, message));
+            // Make sure we're not running this while a client is being
+            // setup to start or stop queueing
+            lock (queuedMessages)
+            {
+                clients.ForEach(client =>
+                {
+                    QueueOrSentToClient(client, message);
+                });
+            }
+        }
+
+        private void QueueOrSentToClient(TcpClient client, JObject message)
+        {
+            if (!client.Connected) return;
+
+            if (queuedMessages.TryGetValue(client, out ConcurrentQueue<JObject> queue))
+            {
+                queue.Enqueue(message);
+            }
+            else
+            {
+                SendEvent(client, message);
+            }
         }
 
         public override void Close()
