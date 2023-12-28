@@ -82,9 +82,10 @@ namespace TimberModTest
         private EventIO io => EventIO.Get();
 
         private int ticksSinceLoad = 0;
+        public int TicksSinceLoad => ticksSinceLoad;
 
-        public static bool ShouldInterruptTicking { get; private set; } = false;
         public int TargetSpeed  { get; private set; } = 0;
+
 
         private static ConcurrentQueue<ReplayEvent> eventsToSend = new ConcurrentQueue<ReplayEvent>();
         private static ConcurrentQueue<ReplayEvent> eventsToPlay = new ConcurrentQueue<ReplayEvent>();
@@ -135,6 +136,12 @@ namespace TimberModTest
             //io = new FileWriteIO("test.json");
             //io = new FileReadIO("planting.json");
             //io = new FileReadIO("trees.json");
+        }
+
+        public void SetTicksSinceLoad(int ticks)
+        {
+            ticksSinceLoad = ticks;
+            Plugin.Log($"Setting ticks since load to: {ticks}");
         }
 
         public void PostLoad()
@@ -344,7 +351,7 @@ namespace TimberModTest
             TargetSpeed = speed;
             // If we're paused, we should interrupt the ticking, so we end
             // before more of the tick happens.
-            ShouldInterruptTicking = speed == 0;
+            TickRequester.ShouldInterruptTicking = speed == 0;
             UpdateSpeed();
         }
 
@@ -413,6 +420,18 @@ namespace TimberModTest
             // Update speed and pause if needed for the new tick.
             UpdateSpeed();
         }
+
+        public void FinishFullTickIfNeededAndThen(Action action)
+        {
+            // If we're paused, we should be at the end of a tick anyway
+            if (_speedManager.CurrentSpeed == 0)
+            {
+                action();
+                return;
+            }
+            // If we're not paused, we need to wait until the end of the tick
+            TickRequester.FinishFullTickAndThen(action);
+        }
     }
 
     [HarmonyPatch(typeof(TickableBucketService), nameof(TickableBucketService.FinishFullTick))]
@@ -467,21 +486,51 @@ namespace TimberModTest
         }
     }
 
+    public static class TickRequester
+    {
+        public static bool ShouldInterruptTicking { get; set; } = false;
+        public static bool ShouldCompleteFullTick { get; private set; } = false;
+
+        // Should be ok non-concurrent - for now only main thread call this
+        private static List<Action> onCompletedFullTick = new List<Action>();
+
+        public static void FinishFullTick()
+        {
+            ShouldCompleteFullTick = true;
+        }
+
+        public static void FinishFullTickAndThen(Action value)
+        {
+            onCompletedFullTick.Add(value);
+            ShouldCompleteFullTick = true;
+        }
+
+        internal static void OnTickingCompleted()
+        {
+            if (!ShouldCompleteFullTick) return;
+            Plugin.Log($"Finished full tick; calling {onCompletedFullTick.Count} callbacks");
+            foreach (var action in onCompletedFullTick)
+            {
+                action();
+            }
+            onCompletedFullTick.Clear();
+            ShouldCompleteFullTick = false;
+        }
+    }
+
     [HarmonyPatch(typeof(TickableBucketService), nameof(TickableBucketService.TickBuckets))]
     static class TickableBucketServiceTickUpdatePatcher
     {
-        public static float percentTicked = 0;
 
         private static bool ShouldTick(TickableBucketService __instance, int numberOfBucketsToTick)
         {
             // Never tick if we've been interrupted by a forced pause
-            if (ReplayService.ShouldInterruptTicking) return false;
+            if (TickRequester.ShouldInterruptTicking) return false;
 
-            // If we've created an instance, make sure to go exactly until
+            // If we need to complete a full tick, make sure to go exactly until
             // the end of this tick, to ensure an update follows immediately.
-            if (EntityComponentInstantiatePatcher.InstanceWasInstantiated)
+            if (TickRequester.ShouldCompleteFullTick)
             {
-                Plugin.Log($"Finishing tick: {__instance._nextTickedBucketIndex}");
                 return __instance._nextTickedBucketIndex != 0;
             }
 
@@ -506,17 +555,8 @@ namespace TimberModTest
                 __instance.TickNextBucket();
             }
 
-            if (EntityComponentInstantiatePatcher.InstanceWasInstantiated)
-            {
-                Plugin.Log($"Finishing full tick; {__instance._nextTickedBucketIndex}");
-            }
-
-            // Clear the flag after each round of updates
-            EntityComponentInstantiatePatcher.InstanceWasInstantiated = false;
-
-            percentTicked = 
-                (float) (__instance._nextTickedBucketIndex + (__instance._tickedSingletons ? 1 : 0)) / 
-                (__instance.NumberOfBuckets + 1);
+            // Tell the TickRequester we've finished this partial (or possibly complete) tick
+            TickRequester.OnTickingCompleted();
 
             // Replace the default behavior entirely
             return false;
@@ -526,11 +566,9 @@ namespace TimberModTest
     [HarmonyPatch(typeof(EntityService), nameof(EntityService.Instantiate), typeof(BaseComponent), typeof(Guid))]
     static class EntityComponentInstantiatePatcher
     {
-        public static bool InstanceWasInstantiated = false;
-
         static void Postfix()
         {
-            InstanceWasInstantiated = true;
+            TickRequester.FinishFullTick();
         }
     }
 }

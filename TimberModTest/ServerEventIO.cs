@@ -26,11 +26,11 @@ namespace TimberModTest
         // TBH this may not be necessary.
         public override UserEventBehavior UserEventBehavior => UserEventBehavior.QueuePlay;
 
-        public ServerEventIO(int port, Func<Task<byte[]>> mapProvider)
+        public ServerEventIO(int port, Func<Task<byte[]>> mapProvider, Func<int> ticksSinceLoadProvider)
         {
             netBase = new TimberServer(port, mapProvider, () =>
             {
-                var message = RandomStateSetEvent.CreateAndExecute();
+                var message = RandomStateSetEvent.CreateAndExecute(ticksSinceLoadProvider());
                 return JObject.Parse(JsonSettings.Serialize(message));
             });
             //netBase = new TimberServer(port, mapProvider, null);

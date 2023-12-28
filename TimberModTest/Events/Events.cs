@@ -105,19 +105,26 @@ namespace TimberModTest.Events
     public class RandomStateSetEvent : ReplayEvent
     {
         public int seed;
+        public int newTicksSinceLoad;
 
         public override void Replay(IReplayContext context)
         {
             UnityEngine.Random.InitState(seed);
-            Plugin.Log($"Seeting seed to {seed}; s0 = {UnityEngine.Random.state.s0}");
+            Plugin.Log($"Setting seed to {seed}; s0 = {UnityEngine.Random.state.s0}");
+
+            if (context != null)
+            {
+                context.GetSingleton<ReplayService>().SetTicksSinceLoad(newTicksSinceLoad);
+            }
         }
 
-        public static RandomStateSetEvent CreateAndExecute()
+        public static RandomStateSetEvent CreateAndExecute(int ticksSinceLoad)
         {
             int seed = UnityEngine.Random.RandomRangeInt(int.MinValue, int.MaxValue);
             RandomStateSetEvent message = new RandomStateSetEvent()
             {
-                seed = seed
+                seed = seed,
+                newTicksSinceLoad = ticksSinceLoad
             };
             // TODO: Not certain if this is the right time, or if it should be enqueued
             message.Replay(null);

@@ -22,10 +22,6 @@ namespace TimberNet
         private readonly Func<Task<byte[]>> mapProvider;
         private readonly Func<JObject>? initEventProvider;
 
-        public int HeartbeatInterval { get; set; } = 1;
-
-        private int ticksAtLastHeartbeat = 0;
-
         public int ClientCount => clients.Count;
 
         public TimberServer(int port, Func<Task<byte[]>> mapProvider, Func<JObject>? initEventProvider)
@@ -56,7 +52,7 @@ namespace TimberNet
                     try
                     {
                         client = listener.AcceptTcpClient();
-                    } catch (Exception ex)
+                    } catch
                     {
                         continue;
                     }
