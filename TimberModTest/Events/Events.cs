@@ -96,6 +96,21 @@ namespace TimberModTest.Events
         {
             return component?.GetComponentFast<EntityComponent>()?.EntityId.ToString();
         }
+
+        protected Building GetBuilding(IReplayContext context, string buildingName)
+        {
+            var result = context.GetSingleton<BuildingService>().GetBuildingPrefab(buildingName);
+            if (result == null)
+            {
+                Plugin.LogWarning($"Could not find building prefab: {buildingName}");
+            }
+            return result;
+        }
+
+        public static string GetBuildingName(BaseComponent component)
+        {
+            return component.GetComponentFast<BlockObject>()?.name;
+        }
     }
 
     [Serializable]

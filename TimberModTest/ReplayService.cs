@@ -22,6 +22,7 @@ using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.Goods;
 using Timberborn.PlantingUI;
 using Timberborn.PrefabSystem;
+using Timberborn.ScienceSystem;
 using Timberborn.SingletonSystem;
 using Timberborn.StatusSystem;
 using Timberborn.TickSystem;
@@ -104,7 +105,8 @@ namespace TimberModTest
             EntityRegistry entityRegistry,
             EntityService entityService,
             RecipeSpecificationService recipeSpecificationService,
-            DemolishableSelectionService demolishableSelectionService
+            DemolishableSelectionService demolishableSelectionService,
+            BuildingUnlockingService buildingUnlockingService
         )
         {
             //_tickWathcerService = AddSingleton(tickWathcerService);
@@ -120,6 +122,7 @@ namespace TimberModTest
             AddSingleton(entityService);
             AddSingleton(recipeSpecificationService);
             AddSingleton(demolishableSelectionService);
+            AddSingleton(buildingUnlockingService);
 
             // TODO: I think there's a SingletonRegistry that may
             // be able to do this.

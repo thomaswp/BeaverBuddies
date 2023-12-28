@@ -12,6 +12,7 @@ using Timberborn.DemolishingUI;
 using Timberborn.EntitySystem;
 using Timberborn.Forestry;
 using Timberborn.PlantingUI;
+using Timberborn.ScienceSystem;
 using UnityEngine;
 
 namespace TimberModTest.Events
@@ -33,7 +34,7 @@ namespace TimberModTest.Events
 
         public override void Replay(IReplayContext context)
         {
-            var buildingPrefab = context.GetSingleton<BuildingService>().GetBuildingPrefab(prefabName);
+            var buildingPrefab = GetBuilding(context, prefabName);
             var blockObject = buildingPrefab.GetComponentFast<BlockObject>();
             var placer = context.GetSingleton<BlockObjectPlacerService>().GetMatchingPlacer(blockObject);
             placer.Place(blockObject, coordinates, orientation);
@@ -243,6 +244,35 @@ namespace TimberModTest.Events
             {
                 coordinates = new List<Vector3Int>(coordinates),
                 wasAdded = false,
+            });
+
+            return EventIO.ShouldPlayPatchedEvents;
+        }
+    }
+
+    [Serializable]
+    class BuildingUnlockedEvent : ReplayEvent
+    {
+        public string buildingName;
+
+        public override void Replay(IReplayContext context)
+        {
+            var building = GetBuilding(context, buildingName);
+            if (building == null) return;
+            context.GetSingleton<BuildingUnlockingService>().Unlock(building);
+        }
+    }
+
+    [HarmonyPatch(typeof(BuildingUnlockingService), nameof(BuildingUnlockingService.Unlock))]
+    class BuildingUnlockingServiceUnlockPatcher
+    {
+        static bool Prefix(Building building)
+        {
+            Plugin.Log($"Unlocking building: {building.name}");
+
+            ReplayService.RecordEvent(new BuildingUnlockedEvent()
+            {
+                buildingName = building.name,
             });
 
             return EventIO.ShouldPlayPatchedEvents;
