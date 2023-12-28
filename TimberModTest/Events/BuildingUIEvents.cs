@@ -22,6 +22,7 @@ using Timberborn.InventorySystem;
 using Timberborn.Planting;
 using Timberborn.PrefabSystem;
 using Timberborn.PrioritySystem;
+using Timberborn.WaterBuildings;
 using Timberborn.Workshops;
 using Timberborn.WorkSystem;
 using TimberModTest;
@@ -407,6 +408,84 @@ namespace TimberModTest.Events
             return WorkplaceDesiredWorkersChangedEvent.DoPrefix(__instance, false);
         }
     }
+
+    class FloodgateHeightChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public float height;
+
+        public override void Replay(IReplayContext context)
+        {
+            Floodgate floodgate = GetComponent<Floodgate>(context, entityID);
+            if (!floodgate) return;
+            floodgate.SetHeight(height);
+        }
+    }
+
+    [HarmonyPatch(typeof(Floodgate), nameof(Floodgate.SetHeightAndSynchronize))]
+    class FloodgateSetHeightPatcher
+    {
+        static bool Prefix(Floodgate __instance, float newHeight)
+        {
+            string entityID = ReplayEvent.GetEntityID(__instance);
+            // Play events directly if they're happening to a non-entity (e.g. prefab);
+            if (entityID == null) return true;
+
+            // Ignore if height is already new height
+            if (__instance.Height == newHeight) return true;
+
+            Plugin.Log($"Setting floodgate {entityID} height to: {newHeight}");
+
+            ReplayService.RecordEvent(new FloodgateHeightChangedEvent()
+            {
+                entityID = entityID,
+                height = newHeight,
+            });
+
+            return EventIO.ShouldPlayPatchedEvents;
+
+        }
+    }
+
+    class FloodgateSynchronizedChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public bool isSynchronized;
+
+        public override void Replay(IReplayContext context)
+        {
+            Floodgate floodgate = GetComponent<Floodgate>(context, entityID);
+            if (!floodgate) return;
+            floodgate.ToggleSynchronization(isSynchronized);
+        }
+    }
+
+
+    [HarmonyPatch(typeof(Floodgate), nameof(Floodgate.ToggleSynchronization))]
+    class FloodgateSynchronizationPatcher
+    {
+        static bool Prefix(Floodgate __instance, bool newValue)
+        {
+            string entityID = ReplayEvent.GetEntityID(__instance);
+            // Play events directly if they're happening to a non-entity (e.g. prefab);
+            if (entityID == null) return true;
+
+            // Ignore if height is already the same
+            if (__instance.IsSynchronized == newValue) return true;
+
+            Plugin.Log($"Setting floodgate synchronized for {entityID} to: {newValue}");
+
+            ReplayService.RecordEvent(new FloodgateSynchronizedChangedEvent()
+            {
+                entityID = entityID,
+                isSynchronized = newValue,
+            });
+
+            return EventIO.ShouldPlayPatchedEvents;
+
+        }
+    }
+
 
     // For debuggin only - to figure out where dropdowns are being set
     [HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetAndUpdate))]
