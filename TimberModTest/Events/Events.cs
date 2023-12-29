@@ -152,6 +152,8 @@ namespace TimberModTest.Events
     {
         public int seed;
         public int newTicksSinceLoad;
+        public int entityUpdateHash;
+        public int positionHash;
 
         public override void Replay(IReplayContext context)
         {
@@ -161,6 +163,7 @@ namespace TimberModTest.Events
             if (context != null)
             {
                 context.GetSingleton<ReplayService>().SetTicksSinceLoad(newTicksSinceLoad);
+                TEBPatcher.SetHashes(entityUpdateHash, positionHash);
             }
         }
 
@@ -170,7 +173,9 @@ namespace TimberModTest.Events
             RandomStateSetEvent message = new RandomStateSetEvent()
             {
                 seed = seed,
-                newTicksSinceLoad = ticksSinceLoad
+                newTicksSinceLoad = ticksSinceLoad,
+                entityUpdateHash = TEBPatcher.EntityUpdateHash,
+                positionHash = TEBPatcher.PositionHash,
             };
             // TODO: Not certain if this is the right time, or if it should be enqueued
             message.Replay(null);

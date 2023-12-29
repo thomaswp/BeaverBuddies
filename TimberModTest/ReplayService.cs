@@ -143,6 +143,7 @@ namespace TimberModTest
         public void SetTicksSinceLoad(int ticks)
         {
             ticksSinceLoad = ticks;
+            TimeTimePatcher.SetTicksSinceLoaded(ticksSinceLoad);
             Plugin.Log($"Setting ticks since load to: {ticks}");
         }
 
@@ -417,7 +418,7 @@ namespace TimberModTest
             }
 
             ticksSinceLoad++;
-            TimeTimePatcher.Tick();
+            TimeTimePatcher.SetTicksSinceLoaded(ticksSinceLoad);
 
             // Update speed and pause if needed for the new tick.
             UpdateSpeed();

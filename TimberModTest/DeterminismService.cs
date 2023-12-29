@@ -412,9 +412,9 @@ namespace TimberModTest
     {
         private static float time = 0;
 
-        public static void Tick()
+        public static void SetTicksSinceLoaded(int ticks)
         {
-            time += Time.fixedDeltaTime;
+            time = ticks * Time.fixedDeltaTime;
         }
 
         static bool Prefix(ref float __result)
@@ -429,6 +429,12 @@ namespace TimberModTest
     {
         public static int EntityUpdateHash { get; private set; }
         public static int PositionHash { get; private set; }
+
+        public static void SetHashes(int entityUpdateHash, int positionHash)
+        {
+            EntityUpdateHash = entityUpdateHash;
+            PositionHash = positionHash;
+        }
 
         static void Prefix(TickableEntityBucket __instance)
         {
