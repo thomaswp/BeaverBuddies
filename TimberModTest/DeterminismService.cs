@@ -313,6 +313,20 @@ namespace TimberModTest
         }
     }
 
+    [HarmonyPatch(typeof(LoopingSoundPlayer), nameof(LoopingSoundPlayer.PlayLooping))]
+    public class LoopingSoundPlayerPatcher
+    {
+        static void Prefix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(LoopingSoundPlayerPatcher), true);
+        }
+
+        static void Postfix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(LoopingSoundPlayerPatcher), false);
+        }
+    }
+
 
     [HarmonyPatch(typeof(Ticker), nameof(Ticker.Update))]
     public class TickerPatcher
