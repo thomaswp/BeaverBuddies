@@ -396,6 +396,9 @@ namespace TimberModTest
         {
             if (io == null) return;
 
+            ticksSinceLoad++;
+            TimeTimePatcher.SetTicksSinceLoaded(ticksSinceLoad);
+
             if (io.ShouldSendHeartbeat)
             {
                 // Add a heartbeat if needed to make sure all ticks have
@@ -416,9 +419,6 @@ namespace TimberModTest
             {
                 //gameSaveHelper.LogStateCheck(ticksSinceLoad);
             }
-
-            ticksSinceLoad++;
-            TimeTimePatcher.SetTicksSinceLoaded(ticksSinceLoad);
 
             // Update speed and pause if needed for the new tick.
             UpdateSpeed();
