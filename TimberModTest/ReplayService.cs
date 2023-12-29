@@ -522,6 +522,7 @@ namespace TimberModTest
     [HarmonyPatch(typeof(TickableBucketService), nameof(TickableBucketService.TickBuckets))]
     static class TickableBucketServiceTickUpdatePatcher
     {
+        public static bool HasTickedReplayService { get; private set; } = false;
 
         private static bool ShouldTick(TickableBucketService __instance, int numberOfBucketsToTick)
         {
@@ -567,8 +568,6 @@ namespace TimberModTest
             return false;
         }
 
-        static bool hasTickedReplayService = false;
-
         static bool IsAtStartOfTick(TickableBucketService __instance)
         {
             return __instance._nextTickedBucketIndex == 0 &&
@@ -581,16 +580,16 @@ namespace TimberModTest
             {
                 // If we're at the start of a tick, and we haven't yet
                 // ticked the ReplayService...
-                if (!hasTickedReplayService)
+                if (!HasTickedReplayService)
                 {
                     // Tick it and stop
-                    hasTickedReplayService = true;
+                    HasTickedReplayService = true;
                     TickRequester.replayService?.DoTick();
                     return true;
                 }
                 // Otherwise if we're still at the beginning
                 // reset the flag
-                hasTickedReplayService = false;
+                HasTickedReplayService = false;
             }
             __instance.TickNextBucket();
             return false;

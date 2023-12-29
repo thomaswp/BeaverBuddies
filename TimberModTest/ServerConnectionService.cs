@@ -66,6 +66,16 @@ namespace TimberModTest
             byte[] bytes = ms.ToArray();
             //Plugin.Log($"Sending map with {bytes.Length} length");
             ticksAtMapLoad = _replayService.TicksSinceLoad;
+            // Because the connecting client will not have yet
+            // ticked the ReplayService when it connects, if the
+            // server has, we rewind by one "frame" so it can be synced.
+            // Note: this isn't a full frame. Both are at the start of a frame,
+            // the only difference is whether or not the ReplayService has ticked
+            // and advanced the frame count.
+            if (TickableBucketServiceTickUpdatePatcher.HasTickedReplayService)
+            {
+                ticksAtMapLoad--;
+            }
             mapLoadingSource.TrySetResult(bytes);
             mapLoadingSource = null;
         }
