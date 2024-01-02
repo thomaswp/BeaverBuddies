@@ -508,17 +508,17 @@ namespace TimberModTest
                 //}
                 //}
 
-                //if (entity._originalName == "BeaverAdult(Clone)" || entity._originalName == "BeaverChild(Clone)")
-                //{
-                //    var transform = entity._entityComponent.TransformFast;
-                //    Plugin.Log($"{entity.EntityId}: {transform.position} {transform.position.x}");
-                //}
+                if (entity._originalName == "BeaverAdult(Clone)" || entity._originalName == "BeaverChild(Clone)")
+                {
+                    var transform = entity._entityComponent.TransformFast;
+                    Plugin.Log($"{entity.EntityId}: {FVS(transform.position)}");
+                }
             }
         }
 
         private static string FVS(Vector3 vector)
         {
-            return $"{vector.x:F2}, {vector.y:F2}, {vector.z:F2}";
+            return $"({vector.x}, {vector.y}, {vector.z})";
         }
     }
 
