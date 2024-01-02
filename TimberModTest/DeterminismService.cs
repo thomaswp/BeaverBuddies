@@ -79,7 +79,8 @@ namespace TimberModTest
                     // TODO: Make only in "dev mode"
                     lastRandomStackTraces.Add(new StackTrace());
                     Plugin.Log("s0 before: " + Random.state.s0.ToString("X8"));
-                    Plugin.LogStackTrace();
+                    Plugin.Log($"Last entity: ${TEBPatcher.LastTickedEntity.name} - {TEBPatcher.LastTickedEntity.EntityId}");
+                    //Plugin.LogStackTrace();
                     return false;
                 }
 
@@ -446,6 +447,8 @@ namespace TimberModTest
         public static int EntityUpdateHash { get; private set; }
         public static int PositionHash { get; private set; }
 
+        public static EntityComponent LastTickedEntity { get; private set; }
+
         public static void SetHashes(int entityUpdateHash, int positionHash)
         {
             EntityUpdateHash = entityUpdateHash;
@@ -458,7 +461,7 @@ namespace TimberModTest
             {
                 var entity = __instance._tickableEntities.Values[i];
                 EntityUpdateHash = TimberNetBase.CombineHash(EntityUpdateHash, entity.EntityId.GetHashCode());
-
+                LastTickedEntity = entity._entityComponent;
 
                 var entityComponent = entity._entityComponent;
                 var pathFollower = entityComponent.GetComponentFast<Walker>()?._pathFollower;
