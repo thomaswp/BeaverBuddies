@@ -24,13 +24,15 @@ namespace TimberModTest.Events
         public string prefabName;
         public Vector3Int coordinates;
         public Orientation orientation;
+        public FlipMode flipMode;
 
         public override void Replay(IReplayContext context)
         {
             var buildingPrefab = GetBuilding(context, prefabName);
             var blockObject = buildingPrefab.GetComponentFast<BlockObject>();
             var placer = context.GetSingleton<BlockObjectPlacerService>().GetMatchingPlacer(blockObject);
-            placer.Place(blockObject, coordinates, orientation);
+            Placement placement = new Placement(coordinates, orientation, flipMode);
+            placer.Place(blockObject, placement);
         }
 
         public override string ToActionString()
@@ -43,7 +45,7 @@ namespace TimberModTest.Events
     [HarmonyPatch(typeof(BuildingPlacer), nameof(BuildingPlacer.Place))]
     class PlacePatcher
     {
-        static bool Prefix(BlockObject prefab, Vector3Int coordinates, Orientation orientation)
+        static bool Prefix(BlockObject prefab, Placement placement)
         {
             return ReplayEvent.DoPrefix(() =>
             {
@@ -52,8 +54,9 @@ namespace TimberModTest.Events
                 return new BuildingPlacedEvent()
                 {
                     prefabName = prefabName,
-                    coordinates = coordinates,
-                    orientation = orientation,
+                    coordinates = placement.Coordinates,
+                    orientation = placement.Orientation,
+                    flipMode = placement.FlipMode,
                 };
             });
         }
