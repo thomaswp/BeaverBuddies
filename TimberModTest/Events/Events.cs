@@ -186,7 +186,7 @@ namespace TimberModTest.Events
     [Serializable]
     public class SpeedSetEvent : ReplayEvent
     {
-        public int speed;
+        public float speed;
 
         public override void Replay(IReplayContext context)
         {
@@ -209,14 +209,14 @@ namespace TimberModTest.Events
     {
         private static bool silently = false;
 
-        public static void SetSpeedSilently(SpeedManager speedManager, int speed)
+        public static void SetSpeedSilently(SpeedManager speedManager, float speed)
         {
             silently = true;
             speedManager.ChangeSpeed(speed);
             silently = false;
         }
 
-        static bool Prefix(SpeedManager __instance, ref int speed)
+        static bool Prefix(SpeedManager __instance, ref float speed)
         {
             // No need to log speed changes to current speed
             if (__instance.CurrentSpeed == speed) return true;

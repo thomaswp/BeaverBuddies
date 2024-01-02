@@ -84,7 +84,7 @@ namespace TimberModTest
         private int ticksSinceLoad = 0;
         public int TicksSinceLoad => ticksSinceLoad;
 
-        public int TargetSpeed  { get; private set; } = 0;
+        public float TargetSpeed  { get; private set; } = 0;
 
 
         private static ConcurrentQueue<ReplayEvent> eventsToSend = new ConcurrentQueue<ReplayEvent>();
@@ -349,7 +349,7 @@ namespace TimberModTest
             UpdateSpeed();
         }
 
-        public void SetTargetSpeed(int speed)
+        public void SetTargetSpeed(float speed)
         {
             TargetSpeed = speed;
             // If we're paused, we should interrupt the ticking, so we end
@@ -371,7 +371,7 @@ namespace TimberModTest
                 SpeedChangePatcher.SetSpeedSilently(_speedManager, 0);
             }
             if (io.IsOutOfEvents) return;
-            int targetSpeed = this.TargetSpeed;
+            float targetSpeed = this.TargetSpeed;
             int ticksBehind = io.TicksBehind;
 
             //Plugin.Log($"Ticks behind {ticksBehind}");
