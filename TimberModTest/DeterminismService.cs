@@ -79,7 +79,7 @@ namespace TimberModTest
                     // TODO: Make only in "dev mode"
                     lastRandomStackTraces.Add(new StackTrace());
                     Plugin.Log("s0 before: " + Random.state.s0.ToString("X8"));
-                    Plugin.Log($"Last entity: ${TEBPatcher.LastTickedEntity.name} - {TEBPatcher.LastTickedEntity.EntityId}");
+                    Plugin.Log($"Last entity: ${TEBPatcher.LastTickedEntity?.name} - {TEBPatcher.LastTickedEntity?.EntityId}");
                     //Plugin.LogStackTrace();
                     return false;
                 }
