@@ -76,6 +76,10 @@ namespace TimberModTest
             {
                 ticksAtMapLoad--;
             }
+            else
+            {
+                _replayService.SetTargetSpeed(0);
+            }
             mapLoadingSource.TrySetResult(bytes);
             mapLoadingSource = null;
         }
