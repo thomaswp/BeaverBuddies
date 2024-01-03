@@ -77,9 +77,9 @@ namespace TimberModTest
                 if (IsTicking)
                 {
                     // TODO: Make only in "dev mode"
-                    lastRandomStackTraces.Add(new StackTrace());
-                    Plugin.Log("s0 before: " + Random.state.s0.ToString("X8"));
-                    Plugin.Log($"Last entity: ${TEBPatcher.LastTickedEntity?.name} - {TEBPatcher.LastTickedEntity?.EntityId}");
+                    //lastRandomStackTraces.Add(new StackTrace());
+                    //Plugin.Log("s0 before: " + Random.state.s0.ToString("X8"));
+                    //Plugin.Log($"Last entity: ${TEBPatcher.LastTickedEntity?.name} - {TEBPatcher.LastTickedEntity?.EntityId}");
                     //Plugin.LogStackTrace();
                     return false;
                 }
@@ -438,6 +438,27 @@ namespace TimberModTest
         {
             __result = time;
             return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(Walker), nameof(Walker.FindPath))]
+    public class WalkerFindPathPatcher
+    {
+
+        static void Prefix(Walker __instance, IDestination destination)
+        {
+            string entityID = __instance.GetComponentFast<EntityComponent>().EntityId.ToString();
+            if (destination is PositionDestination)
+            {
+                Plugin.Log($"{entityID} going to: " +
+                    $"{((PositionDestination)destination).Destination}");
+            } 
+            else if (destination is AccessibleDestination)
+            {
+                var accessible = ((AccessibleDestination)destination).Accessible;
+                Plugin.Log($"{entityID} going to: " +
+                    $"{accessible.GameObjectFast.name} at {accessible.UnblockedSingleAccessInstant}");
+            }
         }
     }
 
