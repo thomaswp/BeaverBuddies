@@ -441,16 +441,6 @@ namespace TimberModTest
         }
     }
 
-    [HarmonyPatch(typeof(Time), nameof(Time.deltaTime), MethodType.Getter)]
-    public class TimeDeltaTimePatcher
-    {
-        static bool Prefix(ref float __result)
-        {
-            __result = Time.fixedDeltaTime;
-            return false;
-        }
-    }
-
     [HarmonyPatch(typeof(TickableEntityBucket), nameof(TickableEntityBucket.TickAll))]
     public class TEBPatcher
     {
