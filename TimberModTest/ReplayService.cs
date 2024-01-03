@@ -546,11 +546,11 @@ namespace TimberModTest
             // Alternatively, I think that we could use the ReplayService version
             // that only stops ticking if not paused
 
-            // Forces 1 tick per update
-            //if (numberOfBucketsToTick != 0)
-            //{
-                //numberOfBucketsToTick = __instance.NumberOfBuckets + 1;
-            //}
+            //Forces 1 tick per update
+            if (numberOfBucketsToTick != 0)
+            {
+                numberOfBucketsToTick = __instance.NumberOfBuckets + 1;
+            }
 
             while (ShouldTick(__instance, numberOfBucketsToTick--))
             {
