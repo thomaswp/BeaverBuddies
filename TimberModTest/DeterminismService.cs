@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using Timberborn.Animations;
 using Timberborn.BlockSystem;
+using Timberborn.BotUpkeep;
 using Timberborn.BuildingTools;
 using Timberborn.CharacterMovementSystem;
 using Timberborn.Common;
@@ -23,6 +24,7 @@ using Timberborn.RecoveredGoodSystem;
 using Timberborn.SingletonSystem;
 using Timberborn.SoundSystem;
 using Timberborn.StockpileVisualization;
+using Timberborn.TerrainSystem;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
 using Timberborn.WalkingSystem;
@@ -328,6 +330,34 @@ namespace TimberModTest
         }
     }
 
+    [HarmonyPatch(typeof(BotManufactoryAnimationController), nameof(BotManufactoryAnimationController.ResetRingRotation))]
+    public class BotManufactoryAnimationControllerPatcher
+    {
+        static void Prefix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(BotManufactoryAnimationControllerPatcher), true);
+        }
+
+        static void Postfix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(BotManufactoryAnimationControllerPatcher), false);
+        }
+    }
+
+    [HarmonyPatch(typeof(TerrainBlockRandomizer), nameof(TerrainBlockRandomizer.PickVariation))]
+    public class TerrainBlockRandomizerPickVariationPatcher
+    {
+        static void Prefix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(TerrainBlockRandomizerPickVariationPatcher), true);
+        }
+
+        static void Postfix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(TerrainBlockRandomizerPickVariationPatcher), false);
+        }
+    }
+
 
     [HarmonyPatch(typeof(Ticker), nameof(Ticker.Update))]
     public class TickerPatcher
@@ -441,26 +471,26 @@ namespace TimberModTest
         }
     }
 
-    [HarmonyPatch(typeof(Walker), nameof(Walker.FindPath))]
-    public class WalkerFindPathPatcher
-    {
+    //[HarmonyPatch(typeof(Walker), nameof(Walker.FindPath))]
+    //public class WalkerFindPathPatcher
+    //{
 
-        static void Prefix(Walker __instance, IDestination destination)
-        {
-            string entityID = __instance.GetComponentFast<EntityComponent>().EntityId.ToString();
-            if (destination is PositionDestination)
-            {
-                Plugin.Log($"{entityID} going to: " +
-                    $"{((PositionDestination)destination).Destination}");
-            } 
-            else if (destination is AccessibleDestination)
-            {
-                var accessible = ((AccessibleDestination)destination).Accessible;
-                Plugin.Log($"{entityID} going to: " +
-                    $"{accessible.GameObjectFast.name} at {accessible.UnblockedSingleAccessInstant}");
-            }
-        }
-    }
+    //    static void Prefix(Walker __instance, IDestination destination)
+    //    {
+    //        string entityID = __instance.GetComponentFast<EntityComponent>().EntityId.ToString();
+    //        if (destination is PositionDestination)
+    //        {
+    //            Plugin.Log($"{entityID} going to: " +
+    //                $"{((PositionDestination)destination).Destination}");
+    //        } 
+    //        else if (destination is AccessibleDestination)
+    //        {
+    //            var accessible = ((AccessibleDestination)destination).Accessible;
+    //            Plugin.Log($"{entityID} going to: " +
+    //                $"{accessible.GameObjectFast.name}");
+    //        }
+    //    }
+    //}
 
     [HarmonyPatch(typeof(TickableEntityBucket), nameof(TickableEntityBucket.TickAll))]
     public class TEBPatcher
