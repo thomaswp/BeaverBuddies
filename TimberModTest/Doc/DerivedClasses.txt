@@ -648,7 +648,7 @@ Timberborn.DistributionSystemUI.DistrictCrossingInventoryFragment:
 Timberborn.DwellingSystemUI.DwellingDebugFragment:
 Timberborn.DwellingSystemUI.DwellingUserFragment:
 Timberborn.ExplosionsUI.DynamiteFragment:
-* TODO
+* Done
 Timberborn.FieldsUI.FarmHouseFragment:
 Timberborn.GameDistrictsUI.DistrictCenterFragment:
 Timberborn.GatheringUI.GatherableFragment:

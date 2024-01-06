@@ -20,6 +20,8 @@ using Timberborn.DemolishingUI;
 using Timberborn.DropdownSystem;
 using Timberborn.Emptying;
 using Timberborn.EntitySystem;
+using Timberborn.Explosions;
+using Timberborn.ExplosionsUI;
 using Timberborn.Fields;
 using Timberborn.Gathering;
 using Timberborn.Goods;
@@ -690,6 +692,38 @@ namespace TimberModTest.Events
         }
     }
 
+    [Serializable]
+    class DynamiteTriggeredEvent : ReplayEvent
+    {
+        public string entityID;
+
+        public override void Replay(IReplayContext context)
+        {
+            Dynamite dynamite = GetComponent<Dynamite>(context, entityID);
+            if (!dynamite) return;
+            dynamite.Trigger();
+        }
+
+        public override string ToActionString()
+        {
+            return $"Triggering dynamite {entityID}!!";
+        }
+    }
+
+    [HarmonyPatch(typeof(DynamiteFragment), nameof(DynamiteFragment.DetonateSelectedDynamite))]
+    class DynamiteFragmentDetonateSelectedDynamitePatcher
+    {
+        static bool Prefix(DynamiteFragment __instance)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance._dynamite, entityID =>
+            {
+                return new DynamiteTriggeredEvent()
+                {
+                    entityID = entityID,
+                };
+            });
+        }
+    }
 
     //// For debugging only - to figure out where dropdowns are being set
     //[HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetAndUpdate))]
