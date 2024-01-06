@@ -29,6 +29,8 @@ using Timberborn.InventorySystem;
 using Timberborn.Planting;
 using Timberborn.PrefabSystem;
 using Timberborn.PrioritySystem;
+using Timberborn.RecoveredGoodSystem;
+using Timberborn.RecoveredGoodSystemUI;
 using Timberborn.StockpilePrioritySystem;
 using Timberborn.StockpilePriorityUISystem;
 using Timberborn.WaterBuildings;
@@ -718,6 +720,39 @@ namespace TimberModTest.Events
             return ReplayEvent.DoEntityPrefix(__instance._dynamite, entityID =>
             {
                 return new DynamiteTriggeredEvent()
+                {
+                    entityID = entityID,
+                };
+            });
+        }
+    }
+
+    [Serializable]
+    class GoodStackDeletedEvent : ReplayEvent
+    {
+        public string entityID;
+
+        public override void Replay(IReplayContext context)
+        {
+            RecoveredGoodStack goodStack = GetComponent<RecoveredGoodStack>(context, entityID);
+            if (!goodStack) return;
+            context.GetSingleton<EntityService>().Delete(goodStack);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Deleting recoverable good {entityID}";
+        }
+    }
+
+    [HarmonyPatch(typeof(DeleteRecoveredGoodStackFragment), nameof(DeleteRecoveredGoodStackFragment.DeleteRecoveredGoodStack))]
+    class DeleteRecoveredGoodStackFragmentPatcher
+    {
+        static bool Prefix(DeleteRecoveredGoodStackFragment __instance)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance._recoveredGoodStack, entityID =>
+            {
+                return new GoodStackDeletedEvent()
                 {
                     entityID = entityID,
                 };

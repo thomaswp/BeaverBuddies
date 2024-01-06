@@ -667,7 +667,7 @@ Timberborn.PlantingUI.PlantablePrioritizerFragment:
 * Done
 Timberborn.PowerGeneratingUI.AdjustableStrengthPowerGeneratorFragment:
 Timberborn.RecoveredGoodSystemUI.DeleteRecoveredGoodStackFragment:
-* TODO
+* Done
 Timberborn.RecoveredGoodSystemUI.RecoveredGoodStackFragment:
 Timberborn.ReproductionUI.BreedingPodFragment:
 Timberborn.RuinsModelShuffling.RuinModelShufflingFragment:
