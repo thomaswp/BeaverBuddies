@@ -15,6 +15,8 @@ using Timberborn.BuildingsUI;
 using Timberborn.BuildingTools;
 using Timberborn.Coordinates;
 using Timberborn.DeconstructionSystemUI;
+using Timberborn.Demolishing;
+using Timberborn.DemolishingUI;
 using Timberborn.DropdownSystem;
 using Timberborn.Emptying;
 using Timberborn.EntitySystem;
@@ -512,6 +514,7 @@ namespace TimberModTest.Events
         }
     }
 
+    [Serializable]
     class FloodgateSynchronizedChangedEvent : ReplayEvent
     {
         public string entityID;
@@ -644,35 +647,78 @@ namespace TimberModTest.Events
     }
 
 
-
-    // For debugging only - to figure out where dropdowns are being set
-    [HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetAndUpdate))]
-    class DropdownPatcher
+    [Serializable]
+    class DemolishButtonClickedEvent : ReplayEvent
     {
-        static bool Prefix(Dropdown __instance, string newValue)
-        {
-            Plugin.Log($"Dropdown selected {newValue}");
-            Plugin.Log(__instance.name + "," + __instance.fullTypeName);
-            //Plugin.Log(new System.Diagnostics.StackTrace().ToString());
+        public string entityID;
+        public bool mark;
 
-            // TODO: For reader, return false
-            return true;
+        public override void Replay(IReplayContext context)
+        {
+            Demolishable demolishable = GetComponent<Demolishable>(context, entityID);
+            if (!demolishable) return;
+            if (mark)
+            {
+                demolishable.Mark();
+            }
+            else
+            {
+                demolishable.Unmark();
+            }
+        }
+
+        public override string ToActionString()
+        {
+            string verb = mark ? "Marking" : "Unmarking";
+            return $"{verb} {entityID} for demolition";
         }
     }
 
-    // For debugging only - to figure out where dropdowns are being set
-    [HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetItems))]
-    class DropdownProviderPatcher
+    [HarmonyPatch(typeof(DemolishableFragment), nameof(DemolishableFragment.OnDemolishButtonClick))]
+    class DemolishableFragmentButtonClickedPatcher
     {
-        static bool Prefix(Dropdown __instance, IDropdownProvider dropdownProvider, Func<string, VisualElement> elementGetter)
+        static bool Prefix(DemolishableFragment __instance)
         {
-            Plugin.Log($"Dropdown set {dropdownProvider} {dropdownProvider.GetType().FullName}");
-            //Plugin.Log(new System.Diagnostics.StackTrace().ToString());
-
-            // TODO: For reader, return false
-            return true;
+            return ReplayEvent.DoEntityPrefix(__instance._demolishable, entityID =>
+            {
+                return new DemolishButtonClickedEvent()
+                {
+                    entityID = entityID,
+                    mark = !__instance._demolishable.IsMarked,
+                };
+            });
         }
     }
+
+
+    //// For debugging only - to figure out where dropdowns are being set
+    //[HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetAndUpdate))]
+    //class DropdownPatcher
+    //{
+    //    static bool Prefix(Dropdown __instance, string newValue)
+    //    {
+    //        Plugin.Log($"Dropdown selected {newValue}");
+    //        Plugin.Log(__instance.name + "," + __instance.fullTypeName);
+    //        //Plugin.Log(new System.Diagnostics.StackTrace().ToString());
+
+    //        // TODO: For reader, return false
+    //        return true;
+    //    }
+    //}
+
+    //// For debugging only - to figure out where dropdowns are being set
+    //[HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetItems))]
+    //class DropdownProviderPatcher
+    //{
+    //    static bool Prefix(Dropdown __instance, IDropdownProvider dropdownProvider, Func<string, VisualElement> elementGetter)
+    //    {
+    //        Plugin.Log($"Dropdown set {dropdownProvider} {dropdownProvider.GetType().FullName}");
+    //        //Plugin.Log(new System.Diagnostics.StackTrace().ToString());
+
+    //        // TODO: For reader, return false
+    //        return true;
+    //    }
+    //}
 
 
 }

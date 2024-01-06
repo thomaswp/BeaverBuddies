@@ -638,8 +638,9 @@ Timberborn.CharacterControlSystemUI.CharacterControlFragment:
 Timberborn.ConstructionSitesUI.ConstructionSiteDebugFragment:
 Timberborn.ConstructionSitesUI.ConstructionSiteFragment:
 Timberborn.DemolishingUI.DemolishableFragment:
+* Done
 Timberborn.DemolishingUI.DemolishablePriorityFragment:
-* TODO
+* Likely redundant with other priority events
 Timberborn.DeteriorationSystemUI.DeteriorableDebugFragment:
 Timberborn.DeteriorationSystemUI.DeteriorableFragment:
 Timberborn.DistributionSystemUI.DistrictCrossingFragment:
@@ -663,7 +664,7 @@ Timberborn.MechanicalSystemUI.BatteryFragment:
 Timberborn.MechanicalSystemUI.MechanicalNodeFragment:
 Timberborn.NaturalResourcesMoistureUI.NaturalResourceMoistureFragment:
 Timberborn.PlantingUI.PlantablePrioritizerFragment:
-* TODO
+* Done
 Timberborn.PowerGeneratingUI.AdjustableStrengthPowerGeneratorFragment:
 Timberborn.RecoveredGoodSystemUI.DeleteRecoveredGoodStackFragment:
 * TODO
@@ -675,12 +676,12 @@ Timberborn.ScienceSystemUI.ScienceNeedingBuildingFragment:
 Timberborn.SimpleOutputBuildingsUI.SimpleOutputInventoryFragment:
 Timberborn.StatusSystemUI.StatusListFragment:
 Timberborn.StockpilePriorityUISystem.StockpilePriorityFragment:
-* TODO
+* Done
 Timberborn.StockpilesUI.StockpileInventoryDebugFragment:
 Timberborn.StockpilesUI.StockpileInventoryFragment:
 Timberborn.StockpileVisualizationUI.StockpileGoodColumnVisualizerDebugFragment:
 Timberborn.WaterBuildingsUI.FloodgateFragment:
-* TODO
+* Done
 Timberborn.WaterBuildingsUI.StreamGaugeFragment:
 Timberborn.WaterSourceSystemUI.WaterSourceFragment:
 Timberborn.WellbeingUI.WellbeingFragment:
