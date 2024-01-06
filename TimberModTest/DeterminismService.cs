@@ -2,9 +2,12 @@
 using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using Timberborn.Animations;
+using Timberborn.Autosaving;
+using Timberborn.Beavers;
 using Timberborn.BlockSystem;
 using Timberborn.BotUpkeep;
 using Timberborn.BuildingTools;
@@ -13,12 +16,14 @@ using Timberborn.Common;
 using Timberborn.ConstructibleSystem;
 using Timberborn.EntitySystem;
 using Timberborn.GameSaveRepositorySystem;
+using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.GameScene;
 using Timberborn.InputSystem;
 using Timberborn.NaturalResources;
 using Timberborn.NaturalResourcesMoisture;
 using Timberborn.NaturalResourcesReproduction;
 using Timberborn.NeedSystem;
+using Timberborn.Persistence;
 using Timberborn.PlantingUI;
 using Timberborn.RecoveredGoodSystem;
 using Timberborn.SingletonSystem;
@@ -30,6 +35,7 @@ using Timberborn.TimeSystem;
 using Timberborn.WalkingSystem;
 using Timberborn.Workshops;
 using Timberborn.WorkSystem;
+using Timberborn.WorldSerialization;
 using TimberNet;
 using UnityEngine;
 
@@ -355,6 +361,66 @@ namespace TimberModTest
         static void Postfix()
         {
             DeterminismController.SetNonGamePatcherActive(typeof(TerrainBlockRandomizerPickVariationPatcher), false);
+        }
+    }
+
+
+    [HarmonyPatch(typeof(BeaverTextureSetter), nameof(BeaverTextureSetter.Start))]
+    public class BeaverTextureSetterStartPatcher
+    {
+        static void Prefix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(BeaverTextureSetterStartPatcher), true);
+        }
+
+        static void Postfix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(TerrainBlockRandomizerPickVariationPatcher), false);
+        }
+    }
+
+    [HarmonyPatch(typeof(TickableBucketService), nameof(TickableBucketService.FinishFullTick))]
+    static class TickableBucketService_FinishFullTick_Patch
+    {
+        static bool Prefix(TickableBucketService __instance)
+        {
+            // If we're saving, ignore this - we've ensured a full
+            // tick was completed beforehand
+            if (GameSaverSavePatcher.IsSaving) return false;
+            // Otherwise log it - we need to investigate this
+            Plugin.LogWarning("Finishing full tick - this probably is bad!");
+            Plugin.LogStackTrace();
+            return true;
+        }
+    }
+
+    [HarmonyPatch(typeof(GameSaver), nameof(GameSaver.Save), typeof(SaveReference), typeof(bool))]
+    public class GameSaverSavePatcher
+    {
+        public static bool IsSaving { get; set; }
+
+        static bool Prefix(GameSaver __instance, SaveReference saveReference, bool skipNameValidation)
+        {
+            if (IsSaving) return true;
+            TickRequester.FinishFullTickAndThen(() =>
+            {
+                IsSaving = true;
+                __instance.Save(saveReference, skipNameValidation);
+                IsSaving = false;
+            });
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(Autosaver), nameof(Autosaver.CreateExitSave))]
+    public class AutosaverCreateExitSavePatcher
+    {
+
+        static void Prefix()
+        {
+            // Go straight to saving since we're going to exit
+            // and don't need to keep clients in sync
+            GameSaverSavePatcher.IsSaving = true;
         }
     }
 

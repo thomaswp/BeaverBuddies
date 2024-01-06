@@ -437,18 +437,6 @@ namespace TimberModTest
         }
     }
 
-    // TODO: May also need to patch FinishFullTick to not move ahead unless
-    // we want to, but it may be ok because we always pause on a full tick?
-    [HarmonyPatch(typeof(TickableBucketService), nameof(TickableBucketService.FinishFullTick))]
-    static class TickableBucketService_FinishFullTick_Patch
-    {
-        static void Postfix(TickableBucketService __instance)
-        {
-            Plugin.Log("Finishing full tick");
-            Plugin.LogStackTrace();
-        }
-    }
-
     [HarmonyPatch(typeof(TickableSingletonService), nameof(TickableSingletonService.Load))]
     static class TickableSingletonServicePatcher
     {
