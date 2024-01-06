@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Timberborn.EntitySystem;
 using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.MapSystem;
 using Timberborn.SingletonSystem;
 using Timberborn.TickSystem;
+using Timberborn.WalkingSystem;
 using TimberModTest.Events;
 using TimberNet;
 
@@ -80,6 +83,17 @@ namespace TimberModTest
             {
                 _replayService.SetTargetSpeed(0);
             }
+
+            // Refresh walker paths, since the loaded game will have
+            // freshly calculated paths
+            var entityService = _replayService.GetSingleton<EntityService>();
+            var entities = entityService._entityRegistry.Entities;
+            var walkers = entities.Select(e => e.GetComponentFast<Walker>()).Where(w => w != null);
+            foreach (Walker walker in walkers)
+            {
+                walker.RefreshPath();
+            }
+
             mapLoadingSource.TrySetResult(bytes);
             mapLoadingSource = null;
         }
