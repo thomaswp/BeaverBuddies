@@ -84,15 +84,16 @@ namespace TimberModTest
                 _replayService.SetTargetSpeed(0);
             }
 
+            // Unfortunately this seems to desync even on initial connects
             // Refresh walker paths, since the loaded game will have
             // freshly calculated paths
-            var entityService = _replayService.GetSingleton<EntityService>();
-            var entities = entityService._entityRegistry.Entities;
-            var walkers = entities.Select(e => e.GetComponentFast<Walker>()).Where(w => w != null);
-            foreach (Walker walker in walkers)
-            {
-                walker.RefreshPath();
-            }
+            //var entityService = _replayService.GetSingleton<EntityService>();
+            //var entities = entityService._entityRegistry.Entities;
+            //var walkers = entities.Select(e => e.GetComponentFast<Walker>()).Where(w => w != null);
+            //foreach (Walker walker in walkers)
+            //{
+            //    walker.RefreshPath();
+            //}
 
             mapLoadingSource.TrySetResult(bytes);
             mapLoadingSource = null;
