@@ -75,14 +75,14 @@ namespace TimberModTest
             // Note: this isn't a full frame. Both are at the start of a frame,
             // the only difference is whether or not the ReplayService has ticked
             // and advanced the frame count.
-            if (TickableBucketServiceTickUpdatePatcher.HasTickedReplayService)
-            {
-                ticksAtMapLoad--;
-            }
-            else
-            {
-                _replayService.SetTargetSpeed(0);
-            }
+            //if (TickableBucketServiceTickUpdatePatcher.HasTickedReplayService)
+            //{
+            //    ticksAtMapLoad--;
+            //}
+            //else
+            //{
+            //    _replayService.SetTargetSpeed(0);
+            //}
 
             // Unfortunately this seems to desync even on initial connects
             // Refresh walker paths, since the loaded game will have
