@@ -375,7 +375,7 @@ namespace TimberModTest
 
         static void Postfix()
         {
-            DeterminismController.SetNonGamePatcherActive(typeof(TerrainBlockRandomizerPickVariationPatcher), false);
+            DeterminismController.SetNonGamePatcherActive(typeof(BeaverTextureSetterStartPatcher), false);
         }
     }
 
