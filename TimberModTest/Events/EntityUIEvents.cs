@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Timberborn.BaseComponentSystem;
+using Timberborn.BeaversUI;
 using Timberborn.BlockObjectTools;
 using Timberborn.BlockSystem;
 using Timberborn.BuilderPrioritySystem;
@@ -13,6 +14,7 @@ using Timberborn.Buildings;
 using Timberborn.BuildingsBlocking;
 using Timberborn.BuildingsUI;
 using Timberborn.BuildingTools;
+using Timberborn.Characters;
 using Timberborn.Coordinates;
 using Timberborn.DeconstructionSystemUI;
 using Timberborn.Demolishing;
@@ -759,6 +761,42 @@ namespace TimberModTest.Events
             });
         }
     }
+
+    [Serializable]
+    class BeaverRenamedEvent : ReplayEvent
+    {
+        public string entityID;
+        public string newName;
+
+        public override void Replay(IReplayContext context)
+        {
+            var character = GetComponent<Character>(context, entityID);
+            if (character == null) return;
+            character.FirstName = newName;
+        }
+
+        public override string ToActionString()
+        {
+            return $"Renaming {entityID} to {newName}";
+        }
+    }
+
+    [HarmonyPatch(typeof(BeaverEntityBadge), nameof(BeaverEntityBadge.SetEntityName))]
+    class BeaverEntityBadgePatcher
+    {
+        static bool Prefix(BeaverEntityBadge __instance, string entityName)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance._character, entityID =>
+            {
+                return new BeaverRenamedEvent()
+                {
+                    entityID = entityID,
+                    newName = entityName,
+                };
+            });
+        }
+    }
+
 
     //// For debugging only - to figure out where dropdowns are being set
     //[HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetAndUpdate))]
