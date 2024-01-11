@@ -59,8 +59,7 @@ namespace TimberModTest.Events
         }
     }
 
-    // TODO: Don't disable!
-    //[HarmonyPatch(typeof(ManualMigrationPopulationRow), nameof(ManualMigrationPopulationRow.MigratePopulation))]
+    [HarmonyPatch(typeof(ManualMigrationPopulationRow), nameof(ManualMigrationPopulationRow.MigratePopulation))]
     class ManualMigrationPopulationRowMigratePatcher
     {
         static bool Prefix(ManualMigrationPopulationRow __instance, int amount)

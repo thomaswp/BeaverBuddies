@@ -27,6 +27,8 @@ using Timberborn.SingletonSystem;
 using Timberborn.StatusSystem;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
+using Timberborn.WorkSystem;
+using Timberborn.WorkSystemUI;
 using TimberModTest.Events;
 using TimberNet;
 using UnityEngine;
@@ -107,7 +109,9 @@ namespace TimberModTest
             EntityService entityService,
             RecipeSpecificationService recipeSpecificationService,
             DemolishableSelectionService demolishableSelectionService,
-            BuildingUnlockingService buildingUnlockingService
+            BuildingUnlockingService buildingUnlockingService,
+            WorkingHoursManager workingHoursManager,
+            WorkingHoursPanel workingHoursPanel
         )
         {
             //_tickWathcerService = AddSingleton(tickWathcerService);
@@ -124,6 +128,8 @@ namespace TimberModTest
             AddSingleton(recipeSpecificationService);
             AddSingleton(demolishableSelectionService);
             AddSingleton(buildingUnlockingService);
+            AddSingleton(workingHoursManager);
+            AddSingleton(workingHoursPanel);
 
             // TODO: I think there's a SingletonRegistry that may
             // be able to do this.

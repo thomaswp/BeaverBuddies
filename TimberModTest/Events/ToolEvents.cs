@@ -14,6 +14,8 @@ using Timberborn.Forestry;
 using Timberborn.PlantingUI;
 using Timberborn.ScienceSystem;
 using Timberborn.ToolSystem;
+using Timberborn.WorkSystem;
+using Timberborn.WorkSystemUI;
 using UnityEngine;
 
 namespace TimberModTest.Events
@@ -340,6 +342,43 @@ namespace TimberModTest.Events
                     buildingName = building.name,
                 };
             });
+        }
+    }
+
+    [Serializable]
+    class WorkingHoursChangedEvent : ReplayEvent
+    {
+        public int hours;
+
+        public override void Replay(IReplayContext context)
+        {
+            var panel = context.GetSingleton<WorkingHoursPanel>();
+            panel._hours = hours;
+            panel.OnHoursChanged();
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting working hours: {hours}";
+        }
+    }
+
+    [HarmonyPatch(typeof(WorkingHoursPanel), nameof(WorkingHoursPanel.OnHoursChanged))]
+    class WorkingHoursPanelOnHoursChangedPatcher
+    {
+        static bool Prefix(WorkingHoursPanel __instance)
+        {
+            bool value = ReplayEvent.DoPrefix(() =>
+            {
+                return new WorkingHoursChangedEvent()
+                {
+                    hours = __instance._hours,
+                };
+            });
+
+            // Update the title if we're actually calling this event
+            if (!value) __instance.UpdateTitle();
+            return value;
         }
     }
 }
