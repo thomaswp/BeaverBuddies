@@ -10,6 +10,7 @@ using Timberborn.EntitySystem;
 using Timberborn.GameDistricts;
 using Timberborn.GameDistrictsMigration;
 using Timberborn.GameDistrictsMigrationBatchControl;
+using Timberborn.Goods;
 using UnityEngine.UIElements;
 using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.InputSystem.InputRemoting;
@@ -98,52 +99,31 @@ namespace TimberModTest.Events
         }
     }
 
-    //[Serializable]
-    //class ExportThresholdChangedEvent : ReplayEvent
-    //{
-    //    public string districtEntityID;
-    //    public string goodID;
-    //    public float threshold;
+    // We need a reference to the district to replay events that happen to the
+    // GoodDistributionSetting
+    class GoodDistributionSettingWithDistrict : GoodDistributionSetting
+    {
+        public DistrictDistributionSetting DistrictSetting { get; private set; }
 
-    //    public override void Replay(IReplayContext context)
-    //    {
-    //        var distributionSetting = GetComponent<DistrictDistributionSetting>(context, districtEntityID);
-    //        if (distributionSetting != null) return;
-    //        var goodSetting = distributionSetting.GetGoodDistributionSetting(goodID);
-    //        if (goodSetting != null)
-    //        {
-    //            Plugin.LogWarning($"Could not find good {goodID} in district {districtEntityID}");
-    //            return;
-    //        }
-    //        goodSetting.SetExportThreshold(threshold);
-    //    }
+        public GoodDistributionSettingWithDistrict(GoodSpecification goodSpecification, DistrictDistributionSetting districtSetting) : base(goodSpecification)
+        {
+            this.DistrictSetting = districtSetting;
+        }
+    }
 
-    //    public override string ToActionString()
-    //    {
-    //        return base.ToActionString();
-    //    }
-    //}
-
-    // This isn't going to work because the slider does not have a reference to
-    // the district.
-    //[HarmonyPatch(typeof(ExportThresholdSlider), nameof(ExportThresholdSlider.OnSliderChanged))]
-    //class ExportThresholdSliderOnSliderChangedPatcher
-    //{
-    //    static bool Prefix(ExportThresholdSlider __instance, ChangeEvent<float> evt)
-    //    {
-    //        return ReplayEvent.DoPrefix(() =>
-    //        {
-    //            var districtEntityID = ReplayEvent.GetEntityID(__instance._setting._goodSpecification.);
-    //            var goodID = __instance._goodDistributionSetting.GoodID;
-    //            return new ExportThresholdChangedEvent()
-    //            {
-    //                districtEntityID = districtEntityID,
-    //                goodID = goodID,
-    //                threshold = value
-    //            };
-    //        });
-    //    }
-    //}
+    [HarmonyPatch(typeof(DistrictDistributionSetting), nameof(DistrictDistributionSetting.AddGoodDistributionSetting))]
+    class DistrictDistributionSettingAddPatcher
+    {
+        static void Prefix(DistrictDistributionSetting __instance, ref GoodDistributionSetting goodDistributionSetting)
+        {
+            // Replace the goodDistributionSetting with a new one that has a reference to the district
+            var newSetting = new GoodDistributionSettingWithDistrict(goodDistributionSetting._goodSpecification, __instance);
+            newSetting.ExportThreshold = goodDistributionSetting.ExportThreshold;
+            newSetting.ImportOption = goodDistributionSetting.ImportOption;
+            newSetting.LastImportTimestamp = goodDistributionSetting.LastImportTimestamp;
+            goodDistributionSetting = newSetting;
+        }
+    }
 
     [Serializable]
     class GoodDistributionSettingChangedEvent : ReplayEvent
@@ -156,9 +136,9 @@ namespace TimberModTest.Events
         public override void Replay(IReplayContext context)
         {
             var distributionSetting = GetComponent<DistrictDistributionSetting>(context, districtEntityID);
-            if (distributionSetting != null) return;
+            if (distributionSetting == null) return;
             var goodSetting = distributionSetting.GetGoodDistributionSetting(goodID);
-            if (goodSetting != null)
+            if (goodSetting == null)
             {
                 Plugin.LogWarning($"Could not find good {goodID} in district {districtEntityID}");
                 return;
@@ -170,51 +150,68 @@ namespace TimberModTest.Events
             if (goodSetting.ImportOption != importOption)
             {
                 goodSetting.SetImportOption(importOption);
-            }    
+            }
         }
 
         public override string ToActionString()
         {
             return base.ToActionString();
         }
+
+        public static bool DoPrefix(GoodDistributionSetting __instance, float exportThreshold, ImportOption importOption, bool typeWarning = true)
+        {
+            if (!(__instance is GoodDistributionSettingWithDistrict))
+            {
+                if (typeWarning)
+                {
+                    Plugin.LogWarning("GoddDistributionSetting without district!!");
+                }
+                return true;
+            }
+            var district = ((GoodDistributionSettingWithDistrict)__instance).DistrictSetting;
+            return DoEntityPrefix(district, entityID =>
+            {
+                return new GoodDistributionSettingChangedEvent()
+                {
+                    districtEntityID = entityID,
+                    goodID = __instance.GoodId,
+                    threshold = exportThreshold,
+                    importOption = importOption,
+                };
+            });
+        }
     }
 
-    [HarmonyPatch(typeof(DistrictDistributionSetting), nameof(DistrictDistributionSetting.AddGoodDistributionSetting))]
-    class DistrictDistributionSettingAddPatcher
+    // I believe that the "Set" methods here are only called from the UI, so this is
+    // similar to intercepting the UI events directly. Loading and initialization don't
+    // call these events.
+    [HarmonyPatch(typeof(GoodDistributionSetting), nameof(GoodDistributionSetting.SetExportThreshold))]
+    class GoodDistributionSettingSetImportThresholdPatcher
     {
-        static bool Prefix(DistrictDistributionSetting __instance, GoodDistributionSetting goodDistributionSetting)
+        static bool Prefix(GoodDistributionSetting __instance, float exportThreshold)
         {
-            var districtEntityID = ReplayEvent.GetEntityID(__instance);
-            var goodID = goodDistributionSetting?.GoodId;
-            if (districtEntityID == null || goodID == null) return true;
-
-            __instance._goodDistributionSettings.Add(goodDistributionSetting);
-            goodDistributionSetting.SettingChanged += (sender, e) =>
-            {
-                // If not loaded, proceed as normal
-                if (!ReplayService.IsLoaded)
-                {
-                    __instance.OnSettingChanged(sender, e);
-                    return;
-                };
-
-                // Otherwise record the event as usual
-                var message = new GoodDistributionSettingChangedEvent()
-                {
-                    districtEntityID = districtEntityID,
-                    goodID = goodID,
-                    threshold = goodDistributionSetting.ExportThreshold,
-                    importOption = goodDistributionSetting.ImportOption,
-                };
-                Plugin.Log(message.ToActionString());
-                ReplayService.RecordEvent(message);
-
-                // Only raise the event and do its effects if we're supposed
-                // to play this event
-                if (!EventIO.ShouldPlayPatchedEvents) return;
-                __instance.OnSettingChanged(sender, e);
-            };
-            return false;
+            if (__instance.ExportThreshold == exportThreshold) return true;
+            return GoodDistributionSettingChangedEvent.DoPrefix(__instance, exportThreshold, __instance.ImportOption);
+        }
+    }
+    [HarmonyPatch(typeof(GoodDistributionSetting), nameof(GoodDistributionSetting.SetImportOption))]
+    class GoodDistributionSettingSetImportOptionPatcher
+    {
+        static bool Prefix(GoodDistributionSetting __instance, ImportOption importOption)
+        {
+            if (__instance.ImportOption == importOption) return true;
+            return GoodDistributionSettingChangedEvent.DoPrefix(__instance, __instance.ExportThreshold, importOption);
+        }
+    }
+    [HarmonyPatch(typeof(GoodDistributionSetting), nameof(GoodDistributionSetting.SetDefault))]
+    class GoodDistributionSettingSetDefaultPatcher
+    {
+        static bool Prefix(GoodDistributionSetting __instance)
+        {
+            var exportThreshold = 0f;
+            var importOption = ((!__instance._goodSpecification.ForceImport) ? ImportOption.Auto : ImportOption.Forced);
+            if (__instance.ImportOption == importOption && __instance.ExportThreshold == exportThreshold) return true;
+            return GoodDistributionSettingChangedEvent.DoPrefix(__instance, exportThreshold, importOption, false);
         }
     }
 }
