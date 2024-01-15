@@ -25,6 +25,44 @@ namespace TimberModTest.Events
         Unknown
     }
 
+    static class DistributorUtils
+    {
+        public static DistributorType GetDistributorType(IDistributorTemplate distributorTemplate)
+        {
+            DistributorType type = distributorTemplate switch
+            {
+                ChildrenDistributorInitializer _ => DistributorType.Children,
+                AdultsDistributorTemplate _ => DistributorType.Adults,
+                BotsDistributorTemplate _ => DistributorType.Bots,
+                _ => DistributorType.Unknown
+            };
+            if (type == DistributorType.Unknown)
+            {
+                Plugin.LogWarning($"Unknown distributor type: {distributorTemplate.GetType()}");
+            }
+            return type;
+        }
+
+
+        private static PopulationDistributorRetriever retreiver = 
+            new PopulationDistributorRetriever();
+        public static PopulationDistributor GetDistributor(DistributorType distributorType, DistrictCenter districtCenter)
+        {
+            var distributor = distributorType switch
+            {
+                DistributorType.Children => retreiver.GetPopulationDistributor<ChildrenDistributorTemplate>(districtCenter),
+                DistributorType.Adults => retreiver.GetPopulationDistributor<AdultsDistributorTemplate>(districtCenter),
+                DistributorType.Bots => retreiver.GetPopulationDistributor<BotsDistributorTemplate>(districtCenter),
+                _ => null
+            };
+            if (distributor == null)
+            {
+                Plugin.LogWarning($"Unknown distributor type: {distributorType}");
+            }
+            return distributor;
+        }
+    }
+
     class ManualMigrationEvent : ReplayEvent
     {
         public string fromDistrictID;
@@ -37,17 +75,10 @@ namespace TimberModTest.Events
             var fromDistrictCenter = GetComponent<DistrictCenter>(context, fromDistrictID);
             var toDistrictCenter = GetComponent<DistrictCenter>(context, toDistrictID);
             if (fromDistrictCenter == null || toDistrictCenter == null) { return; }
-            PopulationDistributorRetriever retreiver = new PopulationDistributorRetriever();
-            var distributor = distributorType switch
-            {
-                DistributorType.Children => retreiver.GetPopulationDistributor<ChildrenDistributorTemplate>(fromDistrictCenter),
-                DistributorType.Adults => retreiver.GetPopulationDistributor<AdultsDistributorTemplate>(fromDistrictCenter),
-                DistributorType.Bots => retreiver.GetPopulationDistributor<BotsDistributorTemplate>(fromDistrictCenter),
-                _ => null
-            };
+            
+            var distributor = DistributorUtils.GetDistributor(distributorType, fromDistrictCenter);
             if (distributor == null) 
             {
-                Plugin.LogWarning($"Unknown distributor type: {distributorType}");
                 return; 
             }
 
@@ -73,17 +104,9 @@ namespace TimberModTest.Events
             if (amount <= 0) return true;
             return ReplayEvent.DoPrefix(() =>
             {
-                DistributorType type = __instance._populationDistributor._distributorTemplate switch
-                {
-                    ChildrenDistributorInitializer _ => DistributorType.Children,
-                    AdultsDistributorTemplate _ => DistributorType.Adults,
-                    BotsDistributorTemplate _ => DistributorType.Bots,
-                    _ => DistributorType.Unknown
-                };
+                DistributorType type = DistributorUtils.GetDistributorType(__instance._populationDistributor._distributorTemplate);
                 if (type == DistributorType.Unknown)
                 {
-                    Plugin.LogWarning($"Unknown distributor type: " +
-                        $"{__instance._populationDistributor._distributorTemplate.GetType()}");
                     return null;
                 }
                 var fromDistrictID = ReplayEvent.GetEntityID(__instance._populationDistributor.DistrictCenter);
@@ -98,6 +121,51 @@ namespace TimberModTest.Events
             });
         }
     }
+
+    class SetDistrictMinimumPopulationEvent : ReplayEvent
+    {
+        public string districtEntityID;
+        public int minimumPopulation;
+        public DistributorType distributorType;
+
+        public override void Replay(IReplayContext context)
+        {
+            DistrictCenter districtCenter = GetComponent<DistrictCenter>(context, districtEntityID);
+            if (districtCenter == null) return;
+            PopulationDistributor distributor = DistributorUtils.GetDistributor(distributorType, districtCenter);
+            if (distributor == null) return;
+            distributor.SetMinimumAndMigrate(minimumPopulation);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting minimum population for {distributorType} for " +
+                $"district {districtEntityID} to {minimumPopulation}";
+        }
+    }
+
+    [HarmonyPatch(typeof(PopulationDistributor), nameof(PopulationDistributor.SetMinimumAndMigrate))]
+    class PopulationDistributorSetMinimumAndMigratePatcher
+    {
+        static bool Prefix(PopulationDistributor __instance, int minimum)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance.DistrictCenter, (entityID) =>
+            {
+                DistributorType type = DistributorUtils.GetDistributorType(__instance._distributorTemplate);
+                if (type == DistributorType.Unknown)
+                {
+                    return null;
+                }
+                return new SetDistrictMinimumPopulationEvent()
+                {
+                    districtEntityID = entityID,
+                    distributorType = type,
+                    minimumPopulation = minimum,
+                };
+            });
+        }
+    }
+
 
     // We need a reference to the district to replay events that happen to the
     // GoodDistributionSetting
