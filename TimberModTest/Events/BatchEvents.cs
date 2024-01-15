@@ -31,7 +31,7 @@ namespace TimberModTest.Events
         {
             DistributorType type = distributorTemplate switch
             {
-                ChildrenDistributorInitializer _ => DistributorType.Children,
+                ChildrenDistributorTemplate _ => DistributorType.Children,
                 AdultsDistributorTemplate _ => DistributorType.Adults,
                 BotsDistributorTemplate _ => DistributorType.Bots,
                 _ => DistributorType.Unknown
@@ -163,6 +163,77 @@ namespace TimberModTest.Events
                     minimumPopulation = minimum,
                 };
             });
+        }
+    }
+
+    class SetDistrictMigrationToggledEvent : ReplayEvent
+    {
+        public string districtEntityID;
+        public bool isImmigration;
+        public bool allow;
+        public DistributorType distributorType;
+
+        public override void Replay(IReplayContext context)
+        {
+            DistrictCenter districtCenter = GetComponent<DistrictCenter>(context, districtEntityID);
+            if (districtCenter == null) return;
+            PopulationDistributor distributor = DistributorUtils.GetDistributor(distributorType, districtCenter);
+            if (distributor == null) return;
+            if (isImmigration)
+            {
+                if (distributor.AllowImmigration == allow) return;
+                distributor.ToggleAllowImmigrationAndMigrate();
+            }
+            else
+            {
+                if (distributor.AllowEmigration == allow) return;
+                distributor.ToggleAllowEmigrationAndMigrate();
+            }
+        }
+
+        public override string ToActionString()
+        {
+            string migrationType = isImmigration ? "immigration" : "emigration";
+            string allowedType = allow ? "allowed" : "disallowed";
+            return $"Toggling {migrationType} to {allowedType} for {distributorType} for " +
+                $"district {districtEntityID}";
+        }
+
+        public static bool DoPrefix(PopulationDistributor __instance, bool isImmigration, bool allow)
+        {
+            return DoEntityPrefix(__instance.DistrictCenter, (entityID) =>
+            {
+                DistributorType type = DistributorUtils.GetDistributorType(__instance._distributorTemplate);
+                if (type == DistributorType.Unknown)
+                {
+                    return null;
+                }
+                return new SetDistrictMigrationToggledEvent()
+                {
+                    districtEntityID = entityID,
+                    distributorType = type,
+                    isImmigration = isImmigration,
+                    allow = allow,
+                };
+            });
+        }
+    }
+
+    [HarmonyPatch(typeof(PopulationDistributor), nameof(PopulationDistributor.ToggleAllowImmigrationAndMigrate))]
+    class PopulationDistributorToggleAllowImmigrationAndMigratePatcher
+    {
+        static bool Prefix(PopulationDistributor __instance)
+        {
+            return SetDistrictMigrationToggledEvent.DoPrefix(__instance, true, !__instance.AllowImmigration);
+        }
+    }
+
+    [HarmonyPatch(typeof(PopulationDistributor), nameof(PopulationDistributor.ToggleAllowEmigrationAndMigrate))]
+    class PopulationDistributorToggleAllowEmigrationAndMigratePatcher
+    {
+        static bool Prefix(PopulationDistributor __instance)
+        {
+            return SetDistrictMigrationToggledEvent.DoPrefix(__instance, false, !__instance.AllowEmigration);
         }
     }
 
