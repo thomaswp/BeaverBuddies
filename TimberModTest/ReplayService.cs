@@ -534,7 +534,7 @@ namespace TimberModTest
             return numberOfBucketsToTick > 0;
         }
 
-
+        [ManualMethodOverwrite]
         static bool Prefix(TickableBucketService __instance, int numberOfBucketsToTick)
         {
             // TODO: I think if number of buckets starts at 0, we should unmark

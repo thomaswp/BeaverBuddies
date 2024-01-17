@@ -203,7 +203,7 @@ namespace TimberModTest.Events
         }
     }
 
-
+    [ManualMethodOverwrite]
     [HarmonyPatch(typeof(SpeedManager), nameof(SpeedManager.ChangeSpeed))]
     public class SpeedChangePatcher
     {

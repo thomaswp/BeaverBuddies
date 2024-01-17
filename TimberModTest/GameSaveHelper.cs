@@ -63,6 +63,7 @@ namespace TimberModTest
         }
     }
 
+    [ManualMethodOverwrite]
     [HarmonyPatch(typeof(DateTime), nameof(DateTime.ToString), typeof(string))]
     static class DateTimeStringPatcher
     {

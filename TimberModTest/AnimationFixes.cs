@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace TimberModTest
 {
-
+    [ManualMethodOverwrite]
     [HarmonyPatch(typeof(MovementAnimator), nameof(MovementAnimator.Update), typeof(float))]
     public class AnimatedPathFollowerUpdatePathcer
     {

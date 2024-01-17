@@ -394,6 +394,7 @@ namespace TimberModTest
         }
     }
 
+    [ManualMethodOverwrite]
     [HarmonyPatch(typeof(GameSaver), nameof(GameSaver.Save), typeof(SaveReference), typeof(bool))]
     public class GameSaverSavePatcher
     {
