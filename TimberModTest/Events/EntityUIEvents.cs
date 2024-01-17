@@ -36,8 +36,10 @@ using Timberborn.RecoveredGoodSystemUI;
 using Timberborn.StockpilePrioritySystem;
 using Timberborn.StockpilePriorityUISystem;
 using Timberborn.WaterBuildings;
+using Timberborn.WorkerTypesUI;
 using Timberborn.Workshops;
 using Timberborn.WorkSystem;
+using Timberborn.WorkSystemUI;
 using TimberModTest;
 using Unity.IO.LowLevel.Unsafe;
 using UnityEngine;
@@ -801,12 +803,15 @@ namespace TimberModTest.Events
     {
         public UnlockableWorkerType workerType;
 
-        // TODO: Need to work with WorkerTypeToggle and WorkplaceUnlockingDialogService
-        // to not show a second dialog when this isn't instantly unlocked, and to update
-        // the toggle when it does get unlocked.
         public override void Replay(IReplayContext context)
         {
-            context.GetSingleton<WorkplaceUnlockingService>().Unlock(workerType);
+            var service = context.GetSingleton<WorkplaceUnlockingService>();
+            if (service.Unlocked(workerType))
+            {
+                Plugin.LogWarning($"Tried to unlock {workerType.WorkerType} for {workerType.WorkplacePrefabName} but it was already unlocked");
+                return;
+            }
+            service.Unlock(workerType);
         }
 
         public override string ToActionString()
@@ -864,8 +869,37 @@ namespace TimberModTest.Events
         }
     }
 
+    [ManualMethodOverwrite]
+    [HarmonyPatch(typeof(WorkerTypeToggle), nameof(WorkerTypeToggle.TryToUnlock))]
+    class WorkerTypeToggleTryToUnlockPatcher
+    {
+        static bool Prefix(WorkerTypeToggle __instance)
+        {
+            // Do the method as normal, but instead of calling back SetBotWorkerType, we raise
+            // an event to do so (only if we get dialot confirmation).
+            UnlockableWorkerType botUnlockableWorkerType = __instance.GetBotUnlockableWorkerType();
+            __instance._workplaceUnlockingDialogService.TryToUnlockWorkerType(botUnlockableWorkerType, () =>
+            {
+                bool callOriginal = ReplayEvent.DoEntityPrefix(__instance._workplaceWorkerType, (entityID) =>
+                {
+                    return new WorkerTypeSetEvent()
+                    {
+                        workplaceEntityID = entityID,
+                        workerType = WorkerTypeHelper.BotWorkerType,
+                    };
+                });
 
+                // If the original method should be called, we call it here.
+                if (callOriginal) 
+                {
+                    __instance.SetBotWorkerType();
+                }
+            });
 
+            // Always override
+            return false;
+        }
+    }
 
     //// For debugging only - to figure out where dropdowns are being set
     //[HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetAndUpdate))]
