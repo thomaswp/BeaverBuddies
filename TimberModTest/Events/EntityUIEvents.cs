@@ -797,6 +797,75 @@ namespace TimberModTest.Events
         }
     }
 
+    class WorkerTypeUnlockedEvent : ReplayEvent
+    {
+        public UnlockableWorkerType workerType;
+
+        // TODO: Need to work with WorkerTypeToggle and WorkplaceUnlockingDialogService
+        // to not show a second dialog when this isn't instantly unlocked, and to update
+        // the toggle when it does get unlocked.
+        public override void Replay(IReplayContext context)
+        {
+            context.GetSingleton<WorkplaceUnlockingService>().Unlock(workerType);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Unlocking {workerType.WorkerType} for {workerType.WorkplacePrefabName}";
+        }
+    }
+
+    [HarmonyPatch(typeof(WorkplaceUnlockingService), nameof(WorkplaceUnlockingService.Unlock))]
+    class WorkplaceUnlockingServiceUnlockPatcher
+    {
+        static bool Prefix(WorkplaceUnlockingService __instance, UnlockableWorkerType unlockableWorkerType)
+        {
+            return ReplayEvent.DoPrefix(() =>
+            {
+                return new WorkerTypeUnlockedEvent()
+                {
+                    workerType = unlockableWorkerType,
+                };
+            });
+        }
+    }
+
+    class WorkerTypeSetEvent : ReplayEvent
+    {
+        public string workplaceEntityID;
+        public string workerType;
+
+        public override void Replay(IReplayContext context)
+        {
+            var workplace = GetComponent<WorkplaceWorkerType>(context, workplaceEntityID);
+            if (workplace == null) return;
+            workplace.SetWorkerType(workerType);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting worker type of {workplaceEntityID} to {workerType}";
+        }
+    }
+
+    [HarmonyPatch(typeof(WorkplaceWorkerType), nameof(WorkplaceWorkerType.SetWorkerType))]
+    class WorkplaceWorkerTypeSetWorkerTypePatcher
+    {
+        static bool Prefix(WorkplaceWorkerType __instance, string workerType)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance, (entityID) =>
+            {
+                return new WorkerTypeSetEvent()
+                {
+                    workplaceEntityID = entityID,
+                    workerType = workerType,
+                };
+            });
+        }
+    }
+
+
+
 
     //// For debugging only - to figure out where dropdowns are being set
     //[HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetAndUpdate))]

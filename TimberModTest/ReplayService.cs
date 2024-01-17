@@ -111,7 +111,8 @@ namespace TimberModTest
             DemolishableSelectionService demolishableSelectionService,
             BuildingUnlockingService buildingUnlockingService,
             WorkingHoursManager workingHoursManager,
-            WorkingHoursPanel workingHoursPanel
+            WorkingHoursPanel workingHoursPanel,
+            WorkplaceUnlockingService workplaceUnlockingService
         )
         {
             //_tickWathcerService = AddSingleton(tickWathcerService);
@@ -130,6 +131,7 @@ namespace TimberModTest
             AddSingleton(buildingUnlockingService);
             AddSingleton(workingHoursManager);
             AddSingleton(workingHoursPanel);
+            AddSingleton(workplaceUnlockingService);
 
             // TODO: I think there's a SingletonRegistry that may
             // be able to do this.

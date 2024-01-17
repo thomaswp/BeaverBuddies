@@ -625,11 +625,11 @@ namespace TimberModTest
                 //}
                 //}
 
-                if (entity._originalName == "BeaverAdult(Clone)" || entity._originalName == "BeaverChild(Clone)")
-                {
-                    var transform = entity._entityComponent.TransformFast;
-                    Plugin.Log($"{entity.EntityId}: {FVS(transform.position)}");
-                }
+                //if (entity._originalName == "BeaverAdult(Clone)" || entity._originalName == "BeaverChild(Clone)")
+                //{
+                //    var transform = entity._entityComponent.TransformFast;
+                //    Plugin.Log($"{entity.EntityId}: {FVS(transform.position)}");
+                //}
             }
         }
 
