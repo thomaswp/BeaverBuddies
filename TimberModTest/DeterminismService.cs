@@ -33,11 +33,11 @@ using Timberborn.TerrainSystem;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
 using Timberborn.WalkingSystem;
-using Timberborn.Workshops;
 using Timberborn.WorkSystem;
 using Timberborn.WorldSerialization;
 using TimberNet;
 using UnityEngine;
+using static Timberborn.GameSaveRuntimeSystem.GameSaver;
 
 namespace TimberModTest
 {
@@ -308,19 +308,20 @@ namespace TimberModTest
         }
     }
 
-    [HarmonyPatch(typeof(ObservatoryAnimator), nameof(ObservatoryAnimator.GenerateRandomAngles))]
-    public class ObservatoryAnimatorGenerateRandomAnglesPatcher
-    {
-        static void Prefix()
-        {
-            DeterminismController.SetNonGamePatcherActive(typeof(ObservatoryAnimatorGenerateRandomAnglesPatcher), true);
-        }
+    // TODO: Figure out what happened to this class - no longer seems to exist
+    //[HarmonyPatch(typeof(ObservatoryAnimator), nameof(ObservatoryAnimator.GenerateRandomAngles))]
+    //public class ObservatoryAnimatorGenerateRandomAnglesPatcher
+    //{
+    //    static void Prefix()
+    //    {
+    //        DeterminismController.SetNonGamePatcherActive(typeof(ObservatoryAnimatorGenerateRandomAnglesPatcher), true);
+    //    }
 
-        static void Postfix()
-        {
-            DeterminismController.SetNonGamePatcherActive(typeof(ObservatoryAnimatorGenerateRandomAnglesPatcher), false);
-        }
-    }
+    //    static void Postfix()
+    //    {
+    //        DeterminismController.SetNonGamePatcherActive(typeof(ObservatoryAnimatorGenerateRandomAnglesPatcher), false);
+    //    }
+    //}
 
     [HarmonyPatch(typeof(LoopingSoundPlayer), nameof(LoopingSoundPlayer.PlayLooping))]
     public class LoopingSoundPlayerPatcher
@@ -394,19 +395,21 @@ namespace TimberModTest
         }
     }
 
+    // TODO: Double check that this still works - the arguments have
+    // changed and now it gets saved on LateUpdate as a queueing process
     [ManualMethodOverwrite]
-    [HarmonyPatch(typeof(GameSaver), nameof(GameSaver.Save), typeof(SaveReference), typeof(bool))]
+    [HarmonyPatch(typeof(GameSaver), nameof(GameSaver.Save), typeof(QueuedSave))]
     public class GameSaverSavePatcher
     {
         public static bool IsSaving { get; set; }
 
-        static bool Prefix(GameSaver __instance, SaveReference saveReference, bool skipNameValidation)
+        static bool Prefix(GameSaver __instance, QueuedSave queuedSave)
         {
             if (IsSaving) return true;
             TickRequester.FinishFullTickAndThen(() =>
             {
                 IsSaving = true;
-                __instance.Save(saveReference, skipNameValidation);
+                __instance.Save(queuedSave);
                 IsSaving = false;
             });
             return false;

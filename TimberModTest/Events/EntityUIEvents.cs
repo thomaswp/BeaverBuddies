@@ -716,7 +716,7 @@ namespace TimberModTest.Events
         }
     }
 
-    [HarmonyPatch(typeof(DynamiteFragment), nameof(DynamiteFragment.DetonateSelectedDynamite))]
+    [HarmonyPatch(typeof(DynamiteFragment), nameof(DynamiteFragment.DetonateSelectedDynamite), [])]
     class DynamiteFragmentDetonateSelectedDynamitePatcher
     {
         static bool Prefix(DynamiteFragment __instance)

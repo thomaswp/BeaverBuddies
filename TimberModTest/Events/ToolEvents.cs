@@ -320,7 +320,9 @@ namespace TimberModTest.Events
                 if (toolBuilding == building)
                 {
                     Plugin.Log("Unlocking tool for building: " + buildingName);
-                    blockObjectTool.Locked = false;
+                    // TODO: Need to test - I think this is equivalent to clearing the lock
+                    // but not sure it'll update the UI
+                    blockObjectTool.Locker = null;
                 }
             }
         }

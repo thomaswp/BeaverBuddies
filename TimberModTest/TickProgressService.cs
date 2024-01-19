@@ -18,17 +18,20 @@ namespace TimberModTest
 
         public static int GetEntityBucketIndex(EntityComponent tickableEntity)
         {
-            return tickableBucketService.GetEntityBucketIndex(tickableEntity.EntityId); ;
+            if (tickableBucketService == null) return 0;
+            return tickableBucketService.GetEntityBucketIndex(tickableEntity.EntityId);
         }
 
         public static bool HasTicked(EntityComponent tickableEntity)
         {
+            if (tickableBucketService == null) return false;
             int bucketIndex = GetEntityBucketIndex(tickableEntity);
             return bucketIndex < tickableBucketService._nextTickedBucketIndex;
         }
 
         public static float PercentTicked(EntityComponent tickableEntity)
         {
+            if (tickableBucketService == null) return 0;
             int bucketIndex = GetEntityBucketIndex(tickableEntity);
             int currentIndex = tickableBucketService._nextTickedBucketIndex;
             // Figure out how many buckets have ticked since this entity's bucket
@@ -40,6 +43,7 @@ namespace TimberModTest
 
         public static float TimeAtLastTick(EntityComponent tickableEntity)
         {
+            if (tickableBucketService == null) return 0;
             float time = Time.time;
             if (HasTicked(tickableEntity))
             {
