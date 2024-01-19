@@ -890,7 +890,7 @@ namespace TimberModTest.Events
                 });
 
                 // If the original method should be called, we call it here.
-                if (callOriginal) 
+                if (callOriginal)
                 {
                     __instance.SetBotWorkerType();
                 }
@@ -900,35 +900,4 @@ namespace TimberModTest.Events
             return false;
         }
     }
-
-    //// For debugging only - to figure out where dropdowns are being set
-    //[HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetAndUpdate))]
-    //class DropdownPatcher
-    //{
-    //    static bool Prefix(Dropdown __instance, string newValue)
-    //    {
-    //        Plugin.Log($"Dropdown selected {newValue}");
-    //        Plugin.Log(__instance.name + "," + __instance.fullTypeName);
-    //        //Plugin.Log(new System.Diagnostics.StackTrace().ToString());
-
-    //        // TODO: For reader, return false
-    //        return true;
-    //    }
-    //}
-
-    //// For debugging only - to figure out where dropdowns are being set
-    //[HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetItems))]
-    //class DropdownProviderPatcher
-    //{
-    //    static bool Prefix(Dropdown __instance, IDropdownProvider dropdownProvider, Func<string, VisualElement> elementGetter)
-    //    {
-    //        Plugin.Log($"Dropdown set {dropdownProvider} {dropdownProvider.GetType().FullName}");
-    //        //Plugin.Log(new System.Diagnostics.StackTrace().ToString());
-
-    //        // TODO: For reader, return false
-    //        return true;
-    //    }
-    //}
-
-
 }

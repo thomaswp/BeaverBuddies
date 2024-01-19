@@ -238,4 +238,22 @@ namespace TimberModTest.Events
             return false;
         }
     }
+
+    // TODO: Overwrite SpeedManager.LockSpeed and see where it's
+    // being called. My guess is we don't ever want to lock speed
+    // if we're the client, and probably only on pause if we're the
+    // server. We may also want to disable certain things if client
+    // e.g. how would menu pause be handled? Save would be unstable.
+    [ManualMethodOverwrite]
+    [HarmonyPatch(typeof(SpeedManager), nameof(SpeedManager.LockSpeed))]
+    public class SpeedLockPatcher
+    {
+        static bool Prefix(SpeedManager __instance)
+        {
+            Plugin.Log("SpeedManager.LockSpeed");
+            Plugin.LogStackTrace();
+            return true;
+        }
+    }
+
 }
