@@ -11,6 +11,7 @@ using TimberApi.ConfiguratorSystem;
 using TimberApi.ConsoleSystem;
 using TimberApi.ModSystem;
 using TimberApi.SceneSystem;
+using Timberborn.BatchControl;
 using Timberborn.BlockSystem;
 using Timberborn.BuildingTools;
 using Timberborn.Coordinates;
@@ -56,7 +57,8 @@ namespace TimberModTest
             //    "Start", "Awake", "Update", "FixedUpdate", "LateUpdate", "OnEnable", "OnDisable", "OnDestroy");
             //ReflectionUtils.PrintChildClasses(typeof(IUpdatableSingleton));
             //ReflectionUtils.PrintChildClasses(typeof(ILateUpdatableSingleton));
-
+            //ReflectionUtils.PrintChildClasses(typeof(IBatchControlRowItem));
+            //ReflectionUtils.PrintChildClasses(typeof(IUpdateableBatchControlRowItem));
         }
     }
 

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Timberborn.BaseComponentSystem;
+using Timberborn.BeaversUI;
 using Timberborn.BlockObjectTools;
 using Timberborn.BlockSystem;
 using Timberborn.BuilderPrioritySystem;
@@ -13,11 +14,16 @@ using Timberborn.Buildings;
 using Timberborn.BuildingsBlocking;
 using Timberborn.BuildingsUI;
 using Timberborn.BuildingTools;
+using Timberborn.Characters;
 using Timberborn.Coordinates;
 using Timberborn.DeconstructionSystemUI;
+using Timberborn.Demolishing;
+using Timberborn.DemolishingUI;
 using Timberborn.DropdownSystem;
 using Timberborn.Emptying;
 using Timberborn.EntitySystem;
+using Timberborn.Explosions;
+using Timberborn.ExplosionsUI;
 using Timberborn.Fields;
 using Timberborn.Gathering;
 using Timberborn.Goods;
@@ -25,11 +31,15 @@ using Timberborn.InventorySystem;
 using Timberborn.Planting;
 using Timberborn.PrefabSystem;
 using Timberborn.PrioritySystem;
+using Timberborn.RecoveredGoodSystem;
+using Timberborn.RecoveredGoodSystemUI;
 using Timberborn.StockpilePrioritySystem;
 using Timberborn.StockpilePriorityUISystem;
 using Timberborn.WaterBuildings;
+using Timberborn.WorkerTypesUI;
 using Timberborn.Workshops;
 using Timberborn.WorkSystem;
+using Timberborn.WorkSystemUI;
 using TimberModTest;
 using Unity.IO.LowLevel.Unsafe;
 using UnityEngine;
@@ -512,6 +522,7 @@ namespace TimberModTest.Events
         }
     }
 
+    [Serializable]
     class FloodgateSynchronizedChangedEvent : ReplayEvent
     {
         public string entityID;
@@ -644,35 +655,249 @@ namespace TimberModTest.Events
     }
 
 
-
-    // For debugging only - to figure out where dropdowns are being set
-    [HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetAndUpdate))]
-    class DropdownPatcher
+    [Serializable]
+    class DemolishButtonClickedEvent : ReplayEvent
     {
-        static bool Prefix(Dropdown __instance, string newValue)
-        {
-            Plugin.Log($"Dropdown selected {newValue}");
-            Plugin.Log(__instance.name + "," + __instance.fullTypeName);
-            //Plugin.Log(new System.Diagnostics.StackTrace().ToString());
+        public string entityID;
+        public bool mark;
 
-            // TODO: For reader, return false
-            return true;
+        public override void Replay(IReplayContext context)
+        {
+            Demolishable demolishable = GetComponent<Demolishable>(context, entityID);
+            if (!demolishable) return;
+            if (mark)
+            {
+                demolishable.Mark();
+            }
+            else
+            {
+                demolishable.Unmark();
+            }
+        }
+
+        public override string ToActionString()
+        {
+            string verb = mark ? "Marking" : "Unmarking";
+            return $"{verb} {entityID} for demolition";
         }
     }
 
-    // For debugging only - to figure out where dropdowns are being set
-    [HarmonyPatch(typeof(Dropdown), nameof(Dropdown.SetItems))]
-    class DropdownProviderPatcher
+    [HarmonyPatch(typeof(DemolishableFragment), nameof(DemolishableFragment.OnDemolishButtonClick))]
+    class DemolishableFragmentButtonClickedPatcher
     {
-        static bool Prefix(Dropdown __instance, IDropdownProvider dropdownProvider, Func<string, VisualElement> elementGetter)
+        static bool Prefix(DemolishableFragment __instance)
         {
-            Plugin.Log($"Dropdown set {dropdownProvider} {dropdownProvider.GetType().FullName}");
-            //Plugin.Log(new System.Diagnostics.StackTrace().ToString());
-
-            // TODO: For reader, return false
-            return true;
+            return ReplayEvent.DoEntityPrefix(__instance._demolishable, entityID =>
+            {
+                return new DemolishButtonClickedEvent()
+                {
+                    entityID = entityID,
+                    mark = !__instance._demolishable.IsMarked,
+                };
+            });
         }
     }
 
+    [Serializable]
+    class DynamiteTriggeredEvent : ReplayEvent
+    {
+        public string entityID;
 
+        public override void Replay(IReplayContext context)
+        {
+            Dynamite dynamite = GetComponent<Dynamite>(context, entityID);
+            if (!dynamite) return;
+            dynamite.Trigger();
+        }
+
+        public override string ToActionString()
+        {
+            return $"Triggering dynamite {entityID}!!";
+        }
+    }
+
+    [HarmonyPatch(typeof(DynamiteFragment), nameof(DynamiteFragment.DetonateSelectedDynamite))]
+    class DynamiteFragmentDetonateSelectedDynamitePatcher
+    {
+        static bool Prefix(DynamiteFragment __instance)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance._dynamite, entityID =>
+            {
+                return new DynamiteTriggeredEvent()
+                {
+                    entityID = entityID,
+                };
+            });
+        }
+    }
+
+    [Serializable]
+    class GoodStackDeletedEvent : ReplayEvent
+    {
+        public string entityID;
+
+        public override void Replay(IReplayContext context)
+        {
+            RecoveredGoodStack goodStack = GetComponent<RecoveredGoodStack>(context, entityID);
+            if (!goodStack) return;
+            context.GetSingleton<EntityService>().Delete(goodStack);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Deleting recoverable good {entityID}";
+        }
+    }
+
+    [HarmonyPatch(typeof(DeleteRecoveredGoodStackFragment), nameof(DeleteRecoveredGoodStackFragment.DeleteRecoveredGoodStack))]
+    class DeleteRecoveredGoodStackFragmentPatcher
+    {
+        static bool Prefix(DeleteRecoveredGoodStackFragment __instance)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance._recoveredGoodStack, entityID =>
+            {
+                return new GoodStackDeletedEvent()
+                {
+                    entityID = entityID,
+                };
+            });
+        }
+    }
+
+    [Serializable]
+    class BeaverRenamedEvent : ReplayEvent
+    {
+        public string entityID;
+        public string newName;
+
+        public override void Replay(IReplayContext context)
+        {
+            var character = GetComponent<Character>(context, entityID);
+            if (character == null) return;
+            character.FirstName = newName;
+        }
+
+        public override string ToActionString()
+        {
+            return $"Renaming {entityID} to {newName}";
+        }
+    }
+
+    [HarmonyPatch(typeof(BeaverEntityBadge), nameof(BeaverEntityBadge.SetEntityName))]
+    class BeaverEntityBadgePatcher
+    {
+        static bool Prefix(BeaverEntityBadge __instance, string entityName)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance._character, entityID =>
+            {
+                return new BeaverRenamedEvent()
+                {
+                    entityID = entityID,
+                    newName = entityName,
+                };
+            });
+        }
+    }
+
+    class WorkerTypeUnlockedEvent : ReplayEvent
+    {
+        public UnlockableWorkerType workerType;
+
+        public override void Replay(IReplayContext context)
+        {
+            var service = context.GetSingleton<WorkplaceUnlockingService>();
+            if (service.Unlocked(workerType))
+            {
+                Plugin.LogWarning($"Tried to unlock {workerType.WorkerType} for {workerType.WorkplacePrefabName} but it was already unlocked");
+                return;
+            }
+            service.Unlock(workerType);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Unlocking {workerType.WorkerType} for {workerType.WorkplacePrefabName}";
+        }
+    }
+
+    [HarmonyPatch(typeof(WorkplaceUnlockingService), nameof(WorkplaceUnlockingService.Unlock))]
+    class WorkplaceUnlockingServiceUnlockPatcher
+    {
+        static bool Prefix(WorkplaceUnlockingService __instance, UnlockableWorkerType unlockableWorkerType)
+        {
+            return ReplayEvent.DoPrefix(() =>
+            {
+                return new WorkerTypeUnlockedEvent()
+                {
+                    workerType = unlockableWorkerType,
+                };
+            });
+        }
+    }
+
+    class WorkerTypeSetEvent : ReplayEvent
+    {
+        public string workplaceEntityID;
+        public string workerType;
+
+        public override void Replay(IReplayContext context)
+        {
+            var workplace = GetComponent<WorkplaceWorkerType>(context, workplaceEntityID);
+            if (workplace == null) return;
+            workplace.SetWorkerType(workerType);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting worker type of {workplaceEntityID} to {workerType}";
+        }
+    }
+
+    [HarmonyPatch(typeof(WorkplaceWorkerType), nameof(WorkplaceWorkerType.SetWorkerType))]
+    class WorkplaceWorkerTypeSetWorkerTypePatcher
+    {
+        static bool Prefix(WorkplaceWorkerType __instance, string workerType)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance, (entityID) =>
+            {
+                return new WorkerTypeSetEvent()
+                {
+                    workplaceEntityID = entityID,
+                    workerType = workerType,
+                };
+            });
+        }
+    }
+
+    [ManualMethodOverwrite]
+    [HarmonyPatch(typeof(WorkerTypeToggle), nameof(WorkerTypeToggle.TryToUnlock))]
+    class WorkerTypeToggleTryToUnlockPatcher
+    {
+        static bool Prefix(WorkerTypeToggle __instance)
+        {
+            // Do the method as normal, but instead of calling back SetBotWorkerType, we raise
+            // an event to do so (only if we get dialot confirmation).
+            UnlockableWorkerType botUnlockableWorkerType = __instance.GetBotUnlockableWorkerType();
+            __instance._workplaceUnlockingDialogService.TryToUnlockWorkerType(botUnlockableWorkerType, () =>
+            {
+                bool callOriginal = ReplayEvent.DoEntityPrefix(__instance._workplaceWorkerType, (entityID) =>
+                {
+                    return new WorkerTypeSetEvent()
+                    {
+                        workplaceEntityID = entityID,
+                        workerType = WorkerTypeHelper.BotWorkerType,
+                    };
+                });
+
+                // If the original method should be called, we call it here.
+                if (callOriginal)
+                {
+                    __instance.SetBotWorkerType();
+                }
+            });
+
+            // Always override
+            return false;
+        }
+    }
 }

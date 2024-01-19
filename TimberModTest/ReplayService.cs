@@ -27,6 +27,8 @@ using Timberborn.SingletonSystem;
 using Timberborn.StatusSystem;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
+using Timberborn.WorkSystem;
+using Timberborn.WorkSystemUI;
 using TimberModTest.Events;
 using TimberNet;
 using UnityEngine;
@@ -107,7 +109,10 @@ namespace TimberModTest
             EntityService entityService,
             RecipeSpecificationService recipeSpecificationService,
             DemolishableSelectionService demolishableSelectionService,
-            BuildingUnlockingService buildingUnlockingService
+            BuildingUnlockingService buildingUnlockingService,
+            WorkingHoursManager workingHoursManager,
+            WorkingHoursPanel workingHoursPanel,
+            WorkplaceUnlockingService workplaceUnlockingService
         )
         {
             //_tickWathcerService = AddSingleton(tickWathcerService);
@@ -124,6 +129,9 @@ namespace TimberModTest
             AddSingleton(recipeSpecificationService);
             AddSingleton(demolishableSelectionService);
             AddSingleton(buildingUnlockingService);
+            AddSingleton(workingHoursManager);
+            AddSingleton(workingHoursPanel);
+            AddSingleton(workplaceUnlockingService);
 
             // TODO: I think there's a SingletonRegistry that may
             // be able to do this.
@@ -437,18 +445,6 @@ namespace TimberModTest
         }
     }
 
-    // TODO: May also need to patch FinishFullTick to not move ahead unless
-    // we want to, but it may be ok because we always pause on a full tick?
-    [HarmonyPatch(typeof(TickableBucketService), nameof(TickableBucketService.FinishFullTick))]
-    static class TickableBucketService_FinishFullTick_Patch
-    {
-        static void Postfix(TickableBucketService __instance)
-        {
-            Plugin.Log("Finishing full tick");
-            Plugin.LogStackTrace();
-        }
-    }
-
     [HarmonyPatch(typeof(TickableSingletonService), nameof(TickableSingletonService.Load))]
     static class TickableSingletonServicePatcher
     {
@@ -538,7 +534,7 @@ namespace TimberModTest
             return numberOfBucketsToTick > 0;
         }
 
-
+        [ManualMethodOverwrite]
         static bool Prefix(TickableBucketService __instance, int numberOfBucketsToTick)
         {
             // TODO: I think if number of buckets starts at 0, we should unmark

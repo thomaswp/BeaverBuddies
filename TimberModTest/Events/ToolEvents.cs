@@ -13,6 +13,9 @@ using Timberborn.EntitySystem;
 using Timberborn.Forestry;
 using Timberborn.PlantingUI;
 using Timberborn.ScienceSystem;
+using Timberborn.ToolSystem;
+using Timberborn.WorkSystem;
+using Timberborn.WorkSystemUI;
 using UnityEngine;
 
 namespace TimberModTest.Events
@@ -302,6 +305,24 @@ namespace TimberModTest.Events
             var building = GetBuilding(context, buildingName);
             if (building == null) return;
             context.GetSingleton<BuildingUnlockingService>().Unlock(building);
+
+            var toolButtonService = context.GetSingleton<ToolButtonService>();
+
+            foreach (ToolButton toolButton in toolButtonService.ToolButtons)
+            {
+                Tool tool = toolButton.Tool;
+                BlockObjectTool blockObjectTool = tool as BlockObjectTool;
+                if (blockObjectTool == null)
+                {
+                    continue;
+                }
+                Building toolBuilding = blockObjectTool.Prefab.GetComponentFast<Building>();
+                if (toolBuilding == building)
+                {
+                    Plugin.Log("Unlocking tool for building: " + buildingName);
+                    blockObjectTool.Locked = false;
+                }
+            }
         }
 
         public override string ToActionString()
@@ -315,6 +336,8 @@ namespace TimberModTest.Events
     {
         static bool Prefix(Building building)
         {
+            //Plugin.LogWarning("science again!");
+            //Plugin.LogStackTrace();
             return ReplayEvent.DoPrefix(() =>
             {
                 return new BuildingUnlockedEvent()
@@ -322,6 +345,43 @@ namespace TimberModTest.Events
                     buildingName = building.name,
                 };
             });
+        }
+    }
+
+    [Serializable]
+    class WorkingHoursChangedEvent : ReplayEvent
+    {
+        public int hours;
+
+        public override void Replay(IReplayContext context)
+        {
+            var panel = context.GetSingleton<WorkingHoursPanel>();
+            panel._hours = hours;
+            panel.OnHoursChanged();
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting working hours: {hours}";
+        }
+    }
+
+    [HarmonyPatch(typeof(WorkingHoursPanel), nameof(WorkingHoursPanel.OnHoursChanged))]
+    class WorkingHoursPanelOnHoursChangedPatcher
+    {
+        static bool Prefix(WorkingHoursPanel __instance)
+        {
+            bool value = ReplayEvent.DoPrefix(() =>
+            {
+                return new WorkingHoursChangedEvent()
+                {
+                    hours = __instance._hours,
+                };
+            });
+
+            // Update the title if we're actually calling this event
+            if (!value) __instance.UpdateTitle();
+            return value;
         }
     }
 }

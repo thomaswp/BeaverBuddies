@@ -2,32 +2,40 @@
 using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using Timberborn.Animations;
+using Timberborn.Autosaving;
+using Timberborn.Beavers;
 using Timberborn.BlockSystem;
+using Timberborn.BotUpkeep;
 using Timberborn.BuildingTools;
 using Timberborn.CharacterMovementSystem;
 using Timberborn.Common;
 using Timberborn.ConstructibleSystem;
 using Timberborn.EntitySystem;
 using Timberborn.GameSaveRepositorySystem;
+using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.GameScene;
 using Timberborn.InputSystem;
 using Timberborn.NaturalResources;
 using Timberborn.NaturalResourcesMoisture;
 using Timberborn.NaturalResourcesReproduction;
 using Timberborn.NeedSystem;
+using Timberborn.Persistence;
 using Timberborn.PlantingUI;
 using Timberborn.RecoveredGoodSystem;
 using Timberborn.SingletonSystem;
 using Timberborn.SoundSystem;
 using Timberborn.StockpileVisualization;
+using Timberborn.TerrainSystem;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
 using Timberborn.WalkingSystem;
 using Timberborn.Workshops;
 using Timberborn.WorkSystem;
+using Timberborn.WorldSerialization;
 using TimberNet;
 using UnityEngine;
 
@@ -77,9 +85,10 @@ namespace TimberModTest
                 if (IsTicking)
                 {
                     // TODO: Make only in "dev mode"
-                    lastRandomStackTraces.Add(new StackTrace());
-                    Plugin.Log("s0 before: " + Random.state.s0.ToString("X8"));
-                    Plugin.LogStackTrace();
+                    //lastRandomStackTraces.Add(new StackTrace());
+                    //Plugin.Log("s0 before: " + Random.state.s0.ToString("X8"));
+                    //Plugin.Log($"Last entity: ${TEBPatcher.LastTickedEntity?.name} - {TEBPatcher.LastTickedEntity?.EntityId}");
+                    //Plugin.LogStackTrace();
                     return false;
                 }
 
@@ -327,6 +336,95 @@ namespace TimberModTest
         }
     }
 
+    [HarmonyPatch(typeof(BotManufactoryAnimationController), nameof(BotManufactoryAnimationController.ResetRingRotation))]
+    public class BotManufactoryAnimationControllerPatcher
+    {
+        static void Prefix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(BotManufactoryAnimationControllerPatcher), true);
+        }
+
+        static void Postfix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(BotManufactoryAnimationControllerPatcher), false);
+        }
+    }
+
+    [HarmonyPatch(typeof(TerrainBlockRandomizer), nameof(TerrainBlockRandomizer.PickVariation))]
+    public class TerrainBlockRandomizerPickVariationPatcher
+    {
+        static void Prefix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(TerrainBlockRandomizerPickVariationPatcher), true);
+        }
+
+        static void Postfix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(TerrainBlockRandomizerPickVariationPatcher), false);
+        }
+    }
+
+
+    [HarmonyPatch(typeof(BeaverTextureSetter), nameof(BeaverTextureSetter.Start))]
+    public class BeaverTextureSetterStartPatcher
+    {
+        static void Prefix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(BeaverTextureSetterStartPatcher), true);
+        }
+
+        static void Postfix()
+        {
+            DeterminismController.SetNonGamePatcherActive(typeof(BeaverTextureSetterStartPatcher), false);
+        }
+    }
+
+    [HarmonyPatch(typeof(TickableBucketService), nameof(TickableBucketService.FinishFullTick))]
+    static class TickableBucketService_FinishFullTick_Patch
+    {
+        static bool Prefix(TickableBucketService __instance)
+        {
+            // If we're saving, ignore this - we've ensured a full
+            // tick was completed beforehand
+            if (GameSaverSavePatcher.IsSaving) return false;
+            // Otherwise log it - we need to investigate this
+            Plugin.LogWarning("Finishing full tick - this probably is bad!");
+            Plugin.LogStackTrace();
+            return true;
+        }
+    }
+
+    [ManualMethodOverwrite]
+    [HarmonyPatch(typeof(GameSaver), nameof(GameSaver.Save), typeof(SaveReference), typeof(bool))]
+    public class GameSaverSavePatcher
+    {
+        public static bool IsSaving { get; set; }
+
+        static bool Prefix(GameSaver __instance, SaveReference saveReference, bool skipNameValidation)
+        {
+            if (IsSaving) return true;
+            TickRequester.FinishFullTickAndThen(() =>
+            {
+                IsSaving = true;
+                __instance.Save(saveReference, skipNameValidation);
+                IsSaving = false;
+            });
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(Autosaver), nameof(Autosaver.CreateExitSave))]
+    public class AutosaverCreateExitSavePatcher
+    {
+
+        static void Prefix()
+        {
+            // Go straight to saving since we're going to exit
+            // and don't need to keep clients in sync
+            GameSaverSavePatcher.IsSaving = true;
+        }
+    }
+
 
     [HarmonyPatch(typeof(Ticker), nameof(Ticker.Update))]
     public class TickerPatcher
@@ -440,11 +538,34 @@ namespace TimberModTest
         }
     }
 
+    //[HarmonyPatch(typeof(Walker), nameof(Walker.FindPath))]
+    //public class WalkerFindPathPatcher
+    //{
+
+    //    static void Prefix(Walker __instance, IDestination destination)
+    //    {
+    //        string entityID = __instance.GetComponentFast<EntityComponent>().EntityId.ToString();
+    //        if (destination is PositionDestination)
+    //        {
+    //            Plugin.Log($"{entityID} going to: " +
+    //                $"{((PositionDestination)destination).Destination}");
+    //        } 
+    //        else if (destination is AccessibleDestination)
+    //        {
+    //            var accessible = ((AccessibleDestination)destination).Accessible;
+    //            Plugin.Log($"{entityID} going to: " +
+    //                $"{accessible.GameObjectFast.name}");
+    //        }
+    //    }
+    //}
+
     [HarmonyPatch(typeof(TickableEntityBucket), nameof(TickableEntityBucket.TickAll))]
     public class TEBPatcher
     {
         public static int EntityUpdateHash { get; private set; }
         public static int PositionHash { get; private set; }
+
+        public static EntityComponent LastTickedEntity { get; private set; }
 
         public static void SetHashes(int entityUpdateHash, int positionHash)
         {
@@ -458,7 +579,7 @@ namespace TimberModTest
             {
                 var entity = __instance._tickableEntities.Values[i];
                 EntityUpdateHash = TimberNetBase.CombineHash(EntityUpdateHash, entity.EntityId.GetHashCode());
-
+                LastTickedEntity = entity._entityComponent;
 
                 var entityComponent = entity._entityComponent;
                 var pathFollower = entityComponent.GetComponentFast<Walker>()?._pathFollower;
@@ -508,14 +629,14 @@ namespace TimberModTest
                 //if (entity._originalName == "BeaverAdult(Clone)" || entity._originalName == "BeaverChild(Clone)")
                 //{
                 //    var transform = entity._entityComponent.TransformFast;
-                //    Plugin.Log($"{entity.EntityId}: {transform.position} {transform.position.x}");
+                //    Plugin.Log($"{entity.EntityId}: {FVS(transform.position)}");
                 //}
             }
         }
 
         private static string FVS(Vector3 vector)
         {
-            return $"{vector.x:F2}, {vector.y:F2}, {vector.z:F2}";
+            return $"({vector.x}, {vector.y}, {vector.z})";
         }
     }
 
