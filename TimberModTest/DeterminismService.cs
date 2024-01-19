@@ -1,9 +1,11 @@
-﻿using HarmonyLib;
+﻿using Bindito.Core.Internal;
+using HarmonyLib;
 using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using Timberborn.Animations;
 using Timberborn.Autosaving;
@@ -642,6 +644,23 @@ namespace TimberModTest
             return $"({vector.x}, {vector.y}, {vector.z})";
         }
     }
+
+    //[HarmonyPatch(typeof(ParameterProvider), nameof(ParameterProvider.GetParameters))]
+    //public static class ParameterProviderPatch
+    //{
+    //    static HashSet<string> types = new HashSet<string>();
+    //    static void Postfix(object[] __result, MethodBase method)
+    //    {
+    //        if (__result.Any(o => o is RandomNumberGenerator))
+    //        {
+    //            string name = method.DeclaringType?.FullName;
+    //            if (types.Add(name))
+    //            {
+    //                Plugin.LogWarning($"{name}");
+    //            }
+    //        }
+    //    }
+    //}
 
     //[HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.SpawnNewResources))]
     //public class NRRPatcher
