@@ -352,6 +352,7 @@ namespace TimberModTest
             // then before the end of the tick.
             if (_speedManager.CurrentSpeed == 0 && TargetSpeed == 0)
             {
+                Plugin.Log("TickIO in update");
                 DoTickIO();
             }
             UpdateSpeed();
