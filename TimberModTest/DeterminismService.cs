@@ -119,18 +119,6 @@ namespace TimberModTest
                 return activeNonGamePatchers.Remove(patcherType);
             }
         }
-
-        //public static bool SetNonTickGamePatcherActive(System.Type patcherType, bool active)
-        //{
-        //    if (active)
-        //    {
-        //        return activeNonTickGamePatchers.Add(patcherType);
-        //    }
-        //    else
-        //    {
-        //        return activeNonTickGamePatchers.Remove(patcherType);
-        //    }
-        //}
         
         private static System.Random random = new System.Random();
 
@@ -310,20 +298,20 @@ namespace TimberModTest
         }
     }
 
-    // TODO: Figure out what happened to this class - no longer seems to exist
-    //[HarmonyPatch(typeof(ObservatoryAnimator), nameof(ObservatoryAnimator.GenerateRandomAngles))]
-    //public class ObservatoryAnimatorGenerateRandomAnglesPatcher
-    //{
-    //    static void Prefix()
-    //    {
-    //        DeterminismController.SetNonGamePatcherActive(typeof(ObservatoryAnimatorGenerateRandomAnglesPatcher), true);
-    //    }
+   // TODO: Timberborn.GameLibs is out of date. This should come from the WorkshopEffets namespace
+   // [HarmonyPatch(typeof(ObservatoryAnimator), nameof(ObservatoryAnimator.GenerateRandomAngles))]
+   // public class ObservatoryAnimatorGenerateRandomAnglesPatcher
+   // {
+   //     static void Prefix()
+   //     {
+   //         DeterminismController.SetNonGamePatcherActive(typeof(ObservatoryAnimatorGenerateRandomAnglesPatcher), true);
+   //     }
 
-    //    static void Postfix()
-    //    {
-    //        DeterminismController.SetNonGamePatcherActive(typeof(ObservatoryAnimatorGenerateRandomAnglesPatcher), false);
-    //    }
-    //}
+   //     static void Postfix()
+   //     {
+   //         DeterminismController.SetNonGamePatcherActive(typeof(ObservatoryAnimatorGenerateRandomAnglesPatcher), false);
+   //     }
+   // }
 
     [HarmonyPatch(typeof(LoopingSoundPlayer), nameof(LoopingSoundPlayer.PlayLooping))]
     public class LoopingSoundPlayerPatcher
@@ -645,6 +633,7 @@ namespace TimberModTest
         }
     }
 
+    // This code finds any service or entity that uses RNG
     //[HarmonyPatch(typeof(ParameterProvider), nameof(ParameterProvider.GetParameters))]
     //public static class ParameterProviderPatch
     //{
