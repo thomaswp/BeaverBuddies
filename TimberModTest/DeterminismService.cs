@@ -1,5 +1,6 @@
 ﻿using Bindito.Core.Internal;
 using HarmonyLib;
+using System;
 using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,18 +17,23 @@ using Timberborn.BuildingTools;
 using Timberborn.CharacterMovementSystem;
 using Timberborn.Common;
 using Timberborn.ConstructibleSystem;
+using Timberborn.CoreSound;
 using Timberborn.EntitySystem;
+using Timberborn.ForestryEffects;
 using Timberborn.GameSaveRepositorySystem;
 using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.GameScene;
+using Timberborn.GameSound;
 using Timberborn.InputSystem;
 using Timberborn.NaturalResources;
+using Timberborn.NaturalResourcesModelSystem;
 using Timberborn.NaturalResourcesMoisture;
 using Timberborn.NaturalResourcesReproduction;
 using Timberborn.NeedSystem;
 using Timberborn.Persistence;
 using Timberborn.PlantingUI;
 using Timberborn.RecoveredGoodSystem;
+using Timberborn.Ruins;
 using Timberborn.SingletonSystem;
 using Timberborn.SoundSystem;
 using Timberborn.StockpileVisualization;
@@ -35,6 +41,8 @@ using Timberborn.TerrainSystem;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
 using Timberborn.WalkingSystem;
+using Timberborn.WaterBuildings;
+using Timberborn.WorkshopsEffects;
 using Timberborn.WorkSystem;
 using Timberborn.WorldSerialization;
 using TimberNet;
@@ -59,6 +67,8 @@ namespace TimberModTest
 
         private static readonly List<StackTrace> lastRandomStackTraces = new List<StackTrace>();
 
+        public static bool IsNonGameplay = false;
+
         public static void ClearRandomStacks()
         {
             lastRandomStackTraces.Clear();
@@ -72,10 +82,26 @@ namespace TimberModTest
             }
         }
 
+        public static T GetNonGameRandom<T>(System.Func<T> getter)
+        {
+            IsNonGameplay = true;
+            try
+            {
+                return getter();
+            }
+            finally
+            { 
+                IsNonGameplay = false; 
+            }
+        }
+
         public static bool ShouldFreezeSeed 
         {
             get
             {
+                // Something is asking us to return false
+                if (IsNonGameplay) return false;
+
                 // Calls from a non-game thread should never use the game's random
                 // though if they are game-related we may need a solution for that...
                 if (UnityThread != null && Thread.CurrentThread != UnityThread)
@@ -141,9 +167,9 @@ namespace TimberModTest
 
         public static Vector2 InsideUnitCircle()
         {
-            var state = Random.state;
-            var value = Random.insideUnitCircle;
-            Random.state = state;
+            var state = UnityEngine.Random.state;
+            var value = UnityEngine.Random.insideUnitCircle;
+            UnityEngine.Random.state = state;
             return value;
         }
 
@@ -198,6 +224,125 @@ namespace TimberModTest
             }
 
             return true;
+        }
+    }
+
+
+    class NonTickRandomNumberGenerator : IRandomNumberGenerator
+    {
+        private IRandomNumberGenerator baseGenerator;
+
+        public NonTickRandomNumberGenerator(IRandomNumberGenerator baseGenerator)
+        {
+            this.baseGenerator = baseGenerator;
+        }
+
+        public bool CheckProbability(float normalizedProbability)
+        {
+            return DeterminismController.GetNonGameRandom(() => baseGenerator.CheckProbability(normalizedProbability));
+        }
+
+        public T GetEnumerableElement<T>(IEnumerable<T> source)
+        {
+            return DeterminismController.GetNonGameRandom(() => baseGenerator.GetEnumerableElement<T>(source));
+        }
+
+        public T GetListElement<T>(IReadOnlyList<T> list)
+        {
+            return DeterminismController.GetNonGameRandom(() => baseGenerator.GetListElement<T>(list));
+        }
+
+        public T GetListElementOrDefault<T>(IReadOnlyList<T> list)
+        {
+            return DeterminismController.GetNonGameRandom(() => baseGenerator.GetListElementOrDefault<T>(list));
+        }
+
+        public Vector2 InsideUnitCircle()
+        {
+            return DeterminismController.GetNonGameRandom(() => baseGenerator.InsideUnitCircle());
+        }
+
+        public float Range(float inclusiveMin, float inclusiveMax)
+        {
+            return DeterminismController.GetNonGameRandom(() => baseGenerator.Range(inclusiveMin, inclusiveMax));
+        }
+
+        public int Range(int inclusiveMin, int exclusiveMax)
+        {
+            return DeterminismController.GetNonGameRandom(() => baseGenerator.Range(inclusiveMin, exclusiveMax));
+        }
+
+        public bool TryGetEnumerableElement<T>(IEnumerable<T> source, out T randomElement)
+        {
+            DeterminismController.IsNonGameplay = true;
+            bool result = baseGenerator.TryGetEnumerableElement<T>(source, out randomElement);
+            DeterminismController.IsNonGameplay = false;
+            return result;
+        }
+
+        public bool TryGetListElement<T>(IReadOnlyList<T> list, out T randomElement)
+        {
+            DeterminismController.IsNonGameplay = true;
+            bool result = baseGenerator.TryGetListElement<T>(list, out randomElement);
+            DeterminismController.IsNonGameplay = false;
+            return result;
+        }
+    }
+
+    // This code finds any service or entity that uses RNG
+    [HarmonyPatch(typeof(ParameterProvider), nameof(ParameterProvider.GetParameters))]
+    public static class ParameterProviderPatch
+    {
+        static NonTickRandomNumberGenerator nonTickRNG = null;
+
+        private static HashSet<Type> blacklist = new HashSet<Type>()
+        {
+            typeof(BeaverTextureSetter),
+            typeof(BotManufactoryAnimationController),
+            typeof(BasicSelectionSound),
+            typeof(TreeCutterSideRandomizer),
+            typeof(DateSalter),
+            typeof(GameMusicPlayer),
+            typeof(NaturalResourceModelRandomizer),
+            typeof(RuinModelFactory),
+            typeof(RuinModelUpdater),
+            typeof(LoopingSoundPlayer),
+            typeof(Sounds),
+            typeof(GoodColumnVariantsService),
+            typeof(GoodPileVariantsService),
+            typeof(StockpileGoodPileVisualizer),
+            typeof(TerrainBlockRandomizer),
+            typeof(ObservatoryAnimator),
+            typeof(WaterInputPipeSegmentFactory),
+        };
+
+        static HashSet<string> types = new HashSet<string>();
+        static void Postfix(object[] __result, MethodBase method)
+        {
+            if (blacklist.Contains(method.DeclaringType))
+            {
+                for (int i =  0; i < __result.Length; i++)
+                {
+                    if (__result[i] is RandomNumberGenerator)
+                    {
+                        RandomNumberGenerator rng = (RandomNumberGenerator)__result[i];
+                        if (nonTickRNG == null)
+                        {
+                            nonTickRNG = new NonTickRandomNumberGenerator(rng);
+                        }
+                        __result[i] = nonTickRNG;
+                    }
+                }
+            }
+
+            //if (__result.Any(o => o is RandomNumberGenerator))
+            //{
+            //    string name = method.DeclaringType?.FullName;
+            //    if (types.Add(name))
+            //    {
+            //        Plugin.LogWarning($"{name}");
+            //    }
+            //}
         }
     }
 
@@ -639,24 +784,6 @@ namespace TimberModTest
             return $"({vector.x}, {vector.y}, {vector.z})";
         }
     }
-
-    // This code finds any service or entity that uses RNG
-    //[HarmonyPatch(typeof(ParameterProvider), nameof(ParameterProvider.GetParameters))]
-    //public static class ParameterProviderPatch
-    //{
-    //    static HashSet<string> types = new HashSet<string>();
-    //    static void Postfix(object[] __result, MethodBase method)
-    //    {
-    //        if (__result.Any(o => o is RandomNumberGenerator))
-    //        {
-    //            string name = method.DeclaringType?.FullName;
-    //            if (types.Add(name))
-    //            {
-    //                Plugin.LogWarning($"{name}");
-    //            }
-    //        }
-    //    }
-    //}
 
     //[HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.SpawnNewResources))]
     //public class NRRPatcher

@@ -1,25 +1,32 @@
-﻿Timberborn.BeaverContaminationSystem.ContaminationApplier
-* In Tick
-Timberborn.Beavers.BeaverNameService
-* In RandomName
-Timberborn.Beavers.BeaverTextureSetter
+﻿= Fully addressed
+# Verified game logic or irrelevant
+> At least partially addressed
+~ Needs investigation
++ Unaddressed concern
+
+# Timberborn.BeaverContaminationSystem.ContaminationApplier
+  * In Tick
+# Timberborn.Beavers.BeaverNameService
+  * In RandomName
+> Timberborn.Beavers.BeaverTextureSetter
 Timberborn.BeaversUI.BeaverGeneratorTool
-Timberborn.BotUpkeep.BotManufactoryAnimationController
-Timberborn.Brushes.BrushProbabilityMap
-Timberborn.CoreSound.BasicSelectionSound
-Timberborn.ForestryEffects.TreeCutterSideRandomizer
-Timberborn.ForestryEffects.TreeShaker
-Timberborn.GameScene.DateSalter
-Timberborn.GameSound.GameMusicPlayer
+> Timberborn.BotUpkeep.BotManufactoryAnimationController
+# Timberborn.Brushes.BrushProbabilityMap
+  * I believe it's used in the map editor, so not an issue.
+= Timberborn.CoreSound.BasicSelectionSound
+= Timberborn.ForestryEffects.TreeCutterSideRandomizer
+= Timberborn.ForestryEffects.TreeShaker
+= Timberborn.GameScene.DateSalter
+= Timberborn.GameSound.GameMusicPlayer
 Timberborn.HazardousWeatherSystem.BadtideWeather
 Timberborn.HazardousWeatherSystem.DroughtWeather
 Timberborn.HazardousWeatherSystem.HazardousWeatherRandomizer
-Timberborn.Healthcare.BeaverInjuryTextureSetter
+~ Timberborn.Healthcare.BeaverInjuryTextureSetter
 Timberborn.MortalSystem.CharacterKiller
 Timberborn.MortalSystem.Mortal
 Timberborn.NaturalResources.CoordinatesOffseter
 Timberborn.NaturalResourcesContamination.ContaminatedNaturalResource
-Timberborn.NaturalResourcesModelSystem.NaturalResourceModelRandomizer
+~ Timberborn.NaturalResourcesModelSystem.NaturalResourceModelRandomizer
 Timberborn.NaturalResourcesMoisture.LivingWaterNaturalResource
 Timberborn.NaturalResourcesMoisture.WateredNaturalResource
 Timberborn.NaturalResourcesReproduction.NaturalResourceReproducer
@@ -28,27 +35,28 @@ Timberborn.NeedApplication.EffectProbabilityService
 Timberborn.NeedApplication.WorkshopRandomNeedApplier
 Timberborn.Pollination.Hive
 Timberborn.RecoveredGoodSystem.RecoveredGoodStackCoordinatesFinder
-Timberborn.RecoveredGoodSystem.RecoveredGoodStackFactory
+> Timberborn.RecoveredGoodSystem.RecoveredGoodStackFactory
 Timberborn.Reproduction.ProcreationHouse
-Timberborn.Ruins.RuinModelFactory
-Timberborn.Ruins.RuinModelUpdater
+~ Timberborn.Ruins.RuinModelFactory
+~ Timberborn.Ruins.RuinModelUpdater
 Timberborn.SleepSystem.Sleeper
 Timberborn.SlotSystem.PatrollingSlotFactory
 Timberborn.SlotSystem.SlotAnimationSynchronizer
 Timberborn.SlotSystem.SlotManager
 Timberborn.SlotSystem.TransformSlotFactory
-Timberborn.SoundSystem.LoopingSoundPlayer
-Timberborn.SoundSystem.Sounds
-Timberborn.StockpileVisualization.GoodColumnVariantsService
-Timberborn.StockpileVisualization.GoodPileVariantsService
-Timberborn.StockpileVisualization.StockpileGoodPileVisualizer
+> Timberborn.SoundSystem.LoopingSoundPlayer
+> Timberborn.SoundSystem.Sounds
+~ Timberborn.StockpileVisualization.GoodColumnVariantsService
+~ Timberborn.StockpileVisualization.GoodPileVariantsService
+> Timberborn.StockpileVisualization.StockpileGoodPileVisualizer
 Timberborn.Terraforming.Drill
-Timberborn.TerrainSystem.TerrainBlockRandomizer
+> Timberborn.TerrainSystem.TerrainBlockRandomizer
 Timberborn.WalkingSystem.RandomDestinationPicker
 Timberborn.Wandering.StrandedRootBehavior
 Timberborn.Wandering.WanderRootBehavior
-Timberborn.WaterBuildings.WaterInputPipeSegmentFactory
++ Timberborn.WaterBuildings.WaterInputPipeSegmentFactory
 Timberborn.WeatherSystem.TemperateWeatherDurationService
 Timberborn.WindSystem.WindService
-Timberborn.WorkshopsEffects.ObservatoryAnimator
+~ Timberborn.WorkshopsEffects.ObservatoryAnimator
+  * Cannot currently address because of outdated library
 Timberborn.Yielding.YieldRemovalChanceBonusService
