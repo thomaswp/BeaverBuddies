@@ -51,14 +51,6 @@ using static Timberborn.GameSaveRuntimeSystem.GameSaver;
 
 namespace TimberModTest
 {
-    // TODO: For reasons I don't fully understand, the game that creates
-    // a water pump will not call WaterInputPipSecmentFactory.CreateFinished
-    // but the game that received the event will. I believe it's because there's
-    // some side-effect to using the tool that calls the method first.
-    // Probably the easiest thing to do is to remove this from random altogether.
-    // Though there may be other methods that require the same thing - can check
-    // in my list.
-
     public static class DeterminismController
     {
         private static HashSet<System.Type> activeNonGamePatchers = new HashSet<System.Type>();

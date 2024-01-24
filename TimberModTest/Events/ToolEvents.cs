@@ -40,7 +40,7 @@ namespace TimberModTest.Events
 
         public override string ToActionString()
         {
-            return $"Placing {prefabName}, {coordinates}, {orientation}";
+            return $"Placing {prefabName}, {coordinates}, {orientation}, {flipMode}";
         }
     }
 
