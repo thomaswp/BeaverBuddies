@@ -19,12 +19,13 @@ namespace TimberModTest
             EntityComponent entity = __instance.GetComponentFast<EntityComponent>();
             if (entity != null)
             {
+                var tickProgressService = SingletonManager.GetSingleton<TickProgressService>();
                 // For the movement animation, use interpolated time based on
                 // how many buckets we've ticked (i.e. how close to the next
                 // time update).
-                time = TickProgressService.TimeAtLastTick(entity) +
+                time = tickProgressService.TimeAtLastTick(entity) +
                     Time.fixedDeltaTime *
-                    TickProgressService.PercentTicked(entity);
+                    tickProgressService.PercentTicked(entity);
                 //Plugin.Log($"{entity.EntityId}:\n" +
                 //    $"index: {TickProgressService.GetEntityBucketIndex(entity)}\n" +
                 //    $"ticked: {TickProgressService.HasTicked(entity)}\n" +

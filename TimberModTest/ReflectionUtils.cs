@@ -38,5 +38,38 @@ namespace TimberModTest
             sb.AppendLine();
             Plugin.Log(sb.ToString());
         }
+
+        public static void FindStaticFields()
+        {
+            string targetNamespace = "TimberModTest";
+
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            // Get all types in the target namespace
+            var typesInNamespace = assemblies.SelectMany(a => a.GetTypes());
+            Plugin.Log("Types: " + typesInNamespace.Count());
+            typesInNamespace = typesInNamespace
+                .Where(type => type.Namespace == targetNamespace);
+            Plugin.Log("In Namespace: " + typesInNamespace.Count());
+
+            foreach (var type in typesInNamespace)
+            {
+                // Check if the type implements IResettableSingleton
+                if (typeof(IResettableSingleton).IsAssignableFrom(type))
+                {
+                    // Skip types that implement IResettableSingleton
+                    continue;
+                }
+
+                // Get static fields for the current type
+                var staticFields = type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+                        .Where(field => !field.IsLiteral);
+
+                foreach (var field in staticFields)
+                {
+                    // Print or process each static field
+                    Plugin.Log($"Type: {type.Name}, Static Field: {field.Name}");
+                }
+            }
+        }
     }
 }

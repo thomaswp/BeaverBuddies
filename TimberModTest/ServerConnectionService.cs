@@ -21,16 +21,19 @@ namespace TimberModTest
 
         private GameSaver _gameSaver;
         private ReplayService _replayService;
+        private TickingService _tickingService;
 
         private TaskCompletionSource<byte[]> mapLoadingSource;
         private int ticksAtMapLoad;
 
         private bool isLoadingMap = false;
 
-        public ServerConnectionService(GameSaver gameSaver, ReplayService replayService)
+        public ServerConnectionService(GameSaver gameSaver, ReplayService replayService, 
+            TickingService tickingService)
         {
             _gameSaver = gameSaver;
             _replayService = replayService;
+            _tickingService = tickingService;
         }
 
         public void Start()
@@ -75,7 +78,7 @@ namespace TimberModTest
             // Note: this isn't a full frame. Both are at the start of a frame,
             // the only difference is whether or not the ReplayService has ticked
             // and advanced the frame count.
-            if (TickableBucketServiceTickUpdatePatcher.HasTickedReplayService)
+            if (_tickingService.HasTickedReplayService)
             {
                 ticksAtMapLoad--;
             }

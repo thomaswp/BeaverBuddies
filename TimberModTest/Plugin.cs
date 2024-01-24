@@ -35,12 +35,15 @@ namespace TimberModTest
         public void Configure(IContainerDefinition containerDefinition)
         {
             if (EventIO.Config.Mode == ReplayConfig.MODE_NONE) return;
+            // TODO: Reset on unload as well
+            SingletonManager.Reset();
             Plugin.Log($"Registering In Game Services");
             //containerDefinition.Bind<DeterminismService>().AsSingleton();
             containerDefinition.Bind<ReplayService>().AsSingleton();
             containerDefinition.Bind<ServerConnectionService>().AsSingleton();
             containerDefinition.Bind<RecordToFileService>().AsSingleton();
             containerDefinition.Bind<TickProgressService>().AsSingleton();
+            containerDefinition.Bind<TickingService>().AsSingleton();
         }
     }
 
@@ -59,6 +62,7 @@ namespace TimberModTest
             //ReflectionUtils.PrintChildClasses(typeof(ILateUpdatableSingleton));
             //ReflectionUtils.PrintChildClasses(typeof(IBatchControlRowItem));
             //ReflectionUtils.PrintChildClasses(typeof(IUpdateableBatchControlRowItem));
+            ReflectionUtils.FindStaticFields();
         }
     }
 

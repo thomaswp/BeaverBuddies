@@ -23,6 +23,7 @@ using Timberborn.Goods;
 using Timberborn.InventorySystem;
 using Timberborn.BaseComponentSystem;
 using Timberborn.BehaviorSystem;
+using static TimberModTest.SingletonManager;
 
 namespace TimberModTest.Events
 {
@@ -128,7 +129,7 @@ namespace TimberModTest.Events
             Plugin.Log(message.ToActionString());
 
             // Record the event
-            ReplayService.RecordEvent(message);
+            GetSingleton<ReplayService>().RecordEvent(message);
 
             // Return based on the EventIO's desired behavior
             return EventIO.ShouldPlayPatchedEvents;
@@ -223,7 +224,7 @@ namespace TimberModTest.Events
             // Also don't log if we're silent
             if (silently) return true;
 
-            ReplayService.RecordEvent(new SpeedSetEvent()
+            S<ReplayService>().RecordEvent(new SpeedSetEvent()
             {
                 speed = speed
             });

@@ -48,6 +48,7 @@ using Timberborn.WorldSerialization;
 using TimberNet;
 using UnityEngine;
 using static Timberborn.GameSaveRuntimeSystem.GameSaver;
+using static TimberModTest.SingletonManager;
 
 namespace TimberModTest
 {
@@ -56,6 +57,7 @@ namespace TimberModTest
         private static HashSet<System.Type> activeNonGamePatchers = new HashSet<System.Type>();
         public static bool IsTicking = false;
         public static Thread UnityThread;
+        private static System.Random random = new System.Random();
 
         private static readonly List<StackTrace> lastRandomStackTraces = new List<StackTrace>();
 
@@ -144,8 +146,6 @@ namespace TimberModTest
                 return activeNonGamePatchers.Remove(patcherType);
             }
         }
-        
-        private static System.Random random = new System.Random();
 
         public static float Range(float inclusiveMin, float inclusiveMax)
         {
@@ -547,7 +547,7 @@ namespace TimberModTest
         static bool Prefix(GameSaver __instance, QueuedSave queuedSave)
         {
             if (IsSaving) return true;
-            TickRequester.FinishFullTickAndThen(() =>
+            S<TickingService>().FinishFullTickAndThen(() =>
             {
                 IsSaving = true;
                 __instance.Save(queuedSave);

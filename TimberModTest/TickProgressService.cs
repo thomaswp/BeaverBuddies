@@ -9,27 +9,28 @@ namespace TimberModTest
 {
     public class TickProgressService
     {
-        private static TickableBucketService tickableBucketService;
+        private TickableBucketService tickableBucketService;
 
         public TickProgressService(ITickableBucketService _tickableBucketService)
         {
             tickableBucketService = _tickableBucketService as TickableBucketService;
+            SingletonManager.Register(this);
         }
 
-        public static int GetEntityBucketIndex(EntityComponent tickableEntity)
+        public int GetEntityBucketIndex(EntityComponent tickableEntity)
         {
             if (tickableBucketService == null) return 0;
             return tickableBucketService.GetEntityBucketIndex(tickableEntity.EntityId);
         }
 
-        public static bool HasTicked(EntityComponent tickableEntity)
+        public bool HasTicked(EntityComponent tickableEntity)
         {
             if (tickableBucketService == null) return false;
             int bucketIndex = GetEntityBucketIndex(tickableEntity);
             return bucketIndex < tickableBucketService._nextTickedBucketIndex;
         }
 
-        public static float PercentTicked(EntityComponent tickableEntity)
+        public float PercentTicked(EntityComponent tickableEntity)
         {
             if (tickableBucketService == null) return 0;
             int bucketIndex = GetEntityBucketIndex(tickableEntity);
@@ -41,7 +42,7 @@ namespace TimberModTest
             return (float)(numerator) / (tickableBucketService.NumberOfBuckets + 1);
         }
 
-        public static float TimeAtLastTick(EntityComponent tickableEntity)
+        public float TimeAtLastTick(EntityComponent tickableEntity)
         {
             if (tickableBucketService == null) return 0;
             float time = Time.time;

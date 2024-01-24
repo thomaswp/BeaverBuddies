@@ -33,6 +33,7 @@ using TimberModTest.Events;
 using TimberNet;
 using UnityEngine;
 using static Timberborn.TickSystem.TickableSingletonService;
+using static TimberModTest.SingletonManager;
 
 namespace TimberModTest
 {
@@ -69,13 +70,14 @@ namespace TimberModTest
         }
     }
 
-    public class ReplayService : IReplayContext, IPostLoadableSingleton, IUpdatableSingleton
+    public class ReplayService : IReplayContext, IPostLoadableSingleton, IUpdatableSingleton, IResettableSingleton
     {
         //private readonly TickWathcerService _tickWathcerService;
         private readonly EventBus _eventBus;
         private readonly SpeedManager _speedManager;
         private readonly GameSaver _gameSaver;
         private readonly ISingletonRepository _singletonRepository;
+        private readonly TickingService _tickRequesterService;
 
         private readonly GameSaveHelper gameSaveHelper;
 
@@ -88,23 +90,29 @@ namespace TimberModTest
 
         public float TargetSpeed  { get; private set; } = 0;
 
-
-        private static ConcurrentQueue<ReplayEvent> eventsToSend = new ConcurrentQueue<ReplayEvent>();
-        private static ConcurrentQueue<ReplayEvent> eventsToPlay = new ConcurrentQueue<ReplayEvent>();
+        private ConcurrentQueue<ReplayEvent> eventsToSend = new ConcurrentQueue<ReplayEvent>();
+        private ConcurrentQueue<ReplayEvent> eventsToPlay = new ConcurrentQueue<ReplayEvent>();
 
         public static bool IsLoaded { get; private set; } = false;
 
         public static bool IsReplayingEvents { get; private set; } = false;
 
+        public void Reset()
+        {
+            IsLoaded = false;
+            IsReplayingEvents = false;
+        }
+
         public ReplayService(
             EventBus eventBus,
             SpeedManager speedManager,
             GameSaver gameSaver,
+            ISingletonRepository singletonRepository,
+            TickingService tickRequesterService,
             BlockObjectPlacerService blockObjectPlacerService,
             BuildingService buildingService,
             PlantingSelectionService plantingSelectionService,
             TreeCuttingArea treeCuttingArea,
-            ISingletonRepository singletonRepository,
             EntityRegistry entityRegistry,
             EntityService entityService,
             RecipeSpecificationService recipeSpecificationService,
@@ -115,11 +123,14 @@ namespace TimberModTest
             WorkplaceUnlockingService workplaceUnlockingService
         )
         {
+            SingletonManager.Register(this);
+
             //_tickWathcerService = AddSingleton(tickWathcerService);
             _eventBus = AddSingleton(eventBus);
             _speedManager = AddSingleton(speedManager);
             _gameSaver = AddSingleton(gameSaver);
             _singletonRepository = AddSingleton(singletonRepository);
+            _tickRequesterService = AddSingleton(tickRequesterService);
             AddSingleton(blockObjectPlacerService);
             AddSingleton(buildingService);
             AddSingleton(plantingSelectionService);
@@ -145,7 +156,7 @@ namespace TimberModTest
             //io = new FileReadIO("planting.json");
             //io = new FileReadIO("trees.json");
 
-            TickRequester.replayService = this;
+            _tickRequesterService.replayService = this;
         }
 
         public void SetTicksSinceLoad(int ticks)
@@ -178,7 +189,7 @@ namespace TimberModTest
             return _singletonRepository.GetSingletons<T>().FirstOrDefault();
         }
 
-        public static void RecordEvent(ReplayEvent replayEvent)
+        public void RecordEvent(ReplayEvent replayEvent)
         {
             // During a replay, we save things manually, only if they're
             // successful.
@@ -284,7 +295,7 @@ namespace TimberModTest
          * called after an event is played, the randomS0 should already
          * be set (it will not be overwritten).
          */
-        private static void EnqueueEventForSending(ReplayEvent replayEvent)
+        private void EnqueueEventForSending(ReplayEvent replayEvent)
         {
             // Only set the random state if this recoded event is
             // actually going to be played, or if it's a heartbeat.
@@ -362,7 +373,7 @@ namespace TimberModTest
             TargetSpeed = speed;
             // If we're paused, we should interrupt the ticking, so we end
             // before more of the tick happens.
-            TickRequester.ShouldInterruptTicking = speed == 0;
+            _tickRequesterService.ShouldInterruptTicking = speed == 0;
             UpdateSpeed();
         }
 
@@ -441,7 +452,7 @@ namespace TimberModTest
                 return;
             }
             // If we're not paused, we need to wait until the end of the tick
-            TickRequester.FinishFullTickAndThen(action);
+            _tickRequesterService.FinishFullTickAndThen(action);
         }
     }
 
@@ -481,28 +492,35 @@ namespace TimberModTest
         }
     }
 
-    public static class TickRequester
+    public class TickingService
     {
-        public static bool ShouldInterruptTicking { get; set; } = false;
-        public static bool ShouldCompleteFullTick { get; private set; } = false;
+        public bool ShouldInterruptTicking { get; set; } = false;
+        public bool ShouldCompleteFullTick { get; private set; } = false;
 
-        public static ReplayService replayService { get; set; }
+        public bool HasTickedReplayService { get; private set; } = false;
+
+        public ReplayService replayService { get; set; }
 
         // Should be ok non-concurrent - for now only main thread call this
-        private static List<Action> onCompletedFullTick = new List<Action>();
+        private List<Action> onCompletedFullTick = new List<Action>();
 
-        public static void FinishFullTick()
+        TickingService()
+        {
+            SingletonManager.Register(this);
+        }
+
+        public void FinishFullTick()
         {
             ShouldCompleteFullTick = true;
         }
 
-        public static void FinishFullTickAndThen(Action value)
+        public void FinishFullTickAndThen(Action value)
         {
             onCompletedFullTick.Add(value);
             ShouldCompleteFullTick = true;
         }
 
-        internal static void OnTickingCompleted()
+        internal void OnTickingCompleted()
         {
             if (!ShouldCompleteFullTick) return;
             Plugin.Log($"Finished full tick; calling {onCompletedFullTick.Count} callbacks");
@@ -513,64 +531,29 @@ namespace TimberModTest
             onCompletedFullTick.Clear();
             ShouldCompleteFullTick = false;
         }
-    }
 
-    [HarmonyPatch(typeof(TickableBucketService), nameof(TickableBucketService.TickBuckets))]
-    static class TickableBucketServiceTickUpdatePatcher
-    {
-        public static bool HasTickedReplayService { get; private set; } = false;
-
-        private static bool ShouldTick(TickableBucketService __instance, int numberOfBucketsToTick)
+        private bool ShouldTick(TickableBucketService __instance, int numberOfBucketsToTick)
         {
+
             // Never tick if we've been interrupted by a forced pause
-            if (TickRequester.ShouldInterruptTicking) return false;
+            if (ShouldInterruptTicking) return false;
 
             // If we need to complete a full tick, make sure to go exactly until
             // the end of this tick, to ensure an update follows immediately.
-            if (TickRequester.ShouldCompleteFullTick)
+            if (ShouldCompleteFullTick)
             {
                 return __instance._nextTickedBucketIndex != 0;
             }
             return numberOfBucketsToTick > 0;
         }
 
-        [ManualMethodOverwrite]
-        static bool Prefix(TickableBucketService __instance, int numberOfBucketsToTick)
-        {
-            // TODO: I think if number of buckets starts at 0, we should unmark
-            // complete full tick and return because it means we're paused...
-            // Alternatively, I think that we could use the ReplayService version
-            // that only stops ticking if not paused
-
-            // Forces 1 tick per update
-            //if (numberOfBucketsToTick != 0)
-            //{
-                //numberOfBucketsToTick = __instance.NumberOfBuckets + 1;
-            //}
-
-            while (ShouldTick(__instance, numberOfBucketsToTick--))
-            {
-                if (TickReplayServiceOrNextBucket(__instance))
-                {
-                    // Refund a bucket if we ticked the ReplayService
-                    numberOfBucketsToTick++;
-                }
-            }
-
-            // Tell the TickRequester we've finished this partial (or possibly complete) tick
-            TickRequester.OnTickingCompleted();
-
-            // Replace the default behavior entirely
-            return false;
-        }
-
-        static bool IsAtStartOfTick(TickableBucketService __instance)
+        private bool IsAtStartOfTick(TickableBucketService __instance)
         {
             return __instance._nextTickedBucketIndex == 0 &&
                 !__instance._tickedSingletons;
         }
 
-        static bool TickReplayServiceOrNextBucket(TickableBucketService __instance)
+        private bool TickReplayServiceOrNextBucket(TickableBucketService __instance)
         {
             if (IsAtStartOfTick(__instance))
             {
@@ -580,7 +563,7 @@ namespace TimberModTest
                 {
                     // Tick it and stop
                     HasTickedReplayService = true;
-                    TickRequester.replayService?.DoTick();
+                    replayService?.DoTick();
                     return true;
                 }
                 // Otherwise if we're still at the beginning
@@ -590,6 +573,49 @@ namespace TimberModTest
             __instance.TickNextBucket();
             return false;
         }
+
+        public bool TickBuckets(TickableBucketService __instance, int numberOfBucketsToTick)
+        {
+
+            // TODO: I think if number of buckets starts at 0, we should unmark
+            // complete full tick and return because it means we're paused...
+            // Alternatively, I think that we could use the ReplayService version
+            // that only stops ticking if not paused
+
+            // Forces 1 tick per update
+            //if (numberOfBucketsToTick != 0)
+            //{
+            //numberOfBucketsToTick = __instance.NumberOfBuckets + 1;
+            //}
+
+            var tickRequesterService = S<TickingService>();
+
+            while (tickRequesterService.ShouldTick(__instance, numberOfBucketsToTick--))
+            {
+                if (tickRequesterService.TickReplayServiceOrNextBucket(__instance))
+                {
+                    // Refund a bucket if we ticked the ReplayService
+                    numberOfBucketsToTick++;
+                }
+            }
+
+            // Tell the TickRequester we've finished this partial (or possibly complete) tick
+            tickRequesterService.OnTickingCompleted();
+
+            // Replace the default behavior entirely
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(TickableBucketService), nameof(TickableBucketService.TickBuckets))]
+    static class TickableBucketServiceTickUpdatePatcher
+    {
+
+        [ManualMethodOverwrite]
+        static bool Prefix(TickableBucketService __instance, int numberOfBucketsToTick)
+        {
+            return S<TickingService>().TickBuckets(__instance, numberOfBucketsToTick);
+        }
     }
 
     [HarmonyPatch(typeof(EntityService), nameof(EntityService.Instantiate), typeof(BaseComponent), typeof(Guid))]
@@ -597,7 +623,7 @@ namespace TimberModTest
     {
         static void Postfix()
         {
-            TickRequester.FinishFullTick();
+            S<TickingService>().FinishFullTick();
         }
     }
 }
