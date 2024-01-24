@@ -27,20 +27,21 @@ namespace TimberModTest.Events
         public string prefabName;
         public Vector3Int coordinates;
         public Orientation orientation;
-        public FlipMode flipMode;
+        public bool isFlipped;
 
         public override void Replay(IReplayContext context)
         {
             var buildingPrefab = GetBuilding(context, prefabName);
             var blockObject = buildingPrefab.GetComponentFast<BlockObject>();
             var placer = context.GetSingleton<BlockObjectPlacerService>().GetMatchingPlacer(blockObject);
-            Placement placement = new Placement(coordinates, orientation, flipMode);
+            Placement placement = new Placement(coordinates, orientation, 
+                isFlipped ? FlipMode.Flipped : FlipMode.Unflipped);
             placer.Place(blockObject, placement);
         }
 
         public override string ToActionString()
         {
-            return $"Placing {prefabName}, {coordinates}, {orientation}, {flipMode}";
+            return $"Placing {prefabName}, {coordinates}, {orientation}, {isFlipped}";
         }
     }
 
@@ -59,7 +60,7 @@ namespace TimberModTest.Events
                     prefabName = prefabName,
                     coordinates = placement.Coordinates,
                     orientation = placement.Orientation,
-                    flipMode = placement.FlipMode,
+                    isFlipped = placement.FlipMode.IsFlipped,
                 };
             });
         }
