@@ -300,7 +300,7 @@ namespace TimberModTest
             typeof(BeaverTextureSetter),
             typeof(BotManufactoryAnimationController),
             typeof(BasicSelectionSound),
-            typeof(TreeCutterSideRandomizer),
+            //typeof(TreeCutterSideRandomizer),
             typeof(DateSalter),
             typeof(GameMusicPlayer),
             typeof(NaturalResourceModelRandomizer),
