@@ -100,7 +100,7 @@ namespace TimberModTest
             get
             {
                 // Something is asking us to return false
-                if (IsNonGameplay) return false;
+                if (IsNonGameplay) return true;
 
                 // Calls from a non-game thread should never use the game's random
                 // though if they are game-related we may need a solution for that...
@@ -300,7 +300,6 @@ namespace TimberModTest
             typeof(BeaverTextureSetter),
             typeof(BotManufactoryAnimationController),
             typeof(BasicSelectionSound),
-            //typeof(TreeCutterSideRandomizer),
             typeof(DateSalter),
             typeof(GameMusicPlayer),
             typeof(NaturalResourceModelRandomizer),
@@ -314,6 +313,14 @@ namespace TimberModTest
             typeof(TerrainBlockRandomizer),
             typeof(ObservatoryAnimator),
             typeof(WaterInputPipeSegmentFactory),
+        };
+
+        // Currently unused - could be used for warnings on items we don't
+        // recognize
+        private static HashSet<Type> whitelist = new HashSet<Type>()
+        {
+            // I think this can only happen during tick
+            typeof(TreeCutterSideRandomizer),
         };
 
         static HashSet<string> types = new HashSet<string>();
