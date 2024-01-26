@@ -20,6 +20,7 @@ using Timberborn.EntitySystem;
 using Timberborn.Forestry;
 using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.Goods;
+using Timberborn.Options;
 using Timberborn.PlantingUI;
 using Timberborn.PrefabSystem;
 using Timberborn.ScienceSystem;
@@ -122,7 +123,8 @@ namespace TimberModTest
             BuildingUnlockingService buildingUnlockingService,
             WorkingHoursManager workingHoursManager,
             WorkingHoursPanel workingHoursPanel,
-            WorkplaceUnlockingService workplaceUnlockingService
+            WorkplaceUnlockingService workplaceUnlockingService,
+            IOptionsBox optionsBox
         )
         {
             //_tickWathcerService = AddSingleton(tickWathcerService);
@@ -144,6 +146,7 @@ namespace TimberModTest
             AddSingleton(workingHoursManager);
             AddSingleton(workingHoursPanel);
             AddSingleton(workplaceUnlockingService);
+            AddSingleton(optionsBox);
 
             // TODO: I think there's a SingletonRegistry that may
             // be able to do this.
