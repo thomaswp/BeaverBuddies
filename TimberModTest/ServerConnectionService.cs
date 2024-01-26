@@ -61,6 +61,7 @@ namespace TimberModTest
         {
             if (EventIO.Get() != null)
             {
+                Plugin.Log("Closing EventIO and resetting state.");
                 EventIO.Get().Close();
                 EventIO.Set(null);
                 SingletonManager.Reset();
