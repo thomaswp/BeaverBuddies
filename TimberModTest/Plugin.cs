@@ -44,6 +44,7 @@ namespace TimberModTest
             containerDefinition.Bind<RecordToFileService>().AsSingleton();
             containerDefinition.Bind<TickProgressService>().AsSingleton();
             containerDefinition.Bind<TickingService>().AsSingleton();
+            containerDefinition.Bind<DeterminismService>().AsSingleton();
         }
     }
 

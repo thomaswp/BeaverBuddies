@@ -20,12 +20,12 @@ namespace TimberModTest
 
         public void Prefix()
         {
-            DeterminismController.SetNonGamePatcherActive(type, true);
+            DeterminismService.SetNonGamePatcherActive(type, true);
         }
 
         public void Postfix()
         {
-            DeterminismController.SetNonGamePatcherActive(type, false);
+            DeterminismService.SetNonGamePatcherActive(type, false);
         }
     }
 

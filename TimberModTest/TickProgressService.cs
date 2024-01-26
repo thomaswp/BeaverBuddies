@@ -7,14 +7,14 @@ using UnityEngine;
 
 namespace TimberModTest
 {
-    public class TickProgressService
+    public class TickProgressService : RegisteredSingleton
     {
         private TickableBucketService tickableBucketService;
 
         public TickProgressService(ITickableBucketService _tickableBucketService)
         {
             tickableBucketService = _tickableBucketService as TickableBucketService;
-            SingletonManager.Register(this);
+            SingletonManager.RegisterSingleton(this);
         }
 
         public int GetEntityBucketIndex(EntityComponent tickableEntity)

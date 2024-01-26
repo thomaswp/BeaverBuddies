@@ -70,14 +70,15 @@ namespace TimberModTest
         }
     }
 
-    public class ReplayService : IReplayContext, IPostLoadableSingleton, IUpdatableSingleton, IResettableSingleton
+    public class ReplayService : RegisteredSingleton, IReplayContext, IPostLoadableSingleton, IUpdatableSingleton, IResettableSingleton
     {
         //private readonly TickWathcerService _tickWathcerService;
         private readonly EventBus _eventBus;
         private readonly SpeedManager _speedManager;
         private readonly GameSaver _gameSaver;
         private readonly ISingletonRepository _singletonRepository;
-        private readonly TickingService _tickRequesterService;
+        private readonly TickingService _tickingService;
+        private readonly DeterminismService _determinismService;
 
         private readonly GameSaveHelper gameSaveHelper;
 
@@ -108,7 +109,8 @@ namespace TimberModTest
             SpeedManager speedManager,
             GameSaver gameSaver,
             ISingletonRepository singletonRepository,
-            TickingService tickRequesterService,
+            TickingService tickingService,
+            DeterminismService determinismService,
             BlockObjectPlacerService blockObjectPlacerService,
             BuildingService buildingService,
             PlantingSelectionService plantingSelectionService,
@@ -123,14 +125,13 @@ namespace TimberModTest
             WorkplaceUnlockingService workplaceUnlockingService
         )
         {
-            SingletonManager.Register(this);
-
             //_tickWathcerService = AddSingleton(tickWathcerService);
             _eventBus = AddSingleton(eventBus);
             _speedManager = AddSingleton(speedManager);
             _gameSaver = AddSingleton(gameSaver);
             _singletonRepository = AddSingleton(singletonRepository);
-            _tickRequesterService = AddSingleton(tickRequesterService);
+            _tickingService = AddSingleton(tickingService);
+            _determinismService = AddSingleton(determinismService);
             AddSingleton(blockObjectPlacerService);
             AddSingleton(buildingService);
             AddSingleton(plantingSelectionService);
@@ -156,7 +157,7 @@ namespace TimberModTest
             //io = new FileReadIO("planting.json");
             //io = new FileReadIO("trees.json");
 
-            _tickRequesterService.replayService = this;
+            _tickingService.replayService = this;
         }
 
         public void SetTicksSinceLoad(int ticks)
@@ -169,7 +170,7 @@ namespace TimberModTest
         public void PostLoad()
         {
             Plugin.Log("PostLoad");
-            DeterminismController.UnityThread = Thread.CurrentThread;
+            _determinismService.UnityThread = Thread.CurrentThread;
         }
 
         private T AddSingleton<T>(T singleton)
@@ -217,9 +218,9 @@ namespace TimberModTest
 
         private void ReplayEvents()
         {
-            if (TickableBucketServiceTick1Patcher.nextBucket != 0)
+            if (_tickingService.NextBucket != 0)
             {
-                Plugin.LogWarning($"Warning, replaying events when bucket != 0: {TickableBucketServiceTick1Patcher.nextBucket}");
+                Plugin.LogWarning($"Warning, replaying events when bucket != 0: {_tickingService.NextBucket}");
             }
 
             List<ReplayEvent> eventsToReplay = io.ReadEvents(ticksSinceLoad);
@@ -285,7 +286,7 @@ namespace TimberModTest
             // If we've replayed everythign for this tick and nothing's
             // triggered a desync, clear the saved stacks.
             //DeterminismController.PrintRandomStacks();
-            DeterminismController.ClearRandomStacks();
+            _determinismService.ClearRandomStacks();
         }
 
         /**
@@ -373,7 +374,7 @@ namespace TimberModTest
             TargetSpeed = speed;
             // If we're paused, we should interrupt the ticking, so we end
             // before more of the tick happens.
-            _tickRequesterService.ShouldInterruptTicking = speed == 0;
+            _tickingService.ShouldInterruptTicking = speed == 0;
             UpdateSpeed();
         }
 
@@ -452,7 +453,7 @@ namespace TimberModTest
                 return;
             }
             // If we're not paused, we need to wait until the end of the tick
-            _tickRequesterService.FinishFullTickAndThen(action);
+            _tickingService.FinishFullTickAndThen(action);
         }
     }
 
@@ -475,39 +476,19 @@ namespace TimberModTest
         }
     }
 
-    [HarmonyPatch(typeof(TickableBucketService), nameof(TickableBucketService.TickNextBucket))]
-    static class TickableBucketServiceTick1Patcher
-    {
-        public static int lastBucket;
-        public static int nextBucket;
-
-        static void Prefix(TickableBucketService __instance)
-        {
-            lastBucket = __instance._nextTickedBucketIndex;
-        }
-
-        static void Postfix(TickableBucketService __instance)
-        {
-            nextBucket = __instance._nextTickedBucketIndex;
-        }
-    }
-
-    public class TickingService
+    public class TickingService : RegisteredSingleton
     {
         public bool ShouldInterruptTicking { get; set; } = false;
         public bool ShouldCompleteFullTick { get; private set; } = false;
 
         public bool HasTickedReplayService { get; private set; } = false;
 
+        public int NextBucket { get; private set; } = 0;
+
         public ReplayService replayService { get; set; }
 
         // Should be ok non-concurrent - for now only main thread call this
         private List<Action> onCompletedFullTick = new List<Action>();
-
-        TickingService()
-        {
-            SingletonManager.Register(this);
-        }
 
         public void FinishFullTick()
         {
@@ -571,6 +552,7 @@ namespace TimberModTest
                 HasTickedReplayService = false;
             }
             __instance.TickNextBucket();
+            NextBucket = __instance._nextTickedBucketIndex;
             return false;
         }
 

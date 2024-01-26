@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
 
 namespace TimberModTest
 {
@@ -20,7 +21,7 @@ namespace TimberModTest
             map.Clear();
         }
 
-        public static T Register<T>(T singleton)
+        public static T RegisterSingleton<T>(T singleton)
         {
             Type type = singleton.GetType();
             if (map.ContainsKey(type))
@@ -31,6 +32,15 @@ namespace TimberModTest
             return singleton;
         }
 
+        /// <summary>
+        /// Gets the singleton of the requested type.
+        /// Note: This method should <b>only</b> be called after initialization,
+        /// as during initialization, the singleton may not be created yet.
+        /// Instead, you can use GetSingletonIfPresent.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public static T GetSingleton<T>()
         {
             Type type = typeof(T);
@@ -39,6 +49,12 @@ namespace TimberModTest
                 return (T)map[type];
             }
             throw new Exception($"Singleton of type {type} not registered");
+        }
+
+        public static T GetSingletonIfPresent<T>()
+        {
+            Type t = typeof(T);
+            return map.ContainsKey(t) ? (T)map[t] : default(T);
         }
 
         /// <summary>
@@ -63,5 +79,13 @@ namespace TimberModTest
     public interface IResettableSingleton
     {
         void Reset();
+    }
+
+    public class RegisteredSingleton
+    { 
+        public RegisteredSingleton()
+        {
+            SingletonManager.RegisterSingleton(this);
+        }
     }
 }

@@ -52,23 +52,35 @@ using static TimberModTest.SingletonManager;
 
 namespace TimberModTest
 {
-    public static class DeterminismController
+    public class DeterminismService : IResettableSingleton
     {
-        private static HashSet<System.Type> activeNonGamePatchers = new HashSet<System.Type>();
-        public static bool IsTicking = false;
-        public static Thread UnityThread;
-        private static System.Random random = new System.Random();
+        public bool IsTicking = false;
+        public Thread UnityThread;
+        private List<StackTrace> lastRandomStackTraces = new List<StackTrace>();
 
-        private static readonly List<StackTrace> lastRandomStackTraces = new List<StackTrace>();
 
         public static bool IsNonGameplay = false;
+        private static System.Random random = new System.Random();
+        private static HashSet<Type> activeNonGamePatchers = new HashSet<Type>();
 
-        public static void ClearRandomStacks()
+        public void Reset()
+        {
+            IsNonGameplay = false;
+            activeNonGamePatchers.Clear();
+            // No need to reset random
+        }
+
+        public DeterminismService()
+        {
+            RegisterSingleton(this);
+        }
+
+        public void ClearRandomStacks()
         {
             lastRandomStackTraces.Clear();
         }
 
-        public static void PrintRandomStacks()
+        public void PrintRandomStacks()
         {
             foreach (StackTrace stack in lastRandomStackTraces)
             {
@@ -76,7 +88,7 @@ namespace TimberModTest
             }
         }
 
-        public static T GetNonGameRandom<T>(System.Func<T> getter)
+        public static T GetNonGameRandom<T>(Func<T> getter)
         {
             IsNonGameplay = true;
             try
@@ -89,7 +101,14 @@ namespace TimberModTest
             }
         }
 
-        public static bool ShouldFreezeSeed 
+
+        public static bool ShouldUseNonGameRNG()
+        {
+            DeterminismService determinismService = GetSingletonIfPresent<DeterminismService>();
+            return determinismService?.ShouldFreezeSeed ?? false;
+        }
+
+        private bool ShouldFreezeSeed 
         {
             get
             {
@@ -165,7 +184,7 @@ namespace TimberModTest
             return value;
         }
 
-        private static void LogUnknownRandomCalled()
+        private void LogUnknownRandomCalled()
         {
             if (!ReplayService.IsLoaded) return;
             
@@ -179,9 +198,9 @@ namespace TimberModTest
     {
         static bool Prefix(float inclusiveMin, float inclusiveMax, ref float __result)
         {
-            if (DeterminismController.ShouldFreezeSeed)
+            if (DeterminismService.ShouldUseNonGameRNG())
             {
-                __result = DeterminismController.Range(inclusiveMin, inclusiveMax);
+                __result = DeterminismService.Range(inclusiveMin, inclusiveMax);
                 return false;
             }
 
@@ -194,9 +213,9 @@ namespace TimberModTest
     {
         static bool Prefix(int inclusiveMin, int exclusiveMax, ref int __result)
         {
-            if (DeterminismController.ShouldFreezeSeed)
+            if (DeterminismService.ShouldUseNonGameRNG())
             {
-                __result = DeterminismController.Range(inclusiveMin, exclusiveMax);
+                __result = DeterminismService.Range(inclusiveMin, exclusiveMax);
                 return false;
             }
 
@@ -209,9 +228,9 @@ namespace TimberModTest
     {
         static bool Prefix(ref Vector2 __result)
         {
-            if (DeterminismController.ShouldFreezeSeed)
+            if (DeterminismService.ShouldUseNonGameRNG())
             {
-                __result = DeterminismController.InsideUnitCircle();
+                __result = DeterminismService.InsideUnitCircle();
                 return false;
             }
 
@@ -231,52 +250,52 @@ namespace TimberModTest
 
         public bool CheckProbability(float normalizedProbability)
         {
-            return DeterminismController.GetNonGameRandom(() => baseGenerator.CheckProbability(normalizedProbability));
+            return DeterminismService.GetNonGameRandom(() => baseGenerator.CheckProbability(normalizedProbability));
         }
 
         public T GetEnumerableElement<T>(IEnumerable<T> source)
         {
-            return DeterminismController.GetNonGameRandom(() => baseGenerator.GetEnumerableElement<T>(source));
+            return DeterminismService.GetNonGameRandom(() => baseGenerator.GetEnumerableElement<T>(source));
         }
 
         public T GetListElement<T>(IReadOnlyList<T> list)
         {
-            return DeterminismController.GetNonGameRandom(() => baseGenerator.GetListElement<T>(list));
+            return DeterminismService.GetNonGameRandom(() => baseGenerator.GetListElement<T>(list));
         }
 
         public T GetListElementOrDefault<T>(IReadOnlyList<T> list)
         {
-            return DeterminismController.GetNonGameRandom(() => baseGenerator.GetListElementOrDefault<T>(list));
+            return DeterminismService.GetNonGameRandom(() => baseGenerator.GetListElementOrDefault<T>(list));
         }
 
         public Vector2 InsideUnitCircle()
         {
-            return DeterminismController.GetNonGameRandom(() => baseGenerator.InsideUnitCircle());
+            return DeterminismService.GetNonGameRandom(() => baseGenerator.InsideUnitCircle());
         }
 
         public float Range(float inclusiveMin, float inclusiveMax)
         {
-            return DeterminismController.GetNonGameRandom(() => baseGenerator.Range(inclusiveMin, inclusiveMax));
+            return DeterminismService.GetNonGameRandom(() => baseGenerator.Range(inclusiveMin, inclusiveMax));
         }
 
         public int Range(int inclusiveMin, int exclusiveMax)
         {
-            return DeterminismController.GetNonGameRandom(() => baseGenerator.Range(inclusiveMin, exclusiveMax));
+            return DeterminismService.GetNonGameRandom(() => baseGenerator.Range(inclusiveMin, exclusiveMax));
         }
 
         public bool TryGetEnumerableElement<T>(IEnumerable<T> source, out T randomElement)
         {
-            DeterminismController.IsNonGameplay = true;
+            DeterminismService.IsNonGameplay = true;
             bool result = baseGenerator.TryGetEnumerableElement<T>(source, out randomElement);
-            DeterminismController.IsNonGameplay = false;
+            DeterminismService.IsNonGameplay = false;
             return result;
         }
 
         public bool TryGetListElement<T>(IReadOnlyList<T> list, out T randomElement)
         {
-            DeterminismController.IsNonGameplay = true;
+            DeterminismService.IsNonGameplay = true;
             bool result = baseGenerator.TryGetListElement<T>(list, out randomElement);
-            DeterminismController.IsNonGameplay = false;
+            DeterminismService.IsNonGameplay = false;
             return result;
         }
     }
@@ -355,13 +374,13 @@ namespace TimberModTest
         // Just as a test, muck random sounds!
         static void Prefix()
         {
-            DeterminismController.SetNonGamePatcherActive(typeof(InputPatcher), true);
+            DeterminismService.SetNonGamePatcherActive(typeof(InputPatcher), true);
         }
 
         static void Postfix()
         {
             //Random.state = state;
-            DeterminismController.SetNonGamePatcherActive(typeof(InputPatcher), false);
+            DeterminismService.SetNonGamePatcherActive(typeof(InputPatcher), false);
         }
     }
 
@@ -370,12 +389,12 @@ namespace TimberModTest
     {
         static void Prefix()
         {
-            DeterminismController.SetNonGamePatcherActive(typeof(SoundsPatcher), true);
+            DeterminismService.SetNonGamePatcherActive(typeof(SoundsPatcher), true);
         }
 
         static void Postfix()
         {
-            DeterminismController.SetNonGamePatcherActive(typeof(SoundsPatcher), false);
+            DeterminismService.SetNonGamePatcherActive(typeof(SoundsPatcher), false);
         }
     }
 
@@ -384,12 +403,12 @@ namespace TimberModTest
     {
         static void Prefix()
         {
-            DeterminismController.SetNonGamePatcherActive(typeof(SoundEmitter), true);
+            DeterminismService.SetNonGamePatcherActive(typeof(SoundEmitter), true);
         }
 
         static void Postfix()
         {
-            DeterminismController.SetNonGamePatcherActive(typeof(SoundEmitter), false);
+            DeterminismService.SetNonGamePatcherActive(typeof(SoundEmitter), false);
         }
     }
 
@@ -398,12 +417,12 @@ namespace TimberModTest
     {
         static void Prefix()
         {
-            DeterminismController.SetNonGamePatcherActive(typeof(DateSalterPatcher), true);
+            DeterminismService.SetNonGamePatcherActive(typeof(DateSalterPatcher), true);
         }
 
         static void Postfix()
         {
-            DeterminismController.SetNonGamePatcherActive(typeof(DateSalterPatcher), false);
+            DeterminismService.SetNonGamePatcherActive(typeof(DateSalterPatcher), false);
         }
     }
 
@@ -412,12 +431,12 @@ namespace TimberModTest
     {
         static void Prefix()
         {
-            DeterminismController.SetNonGamePatcherActive(typeof(PlantableDescriberPatcher), true);
+            DeterminismService.SetNonGamePatcherActive(typeof(PlantableDescriberPatcher), true);
         }
 
         static void Postfix()
         {
-            DeterminismController.SetNonGamePatcherActive(typeof(PlantableDescriberPatcher), false);
+            DeterminismService.SetNonGamePatcherActive(typeof(PlantableDescriberPatcher), false);
         }
     }
 
@@ -426,12 +445,12 @@ namespace TimberModTest
     {
         static void Prefix()
         {
-            DeterminismController.SetNonGamePatcherActive(typeof(StockpileGoodPileVisualizerPatcher), true);
+            DeterminismService.SetNonGamePatcherActive(typeof(StockpileGoodPileVisualizerPatcher), true);
         }
 
         static void Postfix()
         {
-            DeterminismController.SetNonGamePatcherActive(typeof(StockpileGoodPileVisualizerPatcher), false);
+            DeterminismService.SetNonGamePatcherActive(typeof(StockpileGoodPileVisualizerPatcher), false);
         }
     }
 
@@ -440,12 +459,12 @@ namespace TimberModTest
     {
         static void Prefix()
         {
-            DeterminismController.SetNonGamePatcherActive(typeof(RecoveredGoodStackFactoryPatcher), true);
+            DeterminismService.SetNonGamePatcherActive(typeof(RecoveredGoodStackFactoryPatcher), true);
         }
 
         static void Postfix()
         {
-            DeterminismController.SetNonGamePatcherActive(typeof(RecoveredGoodStackFactoryPatcher), false);
+            DeterminismService.SetNonGamePatcherActive(typeof(RecoveredGoodStackFactoryPatcher), false);
         }
     }
 
@@ -469,12 +488,12 @@ namespace TimberModTest
     {
         static void Prefix()
         {
-            DeterminismController.SetNonGamePatcherActive(typeof(LoopingSoundPlayerPatcher), true);
+            DeterminismService.SetNonGamePatcherActive(typeof(LoopingSoundPlayerPatcher), true);
         }
 
         static void Postfix()
         {
-            DeterminismController.SetNonGamePatcherActive(typeof(LoopingSoundPlayerPatcher), false);
+            DeterminismService.SetNonGamePatcherActive(typeof(LoopingSoundPlayerPatcher), false);
         }
     }
 
@@ -483,12 +502,12 @@ namespace TimberModTest
     {
         static void Prefix()
         {
-            DeterminismController.SetNonGamePatcherActive(typeof(BotManufactoryAnimationControllerPatcher), true);
+            DeterminismService.SetNonGamePatcherActive(typeof(BotManufactoryAnimationControllerPatcher), true);
         }
 
         static void Postfix()
         {
-            DeterminismController.SetNonGamePatcherActive(typeof(BotManufactoryAnimationControllerPatcher), false);
+            DeterminismService.SetNonGamePatcherActive(typeof(BotManufactoryAnimationControllerPatcher), false);
         }
     }
 
@@ -497,12 +516,12 @@ namespace TimberModTest
     {
         static void Prefix()
         {
-            DeterminismController.SetNonGamePatcherActive(typeof(TerrainBlockRandomizerPickVariationPatcher), true);
+            DeterminismService.SetNonGamePatcherActive(typeof(TerrainBlockRandomizerPickVariationPatcher), true);
         }
 
         static void Postfix()
         {
-            DeterminismController.SetNonGamePatcherActive(typeof(TerrainBlockRandomizerPickVariationPatcher), false);
+            DeterminismService.SetNonGamePatcherActive(typeof(TerrainBlockRandomizerPickVariationPatcher), false);
         }
     }
 
@@ -512,12 +531,12 @@ namespace TimberModTest
     {
         static void Prefix()
         {
-            DeterminismController.SetNonGamePatcherActive(typeof(BeaverTextureSetterStartPatcher), true);
+            DeterminismService.SetNonGamePatcherActive(typeof(BeaverTextureSetterStartPatcher), true);
         }
 
         static void Postfix()
         {
-            DeterminismController.SetNonGamePatcherActive(typeof(BeaverTextureSetterStartPatcher), false);
+            DeterminismService.SetNonGamePatcherActive(typeof(BeaverTextureSetterStartPatcher), false);
         }
     }
 
@@ -575,11 +594,11 @@ namespace TimberModTest
     {
         static void Prefix()
         {
-            DeterminismController.IsTicking = true;
+            S<DeterminismService>().IsTicking = true;
         }
         static void Postfix()
         {
-            DeterminismController.IsTicking = false;
+            S<DeterminismService>().IsTicking = false;
         }
     }
 
