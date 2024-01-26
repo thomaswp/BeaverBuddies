@@ -26,7 +26,8 @@ namespace TimberModTest
             Type type = singleton.GetType();
             if (map.ContainsKey(type))
             {
-                throw new Exception($"Singleton of type {type} already registered");
+                Plugin.LogWarning($"Singleton of type {type} already registered");
+                map.Remove(type);
             }
             map.Add(type, singleton);
             return singleton;

@@ -14,7 +14,6 @@ namespace TimberModTest
         public TickProgressService(ITickableBucketService _tickableBucketService)
         {
             tickableBucketService = _tickableBucketService as TickableBucketService;
-            SingletonManager.RegisterSingleton(this);
         }
 
         public int GetEntityBucketIndex(EntityComponent tickableEntity)
