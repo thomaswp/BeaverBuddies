@@ -49,6 +49,16 @@ namespace TimberModTest
         public static EventIO Get() { return instance; }
         public static void Set(EventIO io) { instance = io; }
 
+        public static void Reset()
+        {
+            if (instance != null)
+            {
+                Plugin.Log("Closing EventIO.");
+                instance.Close();
+                instance = null;
+            }
+        }
+
         public static bool ShouldPauseTicking
         {
             get

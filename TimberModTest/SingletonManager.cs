@@ -11,6 +11,7 @@ namespace TimberModTest
 
         public static void Reset()
         {
+            Plugin.Log("Resetting SingletonManager");
             foreach (object obj in map.Values)
             {
                 if (obj is IResettableSingleton)

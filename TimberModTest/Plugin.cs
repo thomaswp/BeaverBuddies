@@ -35,8 +35,11 @@ namespace TimberModTest
         public void Configure(IContainerDefinition containerDefinition)
         {
             if (EventIO.Config.Mode == ReplayConfig.MODE_NONE) return;
-            // TODO: Reset on unload as well
+
+            // Reset everything before loading singletons
             SingletonManager.Reset();
+            EventIO.Reset();
+
             Plugin.Log($"Registering In Game Services");
             //containerDefinition.Bind<DeterminismService>().AsSingleton();
             containerDefinition.Bind<ReplayService>().AsSingleton();
@@ -55,9 +58,10 @@ namespace TimberModTest
         {
             if (EventIO.Config.Mode == ReplayConfig.MODE_NONE) return;
 
-            // In case we're loading the main menu from a game
-            Plugin.LogWarning("Resetting SingletonManager");
+            // This will be called if the player exits to the main menu,
+            // so it's best to reset everything.
             SingletonManager.Reset();
+            EventIO.Reset();
 
             Plugin.Log($"Registering Main Menu Services");
             containerDefinition.Bind<ClientConnectionService>().AsSingleton();
