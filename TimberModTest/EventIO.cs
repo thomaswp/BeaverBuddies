@@ -53,9 +53,10 @@ namespace TimberModTest
         {
             if (instance != null)
             {
-                Plugin.Log("Closing EventIO.");
+                Plugin.Log("Closing EventIO...");
                 instance.Close();
                 instance = null;
+                Plugin.Log("Success!");
             }
         }
 

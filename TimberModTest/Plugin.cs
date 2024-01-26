@@ -38,7 +38,14 @@ namespace TimberModTest
 
             // Reset everything before loading singletons
             SingletonManager.Reset();
-            EventIO.Reset();
+            // Reset the event IO if we're not a client, since the
+            // EventIO will have been set from the MainMenu
+            // TODO: I think I need a more robust solution here, especially
+            // when I start making a UI for this...
+            if (EventIO.Config.Mode != ReplayConfig.MODE_CLIENT)
+            {
+                EventIO.Reset();
+            }
 
             Plugin.Log($"Registering In Game Services");
             //containerDefinition.Bind<DeterminismService>().AsSingleton();

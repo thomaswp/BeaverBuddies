@@ -206,6 +206,11 @@ namespace TimberNet
             base.Close();
             try
             {
+                clients.ForEach(client => client.Close());
+            }
+            catch { }
+            try
+            {
                 listener.Stop();
             }
             catch { }  
