@@ -24,6 +24,10 @@ using Timberborn.InventorySystem;
 using Timberborn.BaseComponentSystem;
 using Timberborn.BehaviorSystem;
 using static TimberModTest.SingletonManager;
+using Timberborn.SingletonSystem;
+using Timberborn.OptionsGame;
+using Timberborn.CoreUI;
+using Timberborn.Options;
 
 namespace TimberModTest.Events
 {
@@ -240,20 +244,92 @@ namespace TimberModTest.Events
         }
     }
 
-    // TODO: Overwrite SpeedManager.LockSpeed and see where it's
-    // being called. My guess is we don't ever want to lock speed
-    // if we're the client, and probably only on pause if we're the
-    // server. We may also want to disable certain things if client
-    // e.g. how would menu pause be handled? Save would be unstable.
+    // TODO: It might be nice to make this configurable: whether the host
+    // should freeze the game for these pop-ups. If we don't freeze, it could
+    // definitely cause some possible invalid operations (e.g. deleting a building
+    // that's not there anymore), but in theory these errors get caught before
+    // sending to the server. In practice, though, there could be side-effects of
+    // and aborted event. For clients, I think this is always a possibility, regardless
+    // of whether we freeze, since it's always happening at a delay.
     [ManualMethodOverwrite]
     [HarmonyPatch(typeof(SpeedManager), nameof(SpeedManager.LockSpeed))]
     public class SpeedLockPatcher
     {
         static bool Prefix(SpeedManager __instance)
         {
-            Plugin.Log("SpeedManager.LockSpeed");
-            Plugin.LogStackTrace();
-            return true;
+            // Clients should never freeze for dialogs. Main menu will be
+            // handled separately.
+            if (EventIO.Get()?.UserEventBehavior == UserEventBehavior.Send)
+            {
+                return false;
+            }
+
+            if (!__instance._isLocked)
+            {
+                __instance._speedBefore = __instance.CurrentSpeed;
+                SpeedChangePatcher.SetSpeedSilently(__instance, 0f);
+                __instance._isLocked = true;
+                __instance._eventBus.Post(new SpeedLockChangedEvent(__instance._isLocked));
+            }
+            return false;
+        }
+    }
+
+    [ManualMethodOverwrite]
+    [HarmonyPatch(typeof(SpeedManager), nameof(SpeedManager.UnlockSpeed))]
+    public class SpeedUnlockPatcher
+    {
+        static bool Prefix(SpeedManager __instance)
+        {
+            // Clients should never unfreeze for dialogs. See above.
+            if (EventIO.Get()?.UserEventBehavior == UserEventBehavior.Send)
+            {
+                return false;
+            }
+
+            if (__instance._isLocked)
+            {
+                __instance._isLocked = false;
+                SpeedChangePatcher.SetSpeedSilently(__instance, __instance._speedBefore);
+                __instance._eventBus.Post(new SpeedLockChangedEvent(__instance._isLocked));
+            }
+            return false;
+        }
+    }
+
+    [Serializable]
+    class ShowOptionsMenuEvent : SpeedSetEvent
+    {
+        public ShowOptionsMenuEvent()
+        {
+            speed = 0;
+        }
+
+        public override void Replay(IReplayContext context)
+        {
+            base.Replay(context);
+            context.GetSingleton<IOptionsBox>().Show();
+        }
+    }
+
+    // We make showing the options menu a synced game event, rather than
+    // a non-synced UI action, for two reasons:
+    // 1) This ensures that the Options menu is always shown when a full
+    //    tick has been completed.
+    // 2) This will give other plays a visual clue about why the game has
+    //    paused.
+    // However, only the host will be able to unpause, and only by manually
+    // setting the game speed, since they won't process any events by clients
+    // while they have a panel (including this one) up (I think...).
+    [HarmonyPatch(typeof(GameOptionsBox), nameof(GameOptionsBox.Show))]
+    public class GameOptionsBoxShowPatcher
+    {
+        static bool Prefix()
+        {
+            return ReplayEvent.DoPrefix(() =>
+            {
+                return new ShowOptionsMenuEvent();
+            });
         }
     }
 
