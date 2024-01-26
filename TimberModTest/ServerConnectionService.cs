@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Timberborn.EntitySystem;
 using Timberborn.GameSaveRuntimeSystem;
+using Timberborn.MainMenuSceneLoading;
 using Timberborn.MapSystem;
 using Timberborn.SingletonSystem;
 using Timberborn.TickSystem;
@@ -28,12 +29,16 @@ namespace TimberModTest
 
         private bool isLoadingMap = false;
 
-        public ServerConnectionService(GameSaver gameSaver, ReplayService replayService, 
-            TickingService tickingService)
+        public ServerConnectionService(GameSaver gameSaver, 
+            ReplayService replayService, 
+            TickingService tickingService,
+            EventBus eventBus
+        )
         {
             _gameSaver = gameSaver;
             _replayService = replayService;
             _tickingService = tickingService;
+            eventBus.Register(this);
         }
 
         public void Start()
@@ -49,6 +54,17 @@ namespace TimberModTest
                 Plugin.Log(e.ToString());
             }
 
+        }
+
+        [OnEvent]
+        public void OnPreMainMenuStartedOnPreMainMenuStarted(PreMainMenuStartedEvent preMainMenuStartedEvent)
+        {
+            if (EventIO.Get() != null)
+            {
+                EventIO.Get().Close();
+                EventIO.Set(null);
+                SingletonManager.Reset();
+            }
         }
 
         private Func<Task<byte[]>> ProvideGameState()
