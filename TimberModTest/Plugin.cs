@@ -34,7 +34,7 @@ namespace TimberModTest
     {
         public void Configure(IContainerDefinition containerDefinition)
         {
-            if (EventIO.Config.Mode == ReplayConfig.MODE_NONE) return;
+            if (EventIO.Config.GetNetMode() == NetMode.None) return;
 
             // Reset everything before loading singletons
             SingletonManager.Reset();
@@ -42,7 +42,7 @@ namespace TimberModTest
             // EventIO will have been set from the MainMenu
             // TODO: I think I need a more robust solution here, especially
             // when I start making a UI for this...
-            if (EventIO.Config.Mode != ReplayConfig.MODE_CLIENT)
+            if (EventIO.Config.GetNetMode() != NetMode.Client)
             {
                 EventIO.Reset();
             }
@@ -63,7 +63,7 @@ namespace TimberModTest
     {
         public void Configure(IContainerDefinition containerDefinition)
         {
-            if (EventIO.Config.Mode == ReplayConfig.MODE_NONE) return;
+            if (EventIO.Config.GetNetMode() == NetMode.None) return;
 
             // This will be called if the player exits to the main menu,
             // so it's best to reset everything.
@@ -97,7 +97,7 @@ namespace TimberModTest
 
             ReplayConfig config = mod.Configs.Get<ReplayConfig>();
             EventIO.Config = config;
-            if (config.Mode == ReplayConfig.MODE_NONE) return;
+            if (config.GetNetMode() == NetMode.None) return;
 
             Harmony harmony = new Harmony(PluginGuid);
             harmony.PatchAll();
