@@ -54,6 +54,11 @@ namespace TimberModTest
         public void Configure(IContainerDefinition containerDefinition)
         {
             if (EventIO.Config.Mode == ReplayConfig.MODE_NONE) return;
+
+            // In case we're loading the main menu from a game
+            Plugin.LogWarning("Resetting SingletonManager");
+            SingletonManager.Reset();
+
             Plugin.Log($"Registering Main Menu Services");
             containerDefinition.Bind<ClientConnectionService>().AsSingleton();
 
@@ -63,7 +68,7 @@ namespace TimberModTest
             //ReflectionUtils.PrintChildClasses(typeof(ILateUpdatableSingleton));
             //ReflectionUtils.PrintChildClasses(typeof(IBatchControlRowItem));
             //ReflectionUtils.PrintChildClasses(typeof(IUpdateableBatchControlRowItem));
-            ReflectionUtils.FindStaticFields();
+            //ReflectionUtils.FindStaticFields();
         }
     }
 

@@ -59,12 +59,13 @@ namespace TimberModTest
         [OnEvent]
         public void OnPreMainMenuStartedOnPreMainMenuStarted(PreMainMenuStartedEvent preMainMenuStartedEvent)
         {
+            // Note: This method is called regardless the EventIO set
+            // (e.g., client, server, etc.)
             if (EventIO.Get() != null)
             {
-                Plugin.Log("Closing EventIO and resetting state.");
+                Plugin.Log("Closing EventIO.");
                 EventIO.Get().Close();
                 EventIO.Set(null);
-                SingletonManager.Reset();
             }
         }
 
