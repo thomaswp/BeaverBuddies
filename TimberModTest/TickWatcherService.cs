@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Timberborn.Common;
+﻿using Timberborn.Common;
 using Timberborn.SingletonSystem;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
-using UnityEngine;
 
 namespace TimberModTest
 {

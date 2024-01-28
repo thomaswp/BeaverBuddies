@@ -1,12 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
-using System.Text;
-using static TimberNet.TimberNetBase;
 using TimberNet;
-using Timberborn.Beavers;
 using System.Threading.Tasks;
-using System.Text.RegularExpressions;
 using TimberModTest.Events;
 
 namespace TimberModTest

@@ -1,7 +1,6 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Timberborn.GameScene;
 using Timberborn.InputSystem;
 using Timberborn.PlantingUI;

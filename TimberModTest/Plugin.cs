@@ -1,31 +1,10 @@
-﻿using BepInEx;
-using BepInEx.Logging;
-using Bindito.Core;
+﻿using Bindito.Core;
 using HarmonyLib;
-using Newtonsoft.Json;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
 using TimberApi.ConfiguratorSystem;
 using TimberApi.ConsoleSystem;
 using TimberApi.ModSystem;
 using TimberApi.SceneSystem;
-using Timberborn.BatchControl;
-using Timberborn.BlockSystem;
-using Timberborn.BuildingTools;
-using Timberborn.Coordinates;
-using Timberborn.EntityPanelSystem;
-using Timberborn.GameDistricts;
-using Timberborn.Metrics;
-using Timberborn.PrefabSystem;
-using Timberborn.PrioritySystem;
-using Timberborn.SingletonSystem;
-using Timberborn.TickSystem;
-using Timberborn.WalkingSystem;
-using UnityEngine;
-using UnityEngine.UIElements;
-using static UnityEngine.Tilemaps.Tilemap;
 
 namespace TimberModTest
 {

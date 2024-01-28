@@ -1,18 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Timberborn.EntitySystem;
 using Timberborn.GameSaveRuntimeSystem;
-using Timberborn.MainMenuSceneLoading;
-using Timberborn.MapSystem;
+using Timberborn.NotificationSystemUI;
 using Timberborn.SingletonSystem;
-using Timberborn.TickSystem;
-using Timberborn.WalkingSystem;
-using TimberModTest.Events;
-using TimberNet;
 
 namespace TimberModTest
 {
@@ -23,6 +14,7 @@ namespace TimberModTest
         private GameSaver _gameSaver;
         private ReplayService _replayService;
         private TickingService _tickingService;
+        private NotificationPanel _notificationPanel;
 
         private TaskCompletionSource<byte[]> mapLoadingSource;
         private int ticksAtMapLoad;
@@ -32,12 +24,14 @@ namespace TimberModTest
         public ServerConnectionService(GameSaver gameSaver, 
             ReplayService replayService, 
             TickingService tickingService,
-            EventBus eventBus
+            EventBus eventBus,
+            NotificationPanel notificationPanel
         )
         {
             _gameSaver = gameSaver;
             _replayService = replayService;
             _tickingService = tickingService;
+            _notificationPanel = notificationPanel;
             eventBus.Register(this);
         }
 
@@ -119,6 +113,8 @@ namespace TimberModTest
             if (isLoadingMap)
             {
                 isLoadingMap = false;
+                // This is doable, but not a priority...
+                //_notificationPanel.AddNotification(new Notification());
                 _replayService.FinishFullTickIfNeededAndThen(() => LoadMapIfNeeded());
             }
         }

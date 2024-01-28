@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using TimberApi.ConfigSystem;
+﻿using TimberApi.ConfigSystem;
 
 namespace TimberModTest
 {

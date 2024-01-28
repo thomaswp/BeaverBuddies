@@ -1,8 +1,6 @@
 ﻿using HarmonyLib;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using Timberborn.CameraSystem;
 using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.GameScene;

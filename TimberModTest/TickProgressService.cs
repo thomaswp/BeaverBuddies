@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Timberborn.EntitySystem;
+﻿using Timberborn.EntitySystem;
 using Timberborn.TickSystem;
 using UnityEngine;
 

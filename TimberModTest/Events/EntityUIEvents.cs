@@ -2,24 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 using Timberborn.BaseComponentSystem;
 using Timberborn.BeaversUI;
-using Timberborn.BlockObjectTools;
-using Timberborn.BlockSystem;
 using Timberborn.BuilderPrioritySystem;
-using Timberborn.Buildings;
 using Timberborn.BuildingsBlocking;
 using Timberborn.BuildingsUI;
-using Timberborn.BuildingTools;
 using Timberborn.Characters;
-using Timberborn.Coordinates;
-using Timberborn.DeconstructionSystemUI;
 using Timberborn.Demolishing;
 using Timberborn.DemolishingUI;
-using Timberborn.DropdownSystem;
 using Timberborn.Emptying;
 using Timberborn.EntitySystem;
 using Timberborn.Explosions;
@@ -40,10 +30,6 @@ using Timberborn.WorkerTypesUI;
 using Timberborn.Workshops;
 using Timberborn.WorkSystem;
 using Timberborn.WorkSystemUI;
-using TimberModTest;
-using Unity.IO.LowLevel.Unsafe;
-using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace TimberModTest.Events
 {
