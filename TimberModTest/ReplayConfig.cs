@@ -17,6 +17,7 @@ namespace TimberModTest
         public string Mode { get; set; } = MODE_NONE;
         public string ClientConnectionAddress { get; set; } = "127.0.0.1";
         public int Port { get; set; } = 25565;
+        public bool Verbose = true;
 
         public NetMode GetNetMode()
         {

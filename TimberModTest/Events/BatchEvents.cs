@@ -294,7 +294,7 @@ namespace TimberModTest.Events
             {
                 if (typeWarning)
                 {
-                    Plugin.LogWarning("GoddDistributionSetting without district!!");
+                    Plugin.LogWarning("GoodDistributionSetting without district!!");
                 }
                 return true;
             }

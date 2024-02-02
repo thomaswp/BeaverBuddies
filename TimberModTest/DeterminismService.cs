@@ -588,17 +588,17 @@ namespace TimberModTest
     [HarmonyPatch(typeof(System.Guid), nameof(System.Guid.NewGuid))]
     public class GuidPatcher
     {
-        static bool Prefix(ref System.Guid __result)
+        static bool Prefix(ref Guid __result)
         {
             byte[] guid = new byte[16];
             for (int i = 0; i < guid.Length; i++)
             {
                 guid[i] = (byte)UnityEngine.Random.Range(0, byte.MaxValue + 1);
             }
-            __result = new System.Guid(guid);
+            __result = new Guid(guid);
             if (ReplayService.IsLoaded)
             {
-                Plugin.LogWarning($"Generating new GUID: {__result}");
+                Plugin.Log($"Generating new GUID: {__result}");
             }
             return false;
         }

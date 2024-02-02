@@ -72,11 +72,12 @@ namespace TimberModTest
 
         public void Entry(IMod mod, IConsoleWriter consoleWriter)
         {
+            ReplayConfig config = mod.Configs.Get<ReplayConfig>();
+            EventIO.Config = config;
+
             logger = consoleWriter;
             Log($"Plugin {Guid} is loaded!");
 
-            ReplayConfig config = mod.Configs.Get<ReplayConfig>();
-            EventIO.Config = config;
             if (config.GetNetMode() == NetMode.None) return;
 
             Harmony harmony = new Harmony(Guid);
@@ -87,6 +88,7 @@ namespace TimberModTest
 
         public static void Log(string message)
         {
+            if (!EventIO.Config.Verbose) return;
             logger.LogInfo(message);
         }
 
