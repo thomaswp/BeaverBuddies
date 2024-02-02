@@ -8,6 +8,8 @@ using System.Threading;
 using Timberborn.BaseComponentSystem;
 using Timberborn.BlockObjectTools;
 using Timberborn.Buildings;
+using Timberborn.Core;
+using Timberborn.CoreUI;
 using Timberborn.DemolishingUI;
 using Timberborn.EntitySystem;
 using Timberborn.Forestry;
@@ -113,7 +115,9 @@ namespace TimberModTest
             WorkingHoursManager workingHoursManager,
             WorkingHoursPanel workingHoursPanel,
             WorkplaceUnlockingService workplaceUnlockingService,
-            IOptionsBox optionsBox
+            IOptionsBox optionsBox,
+            DialogBoxShower dialogBoxShower,
+            UrlOpener urlOpener
         )
         {
             //_tickWathcerService = AddSingleton(tickWathcerService);
@@ -136,9 +140,9 @@ namespace TimberModTest
             AddSingleton(workingHoursPanel);
             AddSingleton(workplaceUnlockingService);
             AddSingleton(optionsBox);
+            AddSingleton(dialogBoxShower);
+            AddSingleton(urlOpener);
 
-            // TODO: I think there's a SingletonRegistry that may
-            // be able to do this.
             AddSingleton(this);
 
             _eventBus.Register(this);
@@ -249,9 +253,9 @@ namespace TimberModTest
                     if (s0 != replayEvent.randomS0Before)
                     {
                         Plugin.LogWarning($"Random state mismatch: {s0} != {replayEvent.randomS0Before}");
-                        SetTargetSpeed(0);
-                        SpeedChangePatcher.SetSpeedSilently(_speedManager, 0);
-                        //DeterminismController.PrintRandomStacks();
+                        ClientDesyncedEvent e = new ClientDesyncedEvent();
+                        EnqueueEventForSending(e);
+                        e.Replay(this);
                         break;
                         // TODO: Resync!
                     }
