@@ -2,7 +2,7 @@
   "Name": "TimberModTest", // Name of the mod
   "Version": "1.0.0", // Version of the mod
   "UniqueId": "TimberModTest", // Unique identifier of the mod
-  "MinimumApiVersion": "0.5.0", // Minimun TimberAPI version this mod needs
-  "MinimumGameVersion": "0.2.8", // Minimun game version this mod needs (0.2.8 is the lowest that works with TimberAPI v0.5)
+  "MinimumApiVersion": "0.6.5", // Minimun TimberAPI version this mod needs
+  "MinimumGameVersion": "0.5.9", // Minimun game version this mod needs (0.2.8 is the lowest that works with TimberAPI v0.5)
   "EntryDll": "TimberModTest.dll" // Optional. The entry dll if the mod has custom code
 }
