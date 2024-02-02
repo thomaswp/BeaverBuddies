@@ -67,26 +67,4 @@ namespace TimberModTest
             return false;
         }
     }
-
-    //[HarmonyPatch(typeof(CharacterModel), nameof(CharacterModel.Position), MethodType.Setter)]
-    //public class CharacterModelPositionPatcher
-    //{
-    //    static bool Prefix(CharacterModel __instance, Vector3 value)
-    //    {
-    //        if (__instance.GetComponentFast<EntityComponent>()?.EntityId.ToString() == "00355d1d-36fd-f115-9c90-6a54dda73a85")
-    //        {
-    //            if (!AnimatedPathFollowerUpdatePathcer.IsInUpdate)
-    //            {
-    //                Plugin.Log($"{__instance.Position} --> {value}");
-    //                Plugin.LogStackTrace();
-    //            }
-    //            else
-    //            {
-    //                //Plugin.Log("Get from Update");
-    //            }
-    //        }
-
-    //        return true;
-    //    }
-    //}
 }
