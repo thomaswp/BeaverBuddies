@@ -520,7 +520,7 @@ namespace TimberModTest
             return numberOfBucketsToTick > 0;
         }
 
-        private bool IsAtStartOfTick(TickableBucketService __instance)
+        public static bool IsAtStartOfTick(TickableBucketService __instance)
         {
             return __instance._nextTickedBucketIndex == 0 &&
                 !__instance._tickedSingletons;
@@ -562,11 +562,9 @@ namespace TimberModTest
             //numberOfBucketsToTick = __instance.NumberOfBuckets + 1;
             //}
 
-            var tickRequesterService = S<TickingService>();
-
-            while (tickRequesterService.ShouldTick(__instance, numberOfBucketsToTick--))
+            while (ShouldTick(__instance, numberOfBucketsToTick--))
             {
-                if (tickRequesterService.TickReplayServiceOrNextBucket(__instance))
+                if (TickReplayServiceOrNextBucket(__instance))
                 {
                     // Refund a bucket if we ticked the ReplayService
                     numberOfBucketsToTick++;
@@ -574,7 +572,7 @@ namespace TimberModTest
             }
 
             // Tell the TickRequester we've finished this partial (or possibly complete) tick
-            tickRequesterService.OnTickingCompleted();
+            OnTickingCompleted();
 
             // Replace the default behavior entirely
             return false;

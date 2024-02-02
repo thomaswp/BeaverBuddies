@@ -6,41 +6,54 @@ namespace TimberModTest
 {
     public class TickProgressService : RegisteredSingleton
     {
-        private TickableBucketService tickableBucketService;
+        public TickableBucketService TickableBucketService { get; private set; }
+        private TickingService _tickingService;
 
-        public TickProgressService(ITickableBucketService _tickableBucketService)
+        public TickProgressService(ITickableBucketService _tickableBucketService, TickingService tickingService)
         {
-            tickableBucketService = _tickableBucketService as TickableBucketService;
+            TickableBucketService = _tickableBucketService as TickableBucketService;
+            _tickingService = tickingService;
         }
 
         public int GetEntityBucketIndex(EntityComponent tickableEntity)
         {
-            if (tickableBucketService == null) return 0;
-            return tickableBucketService.GetEntityBucketIndex(tickableEntity.EntityId);
+            return TickableBucketService.GetEntityBucketIndex(tickableEntity.EntityId);
         }
 
         public bool HasTicked(EntityComponent tickableEntity)
         {
-            if (tickableBucketService == null) return false;
             int bucketIndex = GetEntityBucketIndex(tickableEntity);
-            return bucketIndex < tickableBucketService._nextTickedBucketIndex;
+
+            // If the next ticked bucket is 0, this means we either just ticked the replay
+            // service (meaning *no* entities have ticked this tick) or or we're just about to
+            // (meaning *all* entities have ticked this tick).
+            if (TickableBucketService._nextTickedBucketIndex == 0)
+            {
+                // We've only ticked at the start of the tick, before the replay service
+                // has ticked.
+                return TickingService.IsAtStartOfTick(TickableBucketService)
+                    && !_tickingService.HasTickedReplayService;
+            }
+
+            int lastTickedBucket = TickableBucketService._nextTickedBucketIndex - 1;
+            if (lastTickedBucket < 0) lastTickedBucket += TickableBucketService.NumberOfBuckets;
+
+            return bucketIndex <= lastTickedBucket;
         }
 
         public float PercentTicked(EntityComponent tickableEntity)
         {
-            if (tickableBucketService == null) return 0;
             int bucketIndex = GetEntityBucketIndex(tickableEntity);
-            int currentIndex = tickableBucketService._nextTickedBucketIndex;
+            int currentIndex = TickableBucketService._nextTickedBucketIndex;
             // Figure out how many buckets have ticked since this entity's bucket
             int numerator = currentIndex - bucketIndex;
             // If it hasn't ticked yet, add the number of buckets to tick (plus 1 for singletons)
-            if (numerator <= 0) numerator += tickableBucketService.NumberOfBuckets + 1;
-            return (float)(numerator) / (tickableBucketService.NumberOfBuckets + 1);
+            if (numerator <= 0) numerator += TickableBucketService.NumberOfBuckets + 1;
+            return (float)(numerator) / (TickableBucketService.NumberOfBuckets + 1);
         }
 
         public float TimeAtLastTick(EntityComponent tickableEntity)
         {
-            if (tickableBucketService == null) return 0;
             float time = Time.time;
             if (HasTicked(tickableEntity))
             {

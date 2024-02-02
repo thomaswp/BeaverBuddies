@@ -711,8 +711,6 @@ namespace TimberModTest
         public static int EntityUpdateHash { get; private set; }
         public static int PositionHash { get; private set; }
 
-        public static EntityComponent LastTickedEntity { get; private set; }
-
         public static void SetHashes(int entityUpdateHash, int positionHash)
         {
             EntityUpdateHash = entityUpdateHash;
@@ -725,7 +723,6 @@ namespace TimberModTest
             {
                 var entity = __instance._tickableEntities.Values[i];
                 EntityUpdateHash = TimberNetBase.CombineHash(EntityUpdateHash, entity.EntityId.GetHashCode());
-                LastTickedEntity = entity._entityComponent;
 
                 var entityComponent = entity._entityComponent;
                 var pathFollower = entityComponent.GetComponentFast<Walker>()?._pathFollower;
@@ -734,8 +731,9 @@ namespace TimberModTest
                 {
                     // Update the animated path follower to the path follower's
                     // (hopefully) deterministic position
-                    animatedPathFollower.CurrentPosition = pathFollower._transform.position;
-                    PositionHash = TimberNetBase.CombineHash(PositionHash, animatedPathFollower.CurrentPosition.GetHashCode());
+                    var targetPos = pathFollower._transform.position;
+                    animatedPathFollower.CurrentPosition = targetPos;
+                    PositionHash = TimberNetBase.CombineHash(PositionHash, targetPos.GetHashCode());
                 }
                 // Make sure it updates the model's position as well
                 entityComponent.GetComponentFast<MovementAnimator>()?.UpdateTransform(0);

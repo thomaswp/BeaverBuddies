@@ -1,6 +1,10 @@
 ﻿using HarmonyLib;
+using Timberborn.Beavers;
+using Timberborn.CharacterModelSystem;
 using Timberborn.CharacterMovementSystem;
+using Timberborn.Characters;
 using Timberborn.EntitySystem;
+using Timberborn.WorkSystem;
 using UnityEngine;
 
 namespace TimberModTest
@@ -9,9 +13,10 @@ namespace TimberModTest
     [HarmonyPatch(typeof(MovementAnimator), nameof(MovementAnimator.Update), typeof(float))]
     public class AnimatedPathFollowerUpdatePathcer
     {
-
         static bool Prefix(MovementAnimator __instance, float deltaTime)
         {
+            //Vector3 position = Vector3.zero;
+
             float time = Time.time;
             EntityComponent entity = __instance.GetComponentFast<EntityComponent>();
             if (entity != null)
@@ -23,12 +28,18 @@ namespace TimberModTest
                 time = tickProgressService.TimeAtLastTick(entity) +
                     Time.fixedDeltaTime *
                     tickProgressService.PercentTicked(entity);
-                //Plugin.Log($"{entity.EntityId}:\n" +
-                //    $"index: {TickProgressService.GetEntityBucketIndex(entity)}\n" +
-                //    $"ticked: {TickProgressService.HasTicked(entity)}\n" +
-                //    $"last: {TickProgressService.TimeAtLastTick(entity)}\n" +
-                //    $"perc: {TickProgressService.PercentTicked(entity)}\n" +
-                //    $"time: {Time.time} -> {time}");
+
+                //if (entity.EntityId.ToString() == "00355d1d-36fd-f115-9c90-6a54dda73a85")
+                //{
+                //    Plugin.Log($"{entity.EntityId} (${entity.GetComponentFast<Character>().FirstName}) :\n" +
+                //        $"index: {tickProgressService.GetEntityBucketIndex(entity)}\n" +
+                //        $"nextTick: {tickProgressService.TickableBucketService._nextTickedBucketIndex}\n" +
+                //        $"ticked: {tickProgressService.HasTicked(entity)}\n" +
+                //        $"last: {tickProgressService.TimeAtLastTick(entity)}\n" +
+                //        $"perc: {tickProgressService.PercentTicked(entity)}\n" +
+                //        $"time: {Time.time} -> {time}");
+                //    position = __instance._animatedPathFollower.CurrentPosition;
+                //}
             }
             else
             {
@@ -39,18 +50,43 @@ namespace TimberModTest
             __instance._animatedPathFollower.Update(time);
 
             // Otherwise, update as usual
-            if (!__instance._animatedPathFollower.ReachedDestination())
+            if (!__instance._animatedPathFollower.Stopped)
             {
                 __instance.UpdateTransform(deltaTime);
             }
-            else if (!__instance._animatedPathFollower.Stopped)
-            {
-                __instance.StopAnimatingMovement();
-            }
             __instance.InvokeAnimationUpdate();
+
+            //if (position != Vector3.zero)
+            //{
+            //    Plugin.Log($"pos: {position} -> {__instance._animatedPathFollower.CurrentPosition}");
+            //    Vector3 dir = __instance._animatedPathFollower.CurrentPosition - position;
+            //    Plugin.Log($"XDir: {Mathf.Sign(dir.x)}, ZDir: {Mathf.Sign(dir.z)}");
+            //}
 
             // We've replaced the original method, so skip it
             return false;
         }
     }
+
+    //[HarmonyPatch(typeof(CharacterModel), nameof(CharacterModel.Position), MethodType.Setter)]
+    //public class CharacterModelPositionPatcher
+    //{
+    //    static bool Prefix(CharacterModel __instance, Vector3 value)
+    //    {
+    //        if (__instance.GetComponentFast<EntityComponent>()?.EntityId.ToString() == "00355d1d-36fd-f115-9c90-6a54dda73a85")
+    //        {
+    //            if (!AnimatedPathFollowerUpdatePathcer.IsInUpdate)
+    //            {
+    //                Plugin.Log($"{__instance.Position} --> {value}");
+    //                Plugin.LogStackTrace();
+    //            }
+    //            else
+    //            {
+    //                //Plugin.Log("Get from Update");
+    //            }
+    //        }
+
+    //        return true;
+    //    }
+    //}
 }
