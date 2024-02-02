@@ -86,20 +86,25 @@ namespace BeaverBuddies
 
         }
 
+        public static string GetWithDate(string message)
+        {
+            return $"[{System.DateTime.Now.ToString("HH-mm-ss:f")}] {message}";
+        }
+
         public static void Log(string message)
         {
             if (!EventIO.Config.Verbose) return;
-            logger.LogInfo(message);
+            logger.LogInfo(GetWithDate(message));
         }
 
         public static void LogWarning(string message)
         {
-            logger.LogWarning(message);
+            logger.LogWarning(GetWithDate(message));
         }
 
         public static void LogError(string message)
         {
-            logger.LogError(message);
+            logger.LogError(GetWithDate(message));
         }
 
         public static void LogStackTrace()

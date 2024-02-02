@@ -376,12 +376,6 @@ namespace BeaverBuddies
 
         private void UpdateSpeed()
         {
-            // Use for error repro
-            //if (ticksSinceLoad > 320)
-            //{
-            //    SpeedChangePatcher.SetSpeedSilently(_speedManager, 0);
-            //    return;
-            //}
             if (io.IsOutOfEvents && _speedManager.CurrentSpeed != 0)
             {
                 SpeedChangePatcher.SetSpeedSilently(_speedManager, 0);
@@ -427,7 +421,7 @@ namespace BeaverBuddies
 
             // Log from IO
             io.Update();
-            Plugin.Log($"Tick order hash: {TEBPatcher.EntityUpdateHash.ToString("X8")}; " +
+            Plugin.Log($"Tick {ticksSinceLoad:D5} order hash: {TEBPatcher.EntityUpdateHash.ToString("X8")}; " +
                 $"Move hash: {TEBPatcher.PositionHash.ToString("X8")}; " +
                 $"Random s0: {UnityEngine.Random.state.s0.ToString("X8")}");
 
