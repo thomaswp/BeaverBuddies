@@ -88,7 +88,7 @@ namespace BeaverBuddies
 
         public static string GetWithDate(string message)
         {
-            return $"[{System.DateTime.Now.ToString("HH-mm-ss:f")}] {message}";
+            return $"[{System.DateTime.Now.ToString("HH-mm-ss.ff")}] {message}";
         }
 
         public static void Log(string message)
