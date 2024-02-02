@@ -5,11 +5,11 @@ using Timberborn.TimeSystem;
 using Timberborn.PrefabSystem;
 using Timberborn.EntitySystem;
 using Timberborn.BaseComponentSystem;
-using static TimberModTest.SingletonManager;
+using static BeaverBuddies.SingletonManager;
 using Timberborn.OptionsGame;
 using Timberborn.Options;
 
-namespace TimberModTest.Events
+namespace BeaverBuddies.Events
 {
     public interface IReplayContext
     {

@@ -23,11 +23,11 @@ using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
 using Timberborn.WorkSystem;
 using Timberborn.WorkSystemUI;
-using TimberModTest.Events;
+using BeaverBuddies.Events;
 using static Timberborn.TickSystem.TickableSingletonService;
-using static TimberModTest.SingletonManager;
+using static BeaverBuddies.SingletonManager;
 
-namespace TimberModTest
+namespace BeaverBuddies
 {
     public interface IEarlyTickableSingleton : ITickableSingleton
     {

@@ -6,7 +6,7 @@ using TimberApi.ConsoleSystem;
 using TimberApi.ModSystem;
 using TimberApi.SceneSystem;
 
-namespace TimberModTest
+namespace BeaverBuddies
 {
     [Configurator(SceneEntrypoint.InGame)]  // This attribute registers the configurator and tells where it should be loaded
     public class ReplayConfigurator : IConfigurator

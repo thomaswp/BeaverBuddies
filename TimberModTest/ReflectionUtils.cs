@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace TimberModTest
+namespace BeaverBuddies
 {
     public static class ReflectionUtils
     {

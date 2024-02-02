@@ -2,10 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TimberModTest.Events;
+using BeaverBuddies.Events;
 using TimberNet;
 
-namespace TimberModTest
+namespace BeaverBuddies
 {
     public abstract class NetIOBase<T> : EventIO where T : TimberNetBase
     {

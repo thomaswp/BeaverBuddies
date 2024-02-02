@@ -1,7 +1,7 @@
 ﻿using TimberNet;
 using static TimberNet.TimberNetBase;
 
-namespace TimberModTest
+namespace BeaverBuddies
 {
     public class ClientEventIO : NetIOBase<TimberClient>
     {

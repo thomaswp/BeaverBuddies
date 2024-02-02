@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TimberModTest
+namespace BeaverBuddies
 {
     public class SingletonManager
     {

@@ -2,9 +2,9 @@
 using System;
 using TimberNet;
 using System.Threading.Tasks;
-using TimberModTest.Events;
+using BeaverBuddies.Events;
 
-namespace TimberModTest
+namespace BeaverBuddies
 {
     public class ServerEventIO : NetIOBase<TimberServer>
     {

@@ -7,7 +7,7 @@ using Timberborn.EntitySystem;
 using Timberborn.WorkSystem;
 using UnityEngine;
 
-namespace TimberModTest
+namespace BeaverBuddies
 {
     [ManualMethodOverwrite]
     [HarmonyPatch(typeof(MovementAnimator), nameof(MovementAnimator.Update), typeof(float))]

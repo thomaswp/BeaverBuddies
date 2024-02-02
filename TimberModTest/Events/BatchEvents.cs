@@ -6,7 +6,7 @@ using Timberborn.GameDistrictsMigration;
 using Timberborn.GameDistrictsMigrationBatchControl;
 using Timberborn.Goods;
 
-namespace TimberModTest.Events
+namespace BeaverBuddies.Events
 {
     enum DistributorType
     { 

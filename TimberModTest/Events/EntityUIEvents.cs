@@ -31,7 +31,7 @@ using Timberborn.Workshops;
 using Timberborn.WorkSystem;
 using Timberborn.WorkSystemUI;
 
-namespace TimberModTest.Events
+namespace BeaverBuddies.Events
 {
 
     [Serializable]

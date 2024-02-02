@@ -3,7 +3,7 @@ using Timberborn.SingletonSystem;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
 
-namespace TimberModTest
+namespace BeaverBuddies
 {
     // Hypothesis: This gets called at different frequencies depending on game speed
     // It gets called each tick, and I think the number of ticks per game frame depends on game speed

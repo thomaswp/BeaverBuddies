@@ -5,7 +5,7 @@ using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.NotificationSystemUI;
 using Timberborn.SingletonSystem;
 
-namespace TimberModTest
+namespace BeaverBuddies
 {
     class ServerConnectionService : IPostLoadableSingleton, IUpdatableSingleton
     {

@@ -5,9 +5,9 @@ using System.Text;
 using Timberborn.Options;
 using Timberborn.OptionsGame;
 using Timberborn.TimeSystem;
-using static TimberModTest.SingletonManager;
+using static BeaverBuddies.SingletonManager;
 
-namespace TimberModTest.Events
+namespace BeaverBuddies.Events
 {
     [Serializable]
     public class SpeedSetEvent : ReplayEvent

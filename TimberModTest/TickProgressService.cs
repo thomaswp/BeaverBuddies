@@ -2,7 +2,7 @@
 using Timberborn.TickSystem;
 using UnityEngine;
 
-namespace TimberModTest
+namespace BeaverBuddies
 {
     public class TickProgressService : RegisteredSingleton
     {

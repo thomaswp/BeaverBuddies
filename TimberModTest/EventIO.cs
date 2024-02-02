@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using TimberModTest.Events;
+using BeaverBuddies.Events;
 
-namespace TimberModTest
+namespace BeaverBuddies
 {
     public enum UserEventBehavior
     {

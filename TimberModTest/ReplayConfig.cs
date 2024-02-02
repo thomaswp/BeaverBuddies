@@ -1,6 +1,6 @@
 ﻿using TimberApi.ConfigSystem;
 
-namespace TimberModTest
+namespace BeaverBuddies
 {
     public enum NetMode { Server, Client, Record, Replay, None }
 

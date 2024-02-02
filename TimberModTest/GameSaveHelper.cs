@@ -6,7 +6,7 @@ using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.GameScene;
 using TimberNet;
 
-namespace TimberModTest
+namespace BeaverBuddies
 {
     internal class GameSaveHelper
     {

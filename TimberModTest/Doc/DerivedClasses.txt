@@ -611,9 +611,9 @@ Timberborn.WeatherSystemUI.DatePanel:
 Timberborn.WeatherSystemUI.WeatherPanel:
 * Just updates the Weather UI - no updates to game logic.
 Timberborn.WellbeingUI.BasicStatisticsPanel:
-TimberModTest.ClientConnectionService:
-TimberModTest.ReplayService:
-TimberModTest.ServerConnectionService:
+BeaverBuddies.ClientConnectionService:
+BeaverBuddies.ReplayService:
+BeaverBuddies.ServerConnectionService:
 
 
 Classes inhereting: ILateUpdatableSingleton

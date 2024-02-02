@@ -16,7 +16,7 @@ using Timberborn.ToolSystem;
 using Timberborn.WorkSystemUI;
 using UnityEngine;
 
-namespace TimberModTest.Events
+namespace BeaverBuddies.Events
 {
 
     [Serializable]

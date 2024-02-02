@@ -8,10 +8,10 @@ using System.Threading;
 using Timberborn.GameSceneLoading;
 using Timberborn.SceneLoading;
 using Timberborn.SingletonSystem;
-using TimberModTest.Events;
+using BeaverBuddies.Events;
 using TimberNet;
 
-namespace TimberModTest
+namespace BeaverBuddies
 {
 
     class JsonSettings : JsonSerializerSettings

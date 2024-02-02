@@ -6,7 +6,7 @@ using Timberborn.Core;
 using Timberborn.CoreUI;
 using Timberborn.TimeSystem;
 
-namespace TimberModTest.Events
+namespace BeaverBuddies.Events
 {
     [Serializable]
     public class InitializeClientEvent : ReplayEvent

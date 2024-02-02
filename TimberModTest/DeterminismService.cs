@@ -31,9 +31,9 @@ using Timberborn.WorkshopsEffects;
 using TimberNet;
 using UnityEngine;
 using static Timberborn.GameSaveRuntimeSystem.GameSaver;
-using static TimberModTest.SingletonManager;
+using static BeaverBuddies.SingletonManager;
 
-namespace TimberModTest
+namespace BeaverBuddies
 {
     public class DeterminismService : IResettableSingleton
     {

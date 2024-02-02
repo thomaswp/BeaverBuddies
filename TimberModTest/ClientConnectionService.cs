@@ -5,7 +5,7 @@ using Timberborn.GameSceneLoading;
 using Timberborn.SingletonSystem;
 using TimberNet;
 
-namespace TimberModTest
+namespace BeaverBuddies
 {
     public class ClientConnectionService : IUpdatableSingleton, IPostLoadableSingleton
     {

@@ -6,7 +6,7 @@ using Timberborn.InputSystem;
 using Timberborn.PlantingUI;
 using Timberborn.SoundSystem;
 
-namespace TimberModTest
+namespace BeaverBuddies
 {
     class NonGamePatcher
     {
