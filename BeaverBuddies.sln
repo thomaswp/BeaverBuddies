@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33403.182
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeaverBuddies", "TimberModTest\BeaverBuddies.csproj", "{1D3DCBB4-E006-45BA-A5CE-E7F5007AED10}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeaverBuddies", "BeaverBuddies\BeaverBuddies.csproj", "{1D3DCBB4-E006-45BA-A5CE-E7F5007AED10}"
 	ProjectSection(ProjectDependencies) = postProject
 		{BA028DE9-5C9C-40F1-B102-A7C9B422F44E} = {BA028DE9-5C9C-40F1-B102-A7C9B422F44E}
 	EndProjectSection

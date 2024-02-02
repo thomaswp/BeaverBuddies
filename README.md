@@ -1,4 +1,4 @@
-# TimberReplay
+# BeaverBuddies
 
 This is a WIP mod to allow multiplay and replays in Timberborn.
 
@@ -18,12 +18,12 @@ Enabled = true # Change this to true
 3. Install TimberAPI, currently [this version](https://github.com/Timberborn-Modding-Central/TimberAPI/releases/tag/v0.5.5.8), by downloading the "modio" file, and putting its contents into your `Timberborn\BepInEx\plugins\` folder, such that it now contains a folder called `TimberAPI`.
 4. Install Visual Studio (e.g., [2022 community edition](https://visualstudio.microsoft.com/downloads/)) and open this solution with it.
 5. Go to Tools->Options->Nuget Package Manager->Package Sources and click the green [+] button. Call it BepInEx and give it the URL `https://nuget.bepinex.dev/v3/index.json`.
-6. Create a folder in `Timberborn\BepInEx\plugins\` called `TimberModTest`. Make note of the location of this folder.
-7. Open the TimberModTest project (by double-clicking on it in Visual Studio). Find the Build->Events->Post build event option and make sure that the path it gives matches your path to Timberborn. By default it reads:
+6. Create a folder in `Timberborn\BepInEx\plugins\` called `BeaverBuddies`. Make note of the location of this folder.
+7. Open the BeaverBuddies project (by double-clicking on it in Visual Studio). Find the Build->Events->Post build event option and make sure that the path it gives matches your path to Timberborn. By default it reads:
 ```
-xcopy /y "$(ProjectDir)$(OutDir)*"  "C:\Program Files (x86)\Steam\steamapps\common\Timberborn\BepInEx\plugins\TimberModTest"
+xcopy /y "$(ProjectDir)$(OutDir)*"  "C:\Program Files (x86)\Steam\steamapps\common\Timberborn\BepInEx\plugins\BeaverBuddies"
 ```
-8. Build and run the project (Ctrl+shift+B). You should see some .dll files in the `TimberModTest` folder you created earlier.
+8. Build and run the project (Ctrl+shift+B). You should see some .dll files in the `BeaverBuddies` folder you created earlier.
 
 ## Running the Mod
 
