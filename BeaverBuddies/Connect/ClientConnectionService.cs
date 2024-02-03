@@ -5,7 +5,7 @@ using Timberborn.GameSceneLoading;
 using Timberborn.SingletonSystem;
 using TimberNet;
 
-namespace BeaverBuddies
+namespace BeaverBuddies.Connect
 {
     public class ClientConnectionService : IUpdatableSingleton, IPostLoadableSingleton
     {
@@ -32,7 +32,8 @@ namespace BeaverBuddies
                 client = new ClientEventIO(EventIO.Config.ClientConnectionAddress, EventIO.Config.Port, LoadMap);
                 EventIO.Set(client);
 
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Plugin.Log(ex.ToString());
             }

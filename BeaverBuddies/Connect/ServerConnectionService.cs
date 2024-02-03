@@ -5,7 +5,7 @@ using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.NotificationSystemUI;
 using Timberborn.SingletonSystem;
 
-namespace BeaverBuddies
+namespace BeaverBuddies.Connect
 {
     class ServerConnectionService : IPostLoadableSingleton, IUpdatableSingleton
     {
@@ -21,8 +21,8 @@ namespace BeaverBuddies
 
         private bool isLoadingMap = false;
 
-        public ServerConnectionService(GameSaver gameSaver, 
-            ReplayService replayService, 
+        public ServerConnectionService(GameSaver gameSaver,
+            ReplayService replayService,
             TickingService tickingService,
             EventBus eventBus,
             NotificationPanel notificationPanel
@@ -43,7 +43,9 @@ namespace BeaverBuddies
                     ProvideGameState(),
                     () => ticksAtMapLoad);
                 EventIO.Set(io);
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 Plugin.Log("Failed to start server");
                 Plugin.Log(e.ToString());
             }
