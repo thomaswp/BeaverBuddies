@@ -1,4 +1,5 @@
-﻿using TimberNet;
+﻿using System;
+using TimberNet;
 using static TimberNet.TimberNetBase;
 
 namespace BeaverBuddies
@@ -18,12 +19,40 @@ namespace BeaverBuddies
         // It has to wait until an event is received from the server.
         public override UserEventBehavior UserEventBehavior => UserEventBehavior.Send;
 
-        public ClientEventIO(string address, int port, MapReceived mapReceivedCallback)
+        private MapReceived mapReceivedCallback;
+        private bool FailedToConnect = false;
+
+        private ClientEventIO(string address, int port, MapReceived mapReceivedCallback)
         {
+            this.mapReceivedCallback = mapReceivedCallback;
+
             netBase = new TimberClient(address, port);
             netBase.OnMapReceived += mapReceivedCallback;
             netBase.OnLog += Plugin.Log;
-            netBase.Start();
+            try
+            {
+                netBase.Start();
+            } catch (Exception ex)
+            {
+                Plugin.LogError(ex.ToString());
+                CleanUp();
+                FailedToConnect = true;
+            }
+        }
+
+        private void CleanUp()
+        {
+            if (netBase == null) return;
+            netBase.OnMapReceived -= mapReceivedCallback;
+            netBase.OnLog -= Plugin.Log;
+            netBase = null;
+        }
+
+        public static ClientEventIO Create(string address, int port, MapReceived mapReceivedCallback)
+        {
+            ClientEventIO eventIO = new ClientEventIO(address, port, mapReceivedCallback);
+            if (eventIO.FailedToConnect) return null;
+            return eventIO;
         }
     }
 }

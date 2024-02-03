@@ -51,7 +51,7 @@ namespace BeaverBuddies.Connect
                 .SetLocalizedMessage("Enter the global IP address of the Host:")
                 .SetConfirmButton(ip =>
                 {
-                    _clientConnectionService.StartConnection(ip);
+                    _clientConnectionService.ConnectOrShowFailureMessage(ip);
                 });
             builder.Show();
         }

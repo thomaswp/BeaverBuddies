@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using Timberborn.Core;
+using Timberborn.CoreUI;
 using Timberborn.GameSaveRepositorySystem;
 using Timberborn.GameSceneLoading;
 using Timberborn.SingletonSystem;
@@ -14,34 +16,57 @@ namespace BeaverBuddies.Connect
 
         private GameSceneLoader _gameSceneLoader;
         private GameSaveRepository _gameSaveRepository;
+        private DialogBoxShower _dialogBoxShower;
+        private UrlOpener _urlOpener;
         private ClientEventIO client;
 
-        public ClientConnectionService(GameSceneLoader gameSceneLoader, GameSaveRepository gameSaveRepository)
+        public ClientConnectionService(
+            GameSceneLoader gameSceneLoader,
+            GameSaveRepository gameSaveRepository,
+            DialogBoxShower dialogBoxShower,
+            UrlOpener urlOpener
+        )
         {
             _gameSceneLoader = gameSceneLoader;
             _gameSaveRepository = gameSaveRepository;
+            _dialogBoxShower = dialogBoxShower;
+            _urlOpener = urlOpener;
         }
 
         public void PostLoad()
         {
             if (EventIO.Config.GetNetMode() != NetMode.Client) return;
-            StartConnection(EventIO.Config.ClientConnectionAddress);
+            ConnectOrShowFailureMessage(EventIO.Config.ClientConnectionAddress);
         }
 
-        public void StartConnection(string address)
+        public bool TryToConnect(string address)
         {
             Plugin.Log("Connecting client");
-            try
-            {
-                client = new ClientEventIO(address, EventIO.Config.Port, LoadMap);
-                EventIO.Set(client);
+            client = ClientEventIO.Create(address, EventIO.Config.Port, LoadMap);
+            if (client == null) return false;
+            EventIO.Set(client);
+            return true;
+        }
 
-            }
-            catch (Exception ex)
+        const string ConnectionFailedMessage =
+            "Failed to connect to Host. Would you like to open the troubleshooting guide?";
+        const string TroubleshootingUrl = "https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running#troubleshooting";
+
+        public void ConnectOrShowFailureMessage(string address)
+        {
+            if (TryToConnect(address)) return;
+
+            var action = () =>
             {
-                Plugin.Log(ex.ToString());
-            }
-        }   
+                _urlOpener.OpenUrl(TroubleshootingUrl);
+            };
+
+            _dialogBoxShower.Create()
+                .SetMessage(ConnectionFailedMessage)
+                .SetConfirmButton(action)
+                .SetDefaultCancelButton()
+                .Show();
+        }
 
         private void LoadMap(byte[] mapBytes)
         {

@@ -8,6 +8,11 @@ using System.Threading.Tasks;
 
 namespace TimberNet
 {
+    public class ConnectionFailureException : Exception
+    {
+        public ConnectionFailureException() : base("Client connection timed out") { }
+    }
+
     public class TimberClient : TimberNetBase
     {
 
@@ -41,7 +46,11 @@ namespace TimberNet
         public override void Start()
         {
             base.Start();
-            client.Connect(address, port);
+            // TODO: Handle async properly
+            if (!client.ConnectAsync(address, port).Wait(3000))
+            {
+                throw new ConnectionFailureException();
+            }
             // Connect a TCP socket at the address
             Task.Run(() => StartListening(client, true));
         }
