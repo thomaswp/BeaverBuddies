@@ -24,12 +24,16 @@ namespace BeaverBuddies.Connect
 
         public void PostLoad()
         {
-            //TODO: make a UI!
             if (EventIO.Config.GetNetMode() != NetMode.Client) return;
+            StartConnection(EventIO.Config.ClientConnectionAddress);
+        }
+
+        public void StartConnection(string address)
+        {
             Plugin.Log("Connecting client");
             try
             {
-                client = new ClientEventIO(EventIO.Config.ClientConnectionAddress, EventIO.Config.Port, LoadMap);
+                client = new ClientEventIO(address, EventIO.Config.Port, LoadMap);
                 EventIO.Set(client);
 
             }
@@ -37,7 +41,7 @@ namespace BeaverBuddies.Connect
             {
                 Plugin.Log(ex.ToString());
             }
-        }
+        }   
 
         private void LoadMap(byte[] mapBytes)
         {

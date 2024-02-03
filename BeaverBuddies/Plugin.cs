@@ -2,6 +2,7 @@
 using Bindito.Core;
 using HarmonyLib;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using TimberApi.ConfiguratorSystem;
 using TimberApi.ConsoleSystem;
 using TimberApi.ModSystem;
@@ -52,6 +53,7 @@ namespace BeaverBuddies
 
             Plugin.Log($"Registering Main Menu Services");
             containerDefinition.Bind<ClientConnectionService>().AsSingleton();
+            containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
 
             //ReflectionUtils.PrintChildClasses(typeof(MonoBehaviour), 
             //    "Start", "Awake", "Update", "FixedUpdate", "LateUpdate", "OnEnable", "OnDisable", "OnDestroy");
