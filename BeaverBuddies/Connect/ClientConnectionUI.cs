@@ -15,11 +15,10 @@ namespace BeaverBuddies.Connect
         public static void Postfix(ref VisualElement __result)
         {
             VisualElement root = __result.Query("MainMenuPanel");
-            var previousButton = root.Children().ToList()[3] as Button;
+            var previousButton = root.Children().ToList()[3] as LocalizableButton;
             var classList = previousButton.classList;
-            Button button = new Button();
+            Button button = new LocalizableButton();
             button.classList.AddRange(classList);
-            Plugin.Log(classList.ToString());
             button.text = "Join Co-op Game";
             button.clicked += ClientConnectionUI.OpenBox;
             root.Insert(4, button);
@@ -51,8 +50,11 @@ namespace BeaverBuddies.Connect
                 .SetLocalizedMessage("Enter the global IP address of the Host:")
                 .SetConfirmButton(ip =>
                 {
+                    EventIO.Config.ClientConnectionAddress = ip;
+                    EventIO.Config.SaveConfig();
                     _clientConnectionService.ConnectOrShowFailureMessage(ip);
                 });
+            builder._input.value = EventIO.Config.ClientConnectionAddress;
             builder.Show();
         }
 

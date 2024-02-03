@@ -769,6 +769,7 @@ namespace BeaverBuddies.Events
         }
     }
 
+    // TODO: Need to make it work for all Characters, not just beavers
     [HarmonyPatch(typeof(BeaverEntityBadge), nameof(BeaverEntityBadge.SetEntityName))]
     class BeaverEntityBadgePatcher
     {

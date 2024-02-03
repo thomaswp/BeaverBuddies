@@ -69,16 +69,19 @@ namespace BeaverBuddies
     public class Plugin : IModEntrypoint
     {
         private static IConsoleWriter logger;
+        public static IMod Mod { get; private set; }
 
         public const string Guid = PluginInfo.PLUGIN_GUID;
         public const string Version = PluginInfo.PLUGIN_VERSION;
 
         public void Entry(IMod mod, IConsoleWriter consoleWriter)
         {
+            Mod = mod;
+            logger = consoleWriter;
+
             ReplayConfig config = mod.Configs.Get<ReplayConfig>();
             EventIO.Config = config;
 
-            logger = consoleWriter;
             Log($"Plugin {Guid} is loaded!");
 
             if (config.GetNetMode() == NetMode.None) return;
@@ -86,7 +89,6 @@ namespace BeaverBuddies
             Harmony harmony = new Harmony(Guid);
             harmony.PatchAll();
             //DeterminismPatcher.PatchDeterminism(harmony);
-
         }
 
         public static string GetWithDate(string message)

@@ -1,4 +1,8 @@
-﻿using TimberApi.ConfigSystem;
+﻿using Newtonsoft.Json;
+using System;
+using System.IO;
+using TimberApi.ConfigSystem;
+using TimberApi.ModSystem;
 
 namespace BeaverBuddies
 {
@@ -36,6 +40,19 @@ namespace BeaverBuddies
                 default:
                     Plugin.LogWarning("Unknown netowrking mode: " + Mode);
                     return NetMode.None;
+            }
+        }
+
+        public void SaveConfig()
+        {
+            string configPath = Path.Combine(Plugin.Mod.DirectoryPath, "configs", $"{typeof(ReplayConfig).Name}.json");
+            try
+            {
+                File.WriteAllText(configPath, JsonConvert.SerializeObject(this, Formatting.Indented));
+            }
+            catch (Exception e)
+            {
+                Plugin.LogWarning($"Failed to save config: {e}");
             }
         }
 
