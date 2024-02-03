@@ -28,6 +28,10 @@ namespace BeaverBuddies
             containerDefinition.Bind<TickProgressService>().AsSingleton();
             containerDefinition.Bind<TickingService>().AsSingleton();
             containerDefinition.Bind<DeterminismService>().AsSingleton();
+
+            // Also add client connection Singletons, since we can now
+            // connect from the in-game Options menu.
+            containerDefinition.Bind<ClientConnectionService>().AsSingleton();
             containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
         }
     }

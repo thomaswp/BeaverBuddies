@@ -11,6 +11,9 @@ namespace BeaverBuddies.Connect
 {
     public class ClientConnectionService : IUpdatableSingleton, IPostLoadableSingleton
     {
+        // Static here makes sense since it should really only
+        // every happen once
+        private static bool hasAutoloaded = false;
 
         public const string LOCALHOST = "127.0.0.1";
 
@@ -35,8 +38,9 @@ namespace BeaverBuddies.Connect
 
         public void PostLoad()
         {
-            if (EventIO.Config.GetNetMode() == NetMode.AutoconnectClient)
+            if (!hasAutoloaded && EventIO.Config.GetNetMode() == NetMode.AutoconnectClient)
             {
+                hasAutoloaded = true;
                 ConnectOrShowFailureMessage(EventIO.Config.ClientConnectionAddress);
             }
         }
