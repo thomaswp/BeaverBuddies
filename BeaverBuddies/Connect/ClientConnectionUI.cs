@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Timberborn.CoreUI;
 using Timberborn.MainMenuScene;
+using Timberborn.OptionsGame;
 using UnityEngine.UIElements;
 
 namespace BeaverBuddies.Connect
@@ -14,14 +15,20 @@ namespace BeaverBuddies.Connect
     {
         public static void Postfix(ref VisualElement __result)
         {
-            VisualElement root = __result.Query("MainMenuPanel");
-            var previousButton = root.Children().ToList()[3] as LocalizableButton;
-            var classList = previousButton.classList;
-            Button button = new LocalizableButton();
-            button.classList.AddRange(classList);
+            var button = ButtonInserter.DuplicateButton(__result.Q<Button>("LoadGameButton"));
             button.text = "Join Co-op Game";
             button.clicked += ClientConnectionUI.OpenBox;
-            root.Insert(4, button);
+        }
+    }
+
+    [HarmonyPatch(typeof(GameOptionsBox), "GetPanel")]
+    public class GameOptionsBoxGetPanelPatcher
+    {
+        public static void Postfix(ref VisualElement __result)
+        {
+            var button = ButtonInserter.DuplicateButton(__result.Q<Button>("LoadGameButton"));
+            button.text = "Join Co-op Game";
+            button.clicked += ClientConnectionUI.OpenBox;
         }
     }
 

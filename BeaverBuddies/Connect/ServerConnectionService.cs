@@ -46,7 +46,6 @@ namespace BeaverBuddies.Connect
                 io.Start(EventIO.Config.Port,
                     ProvideGameState(),
                     () => ticksAtMapLoad);
-                EventIO.Set(io);
             }
             catch (Exception e)
             {

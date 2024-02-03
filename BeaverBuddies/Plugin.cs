@@ -28,6 +28,7 @@ namespace BeaverBuddies
             containerDefinition.Bind<TickProgressService>().AsSingleton();
             containerDefinition.Bind<TickingService>().AsSingleton();
             containerDefinition.Bind<DeterminismService>().AsSingleton();
+            containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
         }
     }
 
