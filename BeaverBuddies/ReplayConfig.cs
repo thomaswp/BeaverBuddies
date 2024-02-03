@@ -24,6 +24,7 @@ namespace BeaverBuddies
         public string ClientConnectionAddress { get; set; } = "127.0.0.1";
         public int Port { get; set; } = 25565;
         public bool Verbose = true;
+        public bool FirstTimer = true;
 
         public NetMode GetNetMode()
         {

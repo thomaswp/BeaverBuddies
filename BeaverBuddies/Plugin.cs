@@ -51,6 +51,7 @@ namespace BeaverBuddies
             Plugin.Log($"Registering Main Menu Services");
             containerDefinition.Bind<ClientConnectionService>().AsSingleton();
             containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
+            containerDefinition.Bind<FirstTimerService>().AsSingleton();
 
             //ReflectionUtils.PrintChildClasses(typeof(MonoBehaviour), 
             //    "Start", "Awake", "Update", "FixedUpdate", "LateUpdate", "OnEnable", "OnDisable", "OnDestroy");
