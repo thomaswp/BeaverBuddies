@@ -19,15 +19,17 @@ namespace BeaverBuddies
 
         public void Close()
         {
+            if (netBase == null) return;
             netBase.Close();
         }
 
         public void Update()
         {
+            if (netBase == null) return;
             netBase.Update();
         }
 
-        private ReplayEvent ToEvent(JObject obj)
+        private static ReplayEvent ToEvent(JObject obj)
         {
             //Plugin.Log($"Recieving {obj}");
             try
@@ -43,6 +45,7 @@ namespace BeaverBuddies
 
         public List<ReplayEvent> ReadEvents(int ticksSinceLoad)
         {
+            if (netBase == null) return new List<ReplayEvent>();
             return netBase.ReadEvents(ticksSinceLoad)
                 .Select(ToEvent)
                 .Where(e => e != null)
@@ -51,6 +54,7 @@ namespace BeaverBuddies
 
         public virtual void WriteEvents(params ReplayEvent[] events)
         {
+            if (netBase == null) return;
             foreach (ReplayEvent e in events)
             {
                 // TODO: It is silly to convert to JObject here, but not sure if there's

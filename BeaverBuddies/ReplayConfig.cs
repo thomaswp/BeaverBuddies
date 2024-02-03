@@ -6,19 +6,21 @@ using TimberApi.ModSystem;
 
 namespace BeaverBuddies
 {
-    public enum NetMode { Server, Client, Record, Replay, None }
+    public enum NetMode { Manual, AutoconnectClient, Record, Replay, None }
 
     public class ReplayConfig : IConfig
     {
-        public const string MODE_SERVER = "server";
-        public const string MODE_CLIENT = "client";
+        public const string MODE_NONE = "none";
+        public const string MODE_MANUAL = "manual";
+        public const string MODE_AUTOCONNECT = "autoconnect";
+
+        // Not implemented fully yet
         public const string MODE_RECORD = "record";
         public const string MODE_REPLAY = "replay";
-        public const string MODE_NONE = "none";
 
         public string ConfigFileName => "ReplayConfig";
 
-        public string Mode { get; set; } = MODE_NONE;
+        public string Mode { get; set; } = MODE_MANUAL;
         public string ClientConnectionAddress { get; set; } = "127.0.0.1";
         public int Port { get; set; } = 25565;
         public bool Verbose = true;
@@ -27,10 +29,10 @@ namespace BeaverBuddies
         {
             switch (Mode.ToLower())
             {
-                case MODE_SERVER:
-                    return NetMode.Server;
-                case MODE_CLIENT:
-                    return NetMode.Client;
+                case MODE_MANUAL:
+                    return NetMode.Manual;
+                case MODE_AUTOCONNECT:
+                    return NetMode.AutoconnectClient;
                 case MODE_NONE:
                     return NetMode.None;
                 case MODE_RECORD:
@@ -45,7 +47,7 @@ namespace BeaverBuddies
 
         public void SaveConfig()
         {
-            string configPath = Path.Combine(Plugin.Mod.DirectoryPath, "configs", $"{typeof(ReplayConfig).Name}.json");
+            string configPath = Path.Combine(Plugin.Mod.DirectoryPath, "configs", $"{ConfigFileName}.json");
             try
             {
                 File.WriteAllText(configPath, JsonConvert.SerializeObject(this, Formatting.Indented));

@@ -21,7 +21,7 @@ namespace BeaverBuddies
         // TBH this may not be necessary.
         public override UserEventBehavior UserEventBehavior => UserEventBehavior.QueuePlay;
 
-        public ServerEventIO(int port, Func<Task<byte[]>> mapProvider, Func<int> ticksSinceLoadProvider)
+        public void Start(int port, Func<Task<byte[]>> mapProvider, Func<int> ticksSinceLoadProvider)
         {
             netBase = new TimberServer(port, mapProvider, () =>
             {

@@ -35,8 +35,10 @@ namespace BeaverBuddies.Connect
 
         public void PostLoad()
         {
-            if (EventIO.Config.GetNetMode() != NetMode.Client) return;
-            ConnectOrShowFailureMessage(EventIO.Config.ClientConnectionAddress);
+            if (EventIO.Config.GetNetMode() == NetMode.AutoconnectClient)
+            {
+                ConnectOrShowFailureMessage(EventIO.Config.ClientConnectionAddress);
+            }
         }
 
         public bool TryToConnect(string address)

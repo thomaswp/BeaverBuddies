@@ -19,14 +19,6 @@ namespace BeaverBuddies
 
             // Reset everything before loading singletons
             SingletonManager.Reset();
-            // Reset the event IO if we're not a client, since the
-            // EventIO will have been set from the MainMenu
-            // TODO: I think I need a more robust solution here, especially
-            // when I start making a UI for this...
-            if (EventIO.Config.GetNetMode() != NetMode.Client)
-            {
-                EventIO.Reset();
-            }
 
             Plugin.Log($"Registering In Game Services");
             //containerDefinition.Bind<DeterminismService>().AsSingleton();

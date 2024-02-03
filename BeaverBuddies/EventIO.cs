@@ -44,7 +44,12 @@ namespace BeaverBuddies
 
         private static EventIO instance;
         public static EventIO Get() { return instance; }
-        public static void Set(EventIO io) { instance = io; }
+        public static void Set(EventIO io) 
+        {
+            // Clean up the old IO (if it exists)
+            Reset();
+            instance = io; 
+        }
 
         public static void Reset()
         {

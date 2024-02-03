@@ -37,9 +37,13 @@ namespace BeaverBuddies.Connect
 
         public void Start()
         {
+            // Check if the current IO is a server, and if not return
+            ServerEventIO io = EventIO.Get() as ServerEventIO;
+            if (io == null) return;
+
             try
             {
-                io = new ServerEventIO(EventIO.Config.Port,
+                io.Start(EventIO.Config.Port,
                     ProvideGameState(),
                     () => ticksAtMapLoad);
                 EventIO.Set(io);
@@ -105,8 +109,6 @@ namespace BeaverBuddies.Connect
 
         public void PostLoad()
         {
-            // TODO: have a UI :D
-            if (EventIO.Config.GetNetMode() != NetMode.Server) return;
             Start();
         }
 
