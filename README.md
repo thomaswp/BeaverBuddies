@@ -1,6 +1,8 @@
 # BeaverBuddies
 
-This is a WIP mod to allow multiplay and replays in Timberborn.
+BeaverBuddies is a mod to allow multiplayer co-op in Timberborn.
+
+**If you would like to use the mod**, please see the documentation on the [wiki](https://github.com/thomaswp/BeaverBuddies/wiki)!
 
 ## Setup
 

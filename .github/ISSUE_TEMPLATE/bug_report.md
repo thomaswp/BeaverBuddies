@@ -27,7 +27,7 @@ assignees: ''
 **Screenshots**
 If this is an unexpected behavior, or there is something unique about your map that caused the bug, add screenshots to help explain your problem.
 
-**Desktop (please complete the following information):**
+**Desktop (please complete the following information for **both** Host and Client):**
  - OS: [e.g. iOS, Windows 11, Ubuntu Linux]
  - Timberborn version: [visible from main menu in the bottom-left corner]
  - BeaverBuddies version: [when you downloaded it, it had a version]
