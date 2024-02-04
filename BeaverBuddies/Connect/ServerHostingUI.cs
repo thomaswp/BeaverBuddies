@@ -16,7 +16,7 @@ namespace BeaverBuddies.Connect
         public static void Postfix(LoadGameBox __instance, ref VisualElement __result)
         {
             var button = ButtonInserter.DuplicateButton(__result.Q<Button>("LoadButton"));
-            button.text = "Host Co-op Game";
+            button.text = "Host co-op game";
             button.clicked += () => ServerHostingUI.LoadAndHost(__instance);
         }
     }
