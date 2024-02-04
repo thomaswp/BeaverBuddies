@@ -9,6 +9,10 @@ using System.Text;
 
 namespace TimberNet
 {
+    // TODO: I should create a method here that attempts to operate on a steam,
+    // and handles errors uniformly if it fails.
+    // Pretty much any error means the session is over, but the game should show
+    // the error rather than crashing.
     public abstract class TimberNetBase
     {
         public const int HEADER_SIZE = 4;
@@ -171,11 +175,11 @@ namespace TimberNet
             string json = message.ToString();
             byte[] buffer = Encoding.UTF8.GetBytes(json);
 
-            var stream = client.GetStream();
-            SendLength(stream, buffer.Length);
             try
             {
-                client.GetStream().Write(buffer, 0, buffer.Length);
+                var stream = client.GetStream();
+                SendLength(stream, buffer.Length);
+                stream.Write(buffer, 0, buffer.Length);
             } catch (Exception e)
             {
                 Log($"Error sending event: {e.Message}");
@@ -210,6 +214,7 @@ namespace TimberNet
                     continue;
                 }
 
+                // TODO: How should this fail and not hang if map stops sending?
                 byte[] buffer = new byte[messageLength];
                 int read = 0;
                 while (read < messageLength)
@@ -255,6 +260,7 @@ namespace TimberNet
 
         private void ReceiveFile(NetworkStream stream, int messageLength)
         {
+            // TODO: How should this fail?
             int totalBytesRead = 0;
             MemoryStream ms = new MemoryStream();
             while (totalBytesRead < messageLength)
