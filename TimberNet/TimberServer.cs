@@ -208,12 +208,18 @@ namespace TimberNet
             {
                 clients.ForEach(client => client.Close());
             }
-            catch { }
+            catch (Exception e)
+            {
+                Log(e.ToString());
+            }
             try
             {
                 listener.Stop();
             }
-            catch { }  
+            catch (Exception e)
+            {
+                Log(e.ToString());
+            }  
         }
 
         public void SendHeartbeat()
