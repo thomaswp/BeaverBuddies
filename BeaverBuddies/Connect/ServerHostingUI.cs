@@ -15,9 +15,12 @@ namespace BeaverBuddies.Connect
     {
         public static void Postfix(LoadGameBox __instance, ref VisualElement __result)
         {
-            var button = ButtonInserter.DuplicateButton(__result.Q<Button>("LoadButton"));
-            button.text = "Host co-op game";
-            button.clicked += () => ServerHostingUI.LoadAndHost(__instance);
+            // TODO: This still happens multiple times.. need to fix
+            ButtonInserter.DuplicateOrGetButton(__result, "LoadButton", "HostButton", (button) =>
+            {
+                button.text = "Host co-op game";
+                button.clicked += () => ServerHostingUI.LoadAndHost(__instance);
+            });
         }
     }
 

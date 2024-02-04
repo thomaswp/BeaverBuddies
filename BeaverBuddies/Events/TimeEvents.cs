@@ -143,6 +143,7 @@ namespace BeaverBuddies.Events
     // However, only the host will be able to unpause, and only by manually
     // setting the game speed, since they won't process any events by clients
     // while they have a panel (including this one) up (I think...).
+    // TODO: Should allow client to bring up menu, even if they don't pause
     [HarmonyPatch(typeof(GameOptionsBox), nameof(GameOptionsBox.Show))]
     public class GameOptionsBoxShowPatcher
     {

@@ -9,8 +9,6 @@ namespace BeaverBuddies.Connect
 {
     class ServerConnectionService : IPostLoadableSingleton, IUpdatableSingleton
     {
-        private ServerEventIO io;
-
         private GameSaver _gameSaver;
         private ReplayService _replayService;
         private TickingService _tickingService;

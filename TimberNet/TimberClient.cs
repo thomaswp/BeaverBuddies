@@ -46,7 +46,8 @@ namespace TimberNet
         public override void Start()
         {
             base.Start();
-            // TODO: Handle async properly
+            // TODO: Handle async properly and cleanup
+            // TODO: Make wait configurable?
             if (!client.ConnectAsync(address, port).Wait(3000))
             {
                 throw new ConnectionFailureException();

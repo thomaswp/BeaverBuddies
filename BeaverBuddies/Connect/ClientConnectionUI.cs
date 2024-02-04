@@ -15,9 +15,7 @@ namespace BeaverBuddies.Connect
     {
         public static void Postfix(ref VisualElement __result)
         {
-            var button = ButtonInserter.DuplicateButton(__result.Q<Button>("LoadGameButton"));
-            button.text = "Join co-op game";
-            button.clicked += ClientConnectionUI.OpenBox;
+            ClientConnectionUI.DoPostfix(__result);
         }
     }
 
@@ -26,9 +24,7 @@ namespace BeaverBuddies.Connect
     {
         public static void Postfix(ref VisualElement __result)
         {
-            var button = ButtonInserter.DuplicateButton(__result.Q<Button>("LoadGameButton"));
-            button.text = "Join co-op game";
-            button.clicked += ClientConnectionUI.OpenBox;
+            ClientConnectionUI.DoPostfix(__result);
         }
     }
 
@@ -49,6 +45,15 @@ namespace BeaverBuddies.Connect
             _dialogBoxShower = dialogBoxShower;
             _inputBoxShower = inputBoxShower;
             _clientConnectionService = clientConnectionService;
+        }
+
+        public static void DoPostfix(VisualElement __result)
+        {
+            ButtonInserter.DuplicateOrGetButton(__result, "LoadGameButton", "JoinButton", button =>
+            {
+                button.text = "Join co-op game";
+                button.clicked += OpenBox;
+            });
         }
 
         private void ShowBox()
