@@ -18,7 +18,7 @@ BeaverBuddies is a mod to allow multiplayer co-op in Timberborn.
 Enabled = true # Change this to true
 ```
 3. Install TimberAPI, using the same version in [mod.json](BeaverBuddies/mod.json), by downloading the "modio" file, and putting its contents into your `Timberborn\BepInEx\plugins\` folder, such that it now contains a folder called `TimberAPI`.
-4. Install [Visual Studio 2022 community edition](https://visualstudio.microsoft.com/downloads/)) and open this solution with it.
+4. Install [Visual Studio 2022 community edition](https://visualstudio.microsoft.com/downloads/) and open this solution with it.
 5. Go to Tools->Options->Nuget Package Manager->Package Sources and click the green [+] button. Call it BepInEx and give it the URL `https://nuget.bepinex.dev/v3/index.json`.
 6. Create a folder in `Timberborn\BepInEx\plugins\` called `BeaverBuddies`. Make note of the location of this folder.
 7. Open the BeaverBuddies project (by double-clicking on it in Visual Studio). Find the Build->Events->Post build event option and make sure that the path it gives matches your path to Timberborn. By default it reads:
