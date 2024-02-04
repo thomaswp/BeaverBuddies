@@ -21,7 +21,18 @@ namespace BeaverBuddies
             SingletonManager.Reset();
 
             Plugin.Log($"Registering In Game Services");
-            //containerDefinition.Bind<DeterminismService>().AsSingleton();
+
+            // Add client connection Singletons, since we can now
+            // connect from the in-game Options menu (even if we're not
+            // playing co-op right now).
+            containerDefinition.Bind<ClientConnectionService>().AsSingleton();
+            containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
+
+            // EventIO gets set before load, so if it's null, this is a regular
+            // game, so don't initialize these services.
+            if (EventIO.IsNull) return;
+
+            Plugin.Log("Registering Co-op services");
             containerDefinition.Bind<ReplayService>().AsSingleton();
             containerDefinition.Bind<ServerConnectionService>().AsSingleton();
             containerDefinition.Bind<RecordToFileService>().AsSingleton();
@@ -29,10 +40,6 @@ namespace BeaverBuddies
             containerDefinition.Bind<TickingService>().AsSingleton();
             containerDefinition.Bind<DeterminismService>().AsSingleton();
 
-            // Also add client connection Singletons, since we can now
-            // connect from the in-game Options menu.
-            containerDefinition.Bind<ClientConnectionService>().AsSingleton();
-            containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
         }
     }
 

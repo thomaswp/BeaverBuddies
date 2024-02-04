@@ -347,13 +347,12 @@ namespace BeaverBuddies
             }
             if (waitUpdates == 0)
             {
-                IsLoaded = true;
-                // Determinism just for testing
-                //UnityEngine.Random.InitState(1234);
                 //Plugin.Log("Setting random state to 1234");
                 waitUpdates = -1;
             }
             if (io == null) return;
+            // Only say IsLoaded if io exists
+            IsLoaded = true;
             io.Update();
             // Only replay events on Update if we're paused by the user.
             // Also only send events if paused, so the client doesn't play
@@ -584,6 +583,7 @@ namespace BeaverBuddies
         [ManualMethodOverwrite]
         static bool Prefix(TickableBucketService __instance, int numberOfBucketsToTick)
         {
+            if (EventIO.IsNull) return true;
             return S<TickingService>().TickBuckets(__instance, numberOfBucketsToTick);
         }
     }
@@ -593,7 +593,7 @@ namespace BeaverBuddies
     {
         static void Postfix()
         {
-            S<TickingService>().FinishFullTick();
+            GetSingletonIfPresent<TickingService>()?.FinishFullTick();
         }
     }
 }

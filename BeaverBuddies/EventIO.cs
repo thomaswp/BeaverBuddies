@@ -43,6 +43,9 @@ namespace BeaverBuddies
         bool ShouldSendHeartbeat {  get; }
 
         private static EventIO instance;
+
+        public static bool IsNull => instance == null;
+
         public static EventIO Get() { return instance; }
         public static void Set(EventIO io) 
         {

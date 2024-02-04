@@ -35,13 +35,51 @@ using static BeaverBuddies.SingletonManager;
 
 namespace BeaverBuddies
 {
+    /*
+     * Theories for unexplained desyncs:
+     * - Something isn't saved in the save state (e.g. when to go to bed),
+     *   so we get different behavior.
+     * - Nondeterminism in the code, e.g. inconsistent dictionary traversal.
+     *   I've seen no evidence of this, though. Internet suggests that this behavior
+     *   is likely deterministic, just not guaranteed to be.
+     * - Floating point rounding issues with movement, etc. No evidence of this so
+     *   far - at least on the same OS.
+     * 
+     * Monitoring:
+     * - Movement of Beavers diverges over time, possibly due to rounding
+     *   or more likely something with a non-fixed-time-update.
+     *   The differences start small and grow over time.
+     *   I think I've fixed this. Movement still diverges, but it seems
+     *   to only happen after the random state changes, so maybe no longer
+     *   the main cause. Need to verify though. I've also verified that
+     *   removing the MovementAnimator.Update (smooth movement) doesn't
+     *   remove the movement desync (though it does change from frame 320).
+     * 
+     * Ruled out
+     * - Unaccounted for calls to Unity random: there were no abnormal
+     * calls at the time of desync, so the state was altered beforehand.
+     * - new Guids are created on load after save, and before randomness
+     *   is synced, but this seems to just be the patching.
+     * - Inconsistent update order (e.g. due to hash codes/buckets). Seems to
+     *   be consistent.
+     * 
+     * Fixed:
+     * - Guid.NewGuid now uses Unity's random generator and is deterministic
+     * - When a new entity is created, the GUID should be deterministic, and
+     *   it should be added deterministically to the TickableBucketService
+     * - When Entities are created, the tick should fully complete (without
+     *   starting any new ticks) so the entity can Start() on the next Update()
+     * - Time.time is now deterministic. This seemed to be a primary cause of
+     *   desyncs, but I never figured out exactly why.
+     */
+
     public class DeterminismService : IResettableSingleton
     {
-        public bool IsTicking = false;
         public Thread UnityThread;
         private List<StackTrace> lastRandomStackTraces = new List<StackTrace>();
 
 
+        public static bool IsTicking = false;
         public static bool IsNonGameplay = false;
         private static System.Random random = new System.Random();
         private static HashSet<Type> activeNonGamePatchers = new HashSet<Type>();
@@ -49,6 +87,7 @@ namespace BeaverBuddies
         public void Reset()
         {
             IsNonGameplay = false;
+            IsTicking = false;
             activeNonGamePatchers.Clear();
             // No need to reset random
         }
@@ -347,6 +386,8 @@ namespace BeaverBuddies
         }
     }
 
+    // TODO: Many of the following are no longer necessary, since we
+    // use NonTickRandomNumberGenerator, above, with many classes.
     [HarmonyPatch(typeof(InputService), nameof(InputService.Update))]
     public class InputPatcher
     {
@@ -548,7 +589,7 @@ namespace BeaverBuddies
 
         static bool Prefix(GameSaver __instance, QueuedSave queuedSave)
         {
-            if (IsSaving) return true;
+            if (IsSaving || EventIO.IsNull) return true;
             S<TickingService>().FinishFullTickAndThen(() =>
             {
                 IsSaving = true;
@@ -577,11 +618,11 @@ namespace BeaverBuddies
     {
         static void Prefix()
         {
-            S<DeterminismService>().IsTicking = true;
+            DeterminismService.IsTicking = true;
         }
         static void Postfix()
         {
-            S<DeterminismService>().IsTicking = false;
+            DeterminismService.IsTicking = false;
         }
     }
 
@@ -603,56 +644,6 @@ namespace BeaverBuddies
             return false;
         }
     }
-
-    /*
-     * When sleep occurs, the game seems to desync.
-     * 
-     * Definite issues:
-     * - With test map, I'm seeing consistent desync ~ tick 320. Not sure why
-     *   and could be coincidence, but may be causing position divergence.
-     *   The first thing that seems to desync is the random seed, suggesting
-     *   either that we aren't detecting some random events *or* that something
-     *   happens on that frame that causes events to happen out of order.
-     *   This problem doesn't seem to occur when I force a full tick every update
-     *   suggesting that updating in the middle of a tick can cause.
-     *   However, there's still a desync even with 1-tick-per-update so it
-     *   doesn't seem to be the only issue.
-     * 
-     * Theories:
-     * - Some code likely still uses Time.deltaTime or Time.time, which will
-     *   lead to inconsistent behavior. This shows up first in position changes.
-     * - Something isn't saved in the save state (e.g. when to go to bed),
-     *   so we get different behavior.
-     * - Nondeterminism in the code, e.g. inconsistent dictionary traversal
-     * - Floating point rounding issues with movement, etc.
-     * 
-     * Monitoring:
-     * - SlotManager: Was the odd event out once, but can't reproduce it
-     *   so probably a coincidence. Nothing in it seemed to use nondeterminism.
-     * - Movement of Beavers diverges over time, possibly due to rounding
-     *   or more likely something with a non-fixed-time-update.
-     *   The differences start small and grow over time.
-     *   I think I've fixed this. Movement still diverges, but it seems
-     *   to only happen after the random state changes, so maybe no longer
-     *   the main cause. Need to verify though. I've also verified that
-     *   removing the MovementAnimator.Update (smooth movement) doesn't
-     *   remove the movement desync (though it does change from frame 320).
-     * 
-     * Ruled out
-     * - Unaccounted for calls to Unity random: there were no abnormal
-     * calls at the time of desync, so the state was altered beforehand.
-     * - new Guids are created on load after save, and before randomness
-     *   is synced, but this seems to just be the patching.
-     * - Inconsistent update order (e.g. due to hash codes/buckets). Seems to
-     *   be consistent.
-     * 
-     * Fixed:
-     * - Guid.NewGuid now uses Unity's random generator and is deterministic
-     * - When a new entity is created, the GUID should be deterministic, and
-     *   it should be added deterministically to the TickableBucketService
-     * - When Entities are created, the tick should fully complete (without
-     *   starting any new ticks) so the entity can Start() on the next Update().
-     */
 
     [HarmonyPatch(typeof(TickableEntityBucket), nameof(TickableEntityBucket.Add))]
     public class TEBAddPatcher
@@ -679,6 +670,7 @@ namespace BeaverBuddies
 
         static bool Prefix(ref float __result)
         {
+            if (EventIO.IsNull) return true;
             __result = time;
             return false;
         }
@@ -719,6 +711,8 @@ namespace BeaverBuddies
 
         static void Prefix(TickableEntityBucket __instance)
         {
+            if (EventIO.IsNull) return;
+
             for (int i = 0; i < __instance._tickableEntities.Count; i++)
             {
                 var entity = __instance._tickableEntities.Values[i];

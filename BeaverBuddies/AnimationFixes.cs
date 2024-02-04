@@ -15,6 +15,8 @@ namespace BeaverBuddies
     {
         static bool Prefix(MovementAnimator __instance, float deltaTime)
         {
+            if (EventIO.IsNull) return true;
+
             //Vector3 position = Vector3.zero;
 
             float time = Time.time;

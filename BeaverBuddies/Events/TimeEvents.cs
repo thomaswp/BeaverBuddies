@@ -44,6 +44,7 @@ namespace BeaverBuddies.Events
 
         static bool Prefix(SpeedManager __instance, ref float speed)
         {
+            if (!ReplayService.IsLoaded) return true;
             // No need to log speed changes to current speed
             if (__instance.CurrentSpeed == speed) return true;
             // Also don't log if we're silent
