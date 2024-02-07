@@ -569,6 +569,7 @@ namespace BeaverBuddies
     {
         static bool Prefix(TickableBucketService __instance)
         {
+            if (EventIO.IsNull) return true;
             // If we're saving, ignore this - we've ensured a full
             // tick was completed beforehand
             if (GameSaverSavePatcher.IsSaving) return false;
