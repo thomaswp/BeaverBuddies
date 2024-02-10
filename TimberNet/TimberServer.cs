@@ -21,14 +21,21 @@ namespace TimberNet
             new ConcurrentDictionary<TcpClient, ConcurrentQueue<JObject>>();
 
         private readonly TcpListener listener;
-        private readonly Func<Task<byte[]>> mapProvider;
-        private readonly Func<JObject>? initEventProvider;
+
+        private Func<Task<byte[]>> mapProvider;
+        private Func<JObject>? initEventProvider;
 
         public int ClientCount => clients.Count;
 
         public TimberServer(int port, Func<Task<byte[]>> mapProvider, Func<JObject>? initEventProvider)
         {
             listener = new TcpListener(IPAddress.Any, port);
+            this.mapProvider = mapProvider;
+            this.initEventProvider = initEventProvider;
+        }
+
+        public void UpdateProviders(Func<Task<byte[]>> mapProvider, Func<JObject>? initEventProvider)
+        {
             this.mapProvider = mapProvider;
             this.initEventProvider = initEventProvider;
         }

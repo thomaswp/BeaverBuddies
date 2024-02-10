@@ -23,17 +23,31 @@ namespace BeaverBuddies
 
         public void Start(int port, Func<Task<byte[]>> mapProvider, Func<int> ticksSinceLoadProvider)
         {
-            netBase = new TimberServer(port, mapProvider, () =>
+            netBase = new TimberServer(port, mapProvider, CreateInitEvent(ticksSinceLoadProvider));
+            //netBase = new TimberServer(port, mapProvider, null);
+            netBase.OnLog += Plugin.Log;
+            netBase.OnMapReceived += NetBase_OnClientConnected;
+            netBase.Start();
+        }
+
+        private Func<JObject> CreateInitEvent(Func<int> ticksSinceLoadProvider)
+        {
+            // It should be ok to send an init event even if the client is joining before
+            // the server, since a) it won't do much on the Host (just set the random seed)
+            // and b) the client will overwrite these values later whent he Host finished
+            // loading the map.
+            return () =>
             {
                 var message = InitializeClientEvent.CreateAndExecute(ticksSinceLoadProvider());
                 message.ticksSinceLoad = 0;
                 Plugin.Log($"Sending start state: {JsonSettings.Serialize(message)}");
                 return JObject.Parse(JsonSettings.Serialize(message));
-            });
-            //netBase = new TimberServer(port, mapProvider, null);
-            netBase.OnLog += Plugin.Log;
-            netBase.OnMapReceived += NetBase_OnClientConnected;
-            netBase.Start();
+            };
+        }
+
+        public void UpdateProviders(Func<Task<byte[]>> mapProvider, Func<int> ticksSinceLoadProvider)
+        {
+            netBase.UpdateProviders(mapProvider, CreateInitEvent(ticksSinceLoadProvider));
         }
 
         private void NetBase_OnClientConnected(byte[] mapBytes)
