@@ -39,18 +39,7 @@ namespace BeaverBuddies.Connect
             ServerEventIO io = EventIO.Get() as ServerEventIO;
             if (io == null) return;
 
-            try
-            {
-                io.Start(EventIO.Config.Port,
-                    ProvideGameState(),
-                    () => ticksAtMapLoad);
-            }
-            catch (Exception e)
-            {
-                Plugin.Log("Failed to start server");
-                Plugin.Log(e.ToString());
-            }
-
+            io.UpdateProviders(ProvideGameState(), () => ticksAtMapLoad);
         }
 
         private Func<Task<byte[]>> ProvideGameState()

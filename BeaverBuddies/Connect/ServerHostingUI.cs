@@ -9,6 +9,7 @@ using Timberborn.GameSaveRepositorySystemUI;
 using Timberborn.MainMenuScene;
 using UnityEngine.UIElements;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace BeaverBuddies.Connect
 {
@@ -50,19 +51,36 @@ namespace BeaverBuddies.Connect
             {
                 var repository = __instance._gameSceneLoader._gameSaveRepository;
                 var inputStream = repository.OpenSaveWithoutLogging(saveReference);
-                byte[] data = new byte[inputStream.Length];
-                inputStream.Read(data, 0, data.Length);
+                byte[] data;
+                using (var memoryStream = new MemoryStream())
+                {
+                    inputStream.CopyTo(memoryStream);
+                    data = memoryStream.ToArray();
+                }
                 inputStream.Close();
+                Plugin.Log($"Reading map with length {data.Length}");
                 ServerEventIO io = new ServerEventIO();
+                EventIO.Set(io);
                 // We start with a static IO that starts at tick 0 and with the
                 // loaded map to allow clients to join as the host loads.
                 // Later we replace this with something more dynamic.
-                io.Start(
-                    EventIO.Config.Port, 
-                    () => new Task<byte[]>(() => data), 
-                    () => 0
-                );
-                EventIO.Set(io);
+                try
+                {
+                    io.Start(
+                        EventIO.Config.Port,
+                        () => {
+                            Task<byte[]> task = new Task<byte[]>(() => data);
+                            task.Start();
+                            return task;
+                        },
+                        () => 0
+                    );
+                }
+                catch (Exception e)
+                {
+                    Plugin.Log("Failed to start server");
+                    Plugin.Log(e.ToString());
+                }
             }
         }
     }

@@ -29,9 +29,9 @@ namespace TimberNet
 
         public TimberServer(int port, Func<Task<byte[]>> mapProvider, Func<JObject>? initEventProvider)
         {
-            listener = new TcpListener(IPAddress.Any, port);
             this.mapProvider = mapProvider;
             this.initEventProvider = initEventProvider;
+            listener = new TcpListener(IPAddress.Any, port);
         }
 
         public void UpdateProviders(Func<Task<byte[]>> mapProvider, Func<JObject>? initEventProvider)
@@ -122,7 +122,9 @@ namespace TimberNet
         {
             NetworkStream stream = client.GetStream();
 
-            byte[] mapBytes = await mapProvider();
+            Task<byte[]> task = mapProvider();
+            byte[] mapBytes = await task;
+            Log($"Sending map with length {mapBytes.Length}");
 
             // TODO: This may happen a bit early - it seems possible for
             // events from a prior frame to get queued. Maybe just need to filter
