@@ -18,7 +18,6 @@ namespace BeaverBuddies.Events
 
     public abstract class ReplayEvent : IComparable<ReplayEvent>
     {
-        public float timeInFixedSecs;
         public int ticksSinceLoad;
         public int? randomS0Before;
 

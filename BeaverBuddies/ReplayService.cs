@@ -258,7 +258,9 @@ namespace BeaverBuddies
                     {
                         Plugin.LogWarning($"Random state mismatch: {s0} != {replayEvent.randomS0Before}");
                         ClientDesyncedEvent e = new ClientDesyncedEvent();
-                        EnqueueEventForSending(e);
+                        // Don't use EnqueueEventForSending because it shouldn't
+                        // have a random state set.
+                        eventsToSend.Enqueue(replayEvent);
                         e.Replay(this);
                         break;
                         // TODO: Resync!
