@@ -172,7 +172,7 @@ namespace TimberNet
         protected void SendEvent(TcpClient client, JObject message)
         {
             Log($"Sending: {GetType(message)} for tick {GetTick(message)}");
-            string json = message.ToString();
+            string json = message.ToString(Newtonsoft.Json.Formatting.None);
             byte[] buffer = Encoding.UTF8.GetBytes(json);
 
             try
