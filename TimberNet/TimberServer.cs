@@ -31,7 +31,9 @@ namespace TimberNet
         {
             this.mapProvider = mapProvider;
             this.initEventProvider = initEventProvider;
-            listener = new TcpListener(IPAddress.Any, port);
+            // Listen on IPv6 and IPv4
+            listener = new TcpListener(IPAddress.IPv6Any, port);
+            listener.Server.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
         }
 
         public void UpdateProviders(Func<Task<byte[]>> mapProvider, Func<JObject>? initEventProvider)
