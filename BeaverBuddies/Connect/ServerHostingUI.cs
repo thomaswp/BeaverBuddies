@@ -37,8 +37,6 @@ namespace BeaverBuddies.Connect
             IsHosting = true;
             __instance.LoadGame();
             IsHosting = false;
-
-            //EventIO.Set(new ServerEventIO());
         }
     }
 
