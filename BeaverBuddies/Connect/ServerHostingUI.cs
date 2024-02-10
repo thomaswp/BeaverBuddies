@@ -41,7 +41,7 @@ namespace BeaverBuddies.Connect
         }
     }
 
-    [HarmonyPatch(typeof(ValidatingGameLoader), nameof(ValidatingGameLoader.LoadGame)]
+    [HarmonyPatch(typeof(ValidatingGameLoader), nameof(ValidatingGameLoader.LoadGame))]
     public class ValidatingGameLoaderLoadGamePatcher
     {
         public static void Prefix(ValidatingGameLoader __instance, SaveReference saveReference)
