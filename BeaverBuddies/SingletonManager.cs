@@ -33,38 +33,15 @@ namespace BeaverBuddies
         }
 
         /// <summary>
-        /// Gets the singleton of the requested type.
-        /// Note: This method should <b>only</b> be called after initialization,
-        /// as during initialization, the singleton may not be created yet.
-        /// Instead, you can use GetSingletonIfPresent.
+        /// Gets the singleton of the requested type, or null if it is not present.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
         public static T GetSingleton<T>()
         {
-            Type type = typeof(T);
-            if (map.ContainsKey(type))
-            {
-                return (T)map[type];
-            }
-            throw new Exception($"Singleton of type {type} not registered");
-        }
-
-        public static T GetSingletonIfPresent<T>()
-        {
             Type t = typeof(T);
             return map.ContainsKey(t) ? (T)map[t] : default(T);
-        }
-
-        /// <summary>
-        /// Shorthand for GetSingleton
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public static T S<T>()
-        {
-            return GetSingleton<T>();
         }
     }
 

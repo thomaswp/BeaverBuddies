@@ -601,7 +601,9 @@ namespace BeaverBuddies
         static bool Prefix(TickableBucketService __instance, int numberOfBucketsToTick)
         {
             if (EventIO.IsNull) return true;
-            return S<TickingService>().TickBuckets(__instance, numberOfBucketsToTick);
+            TickingService ts = GetSingleton<TickingService>();
+            if (ts == null) return true;
+            return ts.TickBuckets(__instance, numberOfBucketsToTick);
         }
     }
 
@@ -610,7 +612,7 @@ namespace BeaverBuddies
     {
         static void Postfix()
         {
-            GetSingletonIfPresent<TickingService>()?.FinishFullTick();
+            GetSingleton<TickingService>()?.FinishFullTick();
         }
     }
 }

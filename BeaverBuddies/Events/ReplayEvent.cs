@@ -103,6 +103,9 @@ namespace BeaverBuddies.Events
             // If we haven't loaded yet, just use default behavior
             // (e.g. during loading)
             if (!ReplayService.IsLoaded) return true;
+
+            var replayService = GetSingleton<ReplayService>();
+            if (replayService == null) return true;
             
             // Get the event and if it's null, just use default behavior
             ReplayEvent message = getEvent();
@@ -112,7 +115,7 @@ namespace BeaverBuddies.Events
             Plugin.Log(message.ToActionString());
 
             // Record the event
-            GetSingleton<ReplayService>().RecordEvent(message);
+            replayService.RecordEvent(message);
 
             // Return based on the EventIO's desired behavior
             return EventIO.ShouldPlayPatchedEvents;

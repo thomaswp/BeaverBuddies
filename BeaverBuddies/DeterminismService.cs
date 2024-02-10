@@ -126,7 +126,7 @@ namespace BeaverBuddies
 
         public static bool ShouldUseNonGameRNG()
         {
-            DeterminismService determinismService = GetSingletonIfPresent<DeterminismService>();
+            DeterminismService determinismService = GetSingleton<DeterminismService>();
             return determinismService?.ShouldFreezeSeed ?? false;
         }
 
@@ -591,7 +591,9 @@ namespace BeaverBuddies
         static bool Prefix(GameSaver __instance, QueuedSave queuedSave)
         {
             if (IsSaving || EventIO.IsNull) return true;
-            S<TickingService>().FinishFullTickAndThen(() =>
+            TickingService ts = GetSingleton<TickingService>();
+            if (ts == null) return true;
+            ts.FinishFullTickAndThen(() =>
             {
                 IsSaving = true;
                 __instance.Save(queuedSave);
