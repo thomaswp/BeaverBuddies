@@ -47,6 +47,10 @@ namespace BeaverBuddies.Connect
 
         public bool TryToConnect(string address)
         {
+            // Clean up our current co-op state before connecting,
+            // so we don't, for example, end up ticking the client before
+            // it's actually loaded.
+            SingletonManager.Reset();
             Plugin.Log("Connecting client");
             client = ClientEventIO.Create(address, EventIO.Config.Port, LoadMap);
             if (client == null) return false;

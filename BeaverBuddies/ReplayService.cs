@@ -87,6 +87,9 @@ namespace BeaverBuddies
         private ConcurrentQueue<ReplayEvent> eventsToPlay = new ConcurrentQueue<ReplayEvent>();
 
         public static bool IsLoaded { get; private set; } = false;
+        private bool isReset = false;
+
+        private bool CanAct => io != null && !isReset;
 
         public static bool IsReplayingEvents { get; private set; } = false;
 
@@ -94,6 +97,7 @@ namespace BeaverBuddies
         {
             IsLoaded = false;
             IsReplayingEvents = false;
+            isReset = true;
         }
 
         public ReplayService(
@@ -340,6 +344,7 @@ namespace BeaverBuddies
 
         public void UpdateSingleton()
         {
+            if (!CanAct) return;
             if (waitUpdates > 0)
             {
                 waitUpdates--;
@@ -360,10 +365,9 @@ namespace BeaverBuddies
                 }
                 
                 waitUpdates = -1;
+                IsLoaded = true;
             }
-            if (io == null) return;
             // Only say IsLoaded if io exists
-            IsLoaded = true;
             io.Update();
             // Only replay events on Update if we're paused by the user.
             // Also only send events if paused, so the client doesn't play
@@ -414,7 +418,7 @@ namespace BeaverBuddies
         // tick (including parallel things) has finished.
         public void DoTick()
         {
-            if (io == null) return;
+            if (!CanAct) return;
 
             ticksSinceLoad++;
             TimeTimePatcher.SetTicksSinceLoaded(ticksSinceLoad);
