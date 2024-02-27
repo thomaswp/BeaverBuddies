@@ -26,6 +26,7 @@ using Timberborn.WorkSystemUI;
 using BeaverBuddies.Events;
 using static Timberborn.TickSystem.TickableSingletonService;
 using static BeaverBuddies.SingletonManager;
+using BeaverBuddies.Connect;
 
 namespace BeaverBuddies
 {
@@ -82,6 +83,7 @@ namespace BeaverBuddies
         public int TicksSinceLoad => ticksSinceLoad;
 
         public float TargetSpeed  { get; private set; } = 0;
+        public bool IsDesynced { get; private set; } = false;
 
         private ConcurrentQueue<ReplayEvent> eventsToSend = new ConcurrentQueue<ReplayEvent>();
         private ConcurrentQueue<ReplayEvent> eventsToPlay = new ConcurrentQueue<ReplayEvent>();
@@ -89,7 +91,7 @@ namespace BeaverBuddies
         public static bool IsLoaded { get; private set; } = false;
         private bool isReset = false;
 
-        private bool CanAct => io != null && !isReset;
+        private bool CanAct => io != null && !isReset && !IsDesynced;
 
         public static bool IsReplayingEvents { get; private set; } = false;
 
@@ -121,7 +123,8 @@ namespace BeaverBuddies
             WorkplaceUnlockingService workplaceUnlockingService,
             IOptionsBox optionsBox,
             DialogBoxShower dialogBoxShower,
-            UrlOpener urlOpener
+            UrlOpener urlOpener,
+            RehostingService rehostingService
         )
         {
             //_tickWathcerService = AddSingleton(tickWathcerService);
@@ -146,6 +149,7 @@ namespace BeaverBuddies
             AddSingleton(optionsBox);
             AddSingleton(dialogBoxShower);
             AddSingleton(urlOpener);
+            AddSingleton(rehostingService);
 
             AddSingleton(this);
 
@@ -257,11 +261,7 @@ namespace BeaverBuddies
                     if (s0 != replayEvent.randomS0Before)
                     {
                         Plugin.LogWarning($"Random state mismatch: {s0} != {replayEvent.randomS0Before}");
-                        ClientDesyncedEvent e = new ClientDesyncedEvent();
-                        // Don't use EnqueueEventForSending because it shouldn't
-                        // have a random state set.
-                        eventsToSend.Enqueue(replayEvent);
-                        e.Replay(this);
+                        HandleDesync();
                         break;
                         // TODO: Resync!
                     }
@@ -291,6 +291,28 @@ namespace BeaverBuddies
             _determinismService.ClearRandomStacks();
         }
 
+        private void HandleDesync()
+        {
+            if (IsDesynced) return;
+
+            ClientDesyncedEvent e = new ClientDesyncedEvent();
+            // Set IsDesynced to true so event play instead of sending
+            // to the host, allowing the Client to continue play.
+            IsDesynced = true;
+            // Don't use EnqueueEventForSending because it shouldn't
+            // have a random state set.
+            eventsToSend.Enqueue(e);
+            e.Replay(this);
+            // Send events immediately to get this event out before resetting
+            // the EventIO
+            // TODO: This only works because sending events is currently a synchronous
+            // operation, and it really shouldn't be, so this is a short-term fix!
+            SendEvents();
+            // Pause
+            SpeedChangePatcher.SetSpeedSilently(_speedManager, 0);
+            EventIO.Reset();
+        }
+
         /**
          * Readies and event for sending to connected players.
          * Adds the randomS0 if the event will be played, but assumed
@@ -314,6 +336,7 @@ namespace BeaverBuddies
 
         private void SendEvents()
         {
+            if (EventIO.IsNull) return;
             List<ReplayEvent> events = new List<ReplayEvent>();
             while (eventsToSend.TryDequeue(out ReplayEvent replayEvent))
             {
@@ -392,6 +415,7 @@ namespace BeaverBuddies
 
         private void UpdateSpeed()
         {
+            if (EventIO.IsNull) return;
             if (io.IsOutOfEvents && _speedManager.CurrentSpeed != 0)
             {
                 SpeedChangePatcher.SetSpeedSilently(_speedManager, 0);
@@ -435,8 +459,10 @@ namespace BeaverBuddies
             // For the server, sending events allows clients to keep playing.
             DoTickIO();
 
+            // Remember DoTickIO can set EventIO to null
+
             // Log from IO
-            io.Update();
+            io?.Update();
             Plugin.Log($"Tick {ticksSinceLoad:D5} order hash: {TEBPatcher.EntityUpdateHash.ToString("X8")}; " +
                 $"Move hash: {TEBPatcher.PositionHash.ToString("X8")}; " +
                 $"Random s0: {UnityEngine.Random.state.s0.ToString("X8")}");

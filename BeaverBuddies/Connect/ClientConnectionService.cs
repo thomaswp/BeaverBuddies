@@ -62,6 +62,11 @@ namespace BeaverBuddies.Connect
             "Failed to connect to Host. Would you like to open the troubleshooting guide?";
         const string TroubleshootingUrl = "https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running#troubleshooting";
 
+        public void ConnectOrShowFailureMessage()
+        {
+            ConnectOrShowFailureMessage(EventIO.Config.ClientConnectionAddress);
+        }
+
         public void ConnectOrShowFailureMessage(string address)
         {
             if (TryToConnect(address)) return;

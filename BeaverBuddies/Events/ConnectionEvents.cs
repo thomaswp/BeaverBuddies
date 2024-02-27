@@ -1,9 +1,16 @@
-﻿using System;
+﻿using BeaverBuddies.Connect;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using TimberApi;
+using Timberborn.Autosaving;
 using Timberborn.Core;
 using Timberborn.CoreUI;
+using Timberborn.GameSaveRepositorySystem;
+using Timberborn.GameSaveRuntimeSystem;
+using Timberborn.GameSaveRuntimeSystemUI;
+using Timberborn.SettlementNameSystem;
+using Timberborn.SingletonSystem;
 using Timberborn.TimeSystem;
 
 namespace BeaverBuddies.Events
@@ -69,8 +76,8 @@ namespace BeaverBuddies.Events
     {
         const string MESSAGE = 
             "A connected player desynced and cannot continue playing - sorry about that!\n" +
-            "The Host should save and re-host the save and the Client should rejoin.\n" +
-            "The  may need to restart the game if problems persist.\n" +
+            "The Host should hit Rehost and, AFTER that, the Client should Reconnect.\n" +
+            "You may need to restart the game if problems persist.\n" +
             "Before reloading, would you like to file a bug report to " +
             "help us fix this issue?";
 
@@ -81,12 +88,31 @@ namespace BeaverBuddies.Events
             context.GetSingleton<ReplayService>().SetTargetSpeed(0);
             var shower = context.GetSingleton<DialogBoxShower>();
             var urlOpener = context.GetSingleton<UrlOpener>();
-            Action action = () =>
+            Action bugReportAction = () =>
             {
                 urlOpener.OpenUrl(BUG_REPORT_URL);
             };
+            bool isHost = EventIO.Get() is ServerEventIO;
+            RehostingService rehostingService = context.GetSingleton<RehostingService>();
+            Action reconnectAction = () =>
+            {
+                if (isHost)
+                {
+                    if (!rehostingService.RehostGame())
+                    {
+                        // TODO: Failure message
+                    }
+                }
+                else
+                {
+                    context.GetSingleton<ClientConnectionService>()
+                    ?.ConnectOrShowFailureMessage();
+                }
+            };
+            string reconnectText = isHost ? "Save and Rehost" : "Reconnect (wait for Rehost)";
             shower.Create().SetMessage(MESSAGE)
-                .SetConfirmButton(action)
+                .SetInfoButton(bugReportAction, "Post Bug Report")
+                .SetConfirmButton(reconnectAction, reconnectText)
                 .SetDefaultCancelButton()
                 .Show();
         }
