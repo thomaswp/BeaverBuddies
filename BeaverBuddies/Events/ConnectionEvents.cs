@@ -76,7 +76,7 @@ namespace BeaverBuddies.Events
     {
         const string MESSAGE = 
             "A connected player desynced and cannot continue playing - sorry about that!\n" +
-            "The Host should hit Rehost and AFTER the Client should Reconnect.\n" +
+            "The Host should hit Rehost and, AFTER that, the Client should Reconnect.\n" +
             "You may need to restart the game if problems persist.\n" +
             "Before reloading, would you like to file a bug report to " +
             "help us fix this issue?";

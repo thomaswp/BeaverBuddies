@@ -35,6 +35,10 @@ namespace BeaverBuddies.Connect
             _validatingGameLoader = validatingGameLoader;
         }
 
+        // TODO: Should probably check IEnumerable<IAutosaveBlocker> autosaveBlockers
+        // that Autosaver uses, both here and in general when a client joins to avoid
+        // saving when it could corrupt things. Hopefully the save would fail if
+        // there's a real issue, rather than corrupting, but I don't know...
         public bool RehostGame()
         {
             string settlementName = _settlementNameService.SettlementName;
