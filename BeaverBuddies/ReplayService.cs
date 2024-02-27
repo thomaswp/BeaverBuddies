@@ -305,6 +305,8 @@ namespace BeaverBuddies
             // TODO: This only works because sending events is currently a synchronous
             // operation, and it really shouldn't be, so this is a short-term fix!
             SendEvents();
+            // Pause
+            SpeedChangePatcher.SetSpeedSilently(_speedManager, 0);
             EventIO.Reset();
         }
 
@@ -453,6 +455,8 @@ namespace BeaverBuddies
             // Replay and send events at the change of a tick always.
             // For the server, sending events allows clients to keep playing.
             DoTickIO();
+
+            // Remember DoTickIO can set EventIO to null
 
             // Log from IO
             io?.Update();

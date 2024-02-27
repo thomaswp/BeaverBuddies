@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BeaverBuddies.Connect;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using TimberApi;
@@ -81,12 +82,25 @@ namespace BeaverBuddies.Events
             context.GetSingleton<ReplayService>().SetTargetSpeed(0);
             var shower = context.GetSingleton<DialogBoxShower>();
             var urlOpener = context.GetSingleton<UrlOpener>();
-            Action action = () =>
+            Action bugReportAction = () =>
             {
                 urlOpener.OpenUrl(BUG_REPORT_URL);
             };
+            Action reconnectAction = () =>
+            {
+                if (EventIO.Get() is ClientEventIO)
+                {
+                    context.GetSingleton<ClientConnectionService>()
+                    ?.ConnectOrShowFailureMessage();
+                }
+                else if (EventIO.Get() is ServerEventIO)
+                {
+                    // More complicated...
+                }
+            };
             shower.Create().SetMessage(MESSAGE)
-                .SetConfirmButton(action)
+                .SetConfirmButton(reconnectAction)
+                .SetInfoButton(bugReportAction, "Post Bug Report")
                 .SetDefaultCancelButton()
                 .Show();
         }
