@@ -32,6 +32,7 @@ namespace BeaverBuddies.Connect
             _gameSaver = gameSaver;
             _gameSaveRepository = gameSaveRepository;
             _settlementNameService = settlementNameService;
+            _validatingGameLoader = validatingGameLoader;
         }
 
         public bool RehostGame()

@@ -76,8 +76,8 @@ namespace BeaverBuddies.Events
     {
         const string MESSAGE = 
             "A connected player desynced and cannot continue playing - sorry about that!\n" +
-            "The Host should save and re-host the save and the Client should rejoin.\n" +
-            "The  may need to restart the game if problems persist.\n" +
+            "The Host should hit Rehost and AFTER the Client should Reconnect.\n" +
+            "You may need to restart the game if problems persist.\n" +
             "Before reloading, would you like to file a bug report to " +
             "help us fix this issue?";
 
@@ -109,7 +109,7 @@ namespace BeaverBuddies.Events
                     ?.ConnectOrShowFailureMessage();
                 }
             };
-            string reconnectText = isHost ? "Save and Rehost" : "Reconnect";
+            string reconnectText = isHost ? "Save and Rehost" : "Reconnect (wait for Rehost)";
             shower.Create().SetMessage(MESSAGE)
                 .SetInfoButton(bugReportAction, "Post Bug Report")
                 .SetConfirmButton(reconnectAction, reconnectText)
