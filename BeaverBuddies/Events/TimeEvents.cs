@@ -50,7 +50,7 @@ namespace BeaverBuddies.Events
             // Also don't log if we're silent
             if (silently) return true;
 
-            var replayService = GetSingleton<ReplayService>();
+            var replayService = ReplayEvent.GetReplayServiceIfReady();
             if (replayService == null) return true;
 
             replayService.RecordEvent(new SpeedSetEvent()

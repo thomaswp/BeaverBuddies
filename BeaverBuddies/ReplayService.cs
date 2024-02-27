@@ -90,7 +90,7 @@ namespace BeaverBuddies
         public static bool IsLoaded { get; private set; } = false;
         private bool isReset = false;
 
-        private bool CanAct => io != null && !isReset;
+        private bool CanAct => io != null && !isReset && !IsDesynced;
 
         public static bool IsReplayingEvents { get; private set; } = false;
 
@@ -258,14 +258,7 @@ namespace BeaverBuddies
                     if (s0 != replayEvent.randomS0Before)
                     {
                         Plugin.LogWarning($"Random state mismatch: {s0} != {replayEvent.randomS0Before}");
-                        ClientDesyncedEvent e = new ClientDesyncedEvent();
-                        // Set IsDesynced to true so event play instead of sending
-                        // to the host, allowing the Client to continue play.
-                        IsDesynced = true;
-                        // Don't use EnqueueEventForSending because it shouldn't
-                        // have a random state set.
-                        eventsToSend.Enqueue(replayEvent);
-                        e.Replay(this);
+                        HandleDesync();
                         break;
                         // TODO: Resync!
                     }
@@ -295,6 +288,26 @@ namespace BeaverBuddies
             _determinismService.ClearRandomStacks();
         }
 
+        private void HandleDesync()
+        {
+            if (IsDesynced) return;
+
+            ClientDesyncedEvent e = new ClientDesyncedEvent();
+            // Set IsDesynced to true so event play instead of sending
+            // to the host, allowing the Client to continue play.
+            IsDesynced = true;
+            // Don't use EnqueueEventForSending because it shouldn't
+            // have a random state set.
+            eventsToSend.Enqueue(e);
+            e.Replay(this);
+            // Send events immediately to get this event out before resetting
+            // the EventIO
+            // TODO: This only works because sending events is currently a synchronous
+            // operation, and it really shouldn't be, so this is a short-term fix!
+            SendEvents();
+            EventIO.Reset();
+        }
+
         /**
          * Readies and event for sending to connected players.
          * Adds the randomS0 if the event will be played, but assumed
@@ -318,6 +331,7 @@ namespace BeaverBuddies
 
         private void SendEvents()
         {
+            if (EventIO.IsNull) return;
             List<ReplayEvent> events = new List<ReplayEvent>();
             while (eventsToSend.TryDequeue(out ReplayEvent replayEvent))
             {

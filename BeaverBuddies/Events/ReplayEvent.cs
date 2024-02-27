@@ -90,6 +90,17 @@ namespace BeaverBuddies.Events
             return component.GetComponentFast<Prefab>()?.PrefabName;
         }
 
+        public static ReplayService GetReplayServiceIfReady()
+        {
+            // If we haven't loaded yet, we're not ready
+            if (!ReplayService.IsLoaded) return null;
+
+            var replayService = GetSingleton<ReplayService>();
+            if (replayService == null || replayService.IsDesynced) return null;
+            return replayService;
+        }
+        
+
         /// <summary>
         /// Helper method to make overriding recorded actions in game easier.
         /// </summary>
@@ -100,13 +111,10 @@ namespace BeaverBuddies.Events
         /// <returns>True if the method should use default behavior</returns>
         public static bool DoPrefix(Func<ReplayEvent> getEvent)
         {
-            // If we haven't loaded yet, just use default behavior
-            // (e.g. during loading)
-            if (!ReplayService.IsLoaded) return true;
+            // If the replay service is not available, just use default behavior
+            ReplayService replayService = GetReplayServiceIfReady();
+            if (replayService == null) return true;
 
-            var replayService = GetSingleton<ReplayService>();
-            if (replayService == null || replayService.IsDesynced) return true;
-            
             // Get the event and if it's null, just use default behavior
             ReplayEvent message = getEvent();
             if (message == null) return true;
