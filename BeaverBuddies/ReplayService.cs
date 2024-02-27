@@ -410,6 +410,7 @@ namespace BeaverBuddies
 
         private void UpdateSpeed()
         {
+            if (EventIO.IsNull) return;
             if (io.IsOutOfEvents && _speedManager.CurrentSpeed != 0)
             {
                 SpeedChangePatcher.SetSpeedSilently(_speedManager, 0);
@@ -454,7 +455,7 @@ namespace BeaverBuddies
             DoTickIO();
 
             // Log from IO
-            io.Update();
+            io?.Update();
             Plugin.Log($"Tick {ticksSinceLoad:D5} order hash: {TEBPatcher.EntityUpdateHash.ToString("X8")}; " +
                 $"Move hash: {TEBPatcher.PositionHash.ToString("X8")}; " +
                 $"Random s0: {UnityEngine.Random.state.s0.ToString("X8")}");
