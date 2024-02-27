@@ -86,21 +86,23 @@ namespace BeaverBuddies.Events
             {
                 urlOpener.OpenUrl(BUG_REPORT_URL);
             };
+            bool isHost = EventIO.Get() is ServerEventIO;
             Action reconnectAction = () =>
             {
-                if (EventIO.Get() is ClientEventIO)
+                if (isHost)
+                {
+                    // More complicated...
+                }
+                else
                 {
                     context.GetSingleton<ClientConnectionService>()
                     ?.ConnectOrShowFailureMessage();
                 }
-                else if (EventIO.Get() is ServerEventIO)
-                {
-                    // More complicated...
-                }
             };
+            string reconnectText = isHost ? "Save and Rehost" : "Reconnect";
             shower.Create().SetMessage(MESSAGE)
-                .SetConfirmButton(reconnectAction)
                 .SetInfoButton(bugReportAction, "Post Bug Report")
+                .SetConfirmButton(reconnectAction, reconnectText)
                 .SetDefaultCancelButton()
                 .Show();
         }
