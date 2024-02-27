@@ -82,6 +82,7 @@ namespace BeaverBuddies
         public int TicksSinceLoad => ticksSinceLoad;
 
         public float TargetSpeed  { get; private set; } = 0;
+        public bool IsDesynced { get; private set; } = false;
 
         private ConcurrentQueue<ReplayEvent> eventsToSend = new ConcurrentQueue<ReplayEvent>();
         private ConcurrentQueue<ReplayEvent> eventsToPlay = new ConcurrentQueue<ReplayEvent>();
@@ -258,6 +259,9 @@ namespace BeaverBuddies
                     {
                         Plugin.LogWarning($"Random state mismatch: {s0} != {replayEvent.randomS0Before}");
                         ClientDesyncedEvent e = new ClientDesyncedEvent();
+                        // Set IsDesynced to true so event play instead of sending
+                        // to the host, allowing the Client to continue play.
+                        IsDesynced = true;
                         // Don't use EnqueueEventForSending because it shouldn't
                         // have a random state set.
                         eventsToSend.Enqueue(replayEvent);

@@ -105,7 +105,7 @@ namespace BeaverBuddies.Events
             if (!ReplayService.IsLoaded) return true;
 
             var replayService = GetSingleton<ReplayService>();
-            if (replayService == null) return true;
+            if (replayService == null || replayService.IsDesynced) return true;
             
             // Get the event and if it's null, just use default behavior
             ReplayEvent message = getEvent();
