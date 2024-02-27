@@ -26,6 +26,7 @@ using Timberborn.WorkSystemUI;
 using BeaverBuddies.Events;
 using static Timberborn.TickSystem.TickableSingletonService;
 using static BeaverBuddies.SingletonManager;
+using BeaverBuddies.Connect;
 
 namespace BeaverBuddies
 {
@@ -122,7 +123,8 @@ namespace BeaverBuddies
             WorkplaceUnlockingService workplaceUnlockingService,
             IOptionsBox optionsBox,
             DialogBoxShower dialogBoxShower,
-            UrlOpener urlOpener
+            UrlOpener urlOpener,
+            RehostingService rehostingService
         )
         {
             //_tickWathcerService = AddSingleton(tickWathcerService);
@@ -147,6 +149,7 @@ namespace BeaverBuddies
             AddSingleton(optionsBox);
             AddSingleton(dialogBoxShower);
             AddSingleton(urlOpener);
+            AddSingleton(rehostingService);
 
             AddSingleton(this);
 

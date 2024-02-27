@@ -10,6 +10,7 @@ using Timberborn.MainMenuScene;
 using UnityEngine.UIElements;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices.ComTypes;
+using Newtonsoft.Json.Bson;
 
 namespace BeaverBuddies.Connect
 {
@@ -38,7 +39,15 @@ namespace BeaverBuddies.Connect
             __instance.LoadGame();
             IsHosting = false;
         }
+
+        public static void LoadAndHost(ValidatingGameLoader loader, SaveReference saveReferece)
+        {
+            IsHosting = true;
+            loader.LoadGame(saveReferece);
+            IsHosting = false;
+        }
     }
+
 
     [HarmonyPatch(typeof(ValidatingGameLoader), nameof(ValidatingGameLoader.LoadGame))]
     public class ValidatingGameLoaderLoadGamePatcher

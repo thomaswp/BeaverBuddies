@@ -3,8 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using TimberApi;
+using Timberborn.Autosaving;
 using Timberborn.Core;
 using Timberborn.CoreUI;
+using Timberborn.GameSaveRepositorySystem;
+using Timberborn.GameSaveRuntimeSystem;
+using Timberborn.GameSaveRuntimeSystemUI;
+using Timberborn.SettlementNameSystem;
+using Timberborn.SingletonSystem;
 using Timberborn.TimeSystem;
 
 namespace BeaverBuddies.Events
@@ -87,11 +93,15 @@ namespace BeaverBuddies.Events
                 urlOpener.OpenUrl(BUG_REPORT_URL);
             };
             bool isHost = EventIO.Get() is ServerEventIO;
+            RehostingService rehostingService = context.GetSingleton<RehostingService>();
             Action reconnectAction = () =>
             {
                 if (isHost)
                 {
-                    // More complicated...
+                    if (!rehostingService.RehostGame())
+                    {
+                        // TODO: Failure message
+                    }
                 }
                 else
                 {
