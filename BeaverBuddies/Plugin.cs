@@ -7,6 +7,7 @@ using TimberApi.ConfiguratorSystem;
 using TimberApi.ConsoleSystem;
 using TimberApi.ModSystem;
 using TimberApi.SceneSystem;
+using Timberborn.TickSystem;
 
 namespace BeaverBuddies
 {
@@ -67,6 +68,7 @@ namespace BeaverBuddies
             //ReflectionUtils.PrintChildClasses(typeof(ILateUpdatableSingleton));
             //ReflectionUtils.PrintChildClasses(typeof(IBatchControlRowItem));
             //ReflectionUtils.PrintChildClasses(typeof(IUpdateableBatchControlRowItem));
+            //ReflectionUtils.PrintChildClasses(typeof(IParallelTickableSingleton));
             //ReflectionUtils.FindStaticFields();
         }
     }

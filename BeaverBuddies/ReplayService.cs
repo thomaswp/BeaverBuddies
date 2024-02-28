@@ -574,6 +574,8 @@ namespace BeaverBuddies
                 // ticked the ReplayService...
                 if (!HasTickedReplayService)
                 {
+                    // First finish any parallel ticks
+                    __instance._tickableSingletonService.FinishParallelTick();
                     // Tick it and stop
                     HasTickedReplayService = true;
                     replayService?.DoTick();
