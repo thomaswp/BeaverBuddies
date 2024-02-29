@@ -32,6 +32,8 @@ using TimberNet;
 using UnityEngine;
 using static Timberborn.GameSaveRuntimeSystem.GameSaver;
 using static BeaverBuddies.SingletonManager;
+using System.Collections.Immutable;
+using System.Threading.Tasks;
 
 namespace BeaverBuddies
 {
@@ -792,4 +794,23 @@ namespace BeaverBuddies
     //        }
     //    }
     //}
+
+    [HarmonyPatch(typeof(TickableSingletonService), nameof(TickableSingletonService.StartParallelTick))]
+    [ManualMethodOverwrite]
+    class TickableSingletonServiceStartParallelTickPatcher
+    {
+        static bool Prefix(TickableSingletonService __instance)
+        {
+            if (EventIO.IsNull) return true;
+            ImmutableArray<IParallelTickableSingleton>.Enumerator enumerator = 
+                __instance._parallelTickableSingletons.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                // Run directly rather than using the thread pool
+                IParallelTickableSingleton parallelTickable = enumerator.Current;
+                parallelTickable.ParallelTick();
+            }
+            return false;
+        }
+    }
 }
