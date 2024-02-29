@@ -1,9 +1,13 @@
 ﻿using HarmonyLib;
+using System.Collections.Immutable;
 using Timberborn.Beavers;
 using Timberborn.CharacterModelSystem;
 using Timberborn.CharacterMovementSystem;
 using Timberborn.Characters;
 using Timberborn.EntitySystem;
+using Timberborn.TickSystem;
+using Timberborn.WaterContaminationSystem;
+using Timberborn.WaterSystem;
 using Timberborn.WorkSystem;
 using UnityEngine;
 
@@ -68,6 +72,22 @@ namespace BeaverBuddies
 
             // We've replaced the original method, so skip it
             return false;
+        }
+    }
+
+    // It's not clear at all why I get IndexOutOfBounds errors here from the SimmingAnimator
+    // but I do, so patching this to do a bounds check.
+    [HarmonyPatch(typeof(ThreadSafeWaterMap), nameof(ThreadSafeWaterMap.WaterHeight))]
+    class ThreadSafeWaterMapWaterHeightPatcher
+    {
+        static bool Prefix(ThreadSafeWaterMap __instance, int index, ref float __result)
+        {
+            if (index < 0 || index >= __instance._waterDepths.Length)
+            {
+                __result = -1f;
+                return false;
+            }
+            return true;
         }
     }
 }
