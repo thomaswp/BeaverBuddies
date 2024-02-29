@@ -228,6 +228,8 @@ namespace BeaverBuddies
                 return false;
             }
 
+            __result = inclusiveMin;
+            return false;
             return true;
         }
     }
@@ -243,6 +245,8 @@ namespace BeaverBuddies
                 return false;
             }
 
+            __result = inclusiveMin;
+            return false;
             return true;
         }
     }
@@ -258,6 +262,8 @@ namespace BeaverBuddies
                 return false;
             }
 
+            __result = Vector2.right;
+            return false;
             return true;
         }
     }
