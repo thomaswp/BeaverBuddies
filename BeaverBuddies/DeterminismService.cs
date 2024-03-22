@@ -52,6 +52,11 @@ namespace BeaverBuddies
      *   is likely deterministic, just not guaranteed to be.
      * - Floating point rounding issues with movement, etc. No evidence of this so
      *   far - at least on the same OS.
+     *   
+     * To try:
+     * - Remove all randomness
+     * - Remove interpolating animations
+     * - Remove all water logic (this might get complicated...)
      * 
      * Monitoring:
      * - Movement of Beavers diverges over time, possibly due to rounding
@@ -656,16 +661,16 @@ namespace BeaverBuddies
         }
     }
 
-    [HarmonyPatch(typeof(System.Guid), nameof(System.Guid.NewGuid))]
+    [HarmonyPatch(typeof(Guid), nameof(Guid.NewGuid))]
     public class GuidPatcher
     {
         static bool Prefix(ref Guid __result)
         {
-#if NO_RANDOM
-            __result = GenerateIncrementally();
-#else
+//#if NO_RANDOM
+//            __result = GenerateIncrementally();
+//#else
             __result = GenerateWithUnityRandom();
-#endif
+//#endif
             if (ReplayService.IsLoaded)
             {
                 Plugin.Log($"Generating new GUID: {__result}");
