@@ -2,7 +2,7 @@
 #define NO_PARALLEL
 // If defined, the game will use constant values instead of random
 // numbers, making it as deterministic as possible w.r.t random
-#define NO_RANDOM
+//#define NO_RANDOM
 
 using Bindito.Core.Internal;
 using HarmonyLib;
@@ -352,7 +352,7 @@ namespace BeaverBuddies
 
     // If random is disabled, we do not need to distinguish between
     // game and non-game random.
-//#if !NO_RANDOM
+#if !NO_RANDOM
     // This code finds any service or entity that uses RNG
     [HarmonyPatch(typeof(ParameterProvider), nameof(ParameterProvider.GetParameters))]
     public static class ParameterProviderPatch
@@ -416,7 +416,7 @@ namespace BeaverBuddies
             //}
         }
     }
-//#endif
+#endif
 
     // TODO: Many of the following are no longer necessary, since we
     // use NonTickRandomNumberGenerator, above, with many classes.
