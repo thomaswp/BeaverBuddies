@@ -295,6 +295,9 @@ namespace BeaverBuddies
         {
             if (IsDesynced) return;
 
+            DeterminismService determinismService = SingletonManager.GetSingleton<DeterminismService>();
+            determinismService.PrintRandomStacks();
+
             ClientDesyncedEvent e = new ClientDesyncedEvent();
             // Set IsDesynced to true so event play instead of sending
             // to the host, allowing the Client to continue play.

@@ -1,4 +1,7 @@
-﻿using Bindito.Core.Internal;
+﻿#define NO_PARALLEL
+#define NO_RANDOM
+
+using Bindito.Core.Internal;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -158,7 +161,7 @@ namespace BeaverBuddies
                 {
                     // TODO: Make only in "dev mode"
                     //lastRandomStackTraces.Add(new StackTrace());
-                    //Plugin.Log("s0 before: " + Random.state.s0.ToString("X8"));
+                    //Plugin.Log("s0 before: " + UnityEngine.Random.state.s0.ToString("X8"));
                     //Plugin.Log($"Last entity: ${TEBPatcher.LastTickedEntity?.name} - {TEBPatcher.LastTickedEntity?.EntityId}");
                     //Plugin.LogStackTrace();
                     return false;
@@ -228,9 +231,12 @@ namespace BeaverBuddies
                 return false;
             }
 
+#if NO_RANDOM
             __result = inclusiveMin;
             return false;
+#else
             return true;
+#endif
         }
     }
 
@@ -245,9 +251,12 @@ namespace BeaverBuddies
                 return false;
             }
 
+#if NO_RANDOM
             __result = inclusiveMin;
             return false;
+#else
             return true;
+#endif
         }
     }
 
@@ -262,9 +271,12 @@ namespace BeaverBuddies
                 return false;
             }
 
+#if NO_RANDOM
             __result = Vector2.right;
             return false;
+#else
             return true;
+#endif
         }
     }
 
@@ -801,6 +813,7 @@ namespace BeaverBuddies
     //    }
     //}
 
+#if NO_PARALLEL
     [HarmonyPatch(typeof(TickableSingletonService), nameof(TickableSingletonService.StartParallelTick))]
     [ManualMethodOverwrite]
     class TickableSingletonServiceStartParallelTickPatcher
@@ -819,4 +832,5 @@ namespace BeaverBuddies
             return false;
         }
     }
+#endif
 }
