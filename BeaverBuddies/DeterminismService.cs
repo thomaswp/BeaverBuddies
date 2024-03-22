@@ -361,22 +361,22 @@ namespace BeaverBuddies
 
         private static HashSet<Type> blacklist = new HashSet<Type>()
         {
-            typeof(BeaverTextureSetter),
-            typeof(BotManufactoryAnimationController),
-            typeof(BasicSelectionSound),
-            typeof(DateSalter),
-            typeof(GameMusicPlayer),
-            typeof(NaturalResourceModelRandomizer),
-            typeof(RuinModelFactory),
-            typeof(RuinModelUpdater),
-            typeof(LoopingSoundPlayer),
-            typeof(Sounds),
-            typeof(GoodColumnVariantsService),
-            typeof(GoodPileVariantsService),
-            typeof(StockpileGoodPileVisualizer),
-            typeof(TerrainBlockRandomizer),
-            typeof(ObservatoryAnimator),
-            typeof(WaterInputPipeSegmentFactory),
+            //typeof(BeaverTextureSetter),
+            //typeof(BotManufactoryAnimationController),
+            //typeof(BasicSelectionSound),
+            //typeof(DateSalter),
+            //typeof(GameMusicPlayer),
+            //typeof(NaturalResourceModelRandomizer),
+            //typeof(RuinModelFactory),
+            //typeof(RuinModelUpdater),
+            //typeof(LoopingSoundPlayer),
+            //typeof(Sounds),
+            //typeof(GoodColumnVariantsService),
+            //typeof(GoodPileVariantsService),
+            //typeof(StockpileGoodPileVisualizer),
+            //typeof(TerrainBlockRandomizer),
+            //typeof(ObservatoryAnimator),
+            //typeof(WaterInputPipeSegmentFactory),
         };
 
         // Currently unused - could be used for warnings on items we don't
