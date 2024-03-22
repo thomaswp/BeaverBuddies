@@ -1,4 +1,7 @@
-﻿#define NO_PARALLEL
+﻿// If defined, parallel actions occur on the main thread
+#define NO_PARALLEL
+// If defined, the game will use constant values instead of random
+// numbers, making it as deterministic as possible w.r.t random
 #define NO_RANDOM
 
 using Bindito.Core.Internal;
@@ -342,6 +345,9 @@ namespace BeaverBuddies
         }
     }
 
+    // If random is disabled, we do not need to distinguish between
+    // game and non-game random.
+#if !NO_RANDOM
     // This code finds any service or entity that uses RNG
     [HarmonyPatch(typeof(ParameterProvider), nameof(ParameterProvider.GetParameters))]
     public static class ParameterProviderPatch
@@ -405,6 +411,7 @@ namespace BeaverBuddies
             //}
         }
     }
+#endif
 
     // TODO: Many of the following are no longer necessary, since we
     // use NonTickRandomNumberGenerator, above, with many classes.
@@ -654,17 +661,35 @@ namespace BeaverBuddies
     {
         static bool Prefix(ref Guid __result)
         {
-            byte[] guid = new byte[16];
-            for (int i = 0; i < guid.Length; i++)
-            {
-                guid[i] = (byte)UnityEngine.Random.Range(0, byte.MaxValue + 1);
-            }
-            __result = new Guid(guid);
+#if NO_RANDOM
+            __result = GenerateIncrementally();
+#else
+            __result = GenerateWithUnityRandom();
+#endif
             if (ReplayService.IsLoaded)
             {
                 Plugin.Log($"Generating new GUID: {__result}");
             }
             return false;
+        }
+
+        static long nextGuid = 0;
+        private static Guid GenerateIncrementally()
+        {
+            byte[] bytes = BitConverter.GetBytes(nextGuid++);
+            byte[] guid = new byte[16];
+            Array.Copy(bytes, guid, bytes.Length);
+            return new Guid(guid);
+        }
+
+        private static Guid GenerateWithUnityRandom()
+        {
+            byte[] guid = new byte[16];
+            for (int i = 0; i < guid.Length; i++)
+            {
+                guid[i] = (byte)UnityEngine.Random.Range(0, byte.MaxValue + 1);
+            }
+            return new Guid(guid);
         }
     }
 
