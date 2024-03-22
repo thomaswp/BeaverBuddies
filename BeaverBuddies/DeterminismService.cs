@@ -203,9 +203,9 @@ namespace BeaverBuddies
         {
             public static EntityComponent currentlyTickingEntity = null;
 
-            static void Prefix(TickableEntity entity)
+            static void Prefix(TickableEntity __instance)
             {
-                currentlyTickingEntity = entity._entityComponent;
+                currentlyTickingEntity = __instance._entityComponent;
             }
 
             static void Postfix()
