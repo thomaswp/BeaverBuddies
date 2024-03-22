@@ -44,6 +44,14 @@ using System.Threading.Tasks;
 namespace BeaverBuddies
 {
     /*
+     * Current desync issues:
+     * - Multiple examples show desyncs on more complex saves, especially
+     *   once water dynamics become complex, though it is not fully clear
+     *   what precisely causes the desync.
+     *   Completely remove randomness seems to fix the problem, but it's not
+     *   yet clear what specifically fixed it (is it an non-game random
+     *   call or is it something causing random call order to differ).
+     * 
      * Theories for unexplained desyncs:
      * - Something isn't saved in the save state (e.g. when to go to bed),
      *   so we get different behavior.
@@ -169,9 +177,10 @@ namespace BeaverBuddies
                 {
                     // TODO: Make only in "dev mode"
                     //lastRandomStackTraces.Add(new StackTrace());
-                    //Plugin.Log("s0 before: " + UnityEngine.Random.state.s0.ToString("X8"));
-                    //Plugin.Log($"Last entity: ${TEBPatcher.LastTickedEntity?.name} - {TEBPatcher.LastTickedEntity?.EntityId}");
-                    //Plugin.LogStackTrace();
+                    Plugin.Log("s0 before: " + UnityEngine.Random.state.s0.ToString("X8"));
+                    var entity = TickableEntityTickPatcher.currentlyTickingEntity;
+                    Plugin.Log($"Last entity: ${entity?.name} - {entity?.EntityId}");
+                    Plugin.LogStackTrace();
                     return false;
                 }
 
@@ -186,6 +195,22 @@ namespace BeaverBuddies
                 // And ultimately return true, assuming it's non-game code,
                 // though we can't be sure and need to investigate.
                 return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(TickableEntity), nameof(TickableEntity.Tick))]
+        static class TickableEntityTickPatcher
+        {
+            public static EntityComponent currentlyTickingEntity = null;
+
+            static void Prefix(TickableEntity entity)
+            {
+                currentlyTickingEntity = entity._entityComponent;
+            }
+
+            static void Postfix()
+            {
+                currentlyTickingEntity = null;
             }
         }
 
@@ -361,22 +386,22 @@ namespace BeaverBuddies
 
         private static HashSet<Type> blacklist = new HashSet<Type>()
         {
-            //typeof(BeaverTextureSetter),
-            //typeof(BotManufactoryAnimationController),
-            //typeof(BasicSelectionSound),
-            //typeof(DateSalter),
-            //typeof(GameMusicPlayer),
-            //typeof(NaturalResourceModelRandomizer),
-            //typeof(RuinModelFactory),
-            //typeof(RuinModelUpdater),
-            //typeof(LoopingSoundPlayer),
-            //typeof(Sounds),
-            //typeof(GoodColumnVariantsService),
-            //typeof(GoodPileVariantsService),
-            //typeof(StockpileGoodPileVisualizer),
-            //typeof(TerrainBlockRandomizer),
-            //typeof(ObservatoryAnimator),
-            //typeof(WaterInputPipeSegmentFactory),
+            typeof(BeaverTextureSetter),
+            typeof(BotManufactoryAnimationController),
+            typeof(BasicSelectionSound),
+            typeof(DateSalter),
+            typeof(GameMusicPlayer),
+            typeof(NaturalResourceModelRandomizer),
+            typeof(RuinModelFactory),
+            typeof(RuinModelUpdater),
+            typeof(LoopingSoundPlayer),
+            typeof(Sounds),
+            typeof(GoodColumnVariantsService),
+            typeof(GoodPileVariantsService),
+            typeof(StockpileGoodPileVisualizer),
+            typeof(TerrainBlockRandomizer),
+            typeof(ObservatoryAnimator),
+            typeof(WaterInputPipeSegmentFactory),
         };
 
         // Currently unused - could be used for warnings on items we don't

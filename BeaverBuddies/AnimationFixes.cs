@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿# define NO_SMOOTH_ANIMATION
+
+using HarmonyLib;
 using System.Collections.Immutable;
 using Timberborn.Beavers;
 using Timberborn.CharacterModelSystem;
@@ -13,6 +15,7 @@ using UnityEngine;
 
 namespace BeaverBuddies
 {
+#if !NO_SMOOTH_ANIMATION
     [ManualMethodOverwrite]
     [HarmonyPatch(typeof(MovementAnimator), nameof(MovementAnimator.Update), typeof(float))]
     public class AnimatedPathFollowerUpdatePathcer
@@ -74,6 +77,7 @@ namespace BeaverBuddies
             return false;
         }
     }
+#endif
 
     // It's not clear at all why I get IndexOutOfBounds errors here from the SimmingAnimator
     // but I do, so patching this to do a bounds check.
