@@ -40,17 +40,27 @@ using static Timberborn.GameSaveRuntimeSystem.GameSaver;
 using static BeaverBuddies.SingletonManager;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
+using Timberborn.NaturalResources;
+using Timberborn.BlockSystem;
 
 namespace BeaverBuddies
 {
     /*
      * Current desync issues:
      * - Multiple examples show desyncs on more complex saves, especially
-     *   once water dynamics become complex, though it is not fully clear
-     *   what precisely causes the desync.
-     *   Completely remove randomness seems to fix the problem, but it's not
+     *   once water dynamics become complex.
+     *   The cause seems to be that a tree is spawned in one save but not
+     *   in another, which causes an immediate desync. The random seed before
+     *   that spawn is synced, suggesting that the games diverge on where it is
+     *   possible to spawn, or what plants can spawn.
+     *   Specifically, a NaturalResource is queued by 
+     *   NaturalResourceReproducer.TrySpawnNatrualResources, but then in one game
+     *   it is found valid and spawned but not in another.
+     *   Completely removing randomness seems to fix the problem, but it's not
      *   yet clear what specifically fixed it (is it an non-game random
      *   call or is it something causing random call order to differ).
+     *   It may simply be that because under no-randomness trees are spawning always, we don't
+     *   encounter the divergence that random behavior exposes (but doesn't cause).
      * 
      * Theories for unexplained desyncs:
      * - Something isn't saved in the save state (e.g. when to go to bed),
@@ -888,4 +898,17 @@ namespace BeaverBuddies
         }
     }
 #endif
+
+    [HarmonyPatch(typeof(SpawnValidationService), nameof(SpawnValidationService.CanSpawn))]
+    [ManualMethodOverwrite]
+    class SpawnValidationServiceCanSpawnPatcher
+    {
+        static void Postfix(SpawnValidationService __instance, bool __result, Vector3Int coordinates, Blocks blocks, string resourcePrefabName)
+        {
+            Plugin.LogWarning($"Trying to spawn {resourcePrefabName} at {coordinates}: {__result}\n" +
+                $"IsSuitableTerrain: {__instance.IsSuitableTerrain(coordinates)}\n" +
+                $"SpotIsValid: {__instance.SpotIsValid(coordinates, resourcePrefabName)}\n" +
+                $"IsUnobstructed: {__instance.IsUnobstructed(coordinates, blocks)}");
+        }
+    }
 }
