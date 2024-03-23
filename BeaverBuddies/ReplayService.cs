@@ -1,4 +1,8 @@
-﻿using HarmonyLib;
+﻿// Define to force game to run a full tick each
+// update, rather than amortizing ticks over multiple.
+#define ONE_TICK_PER_UPDATE
+
+using HarmonyLib;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -601,11 +605,13 @@ namespace BeaverBuddies
             // Alternatively, I think that we could use the ReplayService version
             // that only stops ticking if not paused
 
+#if ONE_TICK_PER_UPDATE
             // Forces 1 tick per update
-            //if (numberOfBucketsToTick != 0)
-            //{
-            //numberOfBucketsToTick = __instance.NumberOfBuckets + 1;
-            //}
+            if (numberOfBucketsToTick != 0)
+            {
+                numberOfBucketsToTick = __instance.NumberOfBuckets + 1;
+            }
+#endif
 
             while (ShouldTick(__instance, numberOfBucketsToTick--))
             {
