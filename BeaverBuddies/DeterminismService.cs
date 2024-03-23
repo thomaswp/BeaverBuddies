@@ -1,5 +1,5 @@
 ﻿// If defined, parallel actions occur on the main thread
-//#define NO_PARALLEL
+#define NO_PARALLEL
 // If defined, the game will use constant values instead of random
 // numbers, making it as deterministic as possible w.r.t random
 //#define NO_RANDOM
