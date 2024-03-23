@@ -939,18 +939,38 @@ namespace BeaverBuddies
     [HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.MarkSpots))]
     class NRPMarkSpotsPatcher
     {
-        static void Prefix(Reproducible reproducible)
+        private static int lastCount;
+        static void Prefix(NaturalResourceReproducer __instance, Reproducible reproducible)
         {
+            lastCount = __instance._potentialSpots[ReproducibleKey.Create(reproducible)].Count;
+            if (!ReplayService.IsLoaded) return;
             Plugin.Log($"Marking spots for   {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
+        }
+
+        static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
+        {
+            int count = __instance._potentialSpots[ReproducibleKey.Create(reproducible)].Count;
+            Plugin.Log($"{lastCount} --> {count}");
+            Plugin.LogStackTrace();
         }
     }
 
     [HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.UnmarkSpots))]
     class NRPUnmarkSpotsPatcher
     {
-        static void Prefix(Reproducible reproducible)
+        private static int lastCount;
+        static void Prefix(NaturalResourceReproducer __instance, Reproducible reproducible)
         {
-            Plugin.Log($"Unmarking spots for {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
+            lastCount = __instance._potentialSpots[ReproducibleKey.Create(reproducible)].Count;
+            if (!ReplayService.IsLoaded) return;
+            Plugin.Log($"Unmarking spots for   {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
+        }
+
+        static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
+        {
+            int count = __instance._potentialSpots[ReproducibleKey.Create(reproducible)].Count;
+            Plugin.Log($"{lastCount} --> {count}");
+            Plugin.LogStackTrace();
         }
     }
 
