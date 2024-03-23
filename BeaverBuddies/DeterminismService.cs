@@ -911,4 +911,38 @@ namespace BeaverBuddies
                 $"IsUnobstructed: {__instance.IsUnobstructed(coordinates, blocks)}");
         }
     }
+
+    [HarmonyPatch(typeof(BlockValidator), nameof(BlockValidator.BlockValid))]
+    [ManualMethodOverwrite]
+    class BlockValidatorBlockValidPatcher
+    {
+        static void Postfix(BlockValidator __instance, bool __result, Block block, bool almost, bool ignoreUnfinishedStackable)
+        {
+            Plugin.LogWarning($"Trying to spawn block at {block.Coordinates}: {__result}");
+            if (!__instance.FitsInMap(block))
+            {
+                Plugin.LogWarning("Failed FirstInMap");
+            }
+            if (__instance.BlockConflictsWithExistingObject(block))
+            {
+                Plugin.LogWarning("Failed BlockConflictsWithExistingObject");
+            }
+            if (__instance.BlockConflictsWithBlockAbove(block))
+            {
+                Plugin.LogWarning("Failed BlockConflictsWithBlockAbove");
+            }
+            if (__instance.BlockConflictsWithBlocksBelow(block))
+            {
+                Plugin.LogWarning("Failed BlockConflictsWithBlocksBelow");
+            }
+            if (__instance.BlockConflictsWithTerrain(block))
+            {
+                Plugin.LogWarning("Failed BlockConflictsWithTerrain");
+            }
+            if (__instance.BlockConflictsWithMatterBelow(block, almost, ignoreUnfinishedStackable))
+            {
+                Plugin.LogWarning("Failed BlockConflictsWithMatterBelow");
+            }
+        }
+    }
 }
