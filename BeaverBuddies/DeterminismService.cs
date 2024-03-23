@@ -42,6 +42,9 @@ using System.Collections.Immutable;
 using System.Threading.Tasks;
 using Timberborn.NaturalResources;
 using Timberborn.BlockSystem;
+using static Timberborn.NaturalResourcesReproduction.NaturalResourceReproducer;
+using System.Linq;
+using Timberborn.NaturalResourcesReproduction;
 
 namespace BeaverBuddies
 {
@@ -51,8 +54,10 @@ namespace BeaverBuddies
      *   once water dynamics become complex.
      *   The cause seems to be that a tree is spawned in one save but not
      *   in another, which causes an immediate desync. The random seed before
-     *   that spawn is synced, suggesting that the games diverge on where it is
-     *   possible to spawn, or what plants can spawn.
+     *   that spawn is synced, but the game selects a different spot to try to
+     *   spawn the resource, and therefore sometimes it diverges on whether it
+     *   succeeds or fails (it may actually be diverging earlier than this, e.g.
+     *   if both succeed, but create plants in different locations).
      *   Specifically, a NaturalResource is queued by 
      *   NaturalResourceReproducer.TrySpawnNatrualResources, but then in one game
      *   it is found valid and spawned but not in another.
@@ -899,8 +904,40 @@ namespace BeaverBuddies
     }
 #endif
 
-    [HarmonyPatch(typeof(SpawnValidationService), nameof(SpawnValidationService.CanSpawn))]
+    [HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.TryReproduceResources))]
     [ManualMethodOverwrite]
+    class NaturalResourceReproducerTryReproduceResourcesPatcher
+    {
+
+        static bool Prefix(NaturalResourceReproducer __instance)
+        {
+            float num = __instance._dayNightCycle.FixedDeltaTimeInHours / 24f;
+            foreach (KeyValuePair<ReproducibleKey, HashSet<Vector3Int>> potentialSpot in __instance._potentialSpots)
+            {
+                float num2 = num * potentialSpot.Key.ReproductionChance;
+                float num3 = __instance._randomNumberGenerator.Range(0f, 1f);
+                HashSet<Vector3Int> value = potentialSpot.Value;
+                if (num3 < num2 * (float)value.Count)
+                {
+                    int index = __instance._randomNumberGenerator.Range(0, value.Count);
+                    // PATCH
+                    // HashSet.ElementAt() is not deterministic, so we replace it
+                    // with a deterministically sorted list.
+                    var potentialSpawnLocations = potentialSpot.Value.ToList();
+                    potentialSpawnLocations = potentialSpawnLocations.OrderBy(v => v.x).ThenBy(v => v.y).ThenBy(v => v.z).ToList();
+                    Vector3Int position = potentialSpawnLocations[index];
+                    Plugin.LogWarning($"Selecting element {index} = {position} from {potentialSpawnLocations.Count} items");
+                    __instance._newResources.Add((potentialSpot.Key, position));
+                    // END PATCH
+                }
+            }
+            __instance.SpawnNewResources();
+
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(SpawnValidationService), nameof(SpawnValidationService.CanSpawn))]
     class SpawnValidationServiceCanSpawnPatcher
     {
         static void Postfix(SpawnValidationService __instance, bool __result, Vector3Int coordinates, Blocks blocks, string resourcePrefabName)
@@ -912,37 +949,36 @@ namespace BeaverBuddies
         }
     }
 
-    [HarmonyPatch(typeof(BlockValidator), nameof(BlockValidator.BlockValid))]
-    [ManualMethodOverwrite]
-    class BlockValidatorBlockValidPatcher
-    {
-        static void Postfix(BlockValidator __instance, bool __result, Block block, bool almost, bool ignoreUnfinishedStackable)
-        {
-            Plugin.LogWarning($"Trying to spawn block at {block.Coordinates}: {__result}");
-            if (!__instance.FitsInMap(block))
-            {
-                Plugin.LogWarning("Failed FirstInMap");
-            }
-            if (__instance.BlockConflictsWithExistingObject(block))
-            {
-                Plugin.LogWarning("Failed BlockConflictsWithExistingObject");
-            }
-            if (__instance.BlockConflictsWithBlockAbove(block))
-            {
-                Plugin.LogWarning("Failed BlockConflictsWithBlockAbove");
-            }
-            if (__instance.BlockConflictsWithBlocksBelow(block))
-            {
-                Plugin.LogWarning("Failed BlockConflictsWithBlocksBelow");
-            }
-            if (__instance.BlockConflictsWithTerrain(block))
-            {
-                Plugin.LogWarning("Failed BlockConflictsWithTerrain");
-            }
-            if (__instance.BlockConflictsWithMatterBelow(block, almost, ignoreUnfinishedStackable))
-            {
-                Plugin.LogWarning("Failed BlockConflictsWithMatterBelow");
-            }
-        }
-    }
+    //[HarmonyPatch(typeof(BlockValidator), nameof(BlockValidator.BlockValid))]
+    //class BlockValidatorBlockValidPatcher
+    //{
+    //    static void Postfix(BlockValidator __instance, bool __result, Block block, bool almost, bool ignoreUnfinishedStackable)
+    //    {
+    //        Plugin.LogWarning($"Trying to spawn block at {block.Coordinates}: {__result}");
+    //        if (!__instance.FitsInMap(block))
+    //        {
+    //            Plugin.LogWarning("Failed FirstInMap");
+    //        }
+    //        if (__instance.BlockConflictsWithExistingObject(block))
+    //        {
+    //            Plugin.LogWarning("Failed BlockConflictsWithExistingObject");
+    //        }
+    //        if (__instance.BlockConflictsWithBlockAbove(block))
+    //        {
+    //            Plugin.LogWarning("Failed BlockConflictsWithBlockAbove");
+    //        }
+    //        if (__instance.BlockConflictsWithBlocksBelow(block))
+    //        {
+    //            Plugin.LogWarning("Failed BlockConflictsWithBlocksBelow");
+    //        }
+    //        if (__instance.BlockConflictsWithTerrain(block))
+    //        {
+    //            Plugin.LogWarning("Failed BlockConflictsWithTerrain");
+    //        }
+    //        if (__instance.BlockConflictsWithMatterBelow(block, almost, ignoreUnfinishedStackable))
+    //        {
+    //            Plugin.LogWarning("Failed BlockConflictsWithMatterBelow");
+    //        }
+    //    }
+    //}
 }
