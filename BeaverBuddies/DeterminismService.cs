@@ -65,6 +65,9 @@ namespace BeaverBuddies
      *   to a fixed-order list.
      *   Another cause is something about how ticks are spread out over multiple updates.
      *   Forcing one tick per update now fixes the problem.
+     *   The culprit here seems to be the TimeTriggerService (and the whole system)
+     *   which uses time of day rather than ticks which is likely messing things up
+     *   (need to look further!).
      * 
      * Theories for unexplained desyncs:
      * - Something isn't saved in the save state (e.g. when to go to bed),
@@ -942,14 +945,15 @@ namespace BeaverBuddies
         private static int lastCount;
         static void Prefix(NaturalResourceReproducer __instance, Reproducible reproducible)
         {
+            if (!ReplayService.IsLoaded) return;
             var key = ReproducibleKey.Create(reproducible);
             lastCount = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0;
-            if (!ReplayService.IsLoaded) return;
             Plugin.Log($"Marking spots for   {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
         }
 
         static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
         {
+            if (!ReplayService.IsLoaded) return;
             var key = ReproducibleKey.Create(reproducible);
             int count = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0; Plugin.Log($"{lastCount} --> {count}");
             Plugin.LogStackTrace();
@@ -962,6 +966,7 @@ namespace BeaverBuddies
         private static int lastCount;
         static void Prefix(NaturalResourceReproducer __instance, Reproducible reproducible)
         {
+            if (!ReplayService.IsLoaded) return;
             var key = ReproducibleKey.Create(reproducible);
             lastCount = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0; if (!ReplayService.IsLoaded) return;
             Plugin.Log($"Unmarking spots for   {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
@@ -969,8 +974,9 @@ namespace BeaverBuddies
 
         static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
         {
+            if (!ReplayService.IsLoaded) return;
             var key = ReproducibleKey.Create(reproducible);
-            int count = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0; Plugin.Log($"{lastCount} --> {count}");
+            int count = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0;
             Plugin.Log($"{lastCount} --> {count}");
             Plugin.LogStackTrace();
         }
