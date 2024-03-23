@@ -52,20 +52,19 @@ namespace BeaverBuddies
      * Current desync issues:
      * - Multiple examples show desyncs on more complex saves, especially
      *   once water dynamics become complex.
-     *   The cause seems to be that a tree is spawned in one save but not
-     *   in another, which causes an immediate desync. The random seed before
-     *   that spawn is synced, but the game selects a different spot to try to
-     *   spawn the resource, and therefore sometimes it diverges on whether it
-     *   succeeds or fails (it may actually be diverging earlier than this, e.g.
-     *   if both succeed, but create plants in different locations).
+     *   The cause seems to be that a NatrualResource is spawned in one save but not
+     *   in another, which causes an immediate desync. This is caused by divergence
+     *   in the set of available spots for the resource to spawn, which manifests
+     *   only later when the resource spawns in two different locations.
+     *   This may not be detected until a resource tries to spawn in one game
+     *   but cannot in the other (because they're in two different spots).
      *   Specifically, a NaturalResource is queued by 
      *   NaturalResourceReproducer.TrySpawnNatrualResources, but then in one game
      *   it is found valid and spawned but not in another.
-     *   Completely removing randomness seems to fix the problem, but it's not
-     *   yet clear what specifically fixed it (is it an non-game random
-     *   call or is it something causing random call order to differ).
-     *   It may simply be that because under no-randomness trees are spawning always, we don't
-     *   encounter the divergence that random behavior exposes (but doesn't cause).
+     *   One cause was using HashSet.GetElementAt() which I fixed by converting
+     *   to a fixed-order list.
+     *   Another cause is something about how ticks are spread out over multiple updates.
+     *   Forcing one tick per update now fixes the problem.
      * 
      * Theories for unexplained desyncs:
      * - Something isn't saved in the save state (e.g. when to go to bed),
@@ -192,10 +191,10 @@ namespace BeaverBuddies
                 {
                     // TODO: Make only in "dev mode"
                     //lastRandomStackTraces.Add(new StackTrace());
-                    Plugin.Log("s0 before: " + UnityEngine.Random.state.s0.ToString("X8"));
-                    var entity = TickableEntityTickPatcher.currentlyTickingEntity;
-                    Plugin.Log($"Last entity: {entity?.name} - {entity?.EntityId}");
-                    Plugin.LogStackTrace();
+                    //Plugin.Log("s0 before: " + UnityEngine.Random.state.s0.ToString("X8"));
+                    //var entity = TickableEntityTickPatcher.currentlyTickingEntity;
+                    //Plugin.Log($"Last entity: {entity?.name} - {entity?.EntityId}");
+                    //Plugin.LogStackTrace();
                     return false;
                 }
 
@@ -934,6 +933,24 @@ namespace BeaverBuddies
             __instance.SpawnNewResources();
 
             return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.MarkSpots))]
+    class NRPMarkSpotsPatcher
+    {
+        static void Prefix(Reproducible reproducible)
+        {
+            Plugin.Log($"Marking spots for   {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
+        }
+    }
+
+    [HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.UnmarkSpots))]
+    class NRPUnmarkSpotsPatcher
+    {
+        static void Prefix(Reproducible reproducible)
+        {
+            Plugin.Log($"Unmarking spots for {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
         }
     }
 
