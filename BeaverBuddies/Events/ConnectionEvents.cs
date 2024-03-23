@@ -1,17 +1,8 @@
 ﻿using BeaverBuddies.Connect;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using TimberApi;
-using Timberborn.Autosaving;
 using Timberborn.Core;
 using Timberborn.CoreUI;
-using Timberborn.GameSaveRepositorySystem;
-using Timberborn.GameSaveRuntimeSystem;
-using Timberborn.GameSaveRuntimeSystemUI;
-using Timberborn.SettlementNameSystem;
-using Timberborn.SingletonSystem;
-using Timberborn.TimeSystem;
 
 namespace BeaverBuddies.Events
 {

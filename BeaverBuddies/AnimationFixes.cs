@@ -1,16 +1,9 @@
-﻿# define NO_SMOOTH_ANIMATION
+﻿//# define NO_SMOOTH_ANIMATION
 
 using HarmonyLib;
-using System.Collections.Immutable;
-using Timberborn.Beavers;
-using Timberborn.CharacterModelSystem;
 using Timberborn.CharacterMovementSystem;
-using Timberborn.Characters;
 using Timberborn.EntitySystem;
-using Timberborn.TickSystem;
-using Timberborn.WaterContaminationSystem;
 using Timberborn.WaterSystem;
-using Timberborn.WorkSystem;
 using UnityEngine;
 
 namespace BeaverBuddies

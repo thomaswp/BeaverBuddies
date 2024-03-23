@@ -1,5 +1,5 @@
 ﻿// If defined, parallel actions occur on the main thread
-#define NO_PARALLEL
+//#define NO_PARALLEL
 // If defined, the game will use constant values instead of random
 // numbers, making it as deterministic as possible w.r.t random
 //#define NO_RANDOM
@@ -937,6 +937,13 @@ namespace BeaverBuddies
         }
     }
 
+    // TODO: Check for other HashSet stacks
+    //[HarmonyPatch(typeof(HashSet<object>), nameof(HashSet<object>.Add))]
+    //class HasSetAddLogger
+    //{
+
+    //}
+
     [HarmonyPatch(typeof(SpawnValidationService), nameof(SpawnValidationService.CanSpawn))]
     class SpawnValidationServiceCanSpawnPatcher
     {
@@ -948,37 +955,4 @@ namespace BeaverBuddies
                 $"IsUnobstructed: {__instance.IsUnobstructed(coordinates, blocks)}");
         }
     }
-
-    //[HarmonyPatch(typeof(BlockValidator), nameof(BlockValidator.BlockValid))]
-    //class BlockValidatorBlockValidPatcher
-    //{
-    //    static void Postfix(BlockValidator __instance, bool __result, Block block, bool almost, bool ignoreUnfinishedStackable)
-    //    {
-    //        Plugin.LogWarning($"Trying to spawn block at {block.Coordinates}: {__result}");
-    //        if (!__instance.FitsInMap(block))
-    //        {
-    //            Plugin.LogWarning("Failed FirstInMap");
-    //        }
-    //        if (__instance.BlockConflictsWithExistingObject(block))
-    //        {
-    //            Plugin.LogWarning("Failed BlockConflictsWithExistingObject");
-    //        }
-    //        if (__instance.BlockConflictsWithBlockAbove(block))
-    //        {
-    //            Plugin.LogWarning("Failed BlockConflictsWithBlockAbove");
-    //        }
-    //        if (__instance.BlockConflictsWithBlocksBelow(block))
-    //        {
-    //            Plugin.LogWarning("Failed BlockConflictsWithBlocksBelow");
-    //        }
-    //        if (__instance.BlockConflictsWithTerrain(block))
-    //        {
-    //            Plugin.LogWarning("Failed BlockConflictsWithTerrain");
-    //        }
-    //        if (__instance.BlockConflictsWithMatterBelow(block, almost, ignoreUnfinishedStackable))
-    //        {
-    //            Plugin.LogWarning("Failed BlockConflictsWithMatterBelow");
-    //        }
-    //    }
-    //}
 }
