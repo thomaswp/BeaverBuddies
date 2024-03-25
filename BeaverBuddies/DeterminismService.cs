@@ -45,6 +45,7 @@ using Timberborn.BlockSystem;
 using static Timberborn.NaturalResourcesReproduction.NaturalResourceReproducer;
 using System.Linq;
 using Timberborn.NaturalResourcesReproduction;
+using Timberborn.TimeSystem;
 
 namespace BeaverBuddies
 {
@@ -771,6 +772,24 @@ namespace BeaverBuddies
         }
     }
 
+    // TODO: Check whether this is ever called by game logic
+    // or just override it to _secondsPassedToday
+    // DayNightCycle.FluidSecondsPassedToday
+
+    [HarmonyPatch(typeof(DayNightCycle), nameof(DayNightCycle.FluidSecondsPassedToday), MethodType.Getter)]
+    [ManualMethodOverwrite]
+    public class DayNightCycleFluidSecondsPassedTodayPatcher
+    {
+        static bool Prefix(DayNightCycle __instance, ref float __result)
+        {
+            if (EventIO.IsNull) return true;
+            Plugin.LogStackTrace();
+            // Don't add the seconds passed this tick, since that's based on update
+            __result = __instance._secondsPassedToday;
+            return false;
+        }
+    }
+
     //[HarmonyPatch(typeof(Walker), nameof(Walker.FindPath))]
     //public class WalkerFindPathPatcher
     //{
@@ -956,7 +975,7 @@ namespace BeaverBuddies
             if (!ReplayService.IsLoaded) return;
             var key = ReproducibleKey.Create(reproducible);
             int count = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0; Plugin.Log($"{lastCount} --> {count}");
-            Plugin.LogStackTrace();
+            //Plugin.LogStackTrace();
         }
     }
 
@@ -978,7 +997,32 @@ namespace BeaverBuddies
             var key = ReproducibleKey.Create(reproducible);
             int count = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0;
             Plugin.Log($"{lastCount} --> {count}");
-            Plugin.LogStackTrace();
+            //Plugin.LogStackTrace();
+        }
+    }
+
+    [HarmonyPatch(typeof(TimeTriggerService), nameof(TimeTriggerService.Add))]
+    class TimeTriggerServiceAddPatcher
+    {
+        static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger, float triggerTimestamp)
+        {
+            Plugin.Log($"Adding time trigger at {__instance._nextId}-{triggerTimestamp}");
+        }
+    }
+
+    [HarmonyPatch(typeof(TimeTriggerService), nameof(TimeTriggerService.Trigger), typeof(TimeTrigger))]
+    class TimeTriggerServiceTriggerPatcher
+    {
+        static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger)
+        {
+            float triggerTime = 0;
+            long id = 0;
+            if (__instance._timeTriggerKeys.TryGetValue(timeTrigger, out var key))
+            {
+                triggerTime = key.Timestamp;
+                id = key._id;
+            }
+            Plugin.Log($"Triggering time trigger at {__instance._dayNightCycle.PartialDayNumber}: {id}-{triggerTime}");
         }
     }
 
@@ -989,15 +1033,15 @@ namespace BeaverBuddies
 
     //}
 
-    [HarmonyPatch(typeof(SpawnValidationService), nameof(SpawnValidationService.CanSpawn))]
-    class SpawnValidationServiceCanSpawnPatcher
-    {
-        static void Postfix(SpawnValidationService __instance, bool __result, Vector3Int coordinates, Blocks blocks, string resourcePrefabName)
-        {
-            Plugin.LogWarning($"Trying to spawn {resourcePrefabName} at {coordinates}: {__result}\n" +
-                $"IsSuitableTerrain: {__instance.IsSuitableTerrain(coordinates)}\n" +
-                $"SpotIsValid: {__instance.SpotIsValid(coordinates, resourcePrefabName)}\n" +
-                $"IsUnobstructed: {__instance.IsUnobstructed(coordinates, blocks)}");
-        }
-    }
+    //[HarmonyPatch(typeof(SpawnValidationService), nameof(SpawnValidationService.CanSpawn))]
+    //class SpawnValidationServiceCanSpawnPatcher
+    //{
+    //    static void Postfix(SpawnValidationService __instance, bool __result, Vector3Int coordinates, Blocks blocks, string resourcePrefabName)
+    //    {
+    //        Plugin.LogWarning($"Trying to spawn {resourcePrefabName} at {coordinates}: {__result}\n" +
+    //            $"IsSuitableTerrain: {__instance.IsSuitableTerrain(coordinates)}\n" +
+    //            $"SpotIsValid: {__instance.SpotIsValid(coordinates, resourcePrefabName)}\n" +
+    //            $"IsUnobstructed: {__instance.IsUnobstructed(coordinates, blocks)}");
+    //    }
+    //}
 }
