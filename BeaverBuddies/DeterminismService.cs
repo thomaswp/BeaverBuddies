@@ -783,7 +783,7 @@ namespace BeaverBuddies
         static bool Prefix(DayNightCycle __instance, ref float __result)
         {
             if (EventIO.IsNull) return true;
-            Plugin.LogStackTrace();
+            //Plugin.LogStackTrace();
             // Don't add the seconds passed this tick, since that's based on update
             __result = __instance._secondsPassedToday;
             return false;
