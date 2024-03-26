@@ -985,7 +985,7 @@ namespace BeaverBuddies
                     var potentialSpawnLocations = potentialSpot.Value.ToList();
                     potentialSpawnLocations = potentialSpawnLocations.OrderBy(v => v.x).ThenBy(v => v.y).ThenBy(v => v.z).ToList();
                     Vector3Int position = potentialSpawnLocations[index];
-                    Plugin.LogWarning($"Selecting element {index} = {position} from {potentialSpawnLocations.Count} items");
+                    //Plugin.LogWarning($"Selecting element {index} = {position} from {potentialSpawnLocations.Count} items");
                     __instance._newResources.Add((potentialSpot.Key, position));
                     // END PATCH
                 }
