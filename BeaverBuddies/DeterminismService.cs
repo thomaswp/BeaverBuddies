@@ -148,6 +148,7 @@ namespace BeaverBuddies
             // Deterministic seed set before the game is ever loaded,
             // since some components call Random during load and before
             // the Client can receive a seed
+            Plugin.Log("Setting pre-load random state");
             UnityEngine.Random.InitState(42);
         }
 
