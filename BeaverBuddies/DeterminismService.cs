@@ -70,6 +70,16 @@ namespace BeaverBuddies
      *   which uses time of day rather than ticks which is likely messing things up
      *   (need to look further!).
      * 
+     * Known (likely) issues:
+     * - WateredNaturalResource.Awake() and LivingWaterNaturalResource.Awake()
+     *   all random, which likely occurs before
+     *   the client receives its RNG. Further, the game saves the *progress* towards
+     *   death, rather than the time of death, so it would be hard to reload.
+     *   Attempted fix by always initializing random (before game load) to a fixed
+     *   value (would kind of be nice to do this anyway for deterministic bugs).
+     *   
+     * 
+     * 
      * Theories for unexplained desyncs:
      * - Something isn't saved in the save state (e.g. when to go to bed),
      *   so we get different behavior.
@@ -134,6 +144,11 @@ namespace BeaverBuddies
         public DeterminismService()
         {
             RegisterSingleton(this);
+
+            // Deterministic seed set before the game is ever loaded,
+            // since some components call Random during load and before
+            // the Client can receive a seed
+            UnityEngine.Random.InitState(42);
         }
 
         public void ClearRandomStacks()
@@ -449,7 +464,7 @@ namespace BeaverBuddies
                 }
             }
 
-            //if (__result.Any(o => o is RandomNumberGenerator))
+            //if (__result.Any(o => o is TimeTriggerFactory || o is TimeTriggerService))
             //{
             //    string name = method.DeclaringType?.FullName;
             //    if (types.Add(name))
@@ -1006,6 +1021,7 @@ namespace BeaverBuddies
     {
         static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger, float triggerTimestamp)
         {
+            //if (!ReplayService.IsLoaded) return;
             Plugin.Log($"Adding time trigger at {__instance._nextId}-{triggerTimestamp}");
         }
     }
