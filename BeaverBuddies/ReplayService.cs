@@ -417,7 +417,7 @@ namespace BeaverBuddies
             TargetSpeed = speed;
             // If we're paused, we should interrupt the ticking, so we end
             // before more of the tick happens.
-            _tickingService.ShouldInterruptTicking = speed == 0;
+            _tickingService.ShouldStopTicking = speed == 0;
             UpdateSpeed();
         }
 
@@ -518,6 +518,17 @@ namespace BeaverBuddies
 
     public class TickingService : RegisteredSingleton
     {
+        /// <summary>
+        /// If true, the TickingService will stop as soon as possible (interrupting
+        /// a normal update, but finishing it's current bucket) and stop ticking
+        /// until set to false.
+        /// </summary>
+        public bool ShouldStopTicking { get; set; } = false;
+        /// <summary>
+        /// If true, the TickingService will stop as soon as possible (interrupting
+        /// a normal update, but finishing it's current bucket), but it will then resume
+        /// on the following update.
+        /// </summary>
         public bool ShouldInterruptTicking { get; set; } = false;
         public bool ShouldCompleteFullTick { get; private set; } = false;
 
@@ -543,6 +554,9 @@ namespace BeaverBuddies
 
         internal void OnTickingCompleted()
         {
+            // Interruptions are always temporary and get reset at the end of
+            // each ticking update
+            ShouldInterruptTicking = false;
             if (!ShouldCompleteFullTick) return;
             Plugin.Log($"Finished full tick; calling {onCompletedFullTick.Count} callbacks");
             foreach (var action in onCompletedFullTick)
@@ -557,7 +571,7 @@ namespace BeaverBuddies
         {
 
             // Never tick if we've been interrupted by a forced pause
-            if (ShouldInterruptTicking) return false;
+            if (ShouldStopTicking || ShouldInterruptTicking) return false;
 
             // If we need to complete a full tick, make sure to go exactly until
             // the end of this tick, to ensure an update follows immediately.
@@ -642,15 +656,6 @@ namespace BeaverBuddies
             TickingService ts = GetSingleton<TickingService>();
             if (ts == null) return true;
             return ts.TickBuckets(__instance, numberOfBucketsToTick);
-        }
-    }
-
-    [HarmonyPatch(typeof(EntityService), nameof(EntityService.Instantiate), typeof(BaseComponent), typeof(Guid))]
-    static class EntityComponentInstantiatePatcher
-    {
-        static void Postfix()
-        {
-            GetSingleton<TickingService>()?.FinishFullTick();
         }
     }
 }

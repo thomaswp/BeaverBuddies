@@ -46,6 +46,7 @@ using static Timberborn.NaturalResourcesReproduction.NaturalResourceReproducer;
 using System.Linq;
 using Timberborn.NaturalResourcesReproduction;
 using Timberborn.TimeSystem;
+using Timberborn.BaseComponentSystem;
 
 namespace BeaverBuddies
 {
@@ -68,16 +69,7 @@ namespace BeaverBuddies
      *   Forcing one tick per update now fixes the problem.
      *   The culprit here seems to be the TimeTriggerService (and the whole system)
      *   which uses time of day rather than ticks which is likely messing things up
-     *   (need to look further!).
-     * 
-     * Known (likely) issues:
-     * - WateredNaturalResource.Awake() and LivingWaterNaturalResource.Awake()
-     *   all random, which likely occurs before
-     *   the client receives its RNG. Further, the game saves the *progress* towards
-     *   death, rather than the time of death, so it would be hard to reload.
-     *   Attempted fix by always initializing random (before game load) to a fixed
-     *   value (would kind of be nice to do this anyway for deterministic bugs).
-     *   
+     *   (need to look further!).     *   
      * 
      * 
      * Theories for unexplained desyncs:
@@ -103,6 +95,9 @@ namespace BeaverBuddies
      *   the main cause. Need to verify though. I've also verified that
      *   removing the MovementAnimator.Update (smooth movement) doesn't
      *   remove the movement desync (though it does change from frame 320).
+     * - Some TimeTriggers seem to happen not completely synchronized, but
+     *   I believe some of these are animation things, so they don't need to
+     *   be. It does not seem to be causing desyncs.
      * 
      * Ruled out
      * - Unaccounted for calls to Unity random: there were no abnormal
@@ -120,6 +115,12 @@ namespace BeaverBuddies
      *   starting any new ticks) so the entity can Start() on the next Update()
      * - Time.time is now deterministic. This seemed to be a primary cause of
      *   desyncs, but I never figured out exactly why.
+     * - WateredNaturalResource.Awake() and LivingWaterNaturalResource.Awake()
+     *   all random, which likely occurs before the client receives its RNG. 
+     *   Further, the game saves the *progress* towards death, rather than the time 
+     *   of death, so it would be hard to reload.
+     *   Likely fixed by always initializing random (before game load) to a fixed
+     *   value (would kind of be nice to do this anyway for deterministic bugs).
      */
 
     public class DeterminismService : IResettableSingleton
@@ -757,6 +758,27 @@ namespace BeaverBuddies
         }
     }
 
+
+    [HarmonyPatch(typeof(EntityService), nameof(EntityService.Instantiate), typeof(BaseComponent), typeof(Guid))]
+    static class EntityComponentInstantiatePatcher
+    {
+        static void Postfix()
+        {
+            if (EventIO.IsNull) return;
+            TickingService ts = GetSingleton<TickingService>();
+            if (ts != null )
+            {
+                // Interrupt immediately, so a frame passes before
+                // the next bucket is ticked, so the Entity is deterministically
+                // initialized before the next bucket is ticked.
+                // Note: we do this instead of finishing a full frame to avoid
+                // the game constantly skipping frames when there are lots of
+                // entities created.
+                ts.ShouldInterruptTicking = true;
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(TickableEntityBucket), nameof(TickableEntityBucket.Add))]
     public class TEBAddPatcher
     {
@@ -974,80 +996,74 @@ namespace BeaverBuddies
         }
     }
 
-    [HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.MarkSpots))]
-    class NRPMarkSpotsPatcher
-    {
-        private static int lastCount;
-        static void Prefix(NaturalResourceReproducer __instance, Reproducible reproducible)
-        {
-            if (!ReplayService.IsLoaded) return;
-            var key = ReproducibleKey.Create(reproducible);
-            lastCount = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0;
-            Plugin.Log($"Marking spots for   {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
-        }
-
-        static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
-        {
-            if (!ReplayService.IsLoaded) return;
-            var key = ReproducibleKey.Create(reproducible);
-            int count = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0; Plugin.Log($"{lastCount} --> {count}");
-            //Plugin.LogStackTrace();
-        }
-    }
-
-    [HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.UnmarkSpots))]
-    class NRPUnmarkSpotsPatcher
-    {
-        private static int lastCount;
-        static void Prefix(NaturalResourceReproducer __instance, Reproducible reproducible)
-        {
-            if (!ReplayService.IsLoaded) return;
-            var key = ReproducibleKey.Create(reproducible);
-            lastCount = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0; if (!ReplayService.IsLoaded) return;
-            Plugin.Log($"Unmarking spots for   {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
-        }
-
-        static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
-        {
-            if (!ReplayService.IsLoaded) return;
-            var key = ReproducibleKey.Create(reproducible);
-            int count = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0;
-            Plugin.Log($"{lastCount} --> {count}");
-            //Plugin.LogStackTrace();
-        }
-    }
-
-    [HarmonyPatch(typeof(TimeTriggerService), nameof(TimeTriggerService.Add))]
-    class TimeTriggerServiceAddPatcher
-    {
-        static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger, float triggerTimestamp)
-        {
-            //if (!ReplayService.IsLoaded) return;
-            Plugin.Log($"Adding time trigger at {__instance._nextId}-{triggerTimestamp}");
-        }
-    }
-
-    [HarmonyPatch(typeof(TimeTriggerService), nameof(TimeTriggerService.Trigger), typeof(TimeTrigger))]
-    class TimeTriggerServiceTriggerPatcher
-    {
-        static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger)
-        {
-            float triggerTime = 0;
-            long id = 0;
-            if (__instance._timeTriggerKeys.TryGetValue(timeTrigger, out var key))
-            {
-                triggerTime = key.Timestamp;
-                id = key._id;
-            }
-            Plugin.Log($"Triggering time trigger at {__instance._dayNightCycle.PartialDayNumber}: {id}-{triggerTime}");
-        }
-    }
-
-    // TODO: Check for other HashSet stacks
-    //[HarmonyPatch(typeof(HashSet<object>), nameof(HashSet<object>.Add))]
-    //class HasSetAddLogger
+    #region NR_SPAWN_LOGGING
+    //[HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.MarkSpots))]
+    //class NRPMarkSpotsPatcher
     //{
+    //    private static int lastCount;
+    //    static void Prefix(NaturalResourceReproducer __instance, Reproducible reproducible)
+    //    {
+    //        if (!ReplayService.IsLoaded) return;
+    //        var key = ReproducibleKey.Create(reproducible);
+    //        lastCount = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0;
+    //        Plugin.Log($"Marking spots for   {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
+    //    }
 
+    //    static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
+    //    {
+    //        if (!ReplayService.IsLoaded) return;
+    //        var key = ReproducibleKey.Create(reproducible);
+    //        int count = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0; Plugin.Log($"{lastCount} --> {count}");
+    //        //Plugin.LogStackTrace();
+    //    }
+    //}
+
+    //[HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.UnmarkSpots))]
+    //class NRPUnmarkSpotsPatcher
+    //{
+    //    private static int lastCount;
+    //    static void Prefix(NaturalResourceReproducer __instance, Reproducible reproducible)
+    //    {
+    //        if (!ReplayService.IsLoaded) return;
+    //        var key = ReproducibleKey.Create(reproducible);
+    //        lastCount = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0; if (!ReplayService.IsLoaded) return;
+    //        Plugin.Log($"Unmarking spots for   {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
+    //    }
+
+    //    static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
+    //    {
+    //        if (!ReplayService.IsLoaded) return;
+    //        var key = ReproducibleKey.Create(reproducible);
+    //        int count = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0;
+    //        Plugin.Log($"{lastCount} --> {count}");
+    //        //Plugin.LogStackTrace();
+    //    }
+    //}
+
+    //[HarmonyPatch(typeof(TimeTriggerService), nameof(TimeTriggerService.Add))]
+    //class TimeTriggerServiceAddPatcher
+    //{
+    //    static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger, float triggerTimestamp)
+    //    {
+    //        //if (!ReplayService.IsLoaded) return;
+    //        Plugin.Log($"Adding time trigger at {__instance._nextId}-{triggerTimestamp}");
+    //    }
+    //}
+
+    //[HarmonyPatch(typeof(TimeTriggerService), nameof(TimeTriggerService.Trigger), typeof(TimeTrigger))]
+    //class TimeTriggerServiceTriggerPatcher
+    //{
+    //    static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger)
+    //    {
+    //        float triggerTime = 0;
+    //        long id = 0;
+    //        if (__instance._timeTriggerKeys.TryGetValue(timeTrigger, out var key))
+    //        {
+    //            triggerTime = key.Timestamp;
+    //            id = key._id;
+    //        }
+    //        Plugin.Log($"Triggering time trigger at {__instance._dayNightCycle.PartialDayNumber}: {id}-{triggerTime}");
+    //    }
     //}
 
     //[HarmonyPatch(typeof(SpawnValidationService), nameof(SpawnValidationService.CanSpawn))]
@@ -1060,5 +1076,15 @@ namespace BeaverBuddies
     //            $"SpotIsValid: {__instance.SpotIsValid(coordinates, resourcePrefabName)}\n" +
     //            $"IsUnobstructed: {__instance.IsUnobstructed(coordinates, blocks)}");
     //    }
+    //}
+
+    #endregion
+
+
+    // TODO: Check for other HashSet stacks
+    //[HarmonyPatch(typeof(HashSet<object>), nameof(HashSet<object>.Add))]
+    //class HasSetAddLogger
+    //{
+
     //}
 }
