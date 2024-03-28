@@ -774,7 +774,8 @@ namespace BeaverBuddies
                 // Note: we do this instead of finishing a full frame to avoid
                 // the game constantly skipping frames when there are lots of
                 // entities created.
-                ts.ShouldInterruptTicking = true;
+                //ts.ShouldInterruptTicking = true;
+                ts.FinishFullTick();
             }
         }
     }
