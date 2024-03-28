@@ -1,5 +1,5 @@
 ﻿// If defined, parallel actions occur on the main thread
-#define NO_PARALLEL
+//#define NO_PARALLEL
 // If defined, the game will use constant values instead of random
 // numbers, making it as deterministic as possible w.r.t random
 //#define NO_RANDOM
@@ -1018,53 +1018,53 @@ namespace BeaverBuddies
     //    }
     //}
 
-    [HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.UnmarkSpots))]
-    class NRPUnmarkSpotsPatcher
-    {
-        private static int lastCount;
-        static void Prefix(NaturalResourceReproducer __instance, Reproducible reproducible)
-        {
-            if (!ReplayService.IsLoaded) return;
-            var key = ReproducibleKey.Create(reproducible);
-            lastCount = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0; if (!ReplayService.IsLoaded) return;
-            Plugin.Log($"Unmarking spots for   {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
-        }
+    //[HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.UnmarkSpots))]
+    //class NRPUnmarkSpotsPatcher
+    //{
+    //    private static int lastCount;
+    //    static void Prefix(NaturalResourceReproducer __instance, Reproducible reproducible)
+    //    {
+    //        if (!ReplayService.IsLoaded) return;
+    //        var key = ReproducibleKey.Create(reproducible);
+    //        lastCount = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0; if (!ReplayService.IsLoaded) return;
+    //        Plugin.Log($"Unmarking spots for   {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
+    //    }
 
-        static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
-        {
-            if (!ReplayService.IsLoaded) return;
-            var key = ReproducibleKey.Create(reproducible);
-            int count = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0;
-            Plugin.Log($"{lastCount} --> {count}");
-            //Plugin.LogStackTrace();
-        }
-    }
+    //    static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
+    //    {
+    //        if (!ReplayService.IsLoaded) return;
+    //        var key = ReproducibleKey.Create(reproducible);
+    //        int count = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0;
+    //        Plugin.Log($"{lastCount} --> {count}");
+    //        //Plugin.LogStackTrace();
+    //    }
+    //}
 
-    [HarmonyPatch(typeof(TimeTriggerService), nameof(TimeTriggerService.Add))]
-    class TimeTriggerServiceAddPatcher
-    {
-        static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger, float triggerTimestamp)
-        {
-            //if (!ReplayService.IsLoaded) return;
-            Plugin.Log($"Adding time trigger at {__instance._nextId}-{triggerTimestamp}");
-        }
-    }
+    //[HarmonyPatch(typeof(TimeTriggerService), nameof(TimeTriggerService.Add))]
+    //class TimeTriggerServiceAddPatcher
+    //{
+    //    static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger, float triggerTimestamp)
+    //    {
+    //        //if (!ReplayService.IsLoaded) return;
+    //        Plugin.Log($"Adding time trigger at {__instance._nextId}-{triggerTimestamp}");
+    //    }
+    //}
 
-    [HarmonyPatch(typeof(TimeTriggerService), nameof(TimeTriggerService.Trigger), typeof(TimeTrigger))]
-    class TimeTriggerServiceTriggerPatcher
-    {
-        static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger)
-        {
-            float triggerTime = 0;
-            long id = 0;
-            if (__instance._timeTriggerKeys.TryGetValue(timeTrigger, out var key))
-            {
-                triggerTime = key.Timestamp;
-                id = key._id;
-            }
-            Plugin.Log($"Triggering time trigger at {__instance._dayNightCycle.PartialDayNumber}: {id}-{triggerTime}");
-        }
-    }
+    //[HarmonyPatch(typeof(TimeTriggerService), nameof(TimeTriggerService.Trigger), typeof(TimeTrigger))]
+    //class TimeTriggerServiceTriggerPatcher
+    //{
+    //    static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger)
+    //    {
+    //        float triggerTime = 0;
+    //        long id = 0;
+    //        if (__instance._timeTriggerKeys.TryGetValue(timeTrigger, out var key))
+    //        {
+    //            triggerTime = key.Timestamp;
+    //            id = key._id;
+    //        }
+    //        Plugin.Log($"Triggering time trigger at {__instance._dayNightCycle.PartialDayNumber}: {id}-{triggerTime}");
+    //    }
+    //}
 
     //[HarmonyPatch(typeof(SpawnValidationService), nameof(SpawnValidationService.CanSpawn))]
     //class SpawnValidationServiceCanSpawnPatcher
