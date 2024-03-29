@@ -1066,17 +1066,17 @@ namespace BeaverBuddies
     //    }
     //}
 
-    //[HarmonyPatch(typeof(SpawnValidationService), nameof(SpawnValidationService.CanSpawn))]
-    //class SpawnValidationServiceCanSpawnPatcher
-    //{
-    //    static void Postfix(SpawnValidationService __instance, bool __result, Vector3Int coordinates, Blocks blocks, string resourcePrefabName)
-    //    {
-    //        Plugin.LogWarning($"Trying to spawn {resourcePrefabName} at {coordinates}: {__result}\n" +
-    //            $"IsSuitableTerrain: {__instance.IsSuitableTerrain(coordinates)}\n" +
-    //            $"SpotIsValid: {__instance.SpotIsValid(coordinates, resourcePrefabName)}\n" +
-    //            $"IsUnobstructed: {__instance.IsUnobstructed(coordinates, blocks)}");
-    //    }
-    //}
+    [HarmonyPatch(typeof(SpawnValidationService), nameof(SpawnValidationService.CanSpawn))]
+    class SpawnValidationServiceCanSpawnPatcher
+    {
+        static void Postfix(SpawnValidationService __instance, bool __result, Vector3Int coordinates, Blocks blocks, string resourcePrefabName)
+        {
+            Plugin.LogWarning($"Trying to spawn {resourcePrefabName} at {coordinates}: {__result}\n" +
+                $"IsSuitableTerrain: {__instance.IsSuitableTerrain(coordinates)}\n" +
+                $"SpotIsValid: {__instance.SpotIsValid(coordinates, resourcePrefabName)}\n" +
+                $"IsUnobstructed: {__instance.IsUnobstructed(coordinates, blocks)}");
+        }
+    }
 
     #endregion
 
