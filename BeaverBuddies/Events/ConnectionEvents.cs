@@ -18,8 +18,7 @@ namespace BeaverBuddies.Events
 
         public override void Replay(IReplayContext context)
         {
-            UnityEngine.Random.InitState(seed);
-            Plugin.Log($"Setting seed to {seed}; s0 = {UnityEngine.Random.state.s0}");
+            DeterminismService.InitRandomState(seed, "Client Connect");
 
             if (context != null)
             {

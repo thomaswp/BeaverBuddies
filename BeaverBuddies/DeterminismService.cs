@@ -149,8 +149,7 @@ namespace BeaverBuddies
             // Deterministic seed set before the game is ever loaded,
             // since some components call Random during load and before
             // the Client can receive a seed
-            Plugin.Log("Setting pre-load random state");
-            UnityEngine.Random.InitState(42);
+            InitRandomState(42, "Pre-load");
         }
 
         public void ClearRandomStacks()
@@ -285,6 +284,12 @@ namespace BeaverBuddies
             
             Plugin.LogWarning("Unknown random called outside of tick");
             Plugin.LogStackTrace();
+        }
+
+        public static void InitRandomState(int state, string reason)
+        {
+            UnityEngine.Random.InitState(state);
+            Plugin.Log($"[{reason}]: Initializing random with state: {state.ToString("X8")}");
         }
     }
 
@@ -724,11 +729,25 @@ namespace BeaverBuddies
     [HarmonyPatch(typeof(Guid), nameof(Guid.NewGuid))]
     public class GuidPatcher
     {
+        private static bool makeRealGuid = false;
+
+        public static Guid RealNewGuid()
+        {
+            makeRealGuid = true;
+            Guid guid = Guid.NewGuid();
+            makeRealGuid = false;
+            return guid;
+        }
+
         static bool Prefix(ref Guid __result)
         {
 #if NO_RANDOM
             __result = GenerateIncrementally();
 #else
+            if (makeRealGuid)
+            {
+                return true;
+            }
             __result = GenerateWithUnityRandom();
 #endif
             if (ReplayService.IsLoaded)
