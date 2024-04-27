@@ -781,9 +781,25 @@ namespace BeaverBuddies
     [HarmonyPatch(typeof(EntityService), nameof(EntityService.Instantiate), typeof(BaseComponent), typeof(Guid))]
     static class EntityComponentInstantiatePatcher
     {
-        static void Postfix()
+        static void Prefix(EntityService __instance, BaseComponent prefab, ref Guid id)
         {
             if (EventIO.IsNull) return;
+            // During preloading, a GUID can be generated that already exists in 
+            // the save, so this guards against duplicate GUIDs.
+            // It should not happen repeatedly, but we max out (and error) if it goes
+            // over 100 times.
+            for (int i = 0; i < 100; i++)
+            {
+                var existingEntity = __instance._entityRegistry.GetEntity(id);
+                if (existingEntity == null) break;
+                if (ReplayService.IsLoaded)
+                {
+                    // We only log a warning if loaded, since we do expect this to happen
+                    // sometimes during preloading.
+                    Plugin.LogWarning($"Duplicate GUID {id} detected, generating new GUID. Attempt #{i}.");
+                }
+                id = Guid.NewGuid();
+            }
             TickingService ts = GetSingleton<TickingService>();
             if (ts != null )
             {
@@ -795,6 +811,7 @@ namespace BeaverBuddies
                 // entities created.
                 ts.ShouldInterruptTicking = true;
             }
+            return;
         }
     }
 
