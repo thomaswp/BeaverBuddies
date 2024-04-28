@@ -1,6 +1,6 @@
 ﻿// Define to force game to run a full tick each
 // update, rather than amortizing ticks over multiple.
-#define ONE_TICK_PER_UPDATE
+//#define ONE_TICK_PER_UPDATE
 
 using HarmonyLib;
 using System;

@@ -211,10 +211,10 @@ namespace BeaverBuddies
                 {
                     // TODO: Make only in "dev mode"
                     //lastRandomStackTraces.Add(new StackTrace());
-                    Plugin.Log("s0 before: " + UnityEngine.Random.state.s0.ToString("X8"));
-                    var entity = TickableEntityTickPatcher.currentlyTickingEntity;
-                    Plugin.Log($"Last entity: {entity?.name} - {entity?.EntityId}");
-                    Plugin.LogStackTrace();
+                    //Plugin.Log("s0 before: " + UnityEngine.Random.state.s0.ToString("X8"));
+                    //var entity = TickableEntityTickPatcher.currentlyTickingEntity;
+                    //Plugin.Log($"Last entity: {entity?.name} - {entity?.EntityId}");
+                    //Plugin.LogStackTrace();
                     return false;
                 }
 
@@ -1110,17 +1110,17 @@ namespace BeaverBuddies
     //    }
     //}
 
-    [HarmonyPatch(typeof(SpawnValidationService), nameof(SpawnValidationService.CanSpawn))]
-    class SpawnValidationServiceCanSpawnPatcher
-    {
-        static void Postfix(SpawnValidationService __instance, bool __result, Vector3Int coordinates, Blocks blocks, string resourcePrefabName)
-        {
-            Plugin.LogWarning($"Trying to spawn {resourcePrefabName} at {coordinates}: {__result}\n" +
-                $"IsSuitableTerrain: {__instance.IsSuitableTerrain(coordinates)}\n" +
-                $"SpotIsValid: {__instance.SpotIsValid(coordinates, resourcePrefabName)}\n" +
-                $"IsUnobstructed: {__instance.IsUnobstructed(coordinates, blocks)}");
-        }
-    }
+    //[HarmonyPatch(typeof(SpawnValidationService), nameof(SpawnValidationService.CanSpawn))]
+    //class SpawnValidationServiceCanSpawnPatcher
+    //{
+    //    static void Postfix(SpawnValidationService __instance, bool __result, Vector3Int coordinates, Blocks blocks, string resourcePrefabName)
+    //    {
+    //        Plugin.LogWarning($"Trying to spawn {resourcePrefabName} at {coordinates}: {__result}\n" +
+    //            $"IsSuitableTerrain: {__instance.IsSuitableTerrain(coordinates)}\n" +
+    //            $"SpotIsValid: {__instance.SpotIsValid(coordinates, resourcePrefabName)}\n" +
+    //            $"IsUnobstructed: {__instance.IsUnobstructed(coordinates, blocks)}");
+    //    }
+    //}
 
     #endregion
 
