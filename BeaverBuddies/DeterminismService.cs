@@ -784,6 +784,9 @@ namespace BeaverBuddies
         static void Prefix(EntityService __instance, BaseComponent prefab, ref Guid id)
         {
             if (EventIO.IsNull) return;
+
+            var replayService = GetSingleton<ReplayService>();
+
             // During preloading, a GUID can be generated that already exists in 
             // the save, so this guards against duplicate GUIDs.
             // It should not happen repeatedly, but we max out (and error) if it goes
@@ -792,11 +795,16 @@ namespace BeaverBuddies
             {
                 var existingEntity = __instance._entityRegistry.GetEntity(id);
                 if (existingEntity == null) break;
-                if (ReplayService.IsLoaded)
+                string logMessage = $"Duplicate GUID {id} detected, generating new GUID. Attempt #{i}.";
+                if (replayService != null && replayService.TicksSinceLoad > 0)
                 {
                     // We only log a warning if loaded, since we do expect this to happen
                     // sometimes during preloading.
-                    Plugin.LogWarning($"Duplicate GUID {id} detected, generating new GUID. Attempt #{i}.");
+                    Plugin.LogWarning(logMessage);
+                }
+                else
+                {
+                    Plugin.Log(logMessage);
                 }
                 id = Guid.NewGuid();
             }
