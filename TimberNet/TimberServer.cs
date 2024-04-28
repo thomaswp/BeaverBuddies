@@ -57,14 +57,19 @@ namespace TimberNet
             
             Task.Run(() =>
             {
+                // TODO: I have a suspicion that this while plus the catch/continue below
+                // is responsible for the server hanging sometimes on a connection that's dropped.
+                // Logging now to see if I can catch it.
                 while (!IsStopped)
                 {
                     TcpClient client;
                     try
                     {
                         client = listener.AcceptTcpClient();
-                    } catch
+                    } catch (Exception e)
                     {
+                        Log("Error accepting client.");
+                        Log(e.StackTrace);
                         continue;
                     }
                     Task.Run(async () =>
@@ -125,6 +130,7 @@ namespace TimberNet
             NetworkStream stream = client.GetStream();
 
             Task<byte[]> task = mapProvider();
+            Log("Waiting for map...");
             byte[] mapBytes = await task;
             Log($"Sending map with length {mapBytes.Length}");
 

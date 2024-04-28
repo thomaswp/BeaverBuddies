@@ -82,6 +82,9 @@ namespace BeaverBuddies
 
         private List<object> singletons = new();
 
+        // TODO: I believe that this could be a non-static variable
+        // set at initialization time, which would prevent accidentally
+        // accessing a new game's event IO.
         private EventIO io => EventIO.Get();
 
         private int ticksSinceLoad = 0;
@@ -102,6 +105,7 @@ namespace BeaverBuddies
 
         public void Reset()
         {
+            Plugin.Log("Resetting Replay Service...");
             IsLoaded = false;
             IsReplayingEvents = false;
             isReset = true;
@@ -409,7 +413,6 @@ namespace BeaverBuddies
                 Initialize();
                 waitUpdates = -1;
             }
-            // Only say IsLoaded if io exists
             io.Update();
             // Only replay events on Update if we're paused by the user.
             // Also only send events if paused, so the client doesn't play

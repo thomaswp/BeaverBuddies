@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BeaverBuddies
 {
-    public class SingletonManager
+    public static class SingletonManager
     {
         private static Dictionary<Type, object> map = new Dictionary<Type, object>();
 
