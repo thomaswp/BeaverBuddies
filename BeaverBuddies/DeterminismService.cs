@@ -149,8 +149,7 @@ namespace BeaverBuddies
             // Deterministic seed set before the game is ever loaded,
             // since some components call Random during load and before
             // the Client can receive a seed
-            Plugin.Log("Setting pre-load random state");
-            UnityEngine.Random.InitState(42);
+            InitRandomState(42, "Pre-load");
         }
 
         public void ClearRandomStacks()
@@ -285,6 +284,12 @@ namespace BeaverBuddies
             
             Plugin.LogWarning("Unknown random called outside of tick");
             Plugin.LogStackTrace();
+        }
+
+        public static void InitRandomState(int state, string reason)
+        {
+            UnityEngine.Random.InitState(state);
+            Plugin.Log($"[{reason}]: Initializing random with state: {state.ToString("X8")}");
         }
     }
 
@@ -724,11 +729,25 @@ namespace BeaverBuddies
     [HarmonyPatch(typeof(Guid), nameof(Guid.NewGuid))]
     public class GuidPatcher
     {
+        private static bool makeRealGuid = false;
+
+        public static Guid RealNewGuid()
+        {
+            makeRealGuid = true;
+            Guid guid = Guid.NewGuid();
+            makeRealGuid = false;
+            return guid;
+        }
+
         static bool Prefix(ref Guid __result)
         {
 #if NO_RANDOM
             __result = GenerateIncrementally();
 #else
+            if (makeRealGuid)
+            {
+                return true;
+            }
             __result = GenerateWithUnityRandom();
 #endif
             if (ReplayService.IsLoaded)
@@ -762,9 +781,33 @@ namespace BeaverBuddies
     [HarmonyPatch(typeof(EntityService), nameof(EntityService.Instantiate), typeof(BaseComponent), typeof(Guid))]
     static class EntityComponentInstantiatePatcher
     {
-        static void Postfix()
+        static void Prefix(EntityService __instance, BaseComponent prefab, ref Guid id)
         {
             if (EventIO.IsNull) return;
+
+            var replayService = GetSingleton<ReplayService>();
+
+            // During preloading, a GUID can be generated that already exists in 
+            // the save, so this guards against duplicate GUIDs.
+            // It should not happen repeatedly, but we max out (and error) if it goes
+            // over 100 times.
+            for (int i = 0; i < 100; i++)
+            {
+                var existingEntity = __instance._entityRegistry.GetEntity(id);
+                if (existingEntity == null) break;
+                string logMessage = $"Duplicate GUID {id} detected, generating new GUID. Attempt #{i}.";
+                if (replayService != null && replayService.TicksSinceLoad > 0)
+                {
+                    // We only log a warning if loaded, since we do expect this to happen
+                    // sometimes during preloading.
+                    Plugin.LogWarning(logMessage);
+                }
+                else
+                {
+                    Plugin.Log(logMessage);
+                }
+                id = Guid.NewGuid();
+            }
             TickingService ts = GetSingleton<TickingService>();
             if (ts != null )
             {
@@ -776,6 +819,7 @@ namespace BeaverBuddies
                 // entities created.
                 ts.ShouldInterruptTicking = true;
             }
+            return;
         }
     }
 

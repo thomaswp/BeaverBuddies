@@ -371,6 +371,27 @@ namespace BeaverBuddies
             SendEvents();
         }
 
+        private void Initialize()
+        {
+            // Initialize the random state to a truly random number after the game
+            // is fully loaded to avoid collisions of Guids from the prior save
+            Guid guidSeed = GuidPatcher.RealNewGuid();
+            int state = guidSeed.GetHashCode();
+            DeterminismService.InitRandomState(state, "ReplayService.Initialize");
+
+            // Shorthand for "is server"
+            if (io != null && io.ShouldSendHeartbeat)
+            {
+                // In case there are clients who joined immediately and have already loaded
+                // the game, we need to resend the initial state, to ensure that random seeds
+                // are synced, since they'll have already received their initialization event
+                // that was send on join, and it's out of date.
+                EnqueueEventForSending(InitializeClientEvent.CreateAndExecute(ticksSinceLoad));
+            }
+
+            IsLoaded = true;
+        }
+
         // TODO: Find a better callback way of waiting until initial game
         // loading and randomization is done.
         private int waitUpdates = 2;
@@ -385,20 +406,8 @@ namespace BeaverBuddies
             }
             if (waitUpdates == 0)
             {
-                //Plugin.Log("Setting random state to 1234");
-
-                // Shorthand for "is server"
-                if (io != null && io.ShouldSendHeartbeat)
-                {
-                    // In case there are clients who joined immediately and have already loaded
-                    // the game, we need to resend the initial state, to ensure that random seeds
-                    // are synced, since they'll have already received their initialization event
-                    // that was send on join, and it's out of date.
-                    EnqueueEventForSending(InitializeClientEvent.CreateAndExecute(ticksSinceLoad));
-                }
-                
+                Initialize();
                 waitUpdates = -1;
-                IsLoaded = true;
             }
             // Only say IsLoaded if io exists
             io.Update();
