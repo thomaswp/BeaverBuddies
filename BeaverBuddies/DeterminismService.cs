@@ -1041,58 +1041,58 @@ namespace BeaverBuddies
     }
 
     #region NR_SPAWN_LOGGING
-    //[HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.MarkSpots))]
-    //class NRPMarkSpotsPatcher
-    //{
-    //    private static int lastCount;
-    //    static void Prefix(NaturalResourceReproducer __instance, Reproducible reproducible)
-    //    {
-    //        if (!ReplayService.IsLoaded) return;
-    //        var key = ReproducibleKey.Create(reproducible);
-    //        lastCount = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0;
-    //        Plugin.Log($"Marking spots for   {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
-    //    }
+    [HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.MarkSpots))]
+    class NRPMarkSpotsPatcher
+    {
+        private static int lastCount;
+        static void Prefix(NaturalResourceReproducer __instance, Reproducible reproducible)
+        {
+            if (!ReplayService.IsLoaded) return;
+            var key = ReproducibleKey.Create(reproducible);
+            lastCount = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0;
+            Plugin.Log($"Marking spots for   {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
+        }
 
-    //    static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
-    //    {
-    //        if (!ReplayService.IsLoaded) return;
-    //        var key = ReproducibleKey.Create(reproducible);
-    //        int count = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0; Plugin.Log($"{lastCount} --> {count}");
-    //        //Plugin.LogStackTrace();
-    //    }
-    //}
+        static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
+        {
+            if (!ReplayService.IsLoaded) return;
+            var key = ReproducibleKey.Create(reproducible);
+            int count = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0; Plugin.Log($"{lastCount} --> {count}");
+            //Plugin.LogStackTrace();
+        }
+    }
 
-    //[HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.UnmarkSpots))]
-    //class NRPUnmarkSpotsPatcher
-    //{
-    //    private static int lastCount;
-    //    static void Prefix(NaturalResourceReproducer __instance, Reproducible reproducible)
-    //    {
-    //        if (!ReplayService.IsLoaded) return;
-    //        var key = ReproducibleKey.Create(reproducible);
-    //        lastCount = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0; if (!ReplayService.IsLoaded) return;
-    //        Plugin.Log($"Unmarking spots for   {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
-    //    }
+    [HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.UnmarkSpots))]
+    class NRPUnmarkSpotsPatcher
+    {
+        private static int lastCount;
+        static void Prefix(NaturalResourceReproducer __instance, Reproducible reproducible)
+        {
+            if (!ReplayService.IsLoaded) return;
+            var key = ReproducibleKey.Create(reproducible);
+            lastCount = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0; if (!ReplayService.IsLoaded) return;
+            Plugin.Log($"Unmarking spots for   {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
+        }
 
-    //    static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
-    //    {
-    //        if (!ReplayService.IsLoaded) return;
-    //        var key = ReproducibleKey.Create(reproducible);
-    //        int count = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0;
-    //        Plugin.Log($"{lastCount} --> {count}");
-    //        //Plugin.LogStackTrace();
-    //    }
-    //}
+        static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
+        {
+            if (!ReplayService.IsLoaded) return;
+            var key = ReproducibleKey.Create(reproducible);
+            int count = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0;
+            Plugin.Log($"{lastCount} --> {count}");
+            //Plugin.LogStackTrace();
+        }
+    }
 
-    //[HarmonyPatch(typeof(TimeTriggerService), nameof(TimeTriggerService.Add))]
-    //class TimeTriggerServiceAddPatcher
-    //{
-    //    static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger, float triggerTimestamp)
-    //    {
-    //        //if (!ReplayService.IsLoaded) return;
-    //        Plugin.Log($"Adding time trigger at {__instance._nextId}-{triggerTimestamp}");
-    //    }
-    //}
+    [HarmonyPatch(typeof(TimeTriggerService), nameof(TimeTriggerService.Add))]
+    class TimeTriggerServiceAddPatcher
+    {
+        static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger, float triggerTimestamp)
+        {
+            //if (!ReplayService.IsLoaded) return;
+            Plugin.Log($"Adding time trigger at {__instance._nextId}-{triggerTimestamp}");
+        }
+    }
 
     //[HarmonyPatch(typeof(TimeTriggerService), nameof(TimeTriggerService.Trigger), typeof(TimeTrigger))]
     //class TimeTriggerServiceTriggerPatcher
