@@ -1,4 +1,8 @@
-﻿using HarmonyLib;
+﻿// Define to force game to run a full tick each
+// update, rather than amortizing ticks over multiple.
+//#define ONE_TICK_PER_UPDATE
+
+using HarmonyLib;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -27,6 +31,7 @@ using BeaverBuddies.Events;
 using static Timberborn.TickSystem.TickableSingletonService;
 using static BeaverBuddies.SingletonManager;
 using BeaverBuddies.Connect;
+using static UnityEngine.ParticleSystem.PlaybackState;
 
 namespace BeaverBuddies
 {
@@ -77,6 +82,9 @@ namespace BeaverBuddies
 
         private List<object> singletons = new();
 
+        // TODO: I believe that this could be a non-static variable
+        // set at initialization time, which would prevent accidentally
+        // accessing a new game's event IO.
         private EventIO io => EventIO.Get();
 
         private int ticksSinceLoad = 0;
@@ -97,6 +105,7 @@ namespace BeaverBuddies
 
         public void Reset()
         {
+            Plugin.Log("Resetting Replay Service...");
             IsLoaded = false;
             IsReplayingEvents = false;
             isReset = true;
@@ -295,6 +304,9 @@ namespace BeaverBuddies
         {
             if (IsDesynced) return;
 
+            DeterminismService determinismService = SingletonManager.GetSingleton<DeterminismService>();
+            determinismService.PrintRandomStacks();
+
             ClientDesyncedEvent e = new ClientDesyncedEvent();
             // Set IsDesynced to true so event play instead of sending
             // to the host, allowing the Client to continue play.
@@ -363,6 +375,27 @@ namespace BeaverBuddies
             SendEvents();
         }
 
+        private void Initialize()
+        {
+            // Initialize the random state to a truly random number after the game
+            // is fully loaded to avoid collisions of Guids from the prior save
+            Guid guidSeed = GuidPatcher.RealNewGuid();
+            int state = guidSeed.GetHashCode();
+            DeterminismService.InitRandomState(state, "ReplayService.Initialize");
+
+            // Shorthand for "is server"
+            if (io != null && io.ShouldSendHeartbeat)
+            {
+                // In case there are clients who joined immediately and have already loaded
+                // the game, we need to resend the initial state, to ensure that random seeds
+                // are synced, since they'll have already received their initialization event
+                // that was send on join, and it's out of date.
+                EnqueueEventForSending(InitializeClientEvent.CreateAndExecute(ticksSinceLoad));
+            }
+
+            IsLoaded = true;
+        }
+
         // TODO: Find a better callback way of waiting until initial game
         // loading and randomization is done.
         private int waitUpdates = 2;
@@ -377,22 +410,9 @@ namespace BeaverBuddies
             }
             if (waitUpdates == 0)
             {
-                //Plugin.Log("Setting random state to 1234");
-
-                // Shorthand for "is server"
-                if (io != null && io.ShouldSendHeartbeat)
-                {
-                    // In case there are clients who joined immediately and have already loaded
-                    // the game, we need to resend the initial state, to ensure that random seeds
-                    // are synced, since they'll have already received their initialization event
-                    // that was send on join, and it's out of date.
-                    EnqueueEventForSending(InitializeClientEvent.CreateAndExecute(ticksSinceLoad));
-                }
-                
+                Initialize();
                 waitUpdates = -1;
-                IsLoaded = true;
             }
-            // Only say IsLoaded if io exists
             io.Update();
             // Only replay events on Update if we're paused by the user.
             // Also only send events if paused, so the client doesn't play
@@ -409,7 +429,7 @@ namespace BeaverBuddies
             TargetSpeed = speed;
             // If we're paused, we should interrupt the ticking, so we end
             // before more of the tick happens.
-            _tickingService.ShouldInterruptTicking = speed == 0;
+            _tickingService.ShouldStopTicking = speed == 0;
             UpdateSpeed();
         }
 
@@ -510,6 +530,17 @@ namespace BeaverBuddies
 
     public class TickingService : RegisteredSingleton
     {
+        /// <summary>
+        /// If true, the TickingService will stop as soon as possible (interrupting
+        /// a normal update, but finishing it's current bucket) and stop ticking
+        /// until set to false.
+        /// </summary>
+        public bool ShouldStopTicking { get; set; } = false;
+        /// <summary>
+        /// If true, the TickingService will stop as soon as possible (interrupting
+        /// a normal update, but finishing it's current bucket), but it will then resume
+        /// on the following update.
+        /// </summary>
         public bool ShouldInterruptTicking { get; set; } = false;
         public bool ShouldCompleteFullTick { get; private set; } = false;
 
@@ -535,6 +566,9 @@ namespace BeaverBuddies
 
         internal void OnTickingCompleted()
         {
+            // Interruptions are always temporary and get reset at the end of
+            // each ticking update
+            ShouldInterruptTicking = false;
             if (!ShouldCompleteFullTick) return;
             Plugin.Log($"Finished full tick; calling {onCompletedFullTick.Count} callbacks");
             foreach (var action in onCompletedFullTick)
@@ -549,7 +583,7 @@ namespace BeaverBuddies
         {
 
             // Never tick if we've been interrupted by a forced pause
-            if (ShouldInterruptTicking) return false;
+            if (ShouldStopTicking || ShouldInterruptTicking) return false;
 
             // If we need to complete a full tick, make sure to go exactly until
             // the end of this tick, to ensure an update follows immediately.
@@ -574,6 +608,8 @@ namespace BeaverBuddies
                 // ticked the ReplayService...
                 if (!HasTickedReplayService)
                 {
+                    // First finish any parallel ticks
+                    __instance._tickableSingletonService.FinishParallelTick();
                     // Tick it and stop
                     HasTickedReplayService = true;
                     replayService?.DoTick();
@@ -596,11 +632,13 @@ namespace BeaverBuddies
             // Alternatively, I think that we could use the ReplayService version
             // that only stops ticking if not paused
 
+#if ONE_TICK_PER_UPDATE
             // Forces 1 tick per update
-            //if (numberOfBucketsToTick != 0)
-            //{
-            //numberOfBucketsToTick = __instance.NumberOfBuckets + 1;
-            //}
+            if (numberOfBucketsToTick != 0)
+            {
+                numberOfBucketsToTick = __instance.NumberOfBuckets + 1;
+            }
+#endif
 
             while (ShouldTick(__instance, numberOfBucketsToTick--))
             {
@@ -630,15 +668,6 @@ namespace BeaverBuddies
             TickingService ts = GetSingleton<TickingService>();
             if (ts == null) return true;
             return ts.TickBuckets(__instance, numberOfBucketsToTick);
-        }
-    }
-
-    [HarmonyPatch(typeof(EntityService), nameof(EntityService.Instantiate), typeof(BaseComponent), typeof(Guid))]
-    static class EntityComponentInstantiatePatcher
-    {
-        static void Postfix()
-        {
-            GetSingleton<TickingService>()?.FinishFullTick();
         }
     }
 }

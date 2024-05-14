@@ -757,3 +757,10 @@ Timberborn.WorkshopsUI.ProductivityBatchControlRowItem:
 Timberborn.WorkSystemUI.WorkplaceBatchControlRowItem:
 Timberborn.WorkSystemUI.WorkplacePriorityBatchControlRowItem:
 Timberborn.WorkSystemUI.WorkplaceWorkerTypeBatchControlRowItem:
+
+
+Classes inhereting: IParallelTickableSingleton
+Timberborn.SimulationSystem.SimulationController:
+Timberborn.SoilContaminationSystem.SoilContaminationSimulationController:
+Timberborn.SoilMoistureSystem.SoilMoistureSimulationController:
+Timberborn.WaterSystem.WaterSimulationController:

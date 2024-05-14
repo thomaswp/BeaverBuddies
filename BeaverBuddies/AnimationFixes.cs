@@ -1,14 +1,14 @@
-﻿using HarmonyLib;
-using Timberborn.Beavers;
-using Timberborn.CharacterModelSystem;
+﻿//# define NO_SMOOTH_ANIMATION
+
+using HarmonyLib;
 using Timberborn.CharacterMovementSystem;
-using Timberborn.Characters;
 using Timberborn.EntitySystem;
-using Timberborn.WorkSystem;
+using Timberborn.WaterSystem;
 using UnityEngine;
 
 namespace BeaverBuddies
 {
+#if !NO_SMOOTH_ANIMATION
     [ManualMethodOverwrite]
     [HarmonyPatch(typeof(MovementAnimator), nameof(MovementAnimator.Update), typeof(float))]
     public class AnimatedPathFollowerUpdatePathcer
@@ -68,6 +68,23 @@ namespace BeaverBuddies
 
             // We've replaced the original method, so skip it
             return false;
+        }
+    }
+#endif
+
+    // It's not clear at all why I get IndexOutOfBounds errors here from the SimmingAnimator
+    // but I do, so patching this to do a bounds check.
+    [HarmonyPatch(typeof(ThreadSafeWaterMap), nameof(ThreadSafeWaterMap.WaterHeight))]
+    class ThreadSafeWaterMapWaterHeightPatcher
+    {
+        static bool Prefix(ThreadSafeWaterMap __instance, int index, ref float __result)
+        {
+            if (index < 0 || index >= __instance._waterDepths.Length)
+            {
+                __result = -1f;
+                return false;
+            }
+            return true;
         }
     }
 }

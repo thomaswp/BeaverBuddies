@@ -1,17 +1,8 @@
 ﻿using BeaverBuddies.Connect;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using TimberApi;
-using Timberborn.Autosaving;
 using Timberborn.Core;
 using Timberborn.CoreUI;
-using Timberborn.GameSaveRepositorySystem;
-using Timberborn.GameSaveRuntimeSystem;
-using Timberborn.GameSaveRuntimeSystemUI;
-using Timberborn.SettlementNameSystem;
-using Timberborn.SingletonSystem;
-using Timberborn.TimeSystem;
 
 namespace BeaverBuddies.Events
 {
@@ -27,8 +18,7 @@ namespace BeaverBuddies.Events
 
         public override void Replay(IReplayContext context)
         {
-            UnityEngine.Random.InitState(seed);
-            Plugin.Log($"Setting seed to {seed}; s0 = {UnityEngine.Random.state.s0}");
+            DeterminismService.InitRandomState(seed, "Client Connect");
 
             if (context != null)
             {
