@@ -1065,7 +1065,7 @@ namespace BeaverBuddies
                 //    .FirstOrDefault();
                 // END PATCH
                 Enterer enterer = __instance._unassignedEnterers.First();
-                Plugin.Log(enterer.GetComponentFast<EntityComponent>()?.EntityId?.ToString());
+                Plugin.Log(enterer.GetComponentFast<EntityComponent>().EntityId.ToString());
                 __instance._unassignedEnterers.Remove(enterer);
                 __instance.AddEnterer(enterer);
             }
