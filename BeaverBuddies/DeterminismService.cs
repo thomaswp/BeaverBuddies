@@ -1090,6 +1090,7 @@ namespace BeaverBuddies
         static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger, float triggerTimestamp)
         {
             //if (!ReplayService.IsLoaded) return;
+            Plugin.LogStackTrace();
             Plugin.Log($"Adding time trigger at {__instance._nextId}-{triggerTimestamp}; gameplay = {!DeterminismService.IsNonGameplay}");
         }
     }
