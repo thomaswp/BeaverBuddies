@@ -1070,7 +1070,7 @@ namespace BeaverBuddies
                         .Select(e => e.GetComponentFast<EntityComponent>().EntityId)
                         .OrderBy(e => e)
                         );
-                Plugin.Log(available);
+                Plugin.Log($"Selecting from: {available}");
                 Plugin.Log(enterer.GetComponentFast<EntityComponent>().EntityId.ToString());
                 __instance._unassignedEnterers.Remove(enterer);
                 __instance.AddEnterer(enterer);
