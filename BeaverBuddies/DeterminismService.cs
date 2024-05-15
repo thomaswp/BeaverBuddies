@@ -1049,27 +1049,27 @@ namespace BeaverBuddies
         }
     }
 
-    [HarmonyPatch(typeof(SlotManager), nameof(SlotManager.AssignFirstUnassigned))]
-    [ManualMethodOverwrite]
-    class SlotManagerAssignFirstUnassignedPatcher
-    {
-        static bool Prefix(SlotManager __instance)
-        {
-            if (__instance._unassignedEnterers.Count > 0)
-            {
-                // PATCH
-                // HashSet.First() is not deterministic, so we use a sorted list instead
-                // TODO: This is slow so optimize if it helps
-                Enterer enterer = __instance._unassignedEnterers
-                    .OrderBy(e => e.GetComponentFast<EntityComponent>().EntityId)
-                    .FirstOrDefault();
-                // END PATCH
-                __instance._unassignedEnterers.Remove(enterer);
-                __instance.AddEnterer(enterer);
-            }
-            return false;
-        }
-    }
+    //[HarmonyPatch(typeof(SlotManager), nameof(SlotManager.AssignFirstUnassigned))]
+    //[ManualMethodOverwrite]
+    //class SlotManagerAssignFirstUnassignedPatcher
+    //{
+    //    static bool Prefix(SlotManager __instance)
+    //    {
+    //        if (__instance._unassignedEnterers.Count > 0)
+    //        {
+    //            // PATCH
+    //            // HashSet.First() is not deterministic, so we use a sorted list instead
+    //            // TODO: This is slow so optimize if it helps
+    //            Enterer enterer = __instance._unassignedEnterers
+    //                .OrderBy(e => e.GetComponentFast<EntityComponent>().EntityId)
+    //                .FirstOrDefault();
+    //            // END PATCH
+    //            __instance._unassignedEnterers.Remove(enterer);
+    //            __instance.AddEnterer(enterer);
+    //        }
+    //        return false;
+    //    }
+    //}
 
     // Not currently used - doesn't seem to work
     class EnumerableFirstPatcher
