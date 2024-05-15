@@ -185,6 +185,12 @@ namespace BeaverBuddies
             return determinismService?.ShouldFreezeSeed ?? false;
         }
 
+        /// <summary>
+        /// Returns true if the game's random seed should be "frozen," meaning
+        /// a non-game RNG should be used instead.
+        /// In essence this returns true if we think a random call right now
+        /// is unrelated to gameplay and does not need to be synced.
+        /// </summary>
         private bool ShouldFreezeSeed 
         {
             get
@@ -1090,8 +1096,8 @@ namespace BeaverBuddies
         static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger, float triggerTimestamp)
         {
             //if (!ReplayService.IsLoaded) return;
-            if (DeterminismService.ShouldUseNonGameRNG()) return;
-            Plugin.Log($"Adding time trigger at {__instance._nextId}-{triggerTimestamp}; gameplay = {!DeterminismService.ShouldUseNonGameRNG()}");
+
+            Plugin.Log($"Adding time trigger at {__instance._nextId}-{triggerTimestamp}; ticking: {DeterminismService.IsTicking}");
         }
     }
 
