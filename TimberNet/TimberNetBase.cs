@@ -346,7 +346,7 @@ namespace TimberNet
          */
         public virtual List<JObject> ReadEvents(int ticksSinceLoad)
         {
-            if (ticksSinceLoad != TickCount) Log($"Setting ticks from {TickCount} to {ticksSinceLoad}");
+            //if (ticksSinceLoad != TickCount) Log($"Setting ticks from {TickCount} to {ticksSinceLoad}");
             TickCount = ticksSinceLoad;
             Update();
             List<JObject> toProcess = PopEventsToProcess(receivedEvents);
