@@ -217,10 +217,10 @@ namespace BeaverBuddies
                 {
                     // TODO: Make only in "dev mode"
                     //lastRandomStackTraces.Add(new StackTrace());
-                    //Plugin.Log("s0 before: " + UnityEngine.Random.state.s0.ToString("X8"));
-                    //var entity = TickableEntityTickPatcher.currentlyTickingEntity;
-                    //Plugin.Log($"Last entity: {entity?.name} - {entity?.EntityId}");
-                    //Plugin.LogStackTrace();
+                    Plugin.Log("s0 before: " + UnityEngine.Random.state.s0.ToString("X8"));
+                    var entity = TickableEntityTickPatcher.currentlyTickingEntity;
+                    Plugin.Log($"Last entity: {entity?.name} - {entity?.EntityId}");
+                    Plugin.LogStackTrace();
                     return false;
                 }
 
@@ -1095,8 +1095,10 @@ namespace BeaverBuddies
     {
         static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger, float triggerTimestamp)
         {
-            //if (!ReplayService.IsLoaded) return;
-
+            // Remove this to see loading timers; should be deterministic now but could test
+            // in the future if something's not working. For now this removes triggers that
+            // aren't a part of tick logic and *shouldn't* affect gameplay.
+            if (!DeterminismService.IsTicking) return;
             Plugin.Log($"Adding time trigger at {__instance._nextId}-{triggerTimestamp}; ticking: {DeterminismService.IsTicking}");
         }
     }
