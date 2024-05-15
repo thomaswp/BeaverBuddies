@@ -49,6 +49,7 @@ using Timberborn.TimeSystem;
 using Timberborn.BaseComponentSystem;
 using Timberborn.SlotSystem;
 using Timberborn.EnterableSystem;
+using System.Collections;
 
 namespace BeaverBuddies
 {
@@ -175,8 +176,8 @@ namespace BeaverBuddies
                 return getter();
             }
             finally
-            { 
-                IsNonGameplay = false; 
+            {
+                IsNonGameplay = false;
             }
         }
 
@@ -193,7 +194,7 @@ namespace BeaverBuddies
         /// In essence this returns true if we think a random call right now
         /// is unrelated to gameplay and does not need to be synced.
         /// </summary>
-        private bool ShouldFreezeSeed 
+        private bool ShouldFreezeSeed
         {
             get
             {
@@ -289,7 +290,7 @@ namespace BeaverBuddies
         private void LogUnknownRandomCalled()
         {
             if (!ReplayService.IsLoaded) return;
-            
+
             Plugin.LogWarning("Unknown random called outside of tick");
             Plugin.LogStackTrace();
         }
@@ -465,7 +466,7 @@ namespace BeaverBuddies
         {
             if (blacklist.Contains(method.DeclaringType))
             {
-                for (int i =  0; i < __result.Length; i++)
+                for (int i = 0; i < __result.Length; i++)
                 {
                     if (__result[i] is RandomNumberGenerator)
                     {
@@ -597,20 +598,20 @@ namespace BeaverBuddies
         }
     }
 
-   // TODO: Timberborn.GameLibs is out of date. This should come from the WorkshopEffets namespace
-   // [HarmonyPatch(typeof(ObservatoryAnimator), nameof(ObservatoryAnimator.GenerateRandomAngles))]
-   // public class ObservatoryAnimatorGenerateRandomAnglesPatcher
-   // {
-   //     static void Prefix()
-   //     {
-   //         DeterminismController.SetNonGamePatcherActive(typeof(ObservatoryAnimatorGenerateRandomAnglesPatcher), true);
-   //     }
+    // TODO: Timberborn.GameLibs is out of date. This should come from the WorkshopEffets namespace
+    // [HarmonyPatch(typeof(ObservatoryAnimator), nameof(ObservatoryAnimator.GenerateRandomAngles))]
+    // public class ObservatoryAnimatorGenerateRandomAnglesPatcher
+    // {
+    //     static void Prefix()
+    //     {
+    //         DeterminismController.SetNonGamePatcherActive(typeof(ObservatoryAnimatorGenerateRandomAnglesPatcher), true);
+    //     }
 
-   //     static void Postfix()
-   //     {
-   //         DeterminismController.SetNonGamePatcherActive(typeof(ObservatoryAnimatorGenerateRandomAnglesPatcher), false);
-   //     }
-   // }
+    //     static void Postfix()
+    //     {
+    //         DeterminismController.SetNonGamePatcherActive(typeof(ObservatoryAnimatorGenerateRandomAnglesPatcher), false);
+    //     }
+    // }
 
     [HarmonyPatch(typeof(LoopingSoundPlayer), nameof(LoopingSoundPlayer.PlayLooping))]
     public class LoopingSoundPlayerPatcher
@@ -817,7 +818,7 @@ namespace BeaverBuddies
                 id = Guid.NewGuid();
             }
             TickingService ts = GetSingleton<TickingService>();
-            if (ts != null )
+            if (ts != null)
             {
                 // Interrupt immediately, so a frame passes before
                 // the next bucket is ticked, so the Entity is deterministically
@@ -1056,14 +1057,44 @@ namespace BeaverBuddies
         {
             if (__instance._unassignedEnterers.Count > 0)
             {
+                // PATCH
+                // HashSet.First() is not deterministic, so we use a sorted list instead
                 // TODO: This is slow so optimize if it helps
                 Enterer enterer = __instance._unassignedEnterers
                     .OrderBy(e => e.GetComponentFast<EntityComponent>().EntityId)
                     .FirstOrDefault();
+                // END PATCH
                 __instance._unassignedEnterers.Remove(enterer);
                 __instance.AddEnterer(enterer);
             }
             return false;
+        }
+    }
+
+    // Not currently used - doesn't seem to work
+    class EnumerableFirstPatcher
+    {
+        public static void CreatePatch(Harmony harmony)
+        {
+            var method = typeof(Enumerable)
+                .GetMethods(BindingFlags.Static | BindingFlags.Public)
+                .First(m => m.Name == "First" && m.GetParameters().Length == 1 && m.GetParameters()[0].ParameterType.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+
+            MethodInfo prefixMethod = typeof(EnumerableFirstPatcher).GetMethod(nameof(Prefix), BindingFlags.Static | BindingFlags.Public);
+
+            Plugin.Log(method.ToString());
+            Plugin.Log(prefixMethod.ToString());
+
+            harmony.Patch(method, new HarmonyMethod(prefixMethod));
+        }
+
+        // Prefix method must be static and match the signature expected by Harmony
+        public static bool Prefix<TSource>(IEnumerable<TSource> __instance)
+        {
+            Console.WriteLine("First method called");
+
+            // Returning true allows the original method to execute
+            return true;
         }
     }
 

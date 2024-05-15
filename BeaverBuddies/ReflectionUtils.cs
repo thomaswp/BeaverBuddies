@@ -41,10 +41,7 @@ namespace BeaverBuddies
         public static void FindStaticFields()
         {
             string targetNamespace = "TimberModTest";
-
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            // Get all types in the target namespace
-            var typesInNamespace = assemblies.SelectMany(a => a.GetTypes());
+            IEnumerable<Type> typesInNamespace = GetAllTypes();
             Plugin.Log("Types: " + typesInNamespace.Count());
             typesInNamespace = typesInNamespace
                 .Where(type => type.Namespace == targetNamespace);
@@ -67,6 +64,39 @@ namespace BeaverBuddies
                 {
                     // Print or process each static field
                     Plugin.Log($"Type: {type.Name}, Static Field: {field.Name}");
+                }
+            }
+        }
+
+        private static IEnumerable<Type> GetAllTypes()
+        {
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            // Get all types in the target namespace
+            var typesInNamespace = assemblies.SelectMany(a => a.GetTypes());
+            return typesInNamespace;
+        }
+
+        public static void FindHashSetFields()
+        {
+            // Get all types in the assembly
+            var types = GetAllTypes();
+
+            foreach (var type in types)
+            {
+                // Only consider classes
+                if (!type.IsClass)
+                    continue;
+
+                // Get all fields of the class
+                var fields = type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+
+                foreach (var field in fields)
+                {
+                    // Check if the field is of type HashSet<>
+                    if (field.FieldType.IsGenericType && field.FieldType.GetGenericTypeDefinition() == typeof(HashSet<>))
+                    {
+                        Console.WriteLine($"Class: {type.FullName}, Field: {field.Name}");
+                    }
                 }
             }
         }

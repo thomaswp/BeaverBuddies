@@ -70,6 +70,7 @@ namespace BeaverBuddies
             //ReflectionUtils.PrintChildClasses(typeof(IUpdateableBatchControlRowItem));
             //ReflectionUtils.PrintChildClasses(typeof(IParallelTickableSingleton));
             //ReflectionUtils.FindStaticFields();
+            //ReflectionUtils.FindHashSetFields();
         }
     }
 
@@ -96,6 +97,7 @@ namespace BeaverBuddies
 
             Harmony harmony = new Harmony(Guid);
             harmony.PatchAll();
+            //EnumerableFirstPatcher.CreatePatch(harmony);
             //DeterminismPatcher.PatchDeterminism(harmony);
         }
 
