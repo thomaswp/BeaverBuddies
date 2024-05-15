@@ -211,10 +211,10 @@ namespace BeaverBuddies
                 {
                     // TODO: Make only in "dev mode"
                     //lastRandomStackTraces.Add(new StackTrace());
-                    //Plugin.Log("s0 before: " + UnityEngine.Random.state.s0.ToString("X8"));
-                    //var entity = TickableEntityTickPatcher.currentlyTickingEntity;
-                    //Plugin.Log($"Last entity: {entity?.name} - {entity?.EntityId}");
-                    //Plugin.LogStackTrace();
+                    Plugin.Log("s0 before: " + UnityEngine.Random.state.s0.ToString("X8"));
+                    var entity = TickableEntityTickPatcher.currentlyTickingEntity;
+                    Plugin.Log($"Last entity: {entity?.name} - {entity?.EntityId}");
+                    Plugin.LogStackTrace();
                     return false;
                 }
 
@@ -1090,7 +1090,7 @@ namespace BeaverBuddies
         static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger, float triggerTimestamp)
         {
             //if (!ReplayService.IsLoaded) return;
-            Plugin.Log($"Adding time trigger at {__instance._nextId}-{triggerTimestamp}");
+            Plugin.Log($"Adding time trigger at {__instance._nextId}-{triggerTimestamp}; gameplay = {!DeterminismService.IsNonGameplay}");
         }
     }
 
