@@ -47,6 +47,8 @@ using System.Linq;
 using Timberborn.NaturalResourcesReproduction;
 using Timberborn.TimeSystem;
 using Timberborn.BaseComponentSystem;
+using Timberborn.SlotSystem;
+using Timberborn.EnterableSystem;
 
 namespace BeaverBuddies
 {
@@ -1042,6 +1044,25 @@ namespace BeaverBuddies
             }
             __instance.SpawnNewResources();
 
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(SlotManager), nameof(SlotManager.AssignFirstUnassigned))]
+    [ManualMethodOverwrite]
+    class SlotManagerAssignFirstUnassignedPatcher
+    {
+        static bool Prefix(SlotManager __instance)
+        {
+            if (__instance._unassignedEnterers.Count > 0)
+            {
+                // TODO: This is slow so optimize if it helps
+                Enterer enterer = __instance._unassignedEnterers
+                    .OrderBy(e => e.GetComponentFast<EntityComponent>().EntityId)
+                    .FirstOrDefault();
+                __instance._unassignedEnterers.Remove(enterer);
+                __instance.AddEnterer(enterer);
+            }
             return false;
         }
     }
