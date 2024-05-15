@@ -1060,10 +1060,12 @@ namespace BeaverBuddies
                 // PATCH
                 // HashSet.First() is not deterministic, so we use a sorted list instead
                 // TODO: This is slow so optimize if it helps
-                Enterer enterer = __instance._unassignedEnterers
-                    .OrderBy(e => e.GetComponentFast<EntityComponent>().EntityId)
-                    .FirstOrDefault();
+                //Enterer enterer = __instance._unassignedEnterers
+                //    .OrderBy(e => e.GetComponentFast<EntityComponent>().EntityId)
+                //    .FirstOrDefault();
                 // END PATCH
+                Enterer enterer = __instance._unassignedEnterers.First();
+                Plugin.Log(enterer.GetComponentFast<EntityComponent>()?.EntityId?.ToString());
                 __instance._unassignedEnterers.Remove(enterer);
                 __instance.AddEnterer(enterer);
             }
