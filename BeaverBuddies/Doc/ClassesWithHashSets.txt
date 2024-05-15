@@ -128,3 +128,104 @@ Class: TimberApi.Core.ModLoaderSystem.TopologicalSorter+<Sort>d__0, Field: <yiel
 Class: TimberApi.Core.ModLoaderSystem.TopologicalSorter+<Sort>d__0, Field: <visited>5__3
 Class: System.ServiceModel.Channels.ReplyChannelBase, Field: currentAsyncThreads
 Class: System.ServiceModel.Channels.ReplyChannelBase, Field: currentAsyncResults
+
+
+Timberborn.Clusters.dll
+_clusterElements = new HashSet<ClusterElement> ()
+Cluster.Reorganize:
+        _clusterElements.First ()
+
+
+Timberborn.GameDistricts.dll
+_districtCenters = new HashSet<DistrictCenter> { districtCenter }
+_unassignedCitizens = new HashSet<Citizen> ()
+DistrictCluster.TryAddDistrict:
+        _districtCenters.First ()
+
+
+Timberborn.Localization.dll
+_localizationsAvailableOnLastLaunch = new HashSet<string> ()
+LocalizationCsvValidator.ValidateCsvIntegrity:
+        item.First ()
+
+
+Timberborn.MechanicalSystem.dll
+_nodes = new HashSet<MechanicalNode> ()
+hashSet = new HashSet<MechanicalGraph> { mechanicalNode.Graph }
+.:
+        _nodes.FirstOrDefault ()
+MechanicalGraphManager.TransputTargetedBy:
+        GetTransputsAtCoordinates (transput.Target.XY ())?.FirstOrDefault (transput.Faces)
+MechanicalGraphReorganizer.Reorganize:
+        _oldGraphNodes.First ()
+
+
+Timberborn.MechanicalSystemUI.dll
+_unvisitedShafts = new HashSet<MechanicalNode> ()
+_nodesToUpdate = new HashSet<MechanicalNode> ()
+_dirtyGraphs = new HashSet<MechanicalGraph> ()
+_blockedBuildings = new HashSet<BaseComponent> ()
+MechanicalGraphModelUpdater.TraverseRemainingShafts:
+        _unvisitedShafts.First ()
+MechanicalModel.InitializeVariants:
+        _variants.First ()
+
+
+Timberborn.NaturalResourcesReproduction.dll
+_potentialSpots.Add (key, new HashSet<Vector3Int> ())
+_reproductionBlockers = new HashSet<object> ()
+NaturalResourceReproducer.TryReproduceResources:
+        potentialSpot.Value.ElementAt (index)
+
+
+Timberborn.Navigation.dll
+_nodesWithNeighbors = new HashSet<int> ()
+_visitedNodes = new HashSet<Vector3Int> ()
+_uniqueTerrainNodeIds = new HashSet<int> ()
+_uniqueRoadNodeIds = new HashSet<int> ()
+_destinationNodes = new HashSet<int> ()
+DistinctBlockedNodeIds = new HashSet<int> ()
+_visitedNodes = new HashSet<int> ()
+_destinationNodes = new HashSet<int> ()
+DistinctBlockedNodeIds = new HashSet<int> ()
+_visitedNodes = new HashSet<int> ()
+Accessible.FindPathUnlimitedRange:
+        pathCorners.Last ()
+
+
+Timberborn.SelectionSystem.dll
+_objetsToHighlight = new HashSet<BaseComponent> ()
+_current = new HashSet<BaseComponent> ()
+_previous = new HashSet<BaseComponent> ()
+HighlightableObject.HasHighlightColor:
+        _primaryColors.Last ()
+HighlightableObject.HasHighlightColor:
+        _secondaryColors.Last ()
+
+
+Timberborn.SlotSystem.dll
+_unassignedEnterers = new HashSet<Enterer> ()
+SlotAnimationSynchronizer.OnEntererRemovedFromSlot:
+        _enterable.EnterersInside.FirstOrDefault ()
+SlotManager.AssignFirstUnassigned:
+        _unassignedEnterers.First ()
+
+
+Timberborn.WaterBuildings.dll
+_visitedNeighbors = new HashSet<Floodgate> ()
+_blockedTiles = new HashSet<Vector3Int> ()
+StreamGauge.GetCoordinatesXY:
+        (from coords in _blockObject.PositionedBlocks.GetOccupiedCoordinates ()
+        select coords.XY ()).Distinct ().First ()
+
+
+Timberborn.WorkSystem.dll
+_unemployed = new HashSet<Worker> ()
+_unlockedWorkerTypes = new HashSet<UnlockableWorkerType> ()
+UnemployedWorkers.GetUnemployedWorker:
+        _unemployed.First ()
+Workplace.UnassignAllWorkers:
+        _assignedWorkers.First ()
+Workplace.UnassignWorkerIfNonworking:
+        _assignedWorkers.FirstOrDefault ((Worker worker) => !worker.JobRunning)
+
