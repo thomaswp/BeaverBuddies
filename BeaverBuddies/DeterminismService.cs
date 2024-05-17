@@ -66,23 +66,23 @@ namespace BeaverBuddies
      *   Specifically, a NaturalResource is queued by 
      *   NaturalResourceReproducer.TrySpawnNatrualResources, but then in one game
      *   it is found valid and spawned but not in another.
-     *   One cause was using HashSet.GetElementAt() which I fixed by converting
-     *   to a fixed-order list.
+     *   I thought one cause was using HashSet.GetElementAt(), but turns out changing this
+     *   just changed whether the bug happened *that time*.
      *   Another cause is something about how ticks are spread out over multiple updates.
-     *   Forcing one tick per update now fixes the problem.
+     *   Forcing one tick per update now fixes the problem. Confirming this still seems to be the case.
      *   The culprit here seems to be the TimeTriggerService (and the whole system)
      *   which uses time of day rather than ticks which is likely messing things up
-     *   (need to look further!).     *   
+     *   (need to look further!).
      * 
      * 
      * Theories for unexplained desyncs:
      * - Something isn't saved in the save state (e.g. when to go to bed),
      *   so we get different behavior.
-     * - Nondeterminism in the code, e.g. inconsistent dictionary traversal.
-     *   I've seen no evidence of this, though. Internet suggests that this behavior
-     *   is likely deterministic, just not guaranteed to be.
      * - Floating point rounding issues with movement, etc. No evidence of this so
      *   far - at least on the same OS.
+     * - Some gameplay code that occurs in OnDestroyed (though I have seen that this
+     *   can directly trigger when the object is destroyed during a tick, it may also
+     *   be triggered sometimes at the end of a frame).
      *   
      * To try:
      * - Remove all randomness
@@ -109,6 +109,11 @@ namespace BeaverBuddies
      *   is synced, but this seems to just be the patching.
      * - Inconsistent update order (e.g. due to hash codes/buckets). Seems to
      *   be consistent.
+     * - HashSet is *not* the cause of desyncs. I've looked and the source code
+     *   and run a number of tests. The way it's written, the order of enumeration
+     *   is independent of the hashcodes themselves, and therefore depends only
+     *   on the order of additions and removals. If the rest of the game is
+     *   deterministic, it should be as well.
      * 
      * Fixed:
      * - Guid.NewGuid now uses Unity's random generator and is deterministic

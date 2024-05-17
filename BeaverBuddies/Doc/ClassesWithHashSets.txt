@@ -1,3 +1,6 @@
+Note: to the best of my knowledge at this time, HashSet is deterministic
+in the current implementation, even when HashCodes themselves are not.
+
 Class: BepInEx.Preloader.Patching.AssemblyPatcher+<>c__DisplayClass16_0, Field: patchedAssemblies
 Class: BepInEx.Preloader.Patching.AssemblyPatcher+<>c__DisplayClass16_0, Field: patchedAssemblyNames
 Class: System.Reflection.DispatchProxyGenerator+ProxyAssembly, Field: _ignoresAccessAssemblyNames
