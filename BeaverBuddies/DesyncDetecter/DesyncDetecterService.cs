@@ -70,12 +70,14 @@ namespace BeaverBuddies.DesyncDetecter
             int tick = currentTick - (traces.Count - 1);
             while (traces.Count > 0)
             {
+                Plugin.Log($"Sending {tick}: {traces[0].FirstOrDefault().message}");
                 yield return new TraceLoggedForTickEvent()
                 {
-                    tick = tick++,
+                    tick = tick,
                     traces = traces[0],
                 };
                 traces.RemoveAt(0);
+                tick++;
             }
         }
 

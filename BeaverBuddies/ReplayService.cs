@@ -94,10 +94,6 @@ namespace BeaverBuddies
             get => __ticksSinceLoad;
             set
             {
-                if (__ticksSinceLoad != value)
-                {
-                    Plugin.Log($"Setting ticks since load to: {value}");
-                }
                 __ticksSinceLoad = value;
                 TimeTimePatcher.SetTicksSinceLoaded(value);
                 DesyncDetecterService.StartTick(value);
@@ -190,6 +186,7 @@ namespace BeaverBuddies
 
         public void SetTicksSinceLoad(int ticks)
         {
+            Plugin.Log($"Setting ticks since load to: {ticks}");
             ticksSinceLoad = ticks;
         }
 
@@ -399,7 +396,11 @@ namespace BeaverBuddies
                 EnqueueEventForSending(InitializeClientEvent.CreateAndExecute(ticksSinceLoad));
             }
 
+            // Start tick 0 (since the client will get an event to)
+            DesyncDetecterService.StartTick(ticksSinceLoad);
+
             IsLoaded = true;
+
         }
 
         // TODO: Find a better callback way of waiting until initial game
@@ -501,7 +502,10 @@ namespace BeaverBuddies
 
             // Log from IO
             io?.Update();
-            Plugin.Log($"Tick {ticksSinceLoad:D5} order hash: {TEBPatcher.EntityUpdateHash.ToString("X8")}; " +
+
+            // IO Complete for Tick
+            Plugin.Log($"Tick {ticksSinceLoad:D5} IO done; " +
+                $"Order hash: {TEBPatcher.EntityUpdateHash.ToString("X8")}; " +
                 $"Move hash: {TEBPatcher.PositionHash.ToString("X8")}; " +
                 $"Random s0: {UnityEngine.Random.state.s0.ToString("X8")}");
 

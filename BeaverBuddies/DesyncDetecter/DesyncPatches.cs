@@ -75,21 +75,23 @@ namespace BeaverBuddies.DesyncDetecter
         }
     }
 
-    [HarmonyPatch(typeof(TimeTriggerService), nameof(TimeTriggerService.Trigger), typeof(TimeTrigger))]
-    class TimeTriggerServiceTriggerPatcher
-    {
-        static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger)
-        {
-            float triggerTime = 0;
-            long id = 0;
-            if (__instance._timeTriggerKeys.TryGetValue(timeTrigger, out var key))
-            {
-                triggerTime = key.Timestamp;
-                id = key._id;
-            }
-            DesyncDetecterService.Trace($"Triggering time trigger at {__instance._dayNightCycle.PartialDayNumber}: {id}-{triggerTime}");
-        }
-    }
+    // Non-game things create TimeTriggers, even though they happen during the tick
+    // logic, so probably best to exclude.
+    //[HarmonyPatch(typeof(TimeTriggerService), nameof(TimeTriggerService.Trigger), typeof(TimeTrigger))]
+    //class TimeTriggerServiceTriggerPatcher
+    //{
+    //    static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger)
+    //    {
+    //        float triggerTime = 0;
+    //        long id = 0;
+    //        if (__instance._timeTriggerKeys.TryGetValue(timeTrigger, out var key))
+    //        {
+    //            triggerTime = key.Timestamp;
+    //            id = key._id;
+    //        }
+    //        DesyncDetecterService.Trace($"Triggering time trigger at {__instance._dayNightCycle.PartialDayNumber}: {id}-{triggerTime}");
+    //    }
+    //}
 
     [HarmonyPatch(typeof(SpawnValidationService), nameof(SpawnValidationService.CanSpawn))]
     class SpawnValidationServiceCanSpawnPatcher
