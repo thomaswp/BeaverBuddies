@@ -386,7 +386,7 @@ namespace BeaverBuddies
             // is fully loaded to avoid collisions of Guids from the prior save
             Guid guidSeed = GuidPatcher.RealNewGuid();
             int state = guidSeed.GetHashCode();
-            state = 0x5E860905;
+            state = 0x5E860905; // TODO: DEFINITELY REMOVE THIS!!!!
             DeterminismService.InitRandomState(state, "ReplayService.Initialize");
 
             // Shorthand for "is server"
