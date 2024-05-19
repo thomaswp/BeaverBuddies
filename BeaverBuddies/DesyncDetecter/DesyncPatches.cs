@@ -159,7 +159,7 @@ namespace BeaverBuddies.DesyncDetecter
     {
         static void Postfix(WateredNaturalResource __instance, float __result)
         {
-            var id = __instance.GetComponentFast<EntityComponent>().EntityId;
+            var id = __instance.GetComponentFast<EntityComponent>()?.EntityId;
             DesyncDetecterService.Trace(
                 $"WateredNaturalResource {id} random days to die: {__result}");
         }
