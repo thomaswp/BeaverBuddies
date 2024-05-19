@@ -42,6 +42,11 @@ namespace BeaverBuddies.DesyncDetecter
         // TODO: Get from Config
         private static readonly int maxTraceTicks = 10;
 
+        DesyncDetecterService()
+        {
+            Reset();
+        }
+
         public static List<string> GetCurrentTrace()
         {
             return CurrentTrace.Select(t => t.message).ToList();
