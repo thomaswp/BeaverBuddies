@@ -51,6 +51,7 @@ using Timberborn.SlotSystem;
 using Timberborn.EnterableSystem;
 using System.Collections;
 using BeaverBuddies.DesyncDetecter;
+using Timberborn.Brushes;
 
 namespace BeaverBuddies
 {
@@ -89,6 +90,7 @@ namespace BeaverBuddies
      * - Remove all randomness
      * - Remove interpolating animations
      * - Remove all water logic (this might get complicated...)
+     * - Log random calls during load to look for non-gameplay logic
      * 
      * Monitoring:
      * - Movement of Beavers diverges over time, possibly due to rounding
@@ -189,8 +191,21 @@ namespace BeaverBuddies
         {
             get
             {
+                // If for some reason this is happening outside of
+                // a multiplayer game, we don't need to freeze the seed
+                if (EventIO.IsNull) return false;
+
                 // Something is asking us to return false
                 if (IsNonGameplay) return true;
+
+
+                // When the game is loading, almost all random calls are gameplay logic
+                // (e.g., choosing when trees die, or choosing an Enterer).
+                // I have filtered out the non-gameplay ones I've found, and even if they
+                // use gameplay random, it should be ok as long as they are deterministic,
+                // and not determined by UI events. This may require more monitoring.
+                // So we want to use gameplay random.
+                if (!ReplayService.IsLoaded) return false;
 
                 // Calls from a non-game thread should never use the game's random
                 // though if they are game-related we may need a solution for that...
@@ -427,6 +442,7 @@ namespace BeaverBuddies
             typeof(BeaverTextureSetter),
             typeof(BotManufactoryAnimationController),
             typeof(BasicSelectionSound),
+            typeof(BrushProbabilityMap),
             typeof(DateSalter),
             typeof(GameMusicPlayer),
             typeof(NaturalResourceModelRandomizer),
