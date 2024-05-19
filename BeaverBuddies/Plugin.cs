@@ -1,4 +1,5 @@
 ﻿using BeaverBuddies.Connect;
+using BeaverBuddies.DesyncDetecter;
 using Bindito.Core;
 using HarmonyLib;
 using System.Diagnostics;
@@ -41,6 +42,7 @@ namespace BeaverBuddies
             containerDefinition.Bind<TickingService>().AsSingleton();
             containerDefinition.Bind<DeterminismService>().AsSingleton();
             containerDefinition.Bind<RehostingService>().AsSingleton();
+            containerDefinition.Bind<DesyncDetecterService>().AsSingleton();
 
         }
     }

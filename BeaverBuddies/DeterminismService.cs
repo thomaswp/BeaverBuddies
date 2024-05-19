@@ -50,6 +50,7 @@ using Timberborn.BaseComponentSystem;
 using Timberborn.SlotSystem;
 using Timberborn.EnterableSystem;
 using System.Collections;
+using BeaverBuddies.DesyncDetecter;
 
 namespace BeaverBuddies
 {
@@ -134,8 +135,6 @@ namespace BeaverBuddies
     public class DeterminismService : IResettableSingleton
     {
         public Thread UnityThread;
-        private List<StackTrace> lastRandomStackTraces = new List<StackTrace>();
-
 
         public static bool IsTicking = false;
         public static bool IsNonGameplay = false;
@@ -158,19 +157,6 @@ namespace BeaverBuddies
             // since some components call Random during load and before
             // the Client can receive a seed
             InitRandomState(42, "Pre-load");
-        }
-
-        public void ClearRandomStacks()
-        {
-            lastRandomStackTraces.Clear();
-        }
-
-        public void PrintRandomStacks()
-        {
-            foreach (StackTrace stack in lastRandomStackTraces)
-            {
-                Plugin.Log(stack.ToString());
-            }
         }
 
         public static T GetNonGameRandom<T>(Func<T> getter)
@@ -223,12 +209,10 @@ namespace BeaverBuddies
                 // we've caught any non-game code that can run during a tick!
                 if (IsTicking)
                 {
-                    // TODO: Make only in "dev mode"
-                    //lastRandomStackTraces.Add(new StackTrace());
-                    //Plugin.Log("s0 before: " + UnityEngine.Random.state.s0.ToString("X8"));
-                    //var entity = TickableEntityTickPatcher.currentlyTickingEntity;
-                    //Plugin.Log($"Last entity: {entity?.name} - {entity?.EntityId}");
-                    //Plugin.LogStackTrace();
+                    var entity = TickableEntityTickPatcher.currentlyTickingEntity;
+                    DesyncDetecterService.Trace($"Tick RNG; " +
+                        $"s0 before: {UnityEngine.Random.state.s0:X8}; " +
+                        $"Last entity: {entity?.name} - {entity?.EntityId}");
                     return false;
                 }
 
@@ -766,7 +750,7 @@ namespace BeaverBuddies
 #endif
             if (ReplayService.IsLoaded)
             {
-                Plugin.Log($"Generating new GUID: {__result}");
+                DesyncDetecterService.Trace($"Generating new GUID: {__result}");
             }
             return false;
         }
@@ -845,7 +829,7 @@ namespace BeaverBuddies
         {
             if (!ReplayService.IsLoaded) return;
             int index = __instance._tickableEntities.Values.IndexOf(tickableEntity);
-            Plugin.Log($"Adding: {tickableEntity.EntityId} at index {index}");
+            DesyncDetecterService.Trace($"Adding: {tickableEntity.EntityId} at index {index}");
             //Plugin.LogStackTrace();
         }
     }
@@ -885,27 +869,6 @@ namespace BeaverBuddies
             return false;
         }
     }
-
-    //[HarmonyPatch(typeof(Walker), nameof(Walker.FindPath))]
-    //public class WalkerFindPathPatcher
-    //{
-
-    //    static void Prefix(Walker __instance, IDestination destination)
-    //    {
-    //        string entityID = __instance.GetComponentFast<EntityComponent>().EntityId.ToString();
-    //        if (destination is PositionDestination)
-    //        {
-    //            Plugin.Log($"{entityID} going to: " +
-    //                $"{((PositionDestination)destination).Destination}");
-    //        } 
-    //        else if (destination is AccessibleDestination)
-    //        {
-    //            var accessible = ((AccessibleDestination)destination).Accessible;
-    //            Plugin.Log($"{entityID} going to: " +
-    //                $"{accessible.GameObjectFast.name}");
-    //        }
-    //    }
-    //}
 
     [HarmonyPatch(typeof(TickableEntityBucket), nameof(TickableEntityBucket.TickAll))]
     public class TEBPatcher
@@ -988,18 +951,6 @@ namespace BeaverBuddies
         }
     }
 
-    //[HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.SpawnNewResources))]
-    //public class NRRPatcher
-    //{
-    //    static void Prefix(NaturalResourceReproducer __instance)
-    //    {
-    //        foreach (var (reproducibleKey, coordinates) in __instance._newResources)
-    //        {
-    //            Plugin.LogWarning($"{reproducibleKey.Id}, {coordinates.ToString()}");
-    //        }
-    //    }
-    //}
-
 #if NO_PARALLEL
     [HarmonyPatch(typeof(TickableSingletonService), nameof(TickableSingletonService.StartParallelTick))]
     [ManualMethodOverwrite]
@@ -1021,6 +972,9 @@ namespace BeaverBuddies
     }
 #endif
 
+    // TODO: Eventually need to test removing this. I'm 
+    // pretty sure at this point that it changes the random
+    // behavior/order but doesn't fix anything.
     [HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.TryReproduceResources))]
     [ManualMethodOverwrite]
     class NaturalResourceReproducerTryReproduceResourcesPatcher
@@ -1054,6 +1008,9 @@ namespace BeaverBuddies
         }
     }
 
+    // TODO: Eventually need to test removing this. I'm 
+    // pretty sure at this point that it changes the random
+    // behavior/order but doesn't fix anything.
     [HarmonyPatch(typeof(SlotManager), nameof(SlotManager.AssignFirstUnassigned))]
     [ManualMethodOverwrite]
     class SlotManagerAssignFirstUnassignedPatcher
@@ -1083,126 +1040,4 @@ namespace BeaverBuddies
             return false;
         }
     }
-
-    // Not currently used - doesn't seem to work
-    class EnumerableFirstPatcher
-    {
-        public static void CreatePatch(Harmony harmony)
-        {
-            var method = typeof(Enumerable)
-                .GetMethods(BindingFlags.Static | BindingFlags.Public)
-                .First(m => m.Name == "First" && m.GetParameters().Length == 1 && m.GetParameters()[0].ParameterType.GetGenericTypeDefinition() == typeof(IEnumerable<>));
-
-            MethodInfo prefixMethod = typeof(EnumerableFirstPatcher).GetMethod(nameof(Prefix), BindingFlags.Static | BindingFlags.Public);
-
-            Plugin.Log(method.ToString());
-            Plugin.Log(prefixMethod.ToString());
-
-            harmony.Patch(method, new HarmonyMethod(prefixMethod));
-        }
-
-        // Prefix method must be static and match the signature expected by Harmony
-        public static bool Prefix<TSource>(IEnumerable<TSource> __instance)
-        {
-            Console.WriteLine("First method called");
-
-            // Returning true allows the original method to execute
-            return true;
-        }
-    }
-
-    #region NR_SPAWN_LOGGING
-    [HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.MarkSpots))]
-    class NRPMarkSpotsPatcher
-    {
-        private static int lastCount;
-        static void Prefix(NaturalResourceReproducer __instance, Reproducible reproducible)
-        {
-            if (!ReplayService.IsLoaded) return;
-            var key = ReproducibleKey.Create(reproducible);
-            lastCount = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0;
-            Plugin.Log($"Marking spots for   {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
-        }
-
-        static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
-        {
-            if (!ReplayService.IsLoaded) return;
-            var key = ReproducibleKey.Create(reproducible);
-            int count = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0; Plugin.Log($"{lastCount} --> {count}");
-            //Plugin.LogStackTrace();
-        }
-    }
-
-    [HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.UnmarkSpots))]
-    class NRPUnmarkSpotsPatcher
-    {
-        private static int lastCount;
-        static void Prefix(NaturalResourceReproducer __instance, Reproducible reproducible)
-        {
-            if (!ReplayService.IsLoaded) return;
-            var key = ReproducibleKey.Create(reproducible);
-            lastCount = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0; if (!ReplayService.IsLoaded) return;
-            Plugin.Log($"Unmarking spots for   {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
-        }
-
-        static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
-        {
-            if (!ReplayService.IsLoaded) return;
-            var key = ReproducibleKey.Create(reproducible);
-            int count = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0;
-            Plugin.Log($"{lastCount} --> {count}");
-            //Plugin.LogStackTrace();
-        }
-    }
-
-    [HarmonyPatch(typeof(TimeTriggerService), nameof(TimeTriggerService.Add))]
-    class TimeTriggerServiceAddPatcher
-    {
-        static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger, float triggerTimestamp)
-        {
-            // Remove this to see loading timers; should be deterministic now but could test
-            // in the future if something's not working. For now this removes triggers that
-            // aren't a part of tick logic and *shouldn't* affect gameplay.
-            if (!DeterminismService.IsTicking) return;
-            Plugin.Log($"Adding time trigger at {__instance._nextId}-{triggerTimestamp}; ticking: {DeterminismService.IsTicking}");
-        }
-    }
-
-    //[HarmonyPatch(typeof(TimeTriggerService), nameof(TimeTriggerService.Trigger), typeof(TimeTrigger))]
-    //class TimeTriggerServiceTriggerPatcher
-    //{
-    //    static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger)
-    //    {
-    //        float triggerTime = 0;
-    //        long id = 0;
-    //        if (__instance._timeTriggerKeys.TryGetValue(timeTrigger, out var key))
-    //        {
-    //            triggerTime = key.Timestamp;
-    //            id = key._id;
-    //        }
-    //        Plugin.Log($"Triggering time trigger at {__instance._dayNightCycle.PartialDayNumber}: {id}-{triggerTime}");
-    //    }
-    //}
-
-    //[HarmonyPatch(typeof(SpawnValidationService), nameof(SpawnValidationService.CanSpawn))]
-    //class SpawnValidationServiceCanSpawnPatcher
-    //{
-    //    static void Postfix(SpawnValidationService __instance, bool __result, Vector3Int coordinates, Blocks blocks, string resourcePrefabName)
-    //    {
-    //        Plugin.LogWarning($"Trying to spawn {resourcePrefabName} at {coordinates}: {__result}\n" +
-    //            $"IsSuitableTerrain: {__instance.IsSuitableTerrain(coordinates)}\n" +
-    //            $"SpotIsValid: {__instance.SpotIsValid(coordinates, resourcePrefabName)}\n" +
-    //            $"IsUnobstructed: {__instance.IsUnobstructed(coordinates, blocks)}");
-    //    }
-    //}
-
-    #endregion
-
-
-    // TODO: Check for other HashSet stacks
-    //[HarmonyPatch(typeof(HashSet<object>), nameof(HashSet<object>.Add))]
-    //class HasSetAddLogger
-    //{
-
-    //}
 }

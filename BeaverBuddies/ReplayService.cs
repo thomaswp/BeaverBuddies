@@ -32,6 +32,7 @@ using static Timberborn.TickSystem.TickableSingletonService;
 using static BeaverBuddies.SingletonManager;
 using BeaverBuddies.Connect;
 using static UnityEngine.ParticleSystem.PlaybackState;
+using BeaverBuddies.DesyncDetecter;
 
 namespace BeaverBuddies
 {
@@ -87,7 +88,21 @@ namespace BeaverBuddies
         // accessing a new game's event IO.
         private EventIO io => EventIO.Get();
 
-        private int ticksSinceLoad = 0;
+        private int __ticksSinceLoad = 0;
+        private int ticksSinceLoad 
+        { 
+            get => __ticksSinceLoad;
+            set
+            {
+                if (__ticksSinceLoad != value)
+                {
+                    Plugin.Log($"Setting ticks since load to: {value}");
+                }
+                __ticksSinceLoad = value;
+                TimeTimePatcher.SetTicksSinceLoaded(value);
+                DesyncDetecterService.StartTick(value);
+            }
+        }
         public int TicksSinceLoad => ticksSinceLoad;
 
         public float TargetSpeed  { get; private set; } = 0;
@@ -176,8 +191,6 @@ namespace BeaverBuddies
         public void SetTicksSinceLoad(int ticks)
         {
             ticksSinceLoad = ticks;
-            TimeTimePatcher.SetTicksSinceLoaded(ticksSinceLoad);
-            Plugin.Log($"Setting ticks since load to: {ticks}");
         }
 
         public void PostLoad()
@@ -293,19 +306,11 @@ namespace BeaverBuddies
                 }
             }
             IsReplayingEvents = false;
-
-            // If we've replayed everythign for this tick and nothing's
-            // triggered a desync, clear the saved stacks.
-            //DeterminismController.PrintRandomStacks();
-            _determinismService.ClearRandomStacks();
         }
 
-        private void HandleDesync()
+        public void HandleDesync()
         {
             if (IsDesynced) return;
-
-            DeterminismService determinismService = SingletonManager.GetSingleton<DeterminismService>();
-            determinismService.PrintRandomStacks();
 
             ClientDesyncedEvent e = new ClientDesyncedEvent();
             // Set IsDesynced to true so event play instead of sending
@@ -467,8 +472,16 @@ namespace BeaverBuddies
         {
             if (!CanAct) return;
 
+            if (io.ShouldSendHeartbeat)
+            {
+                // TODO: Based on Config!
+                // Before incrementing the tick, capture the trace for that tick
+                // in an event to send.
+                // Note: this will capture traces for tick T but be sent at tick T+1.
+                EnqueueEventForSending(DesyncDetecterService.CreateReplayEventAndClear(TicksSinceLoad));
+            }
+
             ticksSinceLoad++;
-            TimeTimePatcher.SetTicksSinceLoaded(ticksSinceLoad);
 
             if (io.ShouldSendHeartbeat)
             {
