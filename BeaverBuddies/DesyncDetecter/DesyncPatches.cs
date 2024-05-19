@@ -143,7 +143,7 @@ namespace BeaverBuddies.DesyncDetecter
     [HarmonyPatch(typeof(WateredNaturalResource), nameof(WateredNaturalResource.StartDryingOut))]
     public class WateredNaturalResourceStartDryingOutPatcher
     {
-        void Prefix(WateredNaturalResource __instance)
+        static void Prefix(WateredNaturalResource __instance)
         {
             var id = __instance.GetComponentFast<EntityComponent>().EntityId;
             var isDead = __instance._livingNaturalResource.IsDead;
