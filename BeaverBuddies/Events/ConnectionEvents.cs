@@ -23,11 +23,6 @@ namespace BeaverBuddies.Events
             {
                 warningMessage = $"Warning! Server mod version ({serverModVersion}) does not match client mod version ({Plugin.Version}).\n" +
                     $"Please ensure that you are running the same version of the {PluginInfo.PLUGIN_NAME} mod.";
-            } else if (ticksSinceLoad > 0)
-            {
-                // TODO: Move to join request
-                warningMessage = $"Warning: Joining after the Host has unpaused the game is not supported. " +
-                    $"Ask the Host to rehost and join before they unpause.";
             }
             if (warningMessage != null)
             {

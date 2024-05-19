@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
+using System.Runtime.InteropServices.ComTypes;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace TimberNet
@@ -26,6 +28,7 @@ namespace TimberNet
         public delegate void MapReceived(byte[] mapBytes);
 
         public event MessageReceived? OnLog;
+        public event MessageReceived? OnError;
         public event MapReceived? OnMapReceived;
 
         private readonly ConcurrentQueue<string> receivedEventQueue = new ConcurrentQueue<string>();
@@ -186,6 +189,25 @@ namespace TimberNet
             }
         }
 
+        protected bool TryReadLength(NetworkStream stream, out int length)
+        {
+            byte[] headerBuffer = new byte[HEADER_SIZE];
+            try
+            {
+                stream.Read(headerBuffer, 0, headerBuffer.Length);
+            }
+            catch
+            {
+                length = 0;
+                return false;
+            }
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(headerBuffer);
+
+            length = BitConverter.ToInt32(headerBuffer, 0);
+            return true;
+        }
+
         protected void StartListening(TcpClient client, bool isClient)
         {
             //Log("Client connected");
@@ -194,21 +216,17 @@ namespace TimberNet
             int messageCount = 0;
             while (client.Connected && !IsStopped)
             {
-                try
-                {
-                    stream.Read(headerBuffer, 0, headerBuffer.Length);
-                } catch
-                {
-                    break;
-                }
-                if (BitConverter.IsLittleEndian)
-                    Array.Reverse(headerBuffer);
-
-                int messageLength = BitConverter.ToInt32(headerBuffer, 0);
+                if (!TryReadLength(stream, out int messageLength)) continue;
 
                 // First message is always the file
                 if (messageCount == 0 && isClient)
                 {
+                    if (messageLength == 0)
+                    {
+                        ReadErrorMessage(stream);
+                        return;
+                    }
+
                     ReceiveFile(stream, messageLength);
                     messageCount++;
                     continue;
@@ -225,6 +243,20 @@ namespace TimberNet
                 string message = Encoding.UTF8.GetString(buffer);
                 receivedEventQueue.Enqueue(message);
                 messageCount++;
+            }
+        }
+
+        private void ReadErrorMessage(NetworkStream stream)
+        {
+            if (TryReadLength(stream, out int length))
+            {
+                byte[] bytes = new byte[length];
+                stream.Read(bytes, 0, length);
+                string message = Encoding.UTF8.GetString(bytes);
+                if (OnError != null)
+                {
+                    OnError(message);
+                }
             }
         }
 

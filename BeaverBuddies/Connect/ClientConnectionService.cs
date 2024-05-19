@@ -52,7 +52,12 @@ namespace BeaverBuddies.Connect
             // it's actually loaded.
             SingletonManager.Reset();
             Plugin.Log("Connecting client");
-            client = ClientEventIO.Create(address, EventIO.Config.Port, LoadMap);
+            client = ClientEventIO.Create(address, EventIO.Config.Port, LoadMap, (message) =>
+            {
+                message = "Joining failed with error:\n" + message;
+                message += "\nWould you like to open the troubleshooting guide?";
+                ShowError(message);
+            });
             if (client == null) return false;
             EventIO.Set(client);
             return true;
@@ -71,13 +76,19 @@ namespace BeaverBuddies.Connect
         {
             if (TryToConnect(address)) return;
 
+            ShowError(ConnectionFailedMessage);
+        }
+
+        private void ShowError(string message)
+        {
+
             var action = () =>
             {
                 _urlOpener.OpenUrl(TroubleshootingUrl);
             };
 
             _dialogBoxShower.Create()
-                .SetMessage(ConnectionFailedMessage)
+                .SetMessage(message)
                 .SetConfirmButton(action)
                 .SetDefaultCancelButton()
                 .Show();
