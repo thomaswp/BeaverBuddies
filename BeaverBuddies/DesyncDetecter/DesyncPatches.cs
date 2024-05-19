@@ -154,4 +154,16 @@ namespace BeaverBuddies.DesyncDetecter
         }
     }
 
+    [HarmonyPatch(typeof(WateredNaturalResource), nameof(WateredNaturalResource.GenerateRandomDaysToDry))]
+    public class WateredNaturalResourceGenerateRandomDaysToDryPatcher
+    {
+        static void Postfix(WateredNaturalResource __instance, float __result)
+        {
+            var id = __instance.GetComponentFast<EntityComponent>().EntityId;
+            DesyncDetecterService.Trace(
+                $"WateredNaturalResource {id} random days to die: {__result}");
+        }
+    }
+
+
 }
