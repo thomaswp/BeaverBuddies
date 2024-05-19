@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Timberborn.Common;
 
 namespace BeaverBuddies.DesyncDetecter
 {
@@ -17,6 +18,9 @@ namespace BeaverBuddies.DesyncDetecter
     [Serializable]
     public class TraceLoggedForTickEvent : ReplayEvent
     {
+        // tick refers to the tick for which these traces are captures
+        // while ReplayEvent.ticksSinceLoad is the timing of when the
+        // event was actually sent, which is usually 1 tick later
         public int tick;
         public List<Trace> traces;
 
@@ -60,19 +64,19 @@ namespace BeaverBuddies.DesyncDetecter
             Trace("Start Preload");
         }
 
-        public static ReplayEvent CreateReplayEventAndClear(int tick)
+        public static IEnumerable<ReplayEvent> CreateReplayEventsAndClear()
         {
-            var e = new TraceLoggedForTickEvent()
+            // The first tick is the current tick shifted by the number of traces - 1
+            int tick = currentTick - (traces.Count - 1);
+            while (traces.Count > 0)
             {
-                tick = tick,
-                traces = CurrentTrace,
-            };
-
-            // Since this should only be called on the server, there's
-            // no need to retain the trace. It will be saved on the client.
-            traces.Clear();
-
-            return e;
+                yield return new TraceLoggedForTickEvent()
+                {
+                    tick = tick++,
+                    traces = traces[0],
+                };
+                traces.RemoveAt(0);
+            }
         }
 
         public static void StartTick(int tick)

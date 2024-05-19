@@ -475,10 +475,14 @@ namespace BeaverBuddies
             if (io.ShouldSendHeartbeat)
             {
                 // TODO: Based on Config!
-                // Before incrementing the tick, capture the trace for that tick
-                // in an event to send.
-                // Note: this will capture traces for tick T but be sent at tick T+1.
-                EnqueueEventForSending(DesyncDetecterService.CreateReplayEventAndClear(TicksSinceLoad));
+                // Before incrementing the tick (which creates a new blank trace),
+                // capture any unsent traces and send them.
+                // Note: this will capture traces for prior ticks, but be sent with
+                // an event at the start of the *upcoming* tick.
+                foreach (var e in DesyncDetecterService.CreateReplayEventsAndClear())
+                {
+                    EnqueueEventForSending(e);
+                }
             }
 
             ticksSinceLoad++;
