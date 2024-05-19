@@ -10,6 +10,7 @@ using Timberborn.TimeSystem;
 using Timberborn.NaturalResources;
 using UnityEngine;
 using Timberborn.WalkingSystem;
+using Timberborn.NaturalResourcesMoisture;
 
 namespace BeaverBuddies.DesyncDetecter
 {
@@ -136,6 +137,20 @@ namespace BeaverBuddies.DesyncDetecter
                 DesyncDetecterService.Trace($"{entityID} going to: " +
                     $"{accessible.GameObjectFast.name}");
             }
+        }
+    }
+
+    [HarmonyPatch(typeof(WateredNaturalResource), nameof(WateredNaturalResource.StartDryingOut))]
+    public class WateredNaturalResourceStartDryingOutPatcher
+    {
+        void Prefix(WateredNaturalResource __instance)
+        {
+            var id = __instance.GetComponentFast<EntityComponent>().EntityId;
+            var isDead = __instance._livingNaturalResource.IsDead;
+            var time = ((TimeTrigger)__instance._timeTrigger)._delayLeftInDays;
+            DesyncDetecterService.Trace(
+                $"WateredNaturalResource {id} [dead={isDead}] starting to dry out; " +
+                $"trigger delay = {time}");
         }
     }
 
