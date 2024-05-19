@@ -51,6 +51,8 @@ namespace BeaverBuddies.DesyncDetecter
         {
             currentTick = -1;
             traces.Clear();
+            traces.Add(new List<Trace>());
+            Trace("Start Preload");
         }
 
         public static ReplayEvent CreateReplayEventAndClear(int tick)
