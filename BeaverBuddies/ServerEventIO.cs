@@ -6,6 +6,15 @@ using BeaverBuddies.Events;
 
 namespace BeaverBuddies
 {
+    // TODO: With TimberBorn's current architecture, we cannot feasibly
+    // support joining after the game has started. This is because a number
+    // of variables are randomly initialized during load (e.g. tree lifespans)
+    // rather than serialized, since they aren't that important. As a result, the
+    // save won't create the same gamestate as a currently loaded game. The only
+    // way to ensure that the gamestate is the same is to have all clients join
+    // at load time.
+    // Barring a complete overhaul of how loading works, I should probably disable
+    // joining after the play button is first pressed.
     public class ServerEventIO : NetIOBase<TimberServer>
     {
         // Anything that happens on the server should be recorded and
@@ -38,7 +47,7 @@ namespace BeaverBuddies
             // loading the map.
             return () =>
             {
-                var message = InitializeClientEvent.CreateAndExecute(ticksSinceLoadProvider());
+                var message = InitializeClientEvent.Create(ticksSinceLoadProvider());
                 message.ticksSinceLoad = 0;
                 Plugin.Log($"Sending start state: {JsonSettings.Serialize(message)}");
                 return JObject.Parse(JsonSettings.Serialize(message));

@@ -35,8 +35,8 @@ namespace BeaverBuddies
             if (EventIO.IsNull) return;
 
             Plugin.Log("Registering Co-op services");
+            //containerDefinition.Bind<ServerConnectionService>().AsSingleton();
             containerDefinition.Bind<ReplayService>().AsSingleton();
-            containerDefinition.Bind<ServerConnectionService>().AsSingleton();
             containerDefinition.Bind<RecordToFileService>().AsSingleton();
             containerDefinition.Bind<TickProgressService>().AsSingleton();
             containerDefinition.Bind<TickingService>().AsSingleton();

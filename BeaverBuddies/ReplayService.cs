@@ -379,24 +379,7 @@ namespace BeaverBuddies
 
         private void Initialize()
         {
-            // Initialize the random state to a truly random number after the game
-            // is fully loaded to avoid collisions of Guids from the prior save
-            Guid guidSeed = GuidPatcher.RealNewGuid();
-            int state = guidSeed.GetHashCode();
-            state = 0x5E860905; // TODO: DEFINITELY REMOVE THIS!!!!
-            DeterminismService.InitRandomState(state, "ReplayService.Initialize");
-
-            // Shorthand for "is server"
-            if (io != null && io.ShouldSendHeartbeat)
-            {
-                // In case there are clients who joined immediately and have already loaded
-                // the game, we need to resend the initial state, to ensure that random seeds
-                // are synced, since they'll have already received their initialization event
-                // that was send on join, and it's out of date.
-                EnqueueEventForSending(InitializeClientEvent.CreateAndExecute(ticksSinceLoad));
-            }
-
-            // Start tick 0 (since the client will get an event to)
+            // Start tick at 0
             DesyncDetecterService.StartTick(ticksSinceLoad);
 
             IsLoaded = true;

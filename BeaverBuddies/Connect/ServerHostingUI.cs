@@ -56,6 +56,8 @@ namespace BeaverBuddies.Connect
         {
             if (ServerHostingUI.IsHosting)
             {
+                // TODO: Move logic to ServerEventIO
+
                 var repository = __instance._gameSceneLoader._gameSaveRepository;
                 var inputStream = repository.OpenSaveWithoutLogging(saveReference);
                 byte[] data;
@@ -88,6 +90,8 @@ namespace BeaverBuddies.Connect
                     Plugin.Log("Failed to start server");
                     Plugin.Log(e.ToString());
                 }
+
+                DeterminismService.InitRandomStateWithMapBytes(data);
             }
         }
     }

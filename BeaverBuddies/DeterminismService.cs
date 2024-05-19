@@ -134,7 +134,7 @@ namespace BeaverBuddies
      *   value (would kind of be nice to do this anyway for deterministic bugs).
      */
 
-    public class DeterminismService : IResettableSingleton
+    public class DeterminismService : RegisteredSingleton, IResettableSingleton
     {
         public Thread UnityThread;
 
@@ -149,16 +149,6 @@ namespace BeaverBuddies
             IsTicking = false;
             activeNonGamePatchers.Clear();
             // No need to reset random
-        }
-
-        public DeterminismService()
-        {
-            RegisterSingleton(this);
-
-            // Deterministic seed set before the game is ever loaded,
-            // since some components call Random during load and before
-            // the Client can receive a seed
-            InitRandomState(42, "Pre-load");
         }
 
         public static T GetNonGameRandom<T>(Func<T> getter)
@@ -297,6 +287,16 @@ namespace BeaverBuddies
 
             Plugin.LogWarning("Unknown random called outside of tick");
             Plugin.LogStackTrace();
+        }
+
+        public static void InitRandomStateWithMapBytes(byte[] mapBytes)
+        {
+            int state = 13;
+            for (int i = 0; i < mapBytes.Length; i++)
+            {
+                state = TimberNetBase.CombineHash(state, mapBytes[i]);
+            }
+            InitRandomState(state, "MapLoad");
         }
 
         public static void InitRandomState(int state, string reason)

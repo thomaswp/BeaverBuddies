@@ -9,54 +9,40 @@ namespace BeaverBuddies.Events
     [Serializable]
     public class InitializeClientEvent : ReplayEvent
     {
-        public int seed;
-        public int newTicksSinceLoad;
-        public int entityUpdateHash;
-        public int positionHash;
         public string serverModVersion;
         public string serverGameVersion;
 
         public override void Replay(IReplayContext context)
         {
-            DeterminismService.InitRandomState(seed, "Client Connect");
-
-            if (context != null)
+            string warningMessage = null;
+            if (serverGameVersion != Versions.GameVersion.ToString())
             {
-                context.GetSingleton<ReplayService>().SetTicksSinceLoad(newTicksSinceLoad);
-                TEBPatcher.SetHashes(entityUpdateHash, positionHash);
-
-                string warningMessage = null;
-                if (serverGameVersion != Versions.GameVersion.ToString())
-                {
-                    warningMessage = $"Warning! Server Timberborn version ({serverGameVersion}) does not match client Timberborn version ({Versions.GameVersion}).\n" +
-                        $"Please ensure that you are running the same version of the game.";
-                } else if (serverModVersion != Plugin.Version)
-                {
-                    warningMessage = $"Warning! Server mod version ({serverModVersion}) does not match client mod version ({Plugin.Version}).\n" +
-                        $"Please ensure that you are running the same version of the {PluginInfo.PLUGIN_NAME} mod.";
-                }
-                if (warningMessage != null)
-                {
-                    Plugin.LogWarning(warningMessage);
-                    context.GetSingleton<DialogBoxShower>().Create().SetMessage(warningMessage).Show();
-                }
+                warningMessage = $"Warning! Server Timberborn version ({serverGameVersion}) does not match client Timberborn version ({Versions.GameVersion}).\n" +
+                    $"Please ensure that you are running the same version of the game.";
+            } else if (serverModVersion != Plugin.Version)
+            {
+                warningMessage = $"Warning! Server mod version ({serverModVersion}) does not match client mod version ({Plugin.Version}).\n" +
+                    $"Please ensure that you are running the same version of the {PluginInfo.PLUGIN_NAME} mod.";
+            } else if (ticksSinceLoad > 0)
+            {
+                warningMessage = $"Warning: Joining after the Host has unpaused the game is not supported. " +
+                    $"Ask the Host to rehost and join before they unpause.";
+            }
+            if (warningMessage != null)
+            {
+                Plugin.LogWarning(warningMessage);
+                context.GetSingleton<DialogBoxShower>().Create().SetMessage(warningMessage).Show();
             }
         }
 
-        public static InitializeClientEvent CreateAndExecute(int ticksSinceLoad)
+        public static InitializeClientEvent Create(int tickSinceLoad)
         {
-            int seed = UnityEngine.Random.RandomRangeInt(int.MinValue, int.MaxValue);
             InitializeClientEvent message = new InitializeClientEvent()
             {
-                seed = seed,
-                newTicksSinceLoad = ticksSinceLoad,
-                entityUpdateHash = TEBPatcher.EntityUpdateHash,
-                positionHash = TEBPatcher.PositionHash,
+                ticksSinceLoad = tickSinceLoad,
                 serverModVersion = Plugin.Version,
                 serverGameVersion = Versions.GameVersion.ToString(),
             };
-            // TODO: Not certain if this is the right time, or if it should be enqueued
-            message.Replay(null);
             return message;
         }
     }

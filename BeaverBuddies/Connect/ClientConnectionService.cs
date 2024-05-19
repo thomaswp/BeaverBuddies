@@ -92,6 +92,7 @@ namespace BeaverBuddies.Connect
             Stream stream = _gameSaveRepository.CreateSaveSkippingNameValidation(saveRef);
             stream.Write(mapBytes);
             stream.Close();
+            DeterminismService.InitRandomStateWithMapBytes(mapBytes);
             _gameSceneLoader.StartSaveGame(saveRef);
         }
 
