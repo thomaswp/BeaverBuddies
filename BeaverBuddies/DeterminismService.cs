@@ -278,7 +278,7 @@ namespace BeaverBuddies
 
         private void LogUnknownRandomCalled()
         {
-            if (!ReplayService.IsLoaded) return;
+            if (EventIO.IsNull) return;
 
             Plugin.LogWarning("Unknown random called outside of tick");
             Plugin.LogStackTrace();
