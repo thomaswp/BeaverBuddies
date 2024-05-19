@@ -92,6 +92,9 @@ namespace BeaverBuddies.Connect
             Stream stream = _gameSaveRepository.CreateSaveSkippingNameValidation(saveRef);
             stream.Write(mapBytes);
             stream.Close();
+
+            // Set the RNG seed before loading the map
+            // The server does the same
             DeterminismService.InitRandomStateWithMapBytes(mapBytes);
             _gameSceneLoader.StartSaveGame(saveRef);
         }

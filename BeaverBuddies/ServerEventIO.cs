@@ -27,19 +27,38 @@ namespace BeaverBuddies
         // The server should wait until the next update to play a
         // user-initiated event, to make sure that the events
         // happen in the same order for the server and clients.
-        // TBH this may not be necessary.
         public override UserEventBehavior UserEventBehavior => UserEventBehavior.QueuePlay;
 
-        public void Start(int port, Func<Task<byte[]>> mapProvider, Func<int> ticksSinceLoadProvider)
+
+        // We only support a static map; see note above
+        public void Start(byte[] mapBytes)
         {
-            netBase = new TimberServer(port, mapProvider, CreateInitEvent(ticksSinceLoadProvider));
+            try
+            {
+                netBase = new TimberServer(
+                    EventIO.Config.Port,
+                    () => {
+                        // TODO: Probably don't need to hold it in memory after the first tick...
+                        Task<byte[]> task = new Task<byte[]>(() => mapBytes);
+                        task.Start();
+                        return task;
+                    },
+                    CreateInitEvent()
+                );
+            }
+            catch (Exception e)
+            {
+                Plugin.Log("Failed to start server");
+                Plugin.Log(e.ToString());
+                return;
+            }
             //netBase = new TimberServer(port, mapProvider, null);
             netBase.OnLog += Plugin.Log;
             netBase.OnMapReceived += NetBase_OnClientConnected;
             netBase.Start();
         }
 
-        private Func<JObject> CreateInitEvent(Func<int> ticksSinceLoadProvider)
+        private Func<JObject> CreateInitEvent()
         {
             // It should be ok to send an init event even if the client is joining before
             // the server, since a) it won't do much on the Host (just set the random seed)
@@ -47,16 +66,11 @@ namespace BeaverBuddies
             // loading the map.
             return () =>
             {
-                var message = InitializeClientEvent.Create(ticksSinceLoadProvider());
+                var message = InitializeClientEvent.Create();
                 message.ticksSinceLoad = 0;
                 Plugin.Log($"Sending start state: {JsonSettings.Serialize(message)}");
                 return JObject.Parse(JsonSettings.Serialize(message));
             };
-        }
-
-        public void UpdateProviders(Func<Task<byte[]>> mapProvider, Func<int> ticksSinceLoadProvider)
-        {
-            netBase.UpdateProviders(mapProvider, CreateInitEvent(ticksSinceLoadProvider));
         }
 
         private void NetBase_OnClientConnected(byte[] mapBytes)
