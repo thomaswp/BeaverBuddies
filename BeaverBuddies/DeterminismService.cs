@@ -195,7 +195,12 @@ namespace BeaverBuddies
                 // use gameplay random, it should be ok as long as they are deterministic,
                 // and not determined by UI events. This may require more monitoring.
                 // So we want to use gameplay random.
-                if (!ReplayService.IsLoaded) return false;
+                if (!ReplayService.IsLoaded)
+                {
+                    Plugin.Log($"s0 before: {UnityEngine.Random.state.s0}");
+                    Plugin.LogStackTrace();
+                    return false;
+                }
 
                 // Calls from a non-game thread should never use the game's random
                 // though if they are game-related we may need a solution for that...

@@ -502,8 +502,7 @@ namespace BeaverBuddies
 
             if (io is ServerEventIO && ticksSinceLoad == 1)
             {
-                ((ServerEventIO)io).StopAcceptingClients();
-
+                //((ServerEventIO)io).StopAcceptingClients();
             }
         }
 

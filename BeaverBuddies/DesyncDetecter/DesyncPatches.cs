@@ -159,8 +159,8 @@ namespace BeaverBuddies.DesyncDetecter
     {
         static void Postfix(WateredNaturalResource __instance, float __result)
         {
-            Plugin.Log(
-                $"WateredNaturalResource {__instance.GameObjectFast?.name} random days to die: {__result}");
+            //Plugin.Log(
+            //    $"WateredNaturalResource {__instance.GameObjectFast?.name} random days to die: {__result}");
             DesyncDetecterService.Trace(
                 $"WateredNaturalResource {__instance.GameObjectFast?.name} random days to die: {__result}");
         }

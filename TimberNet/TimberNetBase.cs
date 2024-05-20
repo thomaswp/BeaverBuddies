@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
-using System.Runtime.InteropServices.ComTypes;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace TimberNet
@@ -212,11 +210,10 @@ namespace TimberNet
         {
             //Log("Client connected");
             var stream = client.GetStream();
-            byte[] headerBuffer = new byte[HEADER_SIZE];
             int messageCount = 0;
             while (client.Connected && !IsStopped)
             {
-                if (!TryReadLength(stream, out int messageLength)) continue;
+                if (!TryReadLength(stream, out int messageLength)) break;
 
                 // First message is always the file
                 if (messageCount == 0 && isClient)
@@ -230,6 +227,12 @@ namespace TimberNet
                     ReceiveFile(stream, messageLength);
                     messageCount++;
                     continue;
+                }
+
+                if (messageLength == 0)
+                {
+                    Log("Received message of length 0; aborting listen");
+                    break;
                 }
 
                 // TODO: How should this fail and not hang if map stops sending?
