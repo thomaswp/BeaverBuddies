@@ -75,6 +75,7 @@ namespace BeaverBuddies
 
         public void StopAcceptingClients()
         {
+            Plugin.Log("Game started: no longer accepting clients");
             string message = $"The Host has already started the game, and the game can no longer be joined. " +
                 $"Ask the Host to rehost and join before they unpause.";
             netBase.StopAcceptingClients(message);

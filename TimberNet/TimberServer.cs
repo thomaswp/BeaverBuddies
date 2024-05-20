@@ -106,7 +106,7 @@ namespace TimberNet
 
         public void StopAcceptingClients(string errorMessage)
         {
-
+            this.errorMessage = errorMessage;
         }
 
         private void StartQueuing (TcpClient client)
