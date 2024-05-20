@@ -197,8 +197,7 @@ namespace BeaverBuddies
                 // So we want to use gameplay random.
                 if (!ReplayService.IsLoaded)
                 {
-                    Plugin.Log($"s0 before: {UnityEngine.Random.state.s0}");
-                    Plugin.LogStackTrace();
+                    DesyncDetecterService.Trace($"Load RNG; s0 before: {UnityEngine.Random.state.s0:X8}");
                     return false;
                 }
 
