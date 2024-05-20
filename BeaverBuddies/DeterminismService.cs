@@ -142,6 +142,7 @@ namespace BeaverBuddies
         public static bool IsNonGameplay = false;
         private static System.Random random = new System.Random();
         private static HashSet<Type> activeNonGamePatchers = new HashSet<Type>();
+        private static int? nextSeedOnLoad;
 
         public void Reset()
         {
@@ -149,6 +150,17 @@ namespace BeaverBuddies
             IsTicking = false;
             activeNonGamePatchers.Clear();
             // No need to reset random
+            // Don't reset seed, since it's set before the Reset
+        }
+
+        public DeterminismService()
+        {
+            if (nextSeedOnLoad.HasValue)
+            {
+                Plugin.Log($"DeterminismService init with seed: {nextSeedOnLoad.Value:X8}");
+                UnityEngine.Random.InitState(nextSeedOnLoad.Value);
+                nextSeedOnLoad = null;
+            }
         }
 
         public static T GetNonGameRandom<T>(Func<T> getter)
@@ -293,20 +305,20 @@ namespace BeaverBuddies
             Plugin.LogStackTrace();
         }
 
-        public static void InitRandomStateWithMapBytes(byte[] mapBytes)
+        public static void InitGameStartState(byte[] mapBytes)
         {
             int state = 13;
             for (int i = 0; i < mapBytes.Length; i++)
             {
                 state = TimberNetBase.CombineHash(state, mapBytes[i]);
             }
-            InitRandomState(state, "MapLoad");
+            InitGameStartState(state);
         }
 
-        public static void InitRandomState(int state, string reason)
+        private static void InitGameStartState(int state)
         {
-            UnityEngine.Random.InitState(state);
-            Plugin.Log($"[{reason}]: Initializing random with state: {state.ToString("X8")}");
+            Plugin.Log($"Setting next random state: {state.ToString("X8")}");
+            nextSeedOnLoad = state;
         }
     }
 

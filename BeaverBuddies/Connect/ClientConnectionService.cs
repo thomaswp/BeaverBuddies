@@ -106,7 +106,7 @@ namespace BeaverBuddies.Connect
 
             // Set the RNG seed before loading the map
             // The server does the same
-            DeterminismService.InitRandomStateWithMapBytes(mapBytes);
+            DeterminismService.InitGameStartState(mapBytes);
             _gameSceneLoader.StartSaveGame(saveRef);
         }
 
