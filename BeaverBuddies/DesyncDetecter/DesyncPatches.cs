@@ -63,19 +63,6 @@ namespace BeaverBuddies.DesyncDetecter
         }
     }
 
-    [HarmonyPatch(typeof(TimeTriggerService), nameof(TimeTriggerService.Add))]
-    class TimeTriggerServiceAddPatcher
-    {
-        static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger, float triggerTimestamp)
-        {
-            // Remove this to see loading timers; should be deterministic now but could test
-            // in the future if something's not working. For now this removes triggers that
-            // aren't a part of tick logic and *shouldn't* affect gameplay.
-            if (!DeterminismService.IsTicking) return;
-            DesyncDetecterService.Trace($"Adding time trigger at {__instance._nextId}-{triggerTimestamp}; ticking: {DeterminismService.IsTicking}");
-        }
-    }
-
     // Non-game things create TimeTriggers, even though they happen during the tick
     // logic, so probably best to exclude.
     //[HarmonyPatch(typeof(TimeTriggerService), nameof(TimeTriggerService.Trigger), typeof(TimeTrigger))]
@@ -91,6 +78,19 @@ namespace BeaverBuddies.DesyncDetecter
     //            id = key._id;
     //        }
     //        DesyncDetecterService.Trace($"Triggering time trigger at {__instance._dayNightCycle.PartialDayNumber}: {id}-{triggerTime}");
+    //    }
+    //}
+
+    //[HarmonyPatch(typeof(TimeTriggerService), nameof(TimeTriggerService.Add))]
+    //class TimeTriggerServiceAddPatcher
+    //{
+    //    static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger, float triggerTimestamp)
+    //    {
+    //        // Remove this to see loading timers; should be deterministic now but could test
+    //        // in the future if something's not working. For now this removes triggers that
+    //        // aren't a part of tick logic and *shouldn't* affect gameplay.
+    //        if (!DeterminismService.IsTicking) return;
+    //        DesyncDetecterService.Trace($"Adding time trigger at {__instance._nextId}-{triggerTimestamp}; ticking: {DeterminismService.IsTicking}");
     //    }
     //}
 
@@ -113,7 +113,7 @@ namespace BeaverBuddies.DesyncDetecter
         {
             foreach (var (reproducibleKey, coordinates) in __instance._newResources)
             {
-                DesyncDetecterService.Trace($"{reproducibleKey.Id}, {coordinates.ToString()}");
+                DesyncDetecterService.Trace($"Spawning: {reproducibleKey.Id}, {coordinates}");
             }
         }
     }

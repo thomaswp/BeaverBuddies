@@ -276,14 +276,13 @@ namespace BeaverBuddies
                 // random state, make sure we're in the same state.
                 if (replayEvent.randomS0Before != null)
                 {
-                    // TODO: Re-add!!!!!
-                    //int s0 = UnityEngine.Random.state.s0;
-                    //if (s0 != replayEvent.randomS0Before)
-                    //{
-                    //    Plugin.LogWarning($"Random state mismatch: {s0} != {replayEvent.randomS0Before}");
-                    //    HandleDesync();
-                    //    break;
-                    //}
+                    int s0 = UnityEngine.Random.state.s0;
+                    if (s0 != replayEvent.randomS0Before)
+                    {
+                        Plugin.LogWarning($"Random state mismatch: {s0} != {replayEvent.randomS0Before}");
+                        HandleDesync();
+                        break;
+                    }
                 }
                 try
                 {
@@ -502,7 +501,7 @@ namespace BeaverBuddies
 
             if (io is ServerEventIO && ticksSinceLoad == 1)
             {
-                //((ServerEventIO)io).StopAcceptingClients();
+                ((ServerEventIO)io).StopAcceptingClients();
             }
         }
 
