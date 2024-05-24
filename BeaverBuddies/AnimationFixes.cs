@@ -1,4 +1,4 @@
-﻿# define NO_SMOOTH_ANIMATION
+﻿//# define NO_SMOOTH_ANIMATION
 
 using HarmonyLib;
 using Timberborn.CharacterMovementSystem;
