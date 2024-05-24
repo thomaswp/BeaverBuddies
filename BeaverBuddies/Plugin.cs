@@ -2,13 +2,20 @@
 using BeaverBuddies.DesyncDetecter;
 using Bindito.Core;
 using HarmonyLib;
+using Open.Nat;
+using System;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Net.Sockets;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 using TimberApi.ConfiguratorSystem;
 using TimberApi.ConsoleSystem;
 using TimberApi.ModSystem;
 using TimberApi.SceneSystem;
 using Timberborn.TickSystem;
+using UnityEngine.XR;
 
 namespace BeaverBuddies
 {
@@ -47,6 +54,19 @@ namespace BeaverBuddies
         }
     }
 
+    public class Listener : TraceListener
+    {
+        public override void Write(string message)
+        {
+            Console.Write(message);
+        }
+
+        public override void WriteLine(string message)
+        {
+            Console.WriteLine(message);
+        }
+    }
+
     [Configurator(SceneEntrypoint.MainMenu)]
     public class ConnectionMenuConfigurator : IConfigurator
     {
@@ -73,6 +93,33 @@ namespace BeaverBuddies
             //ReflectionUtils.PrintChildClasses(typeof(IParallelTickableSingleton));
             //ReflectionUtils.FindStaticFields();
             //ReflectionUtils.FindHashSetFields();
+
+            var discoverer = new NatDiscoverer();
+
+            NatDiscoverer.TraceSource.Switch.Level = SourceLevels.Verbose;
+            NatDiscoverer.TraceSource.Listeners.Add(new Listener());
+
+            Task.Run(async () =>
+            {
+                // using SSDP protocol, it discovers NAT device.
+                var device = await discoverer.DiscoverDeviceAsync();
+
+                // display the NAT's IP address
+                Console.WriteLine("The external IP Address is: {0} ", await device.GetExternalIPAsync());
+                Console.WriteLine(await device.GetSpecificMappingAsync(Protocol.Tcp, 25565));
+
+                // create a new mapping in the router [external_ip:1702 -> host_machine:1602]
+                await device.CreatePortMapAsync(new Mapping(Protocol.Tcp, 1602, 1702, "For testing"));
+
+                Console.WriteLine("Success!");
+
+                // configure a TCP socket listening on port 1602
+                var endPoint = new IPEndPoint(IPAddress.Any, 1602);
+                var socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                socket.SetIPProtectionLevel(IPProtectionLevel.Unrestricted);
+                socket.Bind(endPoint);
+                socket.Listen(4);
+            });
         }
     }
 
