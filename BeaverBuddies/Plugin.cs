@@ -9,6 +9,11 @@ using TimberApi.ConsoleSystem;
 using TimberApi.ModSystem;
 using TimberApi.SceneSystem;
 using Timberborn.TickSystem;
+using System.Net.WebSockets;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Text;
+using System;
 
 namespace BeaverBuddies
 {
@@ -95,12 +100,32 @@ namespace BeaverBuddies
 
             Log($"Plugin {Guid} is loaded!");
 
+            DoClientWebSocket();
+
             if (config.GetNetMode() == NetMode.None) return;
 
             Harmony harmony = new Harmony(Guid);
             harmony.PatchAll();
             //EnumerableFirstPatcher.CreatePatch(harmony);
             //DeterminismPatcher.PatchDeterminism(harmony);
+        }
+
+        private static async Task DoClientWebSocket()
+        {
+            using (ClientWebSocket ws = new ClientWebSocket())
+            {
+                Uri serverUri = new Uri("wss://echo.websocket.org/");
+                await ws.ConnectAsync(serverUri, CancellationToken.None);
+                while (ws.State == WebSocketState.Open)
+                {
+                    string msg = "hello123";
+                    ArraySegment<byte> bytesToSend = new ArraySegment<byte>(Encoding.UTF8.GetBytes(msg));
+                    await ws.SendAsync(bytesToSend, WebSocketMessageType.Text, true, CancellationToken.None);
+                    ArraySegment<byte> bytesReceived = new ArraySegment<byte>(new byte[1024]);
+                    WebSocketReceiveResult result = await ws.ReceiveAsync(bytesReceived, CancellationToken.None);
+                    Console.WriteLine(Encoding.UTF8.GetString(bytesReceived.Array, 0, result.Count));
+                }
+            }
         }
 
         public static string GetWithDate(string message)
