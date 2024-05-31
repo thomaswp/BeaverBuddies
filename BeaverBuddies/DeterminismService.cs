@@ -1040,36 +1040,25 @@ namespace BeaverBuddies
         }
     }
 
-    // TODO: Eventually need to test removing this. I'm 
-    // pretty sure at this point that it changes the random
-    // behavior/order but doesn't fix anything.
-    //[HarmonyPatch(typeof(SlotManager), nameof(SlotManager.AssignFirstUnassigned))]
-    //[ManualMethodOverwrite]
-    //class SlotManagerAssignFirstUnassignedPatcher
-    //{
-    //    static bool Prefix(SlotManager __instance)
-    //    {
-    //        if (__instance._unassignedEnterers.Count > 0)
-    //        {
-    //            // PATCH
-    //            // HashSet.First() is not deterministic, so we use a sorted list instead
-    //            // TODO: This is slow so optimize if it helps
-    //            //Enterer enterer = __instance._unassignedEnterers
-    //            //    .OrderBy(e => e.GetComponentFast<EntityComponent>().EntityId)
-    //            //    .FirstOrDefault();
-    //            // END PATCH
-    //            Enterer enterer = __instance._unassignedEnterers.First();
-    //            var available = string.Join(',',
-    //                __instance._unassignedEnterers
-    //                    .Select(e => e.GetComponentFast<EntityComponent>().EntityId)
-    //                    .OrderBy(e => e)
-    //                    );
-    //            Plugin.Log($"Selecting from: {available}");
-    //            Plugin.Log(enterer.GetComponentFast<EntityComponent>().EntityId.ToString());
-    //            __instance._unassignedEnterers.Remove(enterer);
-    //            __instance.AddEnterer(enterer);
-    //        }
-    //        return false;
-    //    }
-    //}
+    [HarmonyPatch(typeof(RecoveredGoodStackSpawner), nameof(RecoveredGoodStackSpawner.UpdateSingleton))]
+    [ManualMethodOverwrite]
+    class RecoveredGoodStackSpawnerUpdateSingletonPatcher
+    {
+        private static bool doBaseUpdate = false;
+        
+        public static void BaseUpdateSingleton(RecoveredGoodStackSpawner __instance)
+        {
+            doBaseUpdate = true;
+            __instance.UpdateSingleton();
+            doBaseUpdate = false;
+        }
+
+        static bool Prefix(RecoveredGoodStackSpawner __instance)
+        {
+            if (EventIO.IsNull) return true;
+            if (doBaseUpdate) return true;
+            return false;
+        }
+    }
+
 }
