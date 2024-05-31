@@ -125,6 +125,7 @@ namespace BeaverBuddies.DesyncDetecter
 
         static void Prefix(Walker __instance, IDestination destination)
         {
+
             string entityID = __instance.GetComponentFast<EntityComponent>().EntityId.ToString();
             if (destination is PositionDestination)
             {
@@ -134,6 +135,8 @@ namespace BeaverBuddies.DesyncDetecter
             else if (destination is AccessibleDestination)
             {
                 var accessible = ((AccessibleDestination)destination).Accessible;
+                // Manually check since MonoBehavior doesn't support null conditional operator
+                if (accessible == null) return;
                 DesyncDetecterService.Trace($"{entityID} going to: " +
                     $"{accessible?.GameObjectFast?.name}");
             }
