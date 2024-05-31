@@ -129,13 +129,13 @@ namespace BeaverBuddies.DesyncDetecter
             if (destination is PositionDestination)
             {
                 DesyncDetecterService.Trace($"{entityID} going to: " +
-                    $"{((PositionDestination)destination).Destination}");
+                    $"{((PositionDestination)destination)?.Destination}");
             }
             else if (destination is AccessibleDestination)
             {
                 var accessible = ((AccessibleDestination)destination).Accessible;
                 DesyncDetecterService.Trace($"{entityID} going to: " +
-                    $"{accessible.GameObjectFast.name}");
+                    $"{accessible?.GameObjectFast?.name}");
             }
         }
     }
