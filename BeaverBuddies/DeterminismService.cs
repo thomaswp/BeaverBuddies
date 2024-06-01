@@ -75,6 +75,9 @@ namespace BeaverBuddies
      *   The culprit here seems to be the TimeTriggerService (and the whole system)
      *   which uses time of day rather than ticks which is likely messing things up
      *   (need to look further!).
+     * - WaterObjectService.Update enables or creates an object with
+     *   NaturalResourcesMoisture, which is game logic (probably enables
+     *   since it's not a GUID event...). Needs to happen on tick.
      * 
      * 
      * Theories for unexplained desyncs:
