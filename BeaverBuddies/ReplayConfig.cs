@@ -25,6 +25,7 @@ namespace BeaverBuddies
         public int Port { get; set; } = 25565;
         public bool Verbose = true;
         public bool FirstTimer = true;
+        public bool Debug = false;
 
         public NetMode GetNetMode()
         {

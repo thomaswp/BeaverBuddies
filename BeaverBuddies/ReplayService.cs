@@ -455,9 +455,8 @@ namespace BeaverBuddies
         {
             if (!CanAct) return;
 
-            if (io.ShouldSendHeartbeat)
+            if (EventIO.Config.Debug && io.ShouldSendHeartbeat)
             {
-                // TODO: Based on Config!
                 // Before incrementing the tick (which creates a new blank trace),
                 // capture any unsent traces and send them.
                 // Note: this will capture traces for prior ticks, but be sent with

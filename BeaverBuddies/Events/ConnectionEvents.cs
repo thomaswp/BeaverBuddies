@@ -11,6 +11,7 @@ namespace BeaverBuddies.Events
     {
         public string serverModVersion;
         public string serverGameVersion;
+        public bool isDebugMode;
 
         public override void Replay(IReplayContext context)
         {
@@ -23,6 +24,10 @@ namespace BeaverBuddies.Events
             {
                 warningMessage = $"Warning! Server mod version ({serverModVersion}) does not match client mod version ({Plugin.Version}).\n" +
                     $"Please ensure that you are running the same version of the {PluginInfo.PLUGIN_NAME} mod.";
+            } else if (isDebugMode != EventIO.Config.Debug)
+            {
+                warningMessage = $"Warning! Server debug mode ({isDebugMode}) does not match client debug mode ({EventIO.Config.Debug}).\n" +
+                    $"Please update your config files to be in or not in debug mode.";
             }
             if (warningMessage != null)
             {
@@ -37,6 +42,7 @@ namespace BeaverBuddies.Events
             {
                 serverModVersion = Plugin.Version,
                 serverGameVersion = Versions.GameVersion.ToString(),
+                isDebugMode = EventIO.Config.Debug,
             };
             return message;
         }

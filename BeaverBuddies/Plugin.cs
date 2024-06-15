@@ -43,7 +43,12 @@ namespace BeaverBuddies
             containerDefinition.Bind<DeterminismService>().AsSingleton();
             containerDefinition.Bind<TickReplacerService>().AsSingleton();
             containerDefinition.Bind<RehostingService>().AsSingleton();
-            containerDefinition.Bind<DesyncDetecterService>().AsSingleton();
+
+            if (EventIO.Config.Debug)
+            {
+                Plugin.Log("Debug Mode Active; registering DesyncDetecterService");
+                containerDefinition.Bind<DesyncDetecterService>().AsSingleton();
+            }
 
         }
     }

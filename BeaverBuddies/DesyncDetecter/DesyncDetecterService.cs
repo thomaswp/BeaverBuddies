@@ -43,7 +43,6 @@ namespace BeaverBuddies.DesyncDetecter
         private static readonly List<List<Trace>> traces = new List<List<Trace>>();
         private static List<Trace> CurrentTrace { get { return traces.Last(); } }
 
-        // TODO: Get from Config
         private static readonly int maxTraceTicks = 10;
 
         DesyncDetecterService()
@@ -61,7 +60,10 @@ namespace BeaverBuddies.DesyncDetecter
             currentTick = -1;
             traces.Clear();
             traces.Add(new List<Trace>());
-            Trace("Start Preload");
+            if (EventIO.Config.Debug)
+            {
+                Trace("Start Preload");
+            }
         }
 
         public static IEnumerable<ReplayEvent> CreateReplayEventsAndClear()
@@ -83,6 +85,10 @@ namespace BeaverBuddies.DesyncDetecter
 
         public static void StartTick(int tick)
         {
+            if (!EventIO.Config.Debug)
+            {
+                return;
+            }
             if (tick < currentTick)
             {
                 Plugin.LogError($"Ticks cannot decrease! {tick} < {currentTick}");
@@ -106,6 +112,12 @@ namespace BeaverBuddies.DesyncDetecter
         // Probably better to just avoid the patches altogether
         public static void Trace(string message)
         {
+            if (!EventIO.Config.Debug)
+            {
+                Plugin.LogWarning("DesyncDetectorService.Trace called not in debug mode");
+                //Plugin.LogStackTrace();
+                return;
+            }
             // TODO: Only if Config says so
             CurrentTrace.Add(new Trace()
             {
@@ -117,6 +129,13 @@ namespace BeaverBuddies.DesyncDetecter
 
         public static bool VerifyTraces(int tick, List<Trace> otherTraces)
         {
+            if (!EventIO.Config.Debug)
+            {
+                Plugin.LogWarning("DesyncDetectorService.VerifyTraces called not in debug mode");
+                //Plugin.LogStackTrace();
+                return true;
+            }
+
             if (tick > currentTick)
             {
                 Plugin.LogError($"Verifying future tick! {tick} > {currentTick}");
