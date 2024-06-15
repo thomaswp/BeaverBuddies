@@ -52,6 +52,7 @@ using Timberborn.EnterableSystem;
 using System.Collections;
 using BeaverBuddies.DesyncDetecter;
 using Timberborn.Brushes;
+using Timberborn.WaterObjects;
 
 namespace BeaverBuddies
 {
@@ -1043,6 +1044,9 @@ namespace BeaverBuddies
         }
     }
 
+    // If there's more than ~3 of these, I could probably make a
+    // generalizable approach to prevent Singletons from updating
+    // and instead update them on tick.
     [HarmonyPatch(typeof(RecoveredGoodStackSpawner), nameof(RecoveredGoodStackSpawner.UpdateSingleton))]
     [ManualMethodOverwrite]
     class RecoveredGoodStackSpawnerUpdateSingletonPatcher
@@ -1064,4 +1068,25 @@ namespace BeaverBuddies
         }
     }
 
+
+    [HarmonyPatch(typeof(WaterObjectService), nameof(WaterObjectService.UpdateSingleton))]
+    [ManualMethodOverwrite]
+    class WaterObjectServiceUpdateSingletonPatcher
+    {
+        private static bool doBaseUpdate = false;
+
+        public static void BaseUpdateSingleton(WaterObjectService __instance)
+        {
+            doBaseUpdate = true;
+            __instance.UpdateSingleton();
+            doBaseUpdate = false;
+        }
+
+        static bool Prefix(WaterObjectService __instance)
+        {
+            if (EventIO.IsNull) return true;
+            if (doBaseUpdate) return true;
+            return false;
+        }
+    }
 }

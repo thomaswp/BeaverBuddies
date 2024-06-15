@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Timberborn.RecoveredGoodSystem;
 using Timberborn.TickSystem;
+using Timberborn.WaterObjects;
 
 namespace BeaverBuddies
 {
@@ -12,17 +13,24 @@ namespace BeaverBuddies
     /// </summary>
     internal class TickReplacerService : ITickableSingleton
     {
-        private RecoveredGoodStackSpawner _spawner;
+        private RecoveredGoodStackSpawner _goodStackSpawner;
+        private WaterObjectService _waterObjectService;
 
-        public TickReplacerService(RecoveredGoodStackSpawner spawner)
+
+        public TickReplacerService(
+            RecoveredGoodStackSpawner spawner,
+            WaterObjectService waterObjectService
+        )
         {
-            _spawner = spawner;
+            _goodStackSpawner = spawner;
+            _waterObjectService = waterObjectService;
         }
 
         public void Tick()
         {
             // Move the normal update behavior to a tick
-            RecoveredGoodStackSpawnerUpdateSingletonPatcher.BaseUpdateSingleton(_spawner);
+            RecoveredGoodStackSpawnerUpdateSingletonPatcher.BaseUpdateSingleton(_goodStackSpawner);
+            WaterObjectServiceUpdateSingletonPatcher.BaseUpdateSingleton(_waterObjectService);
         }
     }
 }
