@@ -11,21 +11,54 @@ using Timberborn.NaturalResources;
 using UnityEngine;
 using Timberborn.WalkingSystem;
 using Timberborn.NaturalResourcesMoisture;
+using System.Reflection;
 
 namespace BeaverBuddies.DesyncDetecter
 {
-    // TODO: Find a way to make these patches configurable
-    [HarmonyPatch]
+
+
     public class DesyncPatches
     {
-
+        public static void ApplyDesyncPatches(Harmony harmony)
+        {
+            harmony.Patch(
+                typeof(NaturalResourceReproducer).GetMethod(nameof(NaturalResourceReproducer.MarkSpots), BindingFlags.NonPublic | BindingFlags.Instance),
+                prefix: new HarmonyMethod(typeof(NRPMarkSpotsPatcher), nameof(NRPMarkSpotsPatcher.Prefix)),
+                postfix: new HarmonyMethod(typeof(NRPMarkSpotsPatcher), nameof(NRPMarkSpotsPatcher.Postfix))
+            );
+            harmony.Patch(
+                typeof(NaturalResourceReproducer).GetMethod(nameof(NaturalResourceReproducer.UnmarkSpots), BindingFlags.NonPublic | BindingFlags.Instance),
+                prefix: new HarmonyMethod(typeof(NRPUnmarkSpotsPatcher), nameof(NRPMarkSpotsPatcher.Prefix)),
+                postfix: new HarmonyMethod(typeof(NRPUnmarkSpotsPatcher), nameof(NRPMarkSpotsPatcher.Postfix))
+            );
+            harmony.Patch(
+                typeof(SpawnValidationService).GetMethod(nameof(SpawnValidationService.CanSpawn), BindingFlags.NonPublic | BindingFlags.Instance),
+                postfix: new HarmonyMethod(typeof(SpawnValidationServiceCanSpawnPatcher), nameof(SpawnValidationServiceCanSpawnPatcher.Postfix))
+            );
+            harmony.Patch(
+                typeof(NaturalResourceReproducer).GetMethod(nameof(NaturalResourceReproducer.SpawnNewResources), BindingFlags.NonPublic | BindingFlags.Instance),
+                prefix: new HarmonyMethod(typeof(NRRPatcher), nameof(NRRPatcher.Prefix))
+            );
+            harmony.Patch(
+                typeof(Walker).GetMethod(nameof(Walker.FindPath), BindingFlags.NonPublic | BindingFlags.Instance),
+                prefix: new HarmonyMethod(typeof(WalkerFindPathPatcher), nameof(WalkerFindPathPatcher.Prefix))
+            );
+            harmony.Patch(
+                typeof(WateredNaturalResource).GetMethod(nameof(WateredNaturalResource.StartDryingOut), BindingFlags.NonPublic | BindingFlags.Instance),
+                prefix: new HarmonyMethod(typeof(WateredNaturalResourceStartDryingOutPatcher), nameof(WateredNaturalResourceStartDryingOutPatcher.Prefix))
+            );
+            harmony.Patch(
+                typeof(WateredNaturalResource).GetMethod(nameof(WateredNaturalResource.GenerateRandomDaysToDry), BindingFlags.NonPublic | BindingFlags.Instance),
+                postfix: new HarmonyMethod(typeof(WateredNaturalResourceGenerateRandomDaysToDryPatcher), nameof(WateredNaturalResourceGenerateRandomDaysToDryPatcher.Postfix))
+            );
+        }
     }
 
-    [HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.MarkSpots))]
+    //[HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.MarkSpots))]
     class NRPMarkSpotsPatcher
     {
         private static int lastCount;
-        static void Prefix(NaturalResourceReproducer __instance, Reproducible reproducible)
+        public static void Prefix(NaturalResourceReproducer __instance, Reproducible reproducible)
         {
             if (!ReplayService.IsLoaded) return;
             var key = ReproducibleKey.Create(reproducible);
@@ -33,7 +66,7 @@ namespace BeaverBuddies.DesyncDetecter
             DesyncDetecterService.Trace($"Marking spots for   {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
         }
 
-        static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
+        public static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
         {
             if (!ReplayService.IsLoaded) return;
             var key = ReproducibleKey.Create(reproducible);
@@ -42,7 +75,7 @@ namespace BeaverBuddies.DesyncDetecter
         }
     }
 
-    [HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.UnmarkSpots))]
+    //[HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.UnmarkSpots))]
     class NRPUnmarkSpotsPatcher
     {
         private static int lastCount;
@@ -94,10 +127,10 @@ namespace BeaverBuddies.DesyncDetecter
     //    }
     //}
 
-    [HarmonyPatch(typeof(SpawnValidationService), nameof(SpawnValidationService.CanSpawn))]
+    //[HarmonyPatch(typeof(SpawnValidationService), nameof(SpawnValidationService.CanSpawn))]
     class SpawnValidationServiceCanSpawnPatcher
     {
-        static void Postfix(SpawnValidationService __instance, bool __result, Vector3Int coordinates, Blocks blocks, string resourcePrefabName)
+        public static void Postfix(SpawnValidationService __instance, bool __result, Vector3Int coordinates, Blocks blocks, string resourcePrefabName)
         {
             DesyncDetecterService.Trace($"Trying to spawn {resourcePrefabName} at {coordinates}: {__result}\n" +
                 $"IsSuitableTerrain: {__instance.IsSuitableTerrain(coordinates)}\n" +
@@ -106,10 +139,10 @@ namespace BeaverBuddies.DesyncDetecter
         }
     }
 
-    [HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.SpawnNewResources))]
+    //[HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.SpawnNewResources))]
     public class NRRPatcher
     {
-        static void Prefix(NaturalResourceReproducer __instance)
+        public static void Prefix(NaturalResourceReproducer __instance)
         {
             foreach (var (reproducibleKey, coordinates) in __instance._newResources)
             {
@@ -119,11 +152,11 @@ namespace BeaverBuddies.DesyncDetecter
     }
 
 
-    [HarmonyPatch(typeof(Walker), nameof(Walker.FindPath))]
+    //[HarmonyPatch(typeof(Walker), nameof(Walker.FindPath))]
     public class WalkerFindPathPatcher
     {
 
-        static void Prefix(Walker __instance, IDestination destination)
+        public static void Prefix(Walker __instance, IDestination destination)
         {
 
             string entityID = __instance.GetComponentFast<EntityComponent>().EntityId.ToString();
@@ -146,7 +179,7 @@ namespace BeaverBuddies.DesyncDetecter
     [HarmonyPatch(typeof(WateredNaturalResource), nameof(WateredNaturalResource.StartDryingOut))]
     public class WateredNaturalResourceStartDryingOutPatcher
     {
-        static void Prefix(WateredNaturalResource __instance)
+        public static void Prefix(WateredNaturalResource __instance)
         {
             var id = __instance.GetComponentFast<EntityComponent>().EntityId;
             var isDead = __instance._livingNaturalResource.IsDead;
@@ -160,7 +193,7 @@ namespace BeaverBuddies.DesyncDetecter
     [HarmonyPatch(typeof(WateredNaturalResource), nameof(WateredNaturalResource.GenerateRandomDaysToDry))]
     public class WateredNaturalResourceGenerateRandomDaysToDryPatcher
     {
-        static void Postfix(WateredNaturalResource __instance, float __result)
+        public static void Postfix(WateredNaturalResource __instance, float __result)
         {
             //Plugin.Log(
             //    $"WateredNaturalResource {__instance.GameObjectFast?.name} random days to die: {__result}");
