@@ -47,57 +47,40 @@ using System.Linq;
 using Timberborn.NaturalResourcesReproduction;
 using Timberborn.TimeSystem;
 using Timberborn.BaseComponentSystem;
+using Timberborn.SlotSystem;
+using Timberborn.EnterableSystem;
+using System.Collections;
+using BeaverBuddies.DesyncDetecter;
+using Timberborn.Brushes;
+using Timberborn.WaterObjects;
 
 namespace BeaverBuddies
 {
     /*
      * Current desync issues:
-     * - Multiple examples show desyncs on more complex saves, especially
-     *   once water dynamics become complex.
-     *   The cause seems to be that a NatrualResource is spawned in one save but not
-     *   in another, which causes an immediate desync. This is caused by divergence
-     *   in the set of available spots for the resource to spawn, which manifests
-     *   only later when the resource spawns in two different locations.
-     *   This may not be detected until a resource tries to spawn in one game
-     *   but cannot in the other (because they're in two different spots).
-     *   Specifically, a NaturalResource is queued by 
-     *   NaturalResourceReproducer.TrySpawnNatrualResources, but then in one game
-     *   it is found valid and spawned but not in another.
-     *   One cause was using HashSet.GetElementAt() which I fixed by converting
-     *   to a fixed-order list.
-     *   Another cause is something about how ticks are spread out over multiple updates.
-     *   Forcing one tick per update now fixes the problem.
-     *   The culprit here seems to be the TimeTriggerService (and the whole system)
-     *   which uses time of day rather than ticks which is likely messing things up
-     *   (need to look further!).     *   
-     * 
+     * - *knock on wood*
      * 
      * Theories for unexplained desyncs:
      * - Something isn't saved in the save state (e.g. when to go to bed),
      *   so we get different behavior.
-     * - Nondeterminism in the code, e.g. inconsistent dictionary traversal.
-     *   I've seen no evidence of this, though. Internet suggests that this behavior
-     *   is likely deterministic, just not guaranteed to be.
      * - Floating point rounding issues with movement, etc. No evidence of this so
      *   far - at least on the same OS.
+     * - Some gameplay code that occurs in OnDestroyed (though I have seen that this
+     *   can directly trigger when the object is destroyed during a tick, it may also
+     *   be triggered sometimes at the end of a frame).
      *   
      * To try:
+     * - Use Debug mode in the config, and add more Trace calls to pinpoint issues.
      * - Remove all randomness
      * - Remove interpolating animations
      * - Remove all water logic (this might get complicated...)
+     * - Log random calls during load to look for non-gameplay logic
      * 
      * Monitoring:
-     * - Movement of Beavers diverges over time, possibly due to rounding
-     *   or more likely something with a non-fixed-time-update.
-     *   The differences start small and grow over time.
-     *   I think I've fixed this. Movement still diverges, but it seems
-     *   to only happen after the random state changes, so maybe no longer
-     *   the main cause. Need to verify though. I've also verified that
-     *   removing the MovementAnimator.Update (smooth movement) doesn't
-     *   remove the movement desync (though it does change from frame 320).
+     * - There may be other Singleton's with game logic updates.
      * - Some TimeTriggers seem to happen not completely synchronized, but
-     *   I believe some of these are animation things, so they don't need to
-     *   be. It does not seem to be causing desyncs.
+     *   all the ones I've observed are for non-game logic so far.
+     * - Game state seems to be synced at load now, but need to further confirm.
      * 
      * Ruled out
      * - Unaccounted for calls to Unity random: there were no abnormal
@@ -106,6 +89,11 @@ namespace BeaverBuddies
      *   is synced, but this seems to just be the patching.
      * - Inconsistent update order (e.g. due to hash codes/buckets). Seems to
      *   be consistent.
+     * - HashSet is *not* the cause of desyncs. I've looked and the source code
+     *   and run a number of tests. The way it's written, the order of enumeration
+     *   is independent of the hashcodes themselves, and therefore depends only
+     *   on the order of additions and removals. If the rest of the game is
+     *   deterministic, it should be as well.
      * 
      * Fixed:
      * - Guid.NewGuid now uses Unity's random generator and is deterministic
@@ -115,24 +103,28 @@ namespace BeaverBuddies
      *   starting any new ticks) so the entity can Start() on the next Update()
      * - Time.time is now deterministic. This seemed to be a primary cause of
      *   desyncs, but I never figured out exactly why.
+     * - Beaver movement logic is now only updated on tick, with a separate
+     *   render-only update logic in AnimationFixes, which is undone before a
+     *   tick starts.
      * - WateredNaturalResource.Awake() and LivingWaterNaturalResource.Awake()
      *   all random, which likely occurs before the client receives its RNG. 
      *   Further, the game saves the *progress* towards death, rather than the time 
      *   of death, so it would be hard to reload.
-     *   Likely fixed by always initializing random (before game load) to a fixed
-     *   value (would kind of be nice to do this anyway for deterministic bugs).
+     *   Should be fixed by having original random state based on map hash for both
+     *   Server and Clients.
+     * - A number of Singletons have game logic in their UpdateSingleton method.
+     *   I have moved these to TickReplacerService's Tick method to keep it synced.
      */
 
-    public class DeterminismService : IResettableSingleton
+    public class DeterminismService : RegisteredSingleton, IResettableSingleton
     {
         public Thread UnityThread;
-        private List<StackTrace> lastRandomStackTraces = new List<StackTrace>();
-
 
         public static bool IsTicking = false;
         public static bool IsNonGameplay = false;
         private static System.Random random = new System.Random();
         private static HashSet<Type> activeNonGamePatchers = new HashSet<Type>();
+        private static int? nextSeedOnLoad;
 
         public void Reset()
         {
@@ -140,28 +132,16 @@ namespace BeaverBuddies
             IsTicking = false;
             activeNonGamePatchers.Clear();
             // No need to reset random
+            // Don't reset seed, since it's set before the Reset
         }
 
         public DeterminismService()
         {
-            RegisterSingleton(this);
-
-            // Deterministic seed set before the game is ever loaded,
-            // since some components call Random during load and before
-            // the Client can receive a seed
-            InitRandomState(42, "Pre-load");
-        }
-
-        public void ClearRandomStacks()
-        {
-            lastRandomStackTraces.Clear();
-        }
-
-        public void PrintRandomStacks()
-        {
-            foreach (StackTrace stack in lastRandomStackTraces)
+            if (nextSeedOnLoad.HasValue)
             {
-                Plugin.Log(stack.ToString());
+                Plugin.Log($"DeterminismService init with seed: {nextSeedOnLoad.Value:X8}");
+                UnityEngine.Random.InitState(nextSeedOnLoad.Value);
+                nextSeedOnLoad = null;
             }
         }
 
@@ -173,8 +153,8 @@ namespace BeaverBuddies
                 return getter();
             }
             finally
-            { 
-                IsNonGameplay = false; 
+            {
+                IsNonGameplay = false;
             }
         }
 
@@ -185,12 +165,35 @@ namespace BeaverBuddies
             return determinismService?.ShouldFreezeSeed ?? false;
         }
 
-        private bool ShouldFreezeSeed 
+        /// <summary>
+        /// Returns true if the game's random seed should be "frozen," meaning
+        /// a non-game RNG should be used instead.
+        /// In essence this returns true if we think a random call right now
+        /// is unrelated to gameplay and does not need to be synced.
+        /// </summary>
+        private bool ShouldFreezeSeed
         {
             get
             {
+                // If for some reason this is happening outside of
+                // a multiplayer game, we don't need to freeze the seed
+                if (EventIO.IsNull) return false;
+
                 // Something is asking us to return false
                 if (IsNonGameplay) return true;
+
+
+                // When the game is loading, almost all random calls are gameplay logic
+                // (e.g., choosing when trees die, or choosing an Enterer).
+                // I have filtered out the non-gameplay ones I've found, and even if they
+                // use gameplay random, it should be ok as long as they are deterministic,
+                // and not determined by UI events. This may require more monitoring.
+                // So we want to use gameplay random.
+                if (!ReplayService.IsLoaded)
+                {
+                    DesyncDetecterService.Trace($"Load RNG; s0 before: {UnityEngine.Random.state.s0:X8}");
+                    return false;
+                }
 
                 // Calls from a non-game thread should never use the game's random
                 // though if they are game-related we may need a solution for that...
@@ -209,12 +212,10 @@ namespace BeaverBuddies
                 // we've caught any non-game code that can run during a tick!
                 if (IsTicking)
                 {
-                    // TODO: Make only in "dev mode"
-                    //lastRandomStackTraces.Add(new StackTrace());
-                    //Plugin.Log("s0 before: " + UnityEngine.Random.state.s0.ToString("X8"));
-                    //var entity = TickableEntityTickPatcher.currentlyTickingEntity;
-                    //Plugin.Log($"Last entity: {entity?.name} - {entity?.EntityId}");
-                    //Plugin.LogStackTrace();
+                    var entity = TickableEntityTickPatcher.currentlyTickingEntity;
+                    DesyncDetecterService.Trace($"Tick RNG; " +
+                        $"s0 before: {UnityEngine.Random.state.s0:X8}; " +
+                        $"Last entity: {entity?.name} - {entity?.EntityId}");
                     return false;
                 }
 
@@ -280,16 +281,26 @@ namespace BeaverBuddies
 
         private void LogUnknownRandomCalled()
         {
-            if (!ReplayService.IsLoaded) return;
-            
+            if (EventIO.IsNull) return;
+
             Plugin.LogWarning("Unknown random called outside of tick");
             Plugin.LogStackTrace();
         }
 
-        public static void InitRandomState(int state, string reason)
+        public static void InitGameStartState(byte[] mapBytes)
         {
-            UnityEngine.Random.InitState(state);
-            Plugin.Log($"[{reason}]: Initializing random with state: {state.ToString("X8")}");
+            int state = 13;
+            for (int i = 0; i < mapBytes.Length; i++)
+            {
+                state = TimberNetBase.CombineHash(state, mapBytes[i]);
+            }
+            InitGameStartState(state);
+        }
+
+        private static void InitGameStartState(int state)
+        {
+            Plugin.Log($"Setting next random state: {state.ToString("X8")}");
+            nextSeedOnLoad = state;
         }
     }
 
@@ -429,6 +440,7 @@ namespace BeaverBuddies
             typeof(BeaverTextureSetter),
             typeof(BotManufactoryAnimationController),
             typeof(BasicSelectionSound),
+            typeof(BrushProbabilityMap),
             typeof(DateSalter),
             typeof(GameMusicPlayer),
             typeof(NaturalResourceModelRandomizer),
@@ -457,7 +469,7 @@ namespace BeaverBuddies
         {
             if (blacklist.Contains(method.DeclaringType))
             {
-                for (int i =  0; i < __result.Length; i++)
+                for (int i = 0; i < __result.Length; i++)
                 {
                     if (__result[i] is RandomNumberGenerator)
                     {
@@ -589,20 +601,20 @@ namespace BeaverBuddies
         }
     }
 
-   // TODO: Timberborn.GameLibs is out of date. This should come from the WorkshopEffets namespace
-   // [HarmonyPatch(typeof(ObservatoryAnimator), nameof(ObservatoryAnimator.GenerateRandomAngles))]
-   // public class ObservatoryAnimatorGenerateRandomAnglesPatcher
-   // {
-   //     static void Prefix()
-   //     {
-   //         DeterminismController.SetNonGamePatcherActive(typeof(ObservatoryAnimatorGenerateRandomAnglesPatcher), true);
-   //     }
+    // TODO: Timberborn.GameLibs is out of date. This should come from the WorkshopEffets namespace
+    // [HarmonyPatch(typeof(ObservatoryAnimator), nameof(ObservatoryAnimator.GenerateRandomAngles))]
+    // public class ObservatoryAnimatorGenerateRandomAnglesPatcher
+    // {
+    //     static void Prefix()
+    //     {
+    //         DeterminismController.SetNonGamePatcherActive(typeof(ObservatoryAnimatorGenerateRandomAnglesPatcher), true);
+    //     }
 
-   //     static void Postfix()
-   //     {
-   //         DeterminismController.SetNonGamePatcherActive(typeof(ObservatoryAnimatorGenerateRandomAnglesPatcher), false);
-   //     }
-   // }
+    //     static void Postfix()
+    //     {
+    //         DeterminismController.SetNonGamePatcherActive(typeof(ObservatoryAnimatorGenerateRandomAnglesPatcher), false);
+    //     }
+    // }
 
     [HarmonyPatch(typeof(LoopingSoundPlayer), nameof(LoopingSoundPlayer.PlayLooping))]
     public class LoopingSoundPlayerPatcher
@@ -752,7 +764,7 @@ namespace BeaverBuddies
 #endif
             if (ReplayService.IsLoaded)
             {
-                Plugin.Log($"Generating new GUID: {__result}");
+                DesyncDetecterService.Trace($"Generating new GUID: {__result}");
             }
             return false;
         }
@@ -809,7 +821,7 @@ namespace BeaverBuddies
                 id = Guid.NewGuid();
             }
             TickingService ts = GetSingleton<TickingService>();
-            if (ts != null )
+            if (ts != null)
             {
                 // Interrupt immediately, so a frame passes before
                 // the next bucket is ticked, so the Entity is deterministically
@@ -831,7 +843,7 @@ namespace BeaverBuddies
         {
             if (!ReplayService.IsLoaded) return;
             int index = __instance._tickableEntities.Values.IndexOf(tickableEntity);
-            Plugin.Log($"Adding: {tickableEntity.EntityId} at index {index}");
+            DesyncDetecterService.Trace($"Adding: {tickableEntity.EntityId} at index {index}");
             //Plugin.LogStackTrace();
         }
     }
@@ -871,27 +883,6 @@ namespace BeaverBuddies
             return false;
         }
     }
-
-    //[HarmonyPatch(typeof(Walker), nameof(Walker.FindPath))]
-    //public class WalkerFindPathPatcher
-    //{
-
-    //    static void Prefix(Walker __instance, IDestination destination)
-    //    {
-    //        string entityID = __instance.GetComponentFast<EntityComponent>().EntityId.ToString();
-    //        if (destination is PositionDestination)
-    //        {
-    //            Plugin.Log($"{entityID} going to: " +
-    //                $"{((PositionDestination)destination).Destination}");
-    //        } 
-    //        else if (destination is AccessibleDestination)
-    //        {
-    //            var accessible = ((AccessibleDestination)destination).Accessible;
-    //            Plugin.Log($"{entityID} going to: " +
-    //                $"{accessible.GameObjectFast.name}");
-    //        }
-    //    }
-    //}
 
     [HarmonyPatch(typeof(TickableEntityBucket), nameof(TickableEntityBucket.TickAll))]
     public class TEBPatcher
@@ -974,18 +965,6 @@ namespace BeaverBuddies
         }
     }
 
-    //[HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.SpawnNewResources))]
-    //public class NRRPatcher
-    //{
-    //    static void Prefix(NaturalResourceReproducer __instance)
-    //    {
-    //        foreach (var (reproducibleKey, coordinates) in __instance._newResources)
-    //        {
-    //            Plugin.LogWarning($"{reproducibleKey.Id}, {coordinates.ToString()}");
-    //        }
-    //    }
-    //}
-
 #if NO_PARALLEL
     [HarmonyPatch(typeof(TickableSingletonService), nameof(TickableSingletonService.StartParallelTick))]
     [ManualMethodOverwrite]
@@ -1007,128 +986,49 @@ namespace BeaverBuddies
     }
 #endif
 
-    [HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.TryReproduceResources))]
+    // If there's more than ~3 of these, I could probably make a
+    // generalizable approach to prevent Singletons from updating
+    // and instead update them on tick.
+    [HarmonyPatch(typeof(RecoveredGoodStackSpawner), nameof(RecoveredGoodStackSpawner.UpdateSingleton))]
     [ManualMethodOverwrite]
-    class NaturalResourceReproducerTryReproduceResourcesPatcher
+    class RecoveredGoodStackSpawnerUpdateSingletonPatcher
     {
-
-        static bool Prefix(NaturalResourceReproducer __instance)
+        private static bool doBaseUpdate = false;
+        
+        public static void BaseUpdateSingleton(RecoveredGoodStackSpawner __instance)
         {
-            float num = __instance._dayNightCycle.FixedDeltaTimeInHours / 24f;
-            foreach (KeyValuePair<ReproducibleKey, HashSet<Vector3Int>> potentialSpot in __instance._potentialSpots)
-            {
-                float num2 = num * potentialSpot.Key.ReproductionChance;
-                float num3 = __instance._randomNumberGenerator.Range(0f, 1f);
-                HashSet<Vector3Int> value = potentialSpot.Value;
-                if (num3 < num2 * (float)value.Count)
-                {
-                    int index = __instance._randomNumberGenerator.Range(0, value.Count);
-                    // PATCH
-                    // HashSet.ElementAt() is not deterministic, so we replace it
-                    // with a deterministically sorted list.
-                    var potentialSpawnLocations = potentialSpot.Value.ToList();
-                    potentialSpawnLocations = potentialSpawnLocations.OrderBy(v => v.x).ThenBy(v => v.y).ThenBy(v => v.z).ToList();
-                    Vector3Int position = potentialSpawnLocations[index];
-                    //Plugin.LogWarning($"Selecting element {index} = {position} from {potentialSpawnLocations.Count} items");
-                    __instance._newResources.Add((potentialSpot.Key, position));
-                    // END PATCH
-                }
-            }
-            __instance.SpawnNewResources();
+            doBaseUpdate = true;
+            __instance.UpdateSingleton();
+            doBaseUpdate = false;
+        }
 
+        static bool Prefix(RecoveredGoodStackSpawner __instance)
+        {
+            if (EventIO.IsNull) return true;
+            if (doBaseUpdate) return true;
             return false;
         }
     }
 
-    #region NR_SPAWN_LOGGING
-    //[HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.MarkSpots))]
-    //class NRPMarkSpotsPatcher
-    //{
-    //    private static int lastCount;
-    //    static void Prefix(NaturalResourceReproducer __instance, Reproducible reproducible)
-    //    {
-    //        if (!ReplayService.IsLoaded) return;
-    //        var key = ReproducibleKey.Create(reproducible);
-    //        lastCount = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0;
-    //        Plugin.Log($"Marking spots for   {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
-    //    }
 
-    //    static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
-    //    {
-    //        if (!ReplayService.IsLoaded) return;
-    //        var key = ReproducibleKey.Create(reproducible);
-    //        int count = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0; Plugin.Log($"{lastCount} --> {count}");
-    //        //Plugin.LogStackTrace();
-    //    }
-    //}
+    [HarmonyPatch(typeof(WaterObjectService), nameof(WaterObjectService.UpdateSingleton))]
+    [ManualMethodOverwrite]
+    class WaterObjectServiceUpdateSingletonPatcher
+    {
+        private static bool doBaseUpdate = false;
 
-    //[HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.UnmarkSpots))]
-    //class NRPUnmarkSpotsPatcher
-    //{
-    //    private static int lastCount;
-    //    static void Prefix(NaturalResourceReproducer __instance, Reproducible reproducible)
-    //    {
-    //        if (!ReplayService.IsLoaded) return;
-    //        var key = ReproducibleKey.Create(reproducible);
-    //        lastCount = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0; if (!ReplayService.IsLoaded) return;
-    //        Plugin.Log($"Unmarking spots for   {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
-    //    }
+        public static void BaseUpdateSingleton(WaterObjectService __instance)
+        {
+            doBaseUpdate = true;
+            __instance.UpdateSingleton();
+            doBaseUpdate = false;
+        }
 
-    //    static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
-    //    {
-    //        if (!ReplayService.IsLoaded) return;
-    //        var key = ReproducibleKey.Create(reproducible);
-    //        int count = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0;
-    //        Plugin.Log($"{lastCount} --> {count}");
-    //        //Plugin.LogStackTrace();
-    //    }
-    //}
-
-    //[HarmonyPatch(typeof(TimeTriggerService), nameof(TimeTriggerService.Add))]
-    //class TimeTriggerServiceAddPatcher
-    //{
-    //    static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger, float triggerTimestamp)
-    //    {
-    //        //if (!ReplayService.IsLoaded) return;
-    //        Plugin.Log($"Adding time trigger at {__instance._nextId}-{triggerTimestamp}");
-    //    }
-    //}
-
-    //[HarmonyPatch(typeof(TimeTriggerService), nameof(TimeTriggerService.Trigger), typeof(TimeTrigger))]
-    //class TimeTriggerServiceTriggerPatcher
-    //{
-    //    static void Prefix(TimeTriggerService __instance, TimeTrigger timeTrigger)
-    //    {
-    //        float triggerTime = 0;
-    //        long id = 0;
-    //        if (__instance._timeTriggerKeys.TryGetValue(timeTrigger, out var key))
-    //        {
-    //            triggerTime = key.Timestamp;
-    //            id = key._id;
-    //        }
-    //        Plugin.Log($"Triggering time trigger at {__instance._dayNightCycle.PartialDayNumber}: {id}-{triggerTime}");
-    //    }
-    //}
-
-    //[HarmonyPatch(typeof(SpawnValidationService), nameof(SpawnValidationService.CanSpawn))]
-    //class SpawnValidationServiceCanSpawnPatcher
-    //{
-    //    static void Postfix(SpawnValidationService __instance, bool __result, Vector3Int coordinates, Blocks blocks, string resourcePrefabName)
-    //    {
-    //        Plugin.LogWarning($"Trying to spawn {resourcePrefabName} at {coordinates}: {__result}\n" +
-    //            $"IsSuitableTerrain: {__instance.IsSuitableTerrain(coordinates)}\n" +
-    //            $"SpotIsValid: {__instance.SpotIsValid(coordinates, resourcePrefabName)}\n" +
-    //            $"IsUnobstructed: {__instance.IsUnobstructed(coordinates, blocks)}");
-    //    }
-    //}
-
-    #endregion
-
-
-    // TODO: Check for other HashSet stacks
-    //[HarmonyPatch(typeof(HashSet<object>), nameof(HashSet<object>.Add))]
-    //class HasSetAddLogger
-    //{
-
-    //}
+        static bool Prefix(WaterObjectService __instance)
+        {
+            if (EventIO.IsNull) return true;
+            if (doBaseUpdate) return true;
+            return false;
+        }
+    }
 }

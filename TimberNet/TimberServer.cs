@@ -27,6 +27,9 @@ namespace TimberNet
 
         public int ClientCount => clients.Count;
 
+        private string? errorMessage = null;
+        public bool IsAcceptingClients => errorMessage == null;
+
         public TimberServer(int port, Func<Task<byte[]>> mapProvider, Func<JObject>? initEventProvider)
         {
             this.mapProvider = mapProvider;
@@ -74,6 +77,13 @@ namespace TimberNet
                     }
                     Task.Run(async () =>
                     {
+                        if (!IsAcceptingClients)
+                        {
+                            await SendErrorMessage(client);
+                            client.Close();
+                            return;
+                        }
+
                         await SendMap(client);
                         SendState(client);
                         if (initEventProvider != null)
@@ -92,6 +102,11 @@ namespace TimberNet
                     });
                 }
             });
+        }
+
+        public void StopAcceptingClients(string errorMessage)
+        {
+            this.errorMessage = errorMessage;
         }
 
         private void StartQueuing (TcpClient client)
@@ -123,6 +138,15 @@ namespace TimberNet
                     Log("Warning! Missing client!");
                 }
             }
+        }
+
+        private async Task SendErrorMessage(TcpClient client)
+        {
+            NetworkStream stream = client.GetStream();
+            SendLength(stream, 0);
+            byte[] bytes = Encoding.UTF8.GetBytes(errorMessage);
+            SendLength(stream, bytes.Length);
+            await stream.WriteAsync(bytes, 0, bytes.Length);
         }
 
         private async Task SendMap(TcpClient client)

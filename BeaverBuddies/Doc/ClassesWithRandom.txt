@@ -11,8 +11,7 @@
 > Timberborn.Beavers.BeaverTextureSetter
 Timberborn.BeaversUI.BeaverGeneratorTool
 > Timberborn.BotUpkeep.BotManufactoryAnimationController
-# Timberborn.Brushes.BrushProbabilityMap
-  * I believe it's used in the map editor, so not an issue.
+= Timberborn.Brushes.BrushProbabilityMap
 = Timberborn.CoreSound.BasicSelectionSound
 = Timberborn.ForestryEffects.TreeCutterSideRandomizer
 = Timberborn.ForestryEffects.TreeShaker

@@ -22,13 +22,21 @@ namespace BeaverBuddies
         private MapReceived mapReceivedCallback;
         private bool FailedToConnect = false;
 
-        private ClientEventIO(string address, int port, MapReceived mapReceivedCallback)
+        private ClientEventIO(string address, int port, MapReceived mapReceivedCallback,
+            Action<string> onError)
         {
             this.mapReceivedCallback = mapReceivedCallback;
 
             netBase = new TimberClient(address, port);
             netBase.OnMapReceived += mapReceivedCallback;
             netBase.OnLog += Plugin.Log;
+            netBase.OnError += (error) =>
+            {
+                Plugin.LogError(error);
+                CleanUp();
+                FailedToConnect = true;
+                onError(error);
+            };
             try
             {
                 netBase.Start();
@@ -48,9 +56,9 @@ namespace BeaverBuddies
             netBase = null;
         }
 
-        public static ClientEventIO Create(string address, int port, MapReceived mapReceivedCallback)
+        public static ClientEventIO Create(string address, int port, MapReceived mapReceivedCallback, Action<String> onError)
         {
-            ClientEventIO eventIO = new ClientEventIO(address, port, mapReceivedCallback);
+            ClientEventIO eventIO = new ClientEventIO(address, port, mapReceivedCallback, onError);
             if (eventIO.FailedToConnect) return null;
             return eventIO;
         }

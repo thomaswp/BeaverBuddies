@@ -32,6 +32,7 @@ using static Timberborn.TickSystem.TickableSingletonService;
 using static BeaverBuddies.SingletonManager;
 using BeaverBuddies.Connect;
 using static UnityEngine.ParticleSystem.PlaybackState;
+using BeaverBuddies.DesyncDetecter;
 
 namespace BeaverBuddies
 {
@@ -87,7 +88,17 @@ namespace BeaverBuddies
         // accessing a new game's event IO.
         private EventIO io => EventIO.Get();
 
-        private int ticksSinceLoad = 0;
+        private int __ticksSinceLoad = 0;
+        private int ticksSinceLoad 
+        { 
+            get => __ticksSinceLoad;
+            set
+            {
+                __ticksSinceLoad = value;
+                TimeTimePatcher.SetTicksSinceLoaded(value);
+                DesyncDetecterService.StartTick(value);
+            }
+        }
         public int TicksSinceLoad => ticksSinceLoad;
 
         public float TargetSpeed  { get; private set; } = 0;
@@ -175,9 +186,8 @@ namespace BeaverBuddies
 
         public void SetTicksSinceLoad(int ticks)
         {
-            ticksSinceLoad = ticks;
-            TimeTimePatcher.SetTicksSinceLoaded(ticksSinceLoad);
             Plugin.Log($"Setting ticks since load to: {ticks}");
+            ticksSinceLoad = ticks;
         }
 
         public void PostLoad()
@@ -272,7 +282,6 @@ namespace BeaverBuddies
                         Plugin.LogWarning($"Random state mismatch: {s0} != {replayEvent.randomS0Before}");
                         HandleDesync();
                         break;
-                        // TODO: Resync!
                     }
                 }
                 try
@@ -293,19 +302,11 @@ namespace BeaverBuddies
                 }
             }
             IsReplayingEvents = false;
-
-            // If we've replayed everythign for this tick and nothing's
-            // triggered a desync, clear the saved stacks.
-            //DeterminismController.PrintRandomStacks();
-            _determinismService.ClearRandomStacks();
         }
 
-        private void HandleDesync()
+        public void HandleDesync()
         {
             if (IsDesynced) return;
-
-            DeterminismService determinismService = SingletonManager.GetSingleton<DeterminismService>();
-            determinismService.PrintRandomStacks();
 
             ClientDesyncedEvent e = new ClientDesyncedEvent();
             // Set IsDesynced to true so event play instead of sending
@@ -377,23 +378,11 @@ namespace BeaverBuddies
 
         private void Initialize()
         {
-            // Initialize the random state to a truly random number after the game
-            // is fully loaded to avoid collisions of Guids from the prior save
-            Guid guidSeed = GuidPatcher.RealNewGuid();
-            int state = guidSeed.GetHashCode();
-            DeterminismService.InitRandomState(state, "ReplayService.Initialize");
-
-            // Shorthand for "is server"
-            if (io != null && io.ShouldSendHeartbeat)
-            {
-                // In case there are clients who joined immediately and have already loaded
-                // the game, we need to resend the initial state, to ensure that random seeds
-                // are synced, since they'll have already received their initialization event
-                // that was send on join, and it's out of date.
-                EnqueueEventForSending(InitializeClientEvent.CreateAndExecute(ticksSinceLoad));
-            }
+            // Start tick at 0
+            DesyncDetecterService.StartTick(ticksSinceLoad);
 
             IsLoaded = true;
+
         }
 
         // TODO: Find a better callback way of waiting until initial game
@@ -466,8 +455,19 @@ namespace BeaverBuddies
         {
             if (!CanAct) return;
 
+            if (EventIO.Config.Debug && io.ShouldSendHeartbeat)
+            {
+                // Before incrementing the tick (which creates a new blank trace),
+                // capture any unsent traces and send them.
+                // Note: this will capture traces for prior ticks, but be sent with
+                // an event at the start of the *upcoming* tick.
+                foreach (var e in DesyncDetecterService.CreateReplayEventsAndClear())
+                {
+                    EnqueueEventForSending(e);
+                }
+            }
+
             ticksSinceLoad++;
-            TimeTimePatcher.SetTicksSinceLoaded(ticksSinceLoad);
 
             if (io.ShouldSendHeartbeat)
             {
@@ -483,7 +483,10 @@ namespace BeaverBuddies
 
             // Log from IO
             io?.Update();
-            Plugin.Log($"Tick {ticksSinceLoad:D5} order hash: {TEBPatcher.EntityUpdateHash.ToString("X8")}; " +
+
+            // IO Complete for Tick
+            Plugin.Log($"Tick {ticksSinceLoad:D5} IO done; " +
+                $"Order hash: {TEBPatcher.EntityUpdateHash.ToString("X8")}; " +
                 $"Move hash: {TEBPatcher.PositionHash.ToString("X8")}; " +
                 $"Random s0: {UnityEngine.Random.state.s0.ToString("X8")}");
 
@@ -494,6 +497,11 @@ namespace BeaverBuddies
 
             // Update speed and pause if needed for the new tick.
             UpdateSpeed();
+
+            if (io is ServerEventIO && ticksSinceLoad == 1)
+            {
+                ((ServerEventIO)io).StopAcceptingClients();
+            }
         }
 
         public void FinishFullTickIfNeededAndThen(Action action)

@@ -26,6 +26,7 @@ namespace TimberNet
         public delegate void MapReceived(byte[] mapBytes);
 
         public event MessageReceived? OnLog;
+        public event MessageReceived? OnError;
         public event MapReceived? OnMapReceived;
 
         private readonly ConcurrentQueue<string> receivedEventQueue = new ConcurrentQueue<string>();
@@ -186,32 +187,52 @@ namespace TimberNet
             }
         }
 
+        protected bool TryReadLength(NetworkStream stream, out int length)
+        {
+            byte[] headerBuffer = new byte[HEADER_SIZE];
+            try
+            {
+                stream.Read(headerBuffer, 0, headerBuffer.Length);
+            }
+            catch
+            {
+                length = 0;
+                return false;
+            }
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(headerBuffer);
+
+            length = BitConverter.ToInt32(headerBuffer, 0);
+            return true;
+        }
+
         protected void StartListening(TcpClient client, bool isClient)
         {
             //Log("Client connected");
             var stream = client.GetStream();
-            byte[] headerBuffer = new byte[HEADER_SIZE];
             int messageCount = 0;
             while (client.Connected && !IsStopped)
             {
-                try
-                {
-                    stream.Read(headerBuffer, 0, headerBuffer.Length);
-                } catch
-                {
-                    break;
-                }
-                if (BitConverter.IsLittleEndian)
-                    Array.Reverse(headerBuffer);
-
-                int messageLength = BitConverter.ToInt32(headerBuffer, 0);
+                if (!TryReadLength(stream, out int messageLength)) break;
 
                 // First message is always the file
                 if (messageCount == 0 && isClient)
                 {
+                    if (messageLength == 0)
+                    {
+                        ReadErrorMessage(stream);
+                        return;
+                    }
+
                     ReceiveFile(stream, messageLength);
                     messageCount++;
                     continue;
+                }
+
+                if (messageLength == 0)
+                {
+                    Log("Received message of length 0; aborting listen");
+                    break;
                 }
 
                 // TODO: How should this fail and not hang if map stops sending?
@@ -225,6 +246,20 @@ namespace TimberNet
                 string message = Encoding.UTF8.GetString(buffer);
                 receivedEventQueue.Enqueue(message);
                 messageCount++;
+            }
+        }
+
+        private void ReadErrorMessage(NetworkStream stream)
+        {
+            if (TryReadLength(stream, out int length))
+            {
+                byte[] bytes = new byte[length];
+                stream.Read(bytes, 0, length);
+                string message = Encoding.UTF8.GetString(bytes);
+                if (OnError != null)
+                {
+                    OnError(message);
+                }
             }
         }
 
@@ -346,7 +381,7 @@ namespace TimberNet
          */
         public virtual List<JObject> ReadEvents(int ticksSinceLoad)
         {
-            if (ticksSinceLoad != TickCount) Log($"Setting ticks from {TickCount} to {ticksSinceLoad}");
+            //if (ticksSinceLoad != TickCount) Log($"Setting ticks from {TickCount} to {ticksSinceLoad}");
             TickCount = ticksSinceLoad;
             Update();
             List<JObject> toProcess = PopEventsToProcess(receivedEvents);

@@ -1,4 +1,5 @@
 ﻿using BeaverBuddies.Connect;
+using BeaverBuddies.DesyncDetecter;
 using Bindito.Core;
 using HarmonyLib;
 using System.Diagnostics;
@@ -34,13 +35,20 @@ namespace BeaverBuddies
             if (EventIO.IsNull) return;
 
             Plugin.Log("Registering Co-op services");
+            //containerDefinition.Bind<ServerConnectionService>().AsSingleton();
             containerDefinition.Bind<ReplayService>().AsSingleton();
-            containerDefinition.Bind<ServerConnectionService>().AsSingleton();
             containerDefinition.Bind<RecordToFileService>().AsSingleton();
             containerDefinition.Bind<TickProgressService>().AsSingleton();
             containerDefinition.Bind<TickingService>().AsSingleton();
             containerDefinition.Bind<DeterminismService>().AsSingleton();
+            containerDefinition.Bind<TickReplacerService>().AsSingleton();
             containerDefinition.Bind<RehostingService>().AsSingleton();
+
+            if (EventIO.Config.Debug)
+            {
+                Plugin.Log("Debug Mode Active; registering DesyncDetecterService");
+                containerDefinition.Bind<DesyncDetecterService>().AsSingleton();
+            }
 
         }
     }
@@ -70,6 +78,7 @@ namespace BeaverBuddies
             //ReflectionUtils.PrintChildClasses(typeof(IUpdateableBatchControlRowItem));
             //ReflectionUtils.PrintChildClasses(typeof(IParallelTickableSingleton));
             //ReflectionUtils.FindStaticFields();
+            //ReflectionUtils.FindHashSetFields();
         }
     }
 
@@ -96,6 +105,7 @@ namespace BeaverBuddies
 
             Harmony harmony = new Harmony(Guid);
             harmony.PatchAll();
+            //EnumerableFirstPatcher.CreatePatch(harmony);
             //DeterminismPatcher.PatchDeterminism(harmony);
         }
 
