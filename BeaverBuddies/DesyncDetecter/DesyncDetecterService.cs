@@ -107,9 +107,6 @@ namespace BeaverBuddies.DesyncDetecter
             }
         }
 
-        // TODO: Could is there an efficient way to avoid string
-        // building for high-frequency calls if this is disabled?
-        // Probably better to just avoid the patches altogether
         public static void Trace(string message)
         {
             if (!EventIO.Config.Debug)
@@ -118,11 +115,9 @@ namespace BeaverBuddies.DesyncDetecter
                 //Plugin.LogStackTrace();
                 return;
             }
-            // TODO: Only if Config says so
             CurrentTrace.Add(new Trace()
             {
                 message = message,
-                // TODO: Only if Config says so
                 stackTrace = new StackTrace().ToString(),
             });
         }

@@ -58,28 +58,7 @@ namespace BeaverBuddies
 {
     /*
      * Current desync issues:
-     * - Multiple examples show desyncs on more complex saves, especially
-     *   once water dynamics become complex.
-     *   The cause seems to be that a NatrualResource is spawned in one save but not
-     *   in another, which causes an immediate desync. This is caused by divergence
-     *   in the set of available spots for the resource to spawn, which manifests
-     *   only later when the resource spawns in two different locations.
-     *   This may not be detected until a resource tries to spawn in one game
-     *   but cannot in the other (because they're in two different spots).
-     *   Specifically, a NaturalResource is queued by 
-     *   NaturalResourceReproducer.TrySpawnNatrualResources, but then in one game
-     *   it is found valid and spawned but not in another.
-     *   I thought one cause was using HashSet.GetElementAt(), but turns out changing this
-     *   just changed whether the bug happened *that time*.
-     *   Another cause is something about how ticks are spread out over multiple updates.
-     *   Forcing one tick per update now fixes the problem. Confirming this still seems to be the case.
-     *   The culprit here seems to be the TimeTriggerService (and the whole system)
-     *   which uses time of day rather than ticks which is likely messing things up
-     *   (need to look further!).
-     * - WaterObjectService.Update enables or creates an object with
-     *   NaturalResourcesMoisture, which is game logic (probably enables
-     *   since it's not a GUID event...). Needs to happen on tick.
-     * 
+     * - *knock on wood*
      * 
      * Theories for unexplained desyncs:
      * - Something isn't saved in the save state (e.g. when to go to bed),
@@ -91,23 +70,17 @@ namespace BeaverBuddies
      *   be triggered sometimes at the end of a frame).
      *   
      * To try:
+     * - Use Debug mode in the config, and add more Trace calls to pinpoint issues.
      * - Remove all randomness
      * - Remove interpolating animations
      * - Remove all water logic (this might get complicated...)
      * - Log random calls during load to look for non-gameplay logic
      * 
      * Monitoring:
-     * - Movement of Beavers diverges over time, possibly due to rounding
-     *   or more likely something with a non-fixed-time-update.
-     *   The differences start small and grow over time.
-     *   I think I've fixed this. Movement still diverges, but it seems
-     *   to only happen after the random state changes, so maybe no longer
-     *   the main cause. Need to verify though. I've also verified that
-     *   removing the MovementAnimator.Update (smooth movement) doesn't
-     *   remove the movement desync (though it does change from frame 320).
+     * - There may be other Singleton's with game logic updates.
      * - Some TimeTriggers seem to happen not completely synchronized, but
-     *   I believe some of these are animation things, so they don't need to
-     *   be. It does not seem to be causing desyncs.
+     *   all the ones I've observed are for non-game logic so far.
+     * - Game state seems to be synced at load now, but need to further confirm.
      * 
      * Ruled out
      * - Unaccounted for calls to Unity random: there were no abnormal
@@ -130,12 +103,17 @@ namespace BeaverBuddies
      *   starting any new ticks) so the entity can Start() on the next Update()
      * - Time.time is now deterministic. This seemed to be a primary cause of
      *   desyncs, but I never figured out exactly why.
+     * - Beaver movement logic is now only updated on tick, with a separate
+     *   render-only update logic in AnimationFixes, which is undone before a
+     *   tick starts.
      * - WateredNaturalResource.Awake() and LivingWaterNaturalResource.Awake()
      *   all random, which likely occurs before the client receives its RNG. 
      *   Further, the game saves the *progress* towards death, rather than the time 
      *   of death, so it would be hard to reload.
-     *   Likely fixed by always initializing random (before game load) to a fixed
-     *   value (would kind of be nice to do this anyway for deterministic bugs).
+     *   Should be fixed by having original random state based on map hash for both
+     *   Server and Clients.
+     * - A number of Singletons have game logic in their UpdateSingleton method.
+     *   I have moved these to TickReplacerService's Tick method to keep it synced.
      */
 
     public class DeterminismService : RegisteredSingleton, IResettableSingleton
@@ -1007,42 +985,6 @@ namespace BeaverBuddies
         }
     }
 #endif
-
-    // TODO: Eventually need to test removing this. I'm 
-    // pretty sure at this point that it changes the random
-    // behavior/order but doesn't fix anything.
-    [HarmonyPatch(typeof(NaturalResourceReproducer), nameof(NaturalResourceReproducer.TryReproduceResources))]
-    [ManualMethodOverwrite]
-    class NaturalResourceReproducerTryReproduceResourcesPatcher
-    {
-
-        static bool Prefix(NaturalResourceReproducer __instance)
-        {
-            float num = __instance._dayNightCycle.FixedDeltaTimeInHours / 24f;
-            foreach (KeyValuePair<ReproducibleKey, HashSet<Vector3Int>> potentialSpot in __instance._potentialSpots)
-            {
-                float num2 = num * potentialSpot.Key.ReproductionChance;
-                float num3 = __instance._randomNumberGenerator.Range(0f, 1f);
-                HashSet<Vector3Int> value = potentialSpot.Value;
-                if (num3 < num2 * (float)value.Count)
-                {
-                    int index = __instance._randomNumberGenerator.Range(0, value.Count);
-                    // PATCH
-                    // HashSet.ElementAt() is not deterministic, so we replace it
-                    // with a deterministically sorted list.
-                    var potentialSpawnLocations = potentialSpot.Value.ToList();
-                    potentialSpawnLocations = potentialSpawnLocations.OrderBy(v => v.x).ThenBy(v => v.y).ThenBy(v => v.z).ToList();
-                    Vector3Int position = potentialSpawnLocations[index];
-                    //Plugin.LogWarning($"Selecting element {index} = {position} from {potentialSpawnLocations.Count} items");
-                    __instance._newResources.Add((potentialSpot.Key, position));
-                    // END PATCH
-                }
-            }
-            __instance.SpawnNewResources();
-
-            return false;
-        }
-    }
 
     // If there's more than ~3 of these, I could probably make a
     // generalizable approach to prevent Singletons from updating
