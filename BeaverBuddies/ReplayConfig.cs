@@ -1,14 +1,13 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.IO;
-using TimberApi.ConfigSystem;
-using TimberApi.ModSystem;
 
 namespace BeaverBuddies
 {
     public enum NetMode { Manual, AutoconnectClient, Record, Replay, None }
 
-    public class ReplayConfig : IConfig
+    // TODO: Save/load
+    public class ReplayConfig
     {
         public const string MODE_NONE = "none";
         public const string MODE_MANUAL = "manual";
@@ -49,15 +48,16 @@ namespace BeaverBuddies
 
         public void SaveConfig()
         {
-            string configPath = Path.Combine(Plugin.Mod.DirectoryPath, "configs", $"{ConfigFileName}.json");
-            try
-            {
-                File.WriteAllText(configPath, JsonConvert.SerializeObject(this, Formatting.Indented));
-            }
-            catch (Exception e)
-            {
-                Plugin.LogWarning($"Failed to save config: {e}");
-            }
+            // TODO: v6
+            //string configPath = Path.Combine(Plugin.Mod.DirectoryPath, "configs", $"{ConfigFileName}.json");
+            //try
+            //{
+            //    File.WriteAllText(configPath, JsonConvert.SerializeObject(this, Formatting.Indented));
+            //}
+            //catch (Exception e)
+            //{
+            //    Plugin.LogWarning($"Failed to save config: {e}");
+            //}
         }
 
     }

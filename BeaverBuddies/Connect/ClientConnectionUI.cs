@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Timberborn.CoreUI;
-using Timberborn.MainMenuScene;
+using Timberborn.MainMenuPanels;
 using Timberborn.OptionsGame;
 using UnityEngine.UIElements;
 

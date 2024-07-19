@@ -13,7 +13,7 @@ namespace BeaverBuddies.Connect
 {
     public class RehostingService
     {
-        private readonly SaveTimestampFormatter _saveTimestampFormatter;
+        private readonly AutosaveNameService _autosaveNameService;
         private readonly GameSaver _gameSaver;
         private readonly GameSaveRepository _gameSaveRepository;
         private readonly SettlementNameService _settlementNameService;
@@ -21,14 +21,14 @@ namespace BeaverBuddies.Connect
 
 
         public RehostingService(
-            SaveTimestampFormatter saveTimestampFormatter, 
+            AutosaveNameService autosaveNameService, 
             GameSaver gameSaver, 
             GameSaveRepository gameSaveRepository, 
             SettlementNameService settlementNameService,
             ValidatingGameLoader validatingGameLoader
         ) 
-        { 
-            _saveTimestampFormatter = saveTimestampFormatter;
+        {
+            _autosaveNameService = autosaveNameService;
             _gameSaver = gameSaver;
             _gameSaveRepository = gameSaveRepository;
             _settlementNameService = settlementNameService;
@@ -42,7 +42,7 @@ namespace BeaverBuddies.Connect
         public bool RehostGame()
         {
             string settlementName = _settlementNameService.SettlementName;
-            string saveName = _saveTimestampFormatter.Timestamp() + " Rehost";
+            string saveName = _autosaveNameService.Timestamp() + " Rehost";
             SaveReference saveReference = new SaveReference(settlementName, saveName);
             try
             {

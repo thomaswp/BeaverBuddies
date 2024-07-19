@@ -53,6 +53,7 @@ using System.Collections;
 using BeaverBuddies.DesyncDetecter;
 using Timberborn.Brushes;
 using Timberborn.WaterObjects;
+using Timberborn.TerrainSystemRendering;
 
 namespace BeaverBuddies
 {
@@ -906,7 +907,7 @@ namespace BeaverBuddies
                 EntityUpdateHash = TimberNetBase.CombineHash(EntityUpdateHash, entity.EntityId.GetHashCode());
 
                 var entityComponent = entity._entityComponent;
-                var pathFollower = entityComponent.GetComponentFast<Walker>()?._pathFollower;
+                var pathFollower = entityComponent.GetComponentFast<Walker>()?.PathFollower;
                 var animatedPathFollower = entityComponent.GetComponentFast<MovementAnimator>()?._animatedPathFollower;
                 if (pathFollower != null && animatedPathFollower != null)
                 {
@@ -1010,25 +1011,25 @@ namespace BeaverBuddies
         }
     }
 
+    // TODO: (V6)
+    //[HarmonyPatch(typeof(WaterObjectService), nameof(WaterObjectService.UpdateSingleton))]
+    //[ManualMethodOverwrite]
+    //class WaterObjectServiceUpdateSingletonPatcher
+    //{
+    //    private static bool doBaseUpdate = false;
 
-    [HarmonyPatch(typeof(WaterObjectService), nameof(WaterObjectService.UpdateSingleton))]
-    [ManualMethodOverwrite]
-    class WaterObjectServiceUpdateSingletonPatcher
-    {
-        private static bool doBaseUpdate = false;
+    //    public static void BaseUpdateSingleton(WaterObjectService __instance)
+    //    {
+    //        doBaseUpdate = true;
+    //        __instance.UpdateSingleton();
+    //        doBaseUpdate = false;
+    //    }
 
-        public static void BaseUpdateSingleton(WaterObjectService __instance)
-        {
-            doBaseUpdate = true;
-            __instance.UpdateSingleton();
-            doBaseUpdate = false;
-        }
-
-        static bool Prefix(WaterObjectService __instance)
-        {
-            if (EventIO.IsNull) return true;
-            if (doBaseUpdate) return true;
-            return false;
-        }
-    }
+    //    static bool Prefix(WaterObjectService __instance)
+    //    {
+    //        if (EventIO.IsNull) return true;
+    //        if (doBaseUpdate) return true;
+    //        return false;
+    //    }
+    //}
 }

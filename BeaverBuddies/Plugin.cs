@@ -85,14 +85,14 @@ namespace BeaverBuddies
 
         // TODO: Need to manually keep this updated now
         public const string Version = "1.2.0.0";
-        public const string GUID = "BeaverBuddies";
+        public const string Name = "BeaverBuddies";
 
         private static readonly ManualLogSource logger;
 
         public void StartMod()
         {
             // TODO: Replace with Unity debug for deploy
-            var logger = Logger.CreateLogSource(GUID);
+            var logger = Logger.CreateLogSource(Name);
             logger.LogWarning("Warning");
             logger.LogWarning("Error");
             logger.LogInfo("Info!");
@@ -102,11 +102,11 @@ namespace BeaverBuddies
 
             EventIO.Config = config;
 
-            Log($"${GUID} is loaded!");
+            Log($"${Name} is loaded!");
 
             if (config.GetNetMode() == NetMode.None) return;
 
-            Harmony harmony = new Harmony(GUID);
+            Harmony harmony = new Harmony(Name);
             harmony.PatchAll();
         }
 

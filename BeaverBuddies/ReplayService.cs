@@ -135,7 +135,8 @@ namespace BeaverBuddies
             EntityRegistry entityRegistry,
             EntityService entityService,
             RecipeSpecificationService recipeSpecificationService,
-            DemolishableSelectionService demolishableSelectionService,
+            DemolishableSelectionTool demolishableSelectionTool,
+            DemolishableUnselectionTool demolishableUnselectionTool,
             BuildingUnlockingService buildingUnlockingService,
             WorkingHoursManager workingHoursManager,
             WorkingHoursPanel workingHoursPanel,
@@ -160,7 +161,8 @@ namespace BeaverBuddies
             AddSingleton(entityRegistry);
             AddSingleton(entityService);
             AddSingleton(recipeSpecificationService);
-            AddSingleton(demolishableSelectionService);
+            AddSingleton(demolishableSelectionTool);
+            AddSingleton(demolishableUnselectionTool);
             AddSingleton(buildingUnlockingService);
             AddSingleton(workingHoursManager);
             AddSingleton(workingHoursPanel);
