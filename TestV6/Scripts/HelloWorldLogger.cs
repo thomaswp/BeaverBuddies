@@ -8,11 +8,6 @@ namespace Mods.HelloWorld.Scripts
     internal class HelloWorldLogger : IModStarter
     {
 
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
-
         public void StartMod()
         {
             var playerLogPath = UnityEngine.Application.persistentDataPath + "/Player.log";

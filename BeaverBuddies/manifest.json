@@ -1,0 +1,13 @@
+{
+  "Name": "BeaverBuddies",
+  "Version": "1.2.0",
+  "Id": "beaverbuddies",
+  "MinimumGameVersion": "0.6.0.0",
+  "Description": "BeaverBuddies is a Timberborn mod that adds multiplayer co-op!",
+  "RequiredMods": [
+    {
+      "Id": "Harmony",
+      "MinimumVersion": "2.3.3"
+    }
+  ]
+}

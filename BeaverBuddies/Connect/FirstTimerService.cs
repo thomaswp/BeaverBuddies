@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Timberborn.Core;
 using Timberborn.CoreUI;
 using Timberborn.SingletonSystem;
+using Timberborn.WebNavigation;
 
 namespace BeaverBuddies.Connect
 {

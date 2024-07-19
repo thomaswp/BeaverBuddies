@@ -1,10 +1,10 @@
 ﻿using System;
 using System.IO;
-using Timberborn.Core;
 using Timberborn.CoreUI;
 using Timberborn.GameSaveRepositorySystem;
 using Timberborn.GameSceneLoading;
 using Timberborn.SingletonSystem;
+using Timberborn.WebNavigation;
 using TimberNet;
 
 namespace BeaverBuddies.Connect

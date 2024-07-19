@@ -1,18 +1,15 @@
 ﻿using BeaverBuddies.Connect;
 using BeaverBuddies.DesyncDetecter;
+using BepInEx.Logging;
 using Bindito.Core;
 using HarmonyLib;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using TimberApi.ConfiguratorSystem;
-using TimberApi.ConsoleSystem;
-using TimberApi.ModSystem;
-using TimberApi.SceneSystem;
+using Timberborn.ModManagerScene;
 using Timberborn.TickSystem;
 
 namespace BeaverBuddies
 {
-    [Configurator(SceneEntrypoint.InGame)]  // This attribute registers the configurator and tells where it should be loaded
+    [Context("Game")]
     public class ReplayConfigurator : IConfigurator
     {
         public void Configure(IContainerDefinition containerDefinition)
@@ -53,7 +50,7 @@ namespace BeaverBuddies
         }
     }
 
-    [Configurator(SceneEntrypoint.MainMenu)]
+    [Context("MainMenu")]
     public class ConnectionMenuConfigurator : IConfigurator
     {
         public void Configure(IContainerDefinition containerDefinition)
@@ -83,30 +80,34 @@ namespace BeaverBuddies
     }
 
     [HarmonyPatch]
-    public class Plugin : IModEntrypoint
+    public class Plugin : IModStarter
     {
-        private static IConsoleWriter logger;
-        public static IMod Mod { get; private set; }
 
-        public const string Guid = PluginInfo.PLUGIN_GUID;
-        public const string Version = PluginInfo.PLUGIN_VERSION;
+        // TODO: Need to manually keep this updated now
+        public const string Version = "1.2.0.0";
+        public const string GUID = "BeaverBuddies";
 
-        public void Entry(IMod mod, IConsoleWriter consoleWriter)
+        private static readonly ManualLogSource logger;
+
+        public void StartMod()
         {
-            Mod = mod;
-            logger = consoleWriter;
+            // TODO: Replace with Unity debug for deploy
+            var logger = Logger.CreateLogSource(GUID);
+            logger.LogWarning("Warning");
+            logger.LogWarning("Error");
+            logger.LogInfo("Info!");
 
-            ReplayConfig config = mod.Configs.Get<ReplayConfig>();
+            // TODO: Recreate config system!
+            ReplayConfig config = new ReplayConfig(); // mod.Configs.Get<ReplayConfig>();
+
             EventIO.Config = config;
 
-            Log($"Plugin {Guid} is loaded!");
+            Log($"${GUID} is loaded!");
 
             if (config.GetNetMode() == NetMode.None) return;
 
-            Harmony harmony = new Harmony(Guid);
+            Harmony harmony = new Harmony(GUID);
             harmony.PatchAll();
-            //EnumerableFirstPatcher.CreatePatch(harmony);
-            //DeterminismPatcher.PatchDeterminism(harmony);
         }
 
         public static string GetWithDate(string message)
