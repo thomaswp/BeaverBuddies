@@ -111,6 +111,9 @@ namespace BeaverBuddies.DesyncDetecter
         {
             if (!EventIO.Config.Debug)
             {
+                // We warn here because these debug messages are often called many
+                // times per frame and do string manipulation, so we don't want to
+                // create the debug string at all if we don't need to.
                 Plugin.LogWarning("DesyncDetectorService.Trace called not in debug mode");
                 //Plugin.LogStackTrace();
                 return;

@@ -32,6 +32,7 @@ using BeaverBuddies.Connect;
 using static UnityEngine.ParticleSystem.PlaybackState;
 using BeaverBuddies.DesyncDetecter;
 using Timberborn.WebNavigation;
+using System.Collections.Immutable;
 
 namespace BeaverBuddies
 {
@@ -618,7 +619,7 @@ namespace BeaverBuddies
                 if (!HasTickedReplayService)
                 {
                     // First finish any parallel ticks
-                    __instance._tickableSingletonService.FinishParallelTick();
+                    ((TickableSingletonService)__instance._tickableSingletonService).FinishParallelTick();
                     // Tick it and stop
                     HasTickedReplayService = true;
                     replayService?.DoTick();

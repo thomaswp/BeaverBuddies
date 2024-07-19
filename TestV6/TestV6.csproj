@@ -1769,8 +1769,4 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-  
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /y &quot;$(ProjectDir)$(OutDir)*&quot;  &quot;$(USERPROFILE)\Documents\Timberborn\Mods\TestV6\Scripts&quot;&#xD;&#xA;copy &quot;$(ProjectDir)\manifest.json&quot;  &quot;$(USERPROFILE)\Documents\Timberborn\Mods\TestV6\manifest.json&quot;" />
-  </Target>
 </Project>

@@ -192,7 +192,10 @@ namespace BeaverBuddies
                 // So we want to use gameplay random.
                 if (!ReplayService.IsLoaded)
                 {
-                    DesyncDetecterService.Trace($"Load RNG; s0 before: {UnityEngine.Random.state.s0:X8}");
+                    if (EventIO.Config.Debug)
+                    {
+                        DesyncDetecterService.Trace($"Load RNG; s0 before: {UnityEngine.Random.state.s0:X8}");
+                    }
                     return false;
                 }
 
@@ -214,9 +217,12 @@ namespace BeaverBuddies
                 if (IsTicking)
                 {
                     var entity = TickableEntityTickPatcher.currentlyTickingEntity;
-                    DesyncDetecterService.Trace($"Tick RNG; " +
+                    if (EventIO.Config.Debug)
+                    {
+                        DesyncDetecterService.Trace($"Tick RNG; " +
                         $"s0 before: {UnityEngine.Random.state.s0:X8}; " +
                         $"Last entity: {entity?.name} - {entity?.EntityId}");
+                    }
                     return false;
                 }
 
@@ -765,7 +771,10 @@ namespace BeaverBuddies
 #endif
             if (ReplayService.IsLoaded)
             {
-                DesyncDetecterService.Trace($"Generating new GUID: {__result}");
+                if (EventIO.Config.Debug)
+                {
+                    DesyncDetecterService.Trace($"Generating new GUID: {__result}");
+                }
             }
             return false;
         }
@@ -844,7 +853,10 @@ namespace BeaverBuddies
         {
             if (!ReplayService.IsLoaded) return;
             int index = __instance._tickableEntities.Values.IndexOf(tickableEntity);
-            DesyncDetecterService.Trace($"Adding: {tickableEntity.EntityId} at index {index}");
+            if (EventIO.Config.Debug)
+            {
+                DesyncDetecterService.Trace($"Adding: {tickableEntity.EntityId} at index {index}");
+            }
             //Plugin.LogStackTrace();
         }
     }
@@ -1010,26 +1022,4 @@ namespace BeaverBuddies
             return false;
         }
     }
-
-    // TODO: (V6)
-    //[HarmonyPatch(typeof(WaterObjectService), nameof(WaterObjectService.UpdateSingleton))]
-    //[ManualMethodOverwrite]
-    //class WaterObjectServiceUpdateSingletonPatcher
-    //{
-    //    private static bool doBaseUpdate = false;
-
-    //    public static void BaseUpdateSingleton(WaterObjectService __instance)
-    //    {
-    //        doBaseUpdate = true;
-    //        __instance.UpdateSingleton();
-    //        doBaseUpdate = false;
-    //    }
-
-    //    static bool Prefix(WaterObjectService __instance)
-    //    {
-    //        if (EventIO.IsNull) return true;
-    //        if (doBaseUpdate) return true;
-    //        return false;
-    //    }
-    //}
 }

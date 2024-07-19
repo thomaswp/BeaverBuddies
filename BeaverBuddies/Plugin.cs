@@ -87,22 +87,19 @@ namespace BeaverBuddies
         public const string Version = "1.2.0.0";
         public const string Name = "BeaverBuddies";
 
-        private static readonly ManualLogSource logger;
+        private static ManualLogSource logger;
 
         public void StartMod()
         {
             // TODO: Replace with Unity debug for deploy
-            var logger = Logger.CreateLogSource(Name);
-            logger.LogWarning("Warning");
-            logger.LogWarning("Error");
-            logger.LogInfo("Info!");
+            logger = Logger.CreateLogSource(Name);
 
             // TODO: Recreate config system!
             ReplayConfig config = new ReplayConfig(); // mod.Configs.Get<ReplayConfig>();
 
             EventIO.Config = config;
 
-            Log($"${Name} is loaded!");
+            Log($"{Name} is loaded!");
 
             if (config.GetNetMode() == NetMode.None) return;
 

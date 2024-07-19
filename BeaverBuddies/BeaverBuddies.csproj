@@ -28,6 +28,6 @@
   </ItemGroup>
   
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /y &quot;$(ProjectDir)$(OutDir)*&quot;  &quot;$(USERPROFILE)\Documents\Timberborn\Mods\BeaverBuddies\Scripts&quot;&#xD;&#xA;copy &quot;$(ProjectDir)\manifest.json&quot;  &quot;$(USERPROFILE)\Documents\Timberborn\Mods\TestV6\manifest.json&quot;" />
+    <Exec Command="xcopy /y &quot;$(ProjectDir)$(OutDir)*&quot;  &quot;$(USERPROFILE)\Documents\Timberborn\Mods\BeaverBuddies&quot;&#xD;&#xA;copy &quot;$(ProjectDir)\manifest.json&quot;  &quot;$(USERPROFILE)\Documents\Timberborn\Mods\BeaverBuddies\manifest.json&quot;" />
   </Target>
 </Project>
