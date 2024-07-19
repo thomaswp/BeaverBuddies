@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Timberborn.Core;
 using Timberborn.CoreUI;
 using Timberborn.SingletonSystem;
+using Timberborn.WebNavigation;
+using UnityEngine;
 
 namespace BeaverBuddies.Connect
 {
@@ -30,22 +29,9 @@ namespace BeaverBuddies.Connect
         // TODO: Ideally, wait to show until after OK is clicked.
         public void PostLoad()
         {
-            var config = EventIO.Config;
-
-            if (!config.FirstTimer)
-            {
-                return;
-            }
-
-            var unsetFirstTimer = new Action(() =>
-            {
-                config.FirstTimer = false;
-                config.SaveConfig();
-            });
-
+            Debug.Log("PostLoad!");
             var action = () =>
             {
-                unsetFirstTimer();
                 _urlOpener.OpenUrl(GuideURL);
             };
 
@@ -53,7 +39,6 @@ namespace BeaverBuddies.Connect
                 .SetMessage(Message)
                 .SetConfirmButton(action)
                 // TODO: This doesn't seem to work...
-                .SetCancelButton(unsetFirstTimer)
                 .SetDefaultCancelButton()
                 .Show();
         }

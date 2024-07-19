@@ -1,0 +1,1776 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>BeaverBuddies</AssemblyName>
+    <Description>TimberModTest</Description>
+    <Version>1.1.8</Version>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <NoWarn>$(NoWarn);Harmony003</NoWarn>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
+    <PackageReference Include="BepInEx.Core" Version="5.*" />
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
+    <PackageReference Include="UnityEngine.Modules" Version="2022.2.17" IncludeAssets="compile" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
+  </ItemGroup>
+  
+  <ItemGroup>  
+    <Reference Include="Timberborn.HazardousWeatherSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.HazardousWeatherSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WorkSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WorkSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.CharactersBatchControl">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.CharactersBatchControl.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapEditorNaturalResources">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapEditorNaturalResources.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Modding">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Modding.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AWSSDK.Core">
+      <HintPath>Assets\Plugins\Timberborn\AWSSDK.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Gathering">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Gathering.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.HousingBatchControl">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.HousingBatchControl.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.OptionsGame">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.OptionsGame.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ScreenSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ScreenSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.NaturalResourcesMoisture">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.NaturalResourcesMoisture.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapEditorSimulationSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapEditorSimulationSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.AnalyticsUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.AnalyticsUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ToolPanelSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ToolPanelSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TerrainLevelValidation">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TerrainLevelValidation.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.DeteriorationSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.DeteriorationSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapEditorHazardousWeatherUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapEditorHazardousWeatherUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.NeedSpecifications">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.NeedSpecifications.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WebNavigation">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WebNavigation.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BatchControl">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BatchControl.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Bots">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Bots.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BlockObjectAccesses">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BlockObjectAccesses.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SliderToggleSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SliderToggleSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Debugging">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Debugging.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GameSaveRepositorySystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GameSaveRepositorySystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.AutosavingUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.AutosavingUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BottomBarSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BottomBarSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Buildings">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Buildings.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.PowerBatchControl">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.PowerBatchControl.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.NeedSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.NeedSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.CursorToolSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.CursorToolSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BlockSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BlockSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ModelVariantSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ModelVariantSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BuildingsReachability">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BuildingsReachability.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GameWonderCompletionUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GameWonderCompletionUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SoakedEffects">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SoakedEffects.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TailDecalSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TailDecalSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GrowingUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GrowingUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Workshops">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Workshops.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Demolishing">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Demolishing.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Collections.Immutable">
+      <HintPath>Assets\Plugins\Timberborn\System.Collections.Immutable.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SteamStoreSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SteamStoreSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Moq">
+      <HintPath>Assets\Plugins\Timberborn\Moq.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.NaturalResourcesContaminationUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.NaturalResourcesContaminationUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.NaturalResourcesMoistureUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.NaturalResourcesMoistureUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BrushesUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BrushesUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SaveThumbnail">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SaveThumbnail.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Emptying">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Emptying.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.KeyBindingSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.KeyBindingSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.LinkedBuildingSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.LinkedBuildingSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BehaviorSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BehaviorSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.VersioningUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.VersioningUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BlockObstacles">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BlockObstacles.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SaveMetadataSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SaveMetadataSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WaterBuildings">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WaterBuildings.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WaterSourceSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WaterSourceSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapEditorSceneLoading">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapEditorSceneLoading.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.NavigationUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.NavigationUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WaterSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WaterSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MainMenuModdingUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MainMenuModdingUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BuildingsUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BuildingsUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.InputSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.InputSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MechanicalSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MechanicalSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WaterBrushesUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WaterBrushesUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GameSaveRuntimeSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GameSaveRuntimeSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Pollination">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Pollination.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Healthcare">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Healthcare.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.DeteriorationSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.DeteriorationSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.PowerStorage">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.PowerStorage.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TutorialSettingsSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TutorialSettingsSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GameFactionSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GameFactionSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.DebuggingUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.DebuggingUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BuilderPrioritySystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BuilderPrioritySystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GameDistrictsMigration">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GameDistrictsMigration.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WaterSourceSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WaterSourceSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Fields">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Fields.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WaterContaminationBuildings">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WaterContaminationBuildings.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.PrioritySystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.PrioritySystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GameBlockObjectButtonsSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GameBlockObjectButtonsSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GameSound">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GameSound.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.AssetSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.AssetSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapEditorScene">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapEditorScene.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapEditorTickSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapEditorTickSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.NeedApplication">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.NeedApplication.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ScienceSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ScienceSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.PlatformUtilities">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.PlatformUtilities.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.PathSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.PathSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GoodStackSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GoodStackSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Growing">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Growing.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TutorialSystemInitialization">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TutorialSystemInitialization.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.LevelVisibilitySystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.LevelVisibilitySystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.AttractionsBatchControl">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.AttractionsBatchControl.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.PopulationWorkStatistics">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.PopulationWorkStatistics.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.RangedEffectSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.RangedEffectSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SelectionToolSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SelectionToolSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapItemsUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapItemsUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GoodStackSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GoodStackSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.PopulationStatisticsSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.PopulationStatisticsSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapEditorUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapEditorUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SimulationSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SimulationSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.PowerStorageUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.PowerStorageUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Stockpiles">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Stockpiles.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Wonders">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Wonders.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.StockpileVisualizationUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.StockpileVisualizationUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SteamWorkshopContent">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SteamWorkshopContent.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TailDecalSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TailDecalSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TimbermeshAnimations">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TimbermeshAnimations.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapMetadataSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapMetadataSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SlotSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SlotSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.DemolishingToolGroupSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.DemolishingToolGroupSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.RuinsUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.RuinsUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GameDistricts">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GameDistricts.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.RelationSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.RelationSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.DistanceHeatmap">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.DistanceHeatmap.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.LevelVisibilitySystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.LevelVisibilitySystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ConstructibleSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ConstructibleSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.DistributionSystemBatchControl">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.DistributionSystemBatchControl.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapMetadataSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapMetadataSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WindSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WindSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.StockpilesUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.StockpilesUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.CarryingUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.CarryingUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ExplosionsUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ExplosionsUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Coordinates">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Coordinates.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WorldPersistence">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WorldPersistence.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ApplicationSettingsSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ApplicationSettingsSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ResourceCountingSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ResourceCountingSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TerrainSystemRendering">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TerrainSystemRendering.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GoodConsumingBuildingSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GoodConsumingBuildingSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.NaturalResourcesLifecycleUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.NaturalResourcesLifecycleUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BuildingStatuses">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BuildingStatuses.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.NaturalOverhangs">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.NaturalOverhangs.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BonusSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BonusSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapEditorSimulationSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapEditorSimulationSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ReservableSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ReservableSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.DwellingSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.DwellingSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TimeSpeedButtonSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TimeSpeedButtonSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.StatusSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.StatusSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BuildingRange">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BuildingRange.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.NaturalResourcesLifecycleModelSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.NaturalResourcesLifecycleModelSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ModelHiding">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ModelHiding.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.PlayerDataSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.PlayerDataSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WellbeingUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WellbeingUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.UncuttableYielding">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.UncuttableYielding.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.NotificationSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.NotificationSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Timbermesh">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Timbermesh.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Wellbeing">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Wellbeing.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SteamWorkshop">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SteamWorkshop.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.PopulationUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.PopulationUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Attractions">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Attractions.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.NeedSuspending">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.NeedSuspending.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.PrioritySystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.PrioritySystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BuilderHubSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BuilderHubSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.LinkedBuildingSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.LinkedBuildingSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GameDistrictsBatchControl">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GameDistrictsBatchControl.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Castle.Core">
+      <HintPath>Assets\Plugins\Timberborn\Castle.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Localization">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Localization.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Rendering">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Rendering.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.HazardousWeatherSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.HazardousWeatherSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TickSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TickSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TerrainSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TerrainSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.InputSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.InputSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SteamWorkshopMapDownloading">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SteamWorkshopMapDownloading.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SteamWorkshopModUploadingUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SteamWorkshopModUploadingUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GatheringUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GatheringUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ToolSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ToolSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.DistributionSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.DistributionSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapIndexSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapIndexSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ConstructionMode">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ConstructionMode.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ThumbnailSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ThumbnailSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.CoreUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.CoreUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ModdingUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ModdingUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.RuinsModelShuffling">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.RuinsModelShuffling.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.CharacterNavigation">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.CharacterNavigation.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapEditorStartup">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapEditorStartup.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="LINQtoCSV">
+      <HintPath>Assets\Plugins\Timberborn\LINQtoCSV.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GenericStoreSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GenericStoreSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MortalComponents">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MortalComponents.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SteamWorkshopMapUploadingUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SteamWorkshopMapUploadingUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Effects">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Effects.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ErrorReporting">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ErrorReporting.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Common">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Common.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TutorialSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TutorialSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SettlementNameSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SettlementNameSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ExperimentalModeSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ExperimentalModeSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SimpleOutputBuildings">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SimpleOutputBuildings.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.HaulingUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.HaulingUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.RecoverableGoodSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.RecoverableGoodSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.FileBrowsing">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.FileBrowsing.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SteamWorkshopMapDownloadingUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SteamWorkshopMapDownloadingUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SoilBarrierSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SoilBarrierSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GameWonderCompletion">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GameWonderCompletion.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WorkplacesBatchControl">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WorkplacesBatchControl.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.UISound">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.UISound.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.UIFormatters">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.UIFormatters.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.AttractionsUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.AttractionsUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.PrefabOptimization">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.PrefabOptimization.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AWSSDK.S3">
+      <HintPath>Assets\Plugins\Timberborn\AWSSDK.S3.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WonderPlanes">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WonderPlanes.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapThumbnailCapturingUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapThumbnailCapturingUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Analytics">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Analytics.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GameGoods">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GameGoods.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GameDistrictsUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GameDistrictsUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TimbermeshMaterials">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TimbermeshMaterials.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BotsUpkeep">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BotsUpkeep.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ThumbnailCapturing">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ThumbnailCapturing.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.QuickNotificationSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.QuickNotificationSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WaterWorkshops">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WaterWorkshops.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MainMenuPanels">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MainMenuPanels.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WorkSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WorkSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Persistence">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Persistence.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Metrics">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Metrics.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.RangedEffectBuildingUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.RangedEffectBuildingUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.NaturalResources">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.NaturalResources.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BehaviorSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BehaviorSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.EntityPanelSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.EntityPanelSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SkySystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SkySystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="com.rlabrecque.steamworks.net">
+      <HintPath>Assets\Plugins\Timberborn\com.rlabrecque.steamworks.net.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BeaverContaminationSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BeaverContaminationSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TimbermeshEditorTools">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TimbermeshEditorTools.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MainMenuScene">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MainMenuScene.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.VersioningSerialization">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.VersioningSerialization.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Flipping">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Flipping.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SaveMetadataSaving">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SaveMetadataSaving.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WaterSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WaterSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TimeSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TimeSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BeaversUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BeaversUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.StockpileVisualization">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.StockpileVisualization.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.PathSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.PathSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SceneLoading">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SceneLoading.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Beavers">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Beavers.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ModManagerSceneUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ModManagerSceneUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SelectionSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SelectionSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Navigation">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Navigation.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WalkingSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WalkingSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.LanguageUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.LanguageUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WeatherSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WeatherSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SingletonSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SingletonSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapEditorNaturalResourcesUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapEditorNaturalResourcesUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Goods">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Goods.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="protobuf-net">
+      <HintPath>Assets\Plugins\Timberborn\protobuf-net.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Versioning">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Versioning.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SaveThumbnailCapturing">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SaveThumbnailCapturing.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ResourceCountingSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ResourceCountingSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BeaverBehavior">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BeaverBehavior.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WondersUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WondersUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.StatusSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.StatusSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.FactionGoalsSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.FactionGoalsSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapRepositorySystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapRepositorySystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.RecoverableGoodSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.RecoverableGoodSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SoilMoistureSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SoilMoistureSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Terraforming">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Terraforming.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.CharactersUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.CharactersUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ScienceSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ScienceSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WaterContaminationRendering">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WaterContaminationRendering.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.AlertPanelSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.AlertPanelSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapStateSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapStateSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TextureOperations">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TextureOperations.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Wandering">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Wandering.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.CoreSound">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.CoreSound.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.EnterableSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.EnterableSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.DemolishingUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.DemolishingUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.PlantingUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.PlantingUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.DwellingSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.DwellingSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ClustersUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ClustersUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ForestryUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ForestryUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapThumbnail">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapThumbnail.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GoodConsumingBuildingSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GoodConsumingBuildingSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.PreviewSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.PreviewSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.NaturalResourcesModelSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.NaturalResourcesModelSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.PrefabSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.PrefabSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.RuinsNavigation">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.RuinsNavigation.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GoodsUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GoodsUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapEditorPersistence">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapEditorPersistence.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ModManagerScene">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ModManagerScene.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.CharacterControlSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.CharacterControlSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BuilderPrioritySystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BuilderPrioritySystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.InventorySystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.InventorySystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ConstructionSites">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ConstructionSites.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.RecoveredGoodSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.RecoveredGoodSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WorkshopsEffects">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WorkshopsEffects.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Ruins">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Ruins.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MortalSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MortalSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GameFactionSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GameFactionSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BuildingTools">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BuildingTools.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ReproductionUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ReproductionUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SerializationSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SerializationSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Carrying">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Carrying.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.PowerGeneratingUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.PowerGeneratingUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Benchmarking">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Benchmarking.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TimeSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TimeSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TitleScreenUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TitleScreenUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GameScene">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GameScene.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.InventorySystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.InventorySystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Cutting">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Cutting.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SteamWorkshopModDownloadingUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SteamWorkshopModDownloadingUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.FieldsUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.FieldsUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.CharacterControlSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.CharacterControlSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.LaborSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.LaborSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Bootstrapper">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Bootstrapper.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapEditorPlacementRandomizing">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapEditorPlacementRandomizing.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapRepositorySystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapRepositorySystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.YieldingUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.YieldingUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WonderCompletion">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WonderCompletion.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Particles">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Particles.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SleepSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SleepSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Options">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Options.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.StockpilePriorityUISystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.StockpilePriorityUISystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WaterSystemRendering">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WaterSystemRendering.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.InventorySystemBatchControl">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.InventorySystemBatchControl.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe">
+      <HintPath>Assets\Plugins\Timberborn\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BuildingDoorsteps">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BuildingDoorsteps.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ForestryEffects">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ForestryEffects.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GameSceneLoading">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GameSceneLoading.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TemplateSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TemplateSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SpriteOperations">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SpriteOperations.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.DiagnosticsUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.DiagnosticsUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BlockObjectTools">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BlockObjectTools.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WorkerTypes">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WorkerTypes.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BottomMatching">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BottomMatching.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.NeedBehaviorSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.NeedBehaviorSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.DeconstructionSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.DeconstructionSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.LaborSystemInitialization">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.LaborSystemInitialization.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WorkerOutfitSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WorkerOutfitSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.CommandLine">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.CommandLine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SoilMoistureSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SoilMoistureSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GoodsMapEditor">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GoodsMapEditor.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ModelAttachmentSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ModelAttachmentSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WaterBuildingsUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WaterBuildingsUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WalkingSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WalkingSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WeatherSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WeatherSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.DistributionSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.DistributionSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ModdingAssets">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ModdingAssets.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Animations">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Animations.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BugTrackerUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BugTrackerUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.StorageBatchControl">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.StorageBatchControl.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Population">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Population.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.CameraSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.CameraSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.DeathSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.DeathSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.InventoryNeedSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.InventoryNeedSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SimpleOutputBuildingsUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SimpleOutputBuildingsUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Bindito.Core">
+      <HintPath>Assets\Plugins\Timberborn\Bindito.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.EntitySystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.EntitySystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MainMenuSceneLoading">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MainMenuSceneLoading.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.DropdownSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.DropdownSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.StockpilePrioritySystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.StockpilePrioritySystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.YielderFinding">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.YielderFinding.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.NaturalResourcesContamination">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.NaturalResourcesContamination.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SteamWorkshopModDownloading">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SteamWorkshopModDownloading.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BlockSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BlockSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SettlementStatistics">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SettlementStatistics.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.NaturalResourcesUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.NaturalResourcesUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.KeyBindingSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.KeyBindingSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.FactionSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.FactionSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SoundSettingsSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SoundSettingsSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.NotificationSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.NotificationSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Yielding">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Yielding.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.PlantingEffects">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.PlantingEffects.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.NaturalResourcesReproduction">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.NaturalResourcesReproduction.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BotBehavior">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BotBehavior.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Hauling">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Hauling.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ScreenCapturing">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ScreenCapturing.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GameExitSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GameExitSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WaterObjects">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WaterObjects.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.FileSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.FileSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.CameraAnchorPickerSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.CameraAnchorPickerSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GameSaveRepositorySystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GameSaveRepositorySystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BeaverContaminationSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BeaverContaminationSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BuildingsBlocking">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BuildingsBlocking.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.LifeSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.LifeSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.CharacterMovementSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.CharacterMovementSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GameDistrictsMigrationBatchControl">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GameDistrictsMigrationBatchControl.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapEditorPlacementRandomizingUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapEditorPlacementRandomizingUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.AreaSelectionSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.AreaSelectionSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SoilContaminationSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SoilContaminationSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Diagnostics">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Diagnostics.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.RelationSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.RelationSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TopBarSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TopBarSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Language">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Language.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.StartingLocationSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.StartingLocationSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BonusSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BonusSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.FeatureToggleSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.FeatureToggleSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WorldSerialization">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WorldSerialization.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Planting">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Planting.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapThumbnailCapturing">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapThumbnailCapturing.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SettingsSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SettingsSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapEditorPersistenceUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapEditorPersistenceUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapEditorBrushesUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapEditorBrushesUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TickSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TickSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.NaturalResourcesLifecycle">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.NaturalResourcesLifecycle.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BlockSystemNavigation">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BlockSystemNavigation.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Explosions">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Explosions.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Fences">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Fences.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TimbermeshDTO">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TimbermeshDTO.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MapThumbnailOverlaySystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MapThumbnailOverlaySystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GridTraversing">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GridTraversing.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Characters">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Characters.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.PowerGenerating">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.PowerGenerating.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GridRenderingSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GridRenderingSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SoundSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SoundSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BuildingsNavigation">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BuildingsNavigation.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ErrorReportingUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ErrorReportingUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.UILayoutSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.UILayoutSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SaveSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SaveSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BenchmarkingUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BenchmarkingUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.RecoveredGoodSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.RecoveredGoodSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.StoreSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.StoreSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WaterContaminationBuildingsUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WaterContaminationBuildingsUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ApplicationLifetime">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ApplicationLifetime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GameAnalytics">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GameAnalytics.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Multithreading">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Multithreading.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WorkshopsUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WorkshopsUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WindSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WindSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.DeconstructionSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.DeconstructionSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Brushes">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Brushes.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GameStartup">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GameStartup.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.CharacterModelSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.CharacterModelSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SteamWorkshopUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SteamWorkshopUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.GameSaveRuntimeSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.GameSaveRuntimeSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Autosaving">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Autosaving.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WorkerTypesUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WorkerTypesUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TerrainSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TerrainSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Reproduction">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Reproduction.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Bindito.Unity">
+      <HintPath>Assets\Plugins\Timberborn\Bindito.Unity.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Clusters">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Clusters.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.Forestry">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.Forestry.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.ConstructionSitesUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.ConstructionSitesUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TooltipSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TooltipSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.TutorialSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.TutorialSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.PrefabGroupSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.PrefabGroupSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BaseComponentSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BaseComponentSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.BotsUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.BotsUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.MechanicalSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.MechanicalSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.WaterSystemRenderingUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.WaterSystemRenderingUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SettingsSystemUI">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SettingsSystemUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Timberborn.SettlementNameSystem">
+      <HintPath>Assets\Plugins\Timberborn\Timberborn.SettlementNameSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy /y &quot;$(ProjectDir)$(OutDir)*&quot;  &quot;$(USERPROFILE)\Documents\Timberborn\Mods\TestV6\Scripts&quot;&#xD;&#xA;copy &quot;$(ProjectDir)\manifest.json&quot;  &quot;$(USERPROFILE)\Documents\Timberborn\Mods\TestV6\manifest.json&quot;" />
+  </Target>
+</Project>
