@@ -34,17 +34,20 @@ namespace BeaverBuddies.Connect
         private DialogBoxShower _dialogBoxShower;
         private InputBoxShower _inputBoxShower;
         private ClientConnectionService _clientConnectionService;
+        private ConfigIOService _configIOService;
 
-        public ClientConnectionUI(
+        ClientConnectionUI(
             DialogBoxShower dialogBoxShower, 
             InputBoxShower inputBoxShower, 
-            ClientConnectionService clientConnectionService
+            ClientConnectionService clientConnectionService,
+            ConfigIOService configIOService
         ) 
         {
             instance = this;
             _dialogBoxShower = dialogBoxShower;
             _inputBoxShower = inputBoxShower;
             _clientConnectionService = clientConnectionService;
+            _configIOService = configIOService;
         }
 
         public static void DoPostfix(VisualElement __result)
@@ -63,7 +66,7 @@ namespace BeaverBuddies.Connect
                 .SetConfirmButton(ip =>
                 {
                     EventIO.Config.ClientConnectionAddress = ip;
-                    EventIO.Config.SaveConfig();
+                    _configIOService.SaveConfigToFile();
                     _clientConnectionService.ConnectOrShowFailureMessage(ip);
                 });
             builder._input.value = EventIO.Config.ClientConnectionAddress;

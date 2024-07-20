@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.IO;
+using Timberborn.Modding;
 
 namespace BeaverBuddies
 {
@@ -17,7 +18,6 @@ namespace BeaverBuddies
         public const string MODE_RECORD = "record";
         public const string MODE_REPLAY = "replay";
 
-        public string ConfigFileName => "ReplayConfig";
 
         public string Mode { get; set; } = MODE_MANUAL;
         public string ClientConnectionAddress { get; set; } = "127.0.0.1";
@@ -45,20 +45,5 @@ namespace BeaverBuddies
                     return NetMode.None;
             }
         }
-
-        public void SaveConfig()
-        {
-            // TODO: v6
-            //string configPath = Path.Combine(Plugin.Mod.DirectoryPath, "configs", $"{ConfigFileName}.json");
-            //try
-            //{
-            //    File.WriteAllText(configPath, JsonConvert.SerializeObject(this, Formatting.Indented));
-            //}
-            //catch (Exception e)
-            //{
-            //    Plugin.LogWarning($"Failed to save config: {e}");
-            //}
-        }
-
     }
 }

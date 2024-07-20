@@ -66,6 +66,7 @@ namespace BeaverBuddies
             containerDefinition.Bind<ClientConnectionService>().AsSingleton();
             containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
             containerDefinition.Bind<FirstTimerService>().AsSingleton();
+            containerDefinition.Bind<ConfigIOService>().AsSingleton();
 
             //ReflectionUtils.PrintChildClasses(typeof(MonoBehaviour), 
             //    "Start", "Awake", "Update", "FixedUpdate", "LateUpdate", "OnEnable", "OnDisable", "OnDestroy");
@@ -86,6 +87,7 @@ namespace BeaverBuddies
         // TODO: Need to manually keep this updated now
         public const string Version = "1.2.0.0";
         public const string Name = "BeaverBuddies";
+        public const string ID = "beaverbuddies";
 
         private static ManualLogSource logger;
 
@@ -103,7 +105,7 @@ namespace BeaverBuddies
 
             if (config.GetNetMode() == NetMode.None) return;
 
-            Harmony harmony = new Harmony(Name);
+            Harmony harmony = new Harmony(ID);
             harmony.PatchAll();
         }
 

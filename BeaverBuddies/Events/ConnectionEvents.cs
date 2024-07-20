@@ -23,7 +23,7 @@ namespace BeaverBuddies.Events
             } else if (serverModVersion != Plugin.Version)
             {
                 warningMessage = $"Warning! Server mod version ({serverModVersion}) does not match client mod version ({Plugin.Version}).\n" +
-                    $"Please ensure that you are running the same version of the {Plugin.Name} mod.";
+                    $"Please ensure that you are running the same version of the {Plugin.ID} mod.";
             } else if (isDebugMode != EventIO.Config.Debug)
             {
                 warningMessage = $"Warning! Server debug mode ({isDebugMode}) does not match client debug mode ({EventIO.Config.Debug}).\n" +

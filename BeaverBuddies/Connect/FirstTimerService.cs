@@ -11,6 +11,7 @@ namespace BeaverBuddies.Connect
     {
         private DialogBoxShower _dialogBoxShower;
         private UrlOpener _urlOpener;
+        private ConfigIOService _configIOService;
 
         private const string Message = 
             "It looks like this is your first time using BeaverBuddies. " +
@@ -18,13 +19,15 @@ namespace BeaverBuddies.Connect
             "you are set up to play. Would you like to do that now?";
         private const string GuideURL = "https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running";
 
-        public FirstTimerService(
+        internal FirstTimerService(
             DialogBoxShower dialogBoxShower,
-            UrlOpener urlOpener
+            UrlOpener urlOpener,
+            ConfigIOService configIOService
         )
         {
             _dialogBoxShower = dialogBoxShower;
             _urlOpener = urlOpener;
+            _configIOService = configIOService;
         }
 
         // TODO: Ideally, wait to show until after OK is clicked.
@@ -40,7 +43,7 @@ namespace BeaverBuddies.Connect
             var unsetFirstTimer = new Action(() =>
             {
                 config.FirstTimer = false;
-                config.SaveConfig();
+                _configIOService.SaveConfigToFile();
             });
 
             var action = () =>
@@ -52,9 +55,7 @@ namespace BeaverBuddies.Connect
             _dialogBoxShower.Create()
                 .SetMessage(Message)
                 .SetConfirmButton(action)
-                // TODO: This doesn't seem to work...
                 .SetCancelButton(unsetFirstTimer)
-                .SetDefaultCancelButton()
                 .Show();
         }
     }
