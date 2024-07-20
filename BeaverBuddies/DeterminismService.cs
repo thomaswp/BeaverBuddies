@@ -79,6 +79,13 @@ namespace BeaverBuddies
      * - Remove all water logic (this might get complicated...)
      * - Log random calls during load to look for non-gameplay logic
      * 
+     * Known Issues:
+     * - Either NaturalResourceReproducer.TryReprosuceResources (less likely)
+     *   or WateredNaturalResource.StartDryingOut (more likely) is desyncing,
+     *   and if the later it's likely because of a timer being created.
+     *   Time logging produces lots of false positives, so I don't typically
+     *   do it, but I could try to find a way to...
+     * 
      * Monitoring:
      * - There may be other Singleton's with game logic updates.
      * - Some TimeTriggers seem to happen not completely synchronized, but
