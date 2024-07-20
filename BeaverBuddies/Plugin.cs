@@ -40,6 +40,7 @@ namespace BeaverBuddies
             containerDefinition.Bind<DeterminismService>().AsSingleton();
             containerDefinition.Bind<TickReplacerService>().AsSingleton();
             containerDefinition.Bind<RehostingService>().AsSingleton();
+            containerDefinition.Bind<ConfigIOService>().AsSingleton();
 
             if (EventIO.Config.Debug)
             {
