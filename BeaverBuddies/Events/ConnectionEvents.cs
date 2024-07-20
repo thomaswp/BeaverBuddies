@@ -77,7 +77,9 @@ namespace BeaverBuddies.Events
                 {
                     if (!rehostingService.RehostGame())
                     {
-                        // TODO: Failure message
+                        shower.Create()
+                            .SetMessage("Failed to rehost. Manually save and host again.")
+                            .Show();
                     }
                 }
                 else

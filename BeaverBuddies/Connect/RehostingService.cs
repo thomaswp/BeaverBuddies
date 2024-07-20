@@ -1,13 +1,21 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Text;
 using Timberborn.Autosaving;
 using Timberborn.GameSaveRepositorySystem;
 using Timberborn.GameSaveRepositorySystemUI;
 using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.GameSaveRuntimeSystemUI;
+using Timberborn.InputSystem;
+using Timberborn.SaveSystem;
 using Timberborn.SettlementNameSystem;
 using Timberborn.SingletonSystem;
+using Timberborn.TickSystem;
+using static Timberborn.GameSaveRuntimeSystem.GameSaver;
 
 namespace BeaverBuddies.Connect
 {
@@ -46,16 +54,34 @@ namespace BeaverBuddies.Connect
             SaveReference saveReference = new SaveReference(settlementName, saveName);
             try
             {
-                _gameSaver.InstantSaveSkippingNameValidation(saveReference, () => { });
-                ServerHostingUI.LoadAndHost(_validatingGameLoader, saveReference);
+                _gameSaver.InstantSaveSkippingNameValidation(saveReference, () => 
+                {
+                    // Run on next frame because the GameSaver doesn't release its
+                    // handle on the save stream until the method finishes executing
+                    // i.e. after the callback has run.
+                    _gameSaver.StartCoroutine(RunOnNextFrameCoroutine(() =>
+                    {
+                        ServerHostingUI.LoadAndHost(_validatingGameLoader, saveReference);
+                    }));
+                });
             }
             catch (GameSaverException ex)
             {
                 Plugin.LogError($"Error occured while saving: {ex.InnerException}");
                 _gameSaveRepository.DeleteSaveSafely(saveReference);
                 return false;
+            } catch (Exception ex)
+            {
+                Plugin.LogError($"Failed to rehost: {ex}");
+                return false;
             }
             return true;
+        }
+
+        private IEnumerator RunOnNextFrameCoroutine(Action action)
+        {
+            yield return null;
+            action?.Invoke();
         }
     }
 }
