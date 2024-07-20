@@ -42,14 +42,12 @@ namespace BeaverBuddies.Connect
         public bool RehostGame()
         {
             string settlementName = _settlementNameService.SettlementName;
-            string saveName = _autosaveNameService.Timestamp() + " Rehost";
+            string saveName = _autosaveNameService.Timestamp().Replace(",", "") + " Rehost";
             SaveReference saveReference = new SaveReference(settlementName, saveName);
             try
             {
-                _gameSaver.InstantSaveSkippingNameValidation(saveReference, () =>
-                {
-                    ServerHostingUI.LoadAndHost(_validatingGameLoader, saveReference);
-                });
+                _gameSaver.InstantSaveSkippingNameValidation(saveReference, () => { });
+                ServerHostingUI.LoadAndHost(_validatingGameLoader, saveReference);
             }
             catch (GameSaverException ex)
             {

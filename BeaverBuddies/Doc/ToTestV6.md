@@ -6,3 +6,4 @@
 * WaterObjectService had its update moved to tick I think - watch for desyncs here
 * Vector3 and Vector3Int - do they serialize properly?
 * Figure out a way top not copy pdb, and ignore settings for upload more easily?
+* Sharing violation on path: due to comma? Or opening on read and write on reload simultaneously, need to close stream?

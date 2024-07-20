@@ -195,27 +195,35 @@ namespace BeaverBuddies.DesyncDetecter
                 LogTrace(myTraces[i], true);
             }
             Plugin.Log("========== Desynced Trace ==========");
+
             Plugin.Log("---------- My Trace ----------");
-            if (errorIndex >= myTraces.Count)
-            {
-                Plugin.Log("No trace (index out of bounds)");
-            }
-            else
-            {
-                LogTrace(myTraces[errorIndex], true);
-            }
+            PrintTracesAt(myTraces, errorIndex);
+
             Plugin.Log("---------- Other Trace ----------");
-            if (errorIndex >= otherTraces.Count)
-            {
-                Plugin.Log("No trace (index out of bounds)");
-            }
-            else
-            {
-                LogTrace(otherTraces[errorIndex], true);
-            }
+            PrintTracesAt(otherTraces, errorIndex);
+
             Plugin.Log("========== Desynced Log End ==========");
 
             return false;
+        }
+
+        private static void PrintTracesAt(List<Trace> traces, int startIndex, int maxToPrint = 3)
+        {
+            if (startIndex >= traces.Count)
+            {
+                Plugin.Log("No trace (index out of bounds)");
+                return;
+            }
+            int count = 0;
+            for (int i = startIndex; i < traces.Count; i++)
+            {
+                LogTrace(traces[i], true);
+                if (++count > maxToPrint)
+                {
+                    Plugin.Log("... (more traces)");
+                    break;
+                }
+            }
         }
 
         private static void LogTraces(int index)
