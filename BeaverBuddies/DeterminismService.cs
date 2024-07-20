@@ -54,6 +54,7 @@ using BeaverBuddies.DesyncDetecter;
 using Timberborn.Brushes;
 using Timberborn.WaterObjects;
 using Timberborn.TerrainSystemRendering;
+using Timberborn.CommandLine;
 
 namespace BeaverBuddies
 {
@@ -490,7 +491,7 @@ namespace BeaverBuddies
                 }
             }
 
-            //if (__result.Any(o => o is TimeTriggerFactory || o is TimeTriggerService))
+            //if (__result.Any(o => o is CommandLineArguments))
             //{
             //    string name = method.DeclaringType?.FullName;
             //    if (types.Add(name))
