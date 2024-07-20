@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
@@ -27,7 +27,16 @@
     <ProjectReference Include="..\TimberNet\TimberNet.csproj" />
   </ItemGroup>
   
+  <ItemGroup>
+    <None Update="manifest.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="thumbnail.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /y &quot;$(ProjectDir)$(OutDir)*&quot;  &quot;$(USERPROFILE)\Documents\Timberborn\Mods\BeaverBuddies&quot;&#xD;&#xA;copy &quot;$(ProjectDir)\manifest.json&quot;  &quot;$(USERPROFILE)\Documents\Timberborn\Mods\BeaverBuddies\manifest.json&quot;" />
+    <Exec Command="xcopy /y &quot;$(ProjectDir)$(OutDir)*&quot;  &quot;$(USERPROFILE)\Documents\Timberborn\Mods\BeaverBuddies&quot;&#xD;&#xA;" />
   </Target>
 </Project>
