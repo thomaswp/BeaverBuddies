@@ -157,19 +157,4 @@ namespace BeaverBuddies.DesyncDetecter
                 $"trigger delay = {time}");
         }
     }
-
-    [HarmonyPatch(typeof(WateredNaturalResource), nameof(WateredNaturalResource.GenerateRandomDaysToDry))]
-    public class WateredNaturalResourceGenerateRandomDaysToDryPatcher
-    {
-        public static void Postfix(WateredNaturalResource __instance, float __result)
-        {
-            if (!EventIO.Config.Debug) return;
-            //Plugin.Log(
-            //    $"WateredNaturalResource {__instance.GameObjectFast?.name} random days to die: {__result}");
-            DesyncDetecterService.Trace(
-                $"WateredNaturalResource {__instance.GameObjectFast?.name} random days to die: {__result}");
-        }
-    }
-
-
 }

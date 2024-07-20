@@ -55,6 +55,7 @@ using Timberborn.Brushes;
 using Timberborn.WaterObjects;
 using Timberborn.TerrainSystemRendering;
 using Timberborn.CommandLine;
+using Timberborn.ToolSystem;
 
 namespace BeaverBuddies
 {
@@ -678,6 +679,23 @@ namespace BeaverBuddies
         static void Postfix()
         {
             DeterminismService.SetNonGamePatcherActive(typeof(BeaverTextureSetterStartPatcher), false);
+        }
+    }
+
+    // Sometimes tool descriptions need an instance of the object they describe to describe it
+    // and when it activates this can use randomness (e.g. WateredNaturalResource), which should
+    // be considered UI randomness, since this object never gets in the game.
+    [HarmonyPatch(typeof(DescriptionPanel), nameof(DescriptionPanel.SetDescription))]
+    public class DescriptionPanelSetDescriptionPatcher
+    {
+        static void Prefix()
+        {
+            DeterminismService.SetNonGamePatcherActive(typeof(DescriptionPanelSetDescriptionPatcher), true);
+        }
+
+        static void Postfix()
+        {
+            DeterminismService.SetNonGamePatcherActive(typeof(DescriptionPanelSetDescriptionPatcher), false);
         }
     }
 
