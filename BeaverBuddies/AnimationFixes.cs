@@ -10,6 +10,18 @@ namespace BeaverBuddies
 {
 #if !NO_SMOOTH_ANIMATION
     [ManualMethodOverwrite]
+    /*
+7/20/2024
+private void Update(float deltaTime)
+{
+	_animatedPathFollower.Update(Time.time);
+	if (!_animatedPathFollower.Stopped)
+	{
+		UpdateTransform(deltaTime);
+	}
+	InvokeAnimationUpdate();
+}
+     */
     [HarmonyPatch(typeof(MovementAnimator), nameof(MovementAnimator.Update), typeof(float))]
     public class AnimatedPathFollowerUpdatePathcer
     {

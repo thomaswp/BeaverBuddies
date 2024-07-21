@@ -724,7 +724,6 @@ namespace BeaverBuddies
 
     // TODO: Double check that this still works - the arguments have
     // changed and now it gets saved on LateUpdate as a queueing process
-    [ManualMethodOverwrite]
     [HarmonyPatch(typeof(GameSaver), nameof(GameSaver.Save), typeof(QueuedSave))]
     public class GameSaverSavePatcher
     {
@@ -905,12 +904,12 @@ namespace BeaverBuddies
         }
     }
 
-    // TODO: Check whether this is ever called by game logic
-    // or just override it to _secondsPassedToday
-    // DayNightCycle.FluidSecondsPassedToday
 
-    [HarmonyPatch(typeof(DayNightCycle), nameof(DayNightCycle.FluidSecondsPassedToday), MethodType.Getter)]
     [ManualMethodOverwrite]
+    /*
+public TimeOfDay FluidTimeOfDay => CalculateTimeOfDay(FluidSecondsPassedToday);
+     */
+    [HarmonyPatch(typeof(DayNightCycle), nameof(DayNightCycle.FluidSecondsPassedToday), MethodType.Getter)]
     public class DayNightCycleFluidSecondsPassedTodayPatcher
     {
         static bool Prefix(DayNightCycle __instance, ref float __result)
@@ -1029,7 +1028,6 @@ namespace BeaverBuddies
     // generalizable approach to prevent Singletons from updating
     // and instead update them on tick.
     [HarmonyPatch(typeof(RecoveredGoodStackSpawner), nameof(RecoveredGoodStackSpawner.UpdateSingleton))]
-    [ManualMethodOverwrite]
     class RecoveredGoodStackSpawnerUpdateSingletonPatcher
     {
         private static bool doBaseUpdate = false;

@@ -30,6 +30,15 @@ namespace BeaverBuddies.Events
     }
 
     [ManualMethodOverwrite]
+    /*
+        7/20/2024
+		if (!_isLocked)
+		{
+			Time.timeScale = ScaleSpeed(speed);
+			CurrentSpeed = speed;
+			_eventBus.Post(new CurrentSpeedChangedEvent(CurrentSpeed));
+		}
+     */
     [HarmonyPatch(typeof(SpeedManager), nameof(SpeedManager.ChangeSpeed))]
     public class SpeedChangePatcher
     {
@@ -77,6 +86,16 @@ namespace BeaverBuddies.Events
     // and aborted event. For clients, I think this is always a possibility, regardless
     // of whether we freeze, since it's always happening at a delay.
     [ManualMethodOverwrite]
+    /*
+        7/20/2024
+    	if (!_isLocked)
+		{
+			_speedBefore = CurrentSpeed;
+			ChangeSpeed(0f);
+			_isLocked = true;
+			_eventBus.Post(new SpeedLockChangedEvent(_isLocked));
+		}
+     */
     [HarmonyPatch(typeof(SpeedManager), nameof(SpeedManager.LockSpeed))]
     public class SpeedLockPatcher
     {
@@ -101,6 +120,15 @@ namespace BeaverBuddies.Events
     }
 
     [ManualMethodOverwrite]
+    /*
+     	7/20/2024
+        if (_isLocked)
+		{
+			_isLocked = false;
+			ChangeSpeed(_speedBefore);
+			_eventBus.Post(new SpeedLockChangedEvent(_isLocked));
+		}
+     */
     [HarmonyPatch(typeof(SpeedManager), nameof(SpeedManager.UnlockSpeed))]
     public class SpeedUnlockPatcher
     {

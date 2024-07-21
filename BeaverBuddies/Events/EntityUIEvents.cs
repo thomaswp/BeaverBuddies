@@ -857,6 +857,11 @@ namespace BeaverBuddies.Events
     }
 
     [ManualMethodOverwrite]
+    /*
+        7/20/2024
+		UnlockableWorkerType botUnlockableWorkerType = GetBotUnlockableWorkerType();
+		_workplaceUnlockingDialogService.TryToUnlockWorkerType(botUnlockableWorkerType, SetBotWorkerType);
+     */
     [HarmonyPatch(typeof(WorkerTypeToggle), nameof(WorkerTypeToggle.TryToUnlock))]
     class WorkerTypeToggleTryToUnlockPatcher
     {

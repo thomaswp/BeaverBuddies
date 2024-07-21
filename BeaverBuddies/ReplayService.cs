@@ -667,11 +667,18 @@ namespace BeaverBuddies
         }
     }
 
+    [ManualMethodOverwrite]
+    /*
+        7/20/2024
+        // Also check TickNextBucket - we rework everything
+		while (numberOfBucketsToTick-- > 0)
+		{
+			TickNextBucket();
+		}
+     */
     [HarmonyPatch(typeof(TickableBucketService), nameof(TickableBucketService.TickBuckets))]
     static class TickableBucketServiceTickUpdatePatcher
     {
-
-        [ManualMethodOverwrite]
         static bool Prefix(TickableBucketService __instance, int numberOfBucketsToTick)
         {
             if (EventIO.IsNull) return true;
