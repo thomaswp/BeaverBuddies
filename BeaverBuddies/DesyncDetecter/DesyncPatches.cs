@@ -11,6 +11,7 @@ using Timberborn.NaturalResources;
 using UnityEngine;
 using Timberborn.WalkingSystem;
 using Timberborn.NaturalResourcesMoisture;
+using Timberborn.SoilMoistureSystem;
 
 namespace BeaverBuddies.DesyncDetecter
 {
@@ -155,6 +156,16 @@ namespace BeaverBuddies.DesyncDetecter
             DesyncDetecterService.Trace(
                 $"WateredNaturalResource {id} [dead={isDead}] starting to dry out; " +
                 $"trigger delay = {time}");
+        }
+    }
+
+    [HarmonyPatch(typeof(SoilMoistureMap), nameof(SoilMoistureMap.SetMoistureLevel))]
+    public class SoilMoistureMapSetMoistureLevelPatcher
+    {
+        public static void Prefix(Vector2Int coordinates, int index, float newLevel)
+        {
+            if (!EventIO.Config.Debug) return;
+            DesyncDetecterService.Trace($"Setting moisture level for {coordinates} to {newLevel}");
         }
     }
 }
