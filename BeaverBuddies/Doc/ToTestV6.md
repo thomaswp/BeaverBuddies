@@ -5,3 +5,5 @@
 * Figure out a way to not copy pdb, and ignore settings for upload more easily?
 * New desyncs
 * Desyncs from lag (can be produced w/ heavy Tracing)
+* Implement auto-host last map option
+* Test auto join
