@@ -159,13 +159,15 @@ namespace BeaverBuddies.DesyncDetecter
         }
     }
 
-    [HarmonyPatch(typeof(SoilMoistureMap), nameof(SoilMoistureMap.SetMoistureLevel))]
-    public class SoilMoistureMapSetMoistureLevelPatcher
-    {
-        public static void Prefix(Vector2Int coordinates, int index, float newLevel)
-        {
-            if (!EventIO.Config.Debug) return;
-            DesyncDetecterService.Trace($"Setting moisture level for {coordinates} to {newLevel}");
-        }
-    }
+    // TODO: This is too laggy, so it causes a desync from lag. Need to fix that to
+    // see if I still get desyncs from not-lag.
+    //[HarmonyPatch(typeof(SoilMoistureMap), nameof(SoilMoistureMap.SetMoistureLevel))]
+    //public class SoilMoistureMapSetMoistureLevelPatcher
+    //{
+    //    public static void Prefix(Vector2Int coordinates, int index, float newLevel)
+    //    {
+    //        if (!EventIO.Config.Debug) return;
+    //        DesyncDetecterService.Trace($"Setting moisture level for {coordinates} to {newLevel}");
+    //    }
+    //}
 }
