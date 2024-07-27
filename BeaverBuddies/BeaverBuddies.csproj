@@ -13,7 +13,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="BepInEx.Core" Version="5.*" />
+    <PackageReference Include="Lib.Harmony" Version="2.3.3" />
     <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
     <PackageReference Include="Timberborn.GameLibs" Version="0.6.0.4-r.0" />
     <PackageReference Include="UnityEngine.Modules" Version="2022.2.17" IncludeAssets="compile" />

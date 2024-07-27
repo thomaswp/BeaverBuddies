@@ -1,11 +1,10 @@
 ﻿using BeaverBuddies.Connect;
 using BeaverBuddies.DesyncDetecter;
-using BepInEx.Logging;
+using BeaverBuddies.Util.Logging;
 using Bindito.Core;
 using HarmonyLib;
 using System.Diagnostics;
 using Timberborn.ModManagerScene;
-using Timberborn.TickSystem;
 
 namespace BeaverBuddies
 {
@@ -26,6 +25,7 @@ namespace BeaverBuddies
             // playing co-op right now).
             containerDefinition.Bind<ClientConnectionService>().AsSingleton();
             containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
+            containerDefinition.Bind<ConfigIOService>().AsSingleton();
 
             // EventIO gets set before load, so if it's null, this is a regular
             // game, so don't initialize these services.
@@ -40,7 +40,6 @@ namespace BeaverBuddies
             containerDefinition.Bind<DeterminismService>().AsSingleton();
             containerDefinition.Bind<TickReplacerService>().AsSingleton();
             containerDefinition.Bind<RehostingService>().AsSingleton();
-            containerDefinition.Bind<ConfigIOService>().AsSingleton();
 
             if (EventIO.Config.Debug)
             {
@@ -90,12 +89,11 @@ namespace BeaverBuddies
         public const string Name = "BeaverBuddies";
         public const string ID = "beaverbuddies";
 
-        private static ManualLogSource logger;
+        private static ILogger logger;
 
         public void StartMod()
         {
-            // TODO: Replace with Unity debug for deploy
-            logger = Logger.CreateLogSource(Name);
+            logger = new UnityLogger();
 
             // TODO: Recreate config system!
             ReplayConfig config = new ReplayConfig(); // mod.Configs.Get<ReplayConfig>();
