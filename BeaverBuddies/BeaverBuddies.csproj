@@ -8,43 +8,45 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<LangVersion>latest</LangVersion>
 		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
-		<NoWarn>$(NoWarn);Harmony003</NoWarn>
+		<NoWarn>$(NoWarn)</NoWarn>		
+		<!-- Path Config -->
 		<TimberbornPath>C:\Program Files (x86)\Steam\steamapps\common\Timberborn</TimberbornPath>
-		<HarmonyPath>C:\Program Files (x86)\Steam\steamapps\workshop\content\1062090\3284904751</HarmonyPath>
+		<BepInExPath>C:\Dev\BepInEx_win_x64_5.4.23.2</BepInExPath>
 		<!-- Use the registry because the doc folder can be modified outside $(USERPROFILE) like E:\DocLibrary -->
 		<DocumentsPath>$(registry:HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders@Personal)</DocumentsPath>
 		<BeaverBuddiesModsPath>$(DocumentsPath)\Timberborn\Mods\BeaverBuddies</BeaverBuddiesModsPath>
 		<BeaverBuddiesManagedPath>$(TimberbornPath)\Timberborn_Data\Managed</BeaverBuddiesManagedPath>
+		<!-- Include HarmonyX file inside $(BeaverBuddiesModsPath) -->
+		<includeHarmonyX>true</includeHarmonyX>
 	</PropertyGroup>
 
 	<!-- NuGet -->
-	<ItemGroup>		
-		<PackageReference Include="BepInEx.AssemblyPublicizer" Version="0.4.2" />
-		<PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2" PrivateAssets="all" />
-		<!--<PackageReference Include="Lib.Harmony" Version="2.3.3" />-->
+	<ItemGroup>
+		<PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2" PrivateAssets="all" /> 
 		<PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
-	</ItemGroup>
-	<ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
-		<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
-	</ItemGroup>
-	
-	<!-- OutSide Project --> 
+	</ItemGroup> 
+
+	<!-- OutSide Project -->
 	<ItemGroup>
 		<ProjectReference Include="..\TimberNet\TimberNet.csproj" />
 	</ItemGroup>
 
 	<!-- Reference DLL -->
-	<ItemGroup>		
-		<!-- Private Reference DLL -->
-		<Reference Include="$(HarmonyPath)\0Harmony.dll" Private="false" />
+	<ItemGroup>
+		<!-- BepInEx (Harmony, Mono.Cecil & MonoMod DLL) -->
+		<Reference Include="$(BepInExPath)\BepInEx\core\0Harmony.dll" Private="$(includeHarmonyX)" />
+		<Reference Include="$(BepInExPath)\BepInEx\core\Mono.Cecil.*.dll" Private="$(includeHarmonyX)" />
+		<Reference Include="$(BepInExPath)\BepInEx\core\MonoMod.*.dll" Private="$(includeHarmonyX)" />
+		
+		<!-- Timberborn DLL & Publicize (BepInEx.AssemblyPublicizer.MSBuild) -->
 		<Reference Include="$(BeaverBuddiesManagedPath)\Bindito.Core.dll" Private="false" />
 		<Reference Include="$(BeaverBuddiesManagedPath)\Bindito.Unity.dll" Private="false" />
-		<!-- Private Reference DLL with Publicize (use BepInEx.AssemblyPublicizer & BepInEx.AssemblyPublicizer.MSBuild) -->
 		<Reference Include="$(BeaverBuddiesManagedPath)\UnityEngine.*.dll" Publicize="true" Private="false" />
 		<Reference Include="$(BeaverBuddiesManagedPath)\Timberborn.*.dll" Publicize="true" Private="false" />
 	</ItemGroup>
 
-	<!-- Add file to Output folder -->
+	
+	<!-- Add files to Output folder -->
 	<ItemGroup>
 		<None Update="manifest.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -54,14 +56,19 @@
 		</None>
 	</ItemGroup>
 
+	<!-- PreBuild -->
+	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+		<!-- Empty -->
+	</Target>
+
 	<!-- PostBuild -->
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Message Text="DestinationFolder = $(BeaverBuddiesModsPath)" />
 		<!-- Create Folder -->
 		<MakeDir Directories="$(BeaverBuddiesModsPath)" />
 		<ItemGroup>
-			<FilesToDelete Include="$(BeaverBuddiesModsPath)\*"/>
-			<FilesToCopy Include="$(ProjectDir)$(OutDir)\*"/>
+			<FilesToDelete Include="$(BeaverBuddiesModsPath)\*" />
+			<FilesToCopy Include="$(ProjectDir)$(OutDir)\*" />
 		</ItemGroup>
 		<!-- Clear BeaverBuddiesModsPath Directory & Copy Output files inside -->
 		<Delete Files="@(FilesToDelete)" />
