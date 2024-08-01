@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Timberborn.CoreUI;
+using Timberborn.Localization;
 using Timberborn.MainMenuPanels;
 using Timberborn.OptionsGame;
 using UnityEngine.UIElements;
@@ -13,18 +14,18 @@ namespace BeaverBuddies.Connect
     [HarmonyPatch(typeof(MainMenuPanel), "GetPanel")]
     public class MainMenuGetPanelPatcher
     {
-        public static void Postfix(ref VisualElement __result)
+        public static void Postfix(MainMenuPanel __instance, ref VisualElement __result)
         {
-            ClientConnectionUI.DoPostfix(__result);
+            ClientConnectionUI.DoPostfix(__instance, __result);
         }
     }
 
     [HarmonyPatch(typeof(GameOptionsBox), "GetPanel")]
     public class GameOptionsBoxGetPanelPatcher
     {
-        public static void Postfix(ref VisualElement __result)
+        public static void Postfix(MainMenuPanel __instance, ref VisualElement __result)
         {
-            ClientConnectionUI.DoPostfix(__result);
+            ClientConnectionUI.DoPostfix(__instance, __result);
         }
     }
 
@@ -50,19 +51,32 @@ namespace BeaverBuddies.Connect
             _configIOService = configIOService;
         }
 
-        public static void DoPostfix(VisualElement __result)
+        public static void DoPostfix(MainMenuPanel __instance, VisualElement __result)
         {
-            ButtonInserter.DuplicateOrGetButton(__result, "LoadGameButton", "JoinButton", button =>
+            ILoc _loc = __instance._loc;
+            Button button = ButtonInserter.DuplicateOrGetButton(__result, "LoadGameButton", "JoinButton", button =>
             {
-                button.text = "Join co-op game";
+                button.text = _loc.T("BeaverBuddies.Menu.JoinCoopGame");
                 button.clicked += OpenBox;
+                /*
+                // Extract Dictionary to Player.log
+                Dictionary<string, string> localization = ((Loc)_loc)._localization;
+                Plugin.Log("List of all key for Localization BEGIN");
+                foreach (var item in localization)
+                {
+                    var valueAsString = "{" + String.Join("},{", item.Value) + "}";
+                    Plugin.Log($"{item.Key}=[{valueAsString}]");
+                }
+                Plugin.Log("List of all key for Localization END");
+                */
             });
         }
 
         private void ShowBox()
         {
+            ILoc _loc = _inputBoxShower._loc;
             var builder = _inputBoxShower.Create()
-                .SetLocalizedMessage("Enter the global IP address of the Host:")
+                .SetLocalizedMessage(_loc.T("BeaverBuddies.JoinCoopGame.EnterIp"))
                 .SetConfirmButton(ip =>
                 {
                     EventIO.Config.ClientConnectionAddress = ip;

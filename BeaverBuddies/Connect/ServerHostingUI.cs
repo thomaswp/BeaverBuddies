@@ -10,6 +10,8 @@ using UnityEngine.UIElements;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices.ComTypes;
 using Newtonsoft.Json.Bson;
+using Timberborn.CoreUI;
+using Timberborn.Localization;
 
 namespace BeaverBuddies.Connect
 {
@@ -19,10 +21,11 @@ namespace BeaverBuddies.Connect
     {
         public static void Postfix(LoadGameBox __instance, ref VisualElement __result)
         {
+            ILoc _loc = __instance._loc;
             // TODO: This still happens multiple times.. need to fix
             ButtonInserter.DuplicateOrGetButton(__result, "LoadButton", "HostButton", (button) =>
             {
-                button.text = "Host co-op game";
+                button.text = _loc.T("BeaverBuddies.Saving.HostCoopGame");
                 button.clicked += () => ServerHostingUI.LoadAndHost(__instance);
             });
         }
