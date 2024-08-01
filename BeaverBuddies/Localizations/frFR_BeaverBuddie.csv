@@ -1,6 +1,6 @@
 ID,Text,Comment
 BeaverBuddies.Menu.JoinCoopGame,"Rejoindre partie co-op","Join co-op game"
-BeaverBuddies.JoinCoopGame.EnterIp,"Entrez l'adresse IP de l'hôte :","Enter the global IP address of the Host:"
+BeaverBuddies.JoinCoopGame.EnterIp,"Entrez l'adresse IP de l'Hôte :","Enter the global IP address of the Host:"
 BeaverBuddies.FirstTimer.Message,"Il semble que vous utilisiez BeaverBuddies pour la première fois. Nous vous recommandons de jeter un coup d'œil rapide à notre guide pour vous assurer que vous êtes prêt à jouer. Voulez-vous le faire maintenant ?","It looks like this is your first time using BeaverBuddies. We recommend taking a quick look through our guide to make sure you are set up to play. Would you like to do that now?"
 BeaverBuddies.FirstTimer.GuideURL,"https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running","https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running"
 BeaverBuddies.Saving.HostCoopGame,"Héberger partie co-op","Host co-op game"
