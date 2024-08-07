@@ -1,5 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- Import system-specific properties -->
+  <Import Project="env.props" Condition="Exists('env.props')" />
+  <!-- Or the default properties if they don't exist -->
+  <Import Project="env.props.template" Condition="!Exists('env.props')" />
+
+  <!-- Before building, create a copy if it doesn't exist -->
+  <Target Name="EnsureEnvProps" BeforeTargets="BeforeBuild">
+    <Message Importance="high" Text="Checking for env.props file..." />
+    <Exec Command="if not exist env.props copy env.props.template env.props" />
+  </Target>
+
 	<PropertyGroup>
 		<TargetFramework>netstandard2.1</TargetFramework>
 		<AssemblyName>BeaverBuddies</AssemblyName>
@@ -10,10 +21,6 @@
 		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
 		<NoWarn>$(NoWarn)</NoWarn>		
 		<!-- Path Config -->
-		<TimberbornPath>C:\Program Files (x86)\Steam\steamapps\common\Timberborn\</TimberbornPath>
-		<BepInExPath>C:\Dev\BepInEx_win_x64_5.4.23.2\</BepInExPath>
-		<!-- Use the registry because the doc folder can be modified outside $(USERPROFILE) like E:\DocLibrary -->
-		<DocumentsPath>$(registry:HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders@Personal)\</DocumentsPath>
 		<BeaverBuddiesModsPath>$(DocumentsPath)Timberborn\Mods\BeaverBuddies\</BeaverBuddiesModsPath>
 		<BeaverBuddiesManagedPath>$(TimberbornPath)Timberborn_Data\Managed\</BeaverBuddiesManagedPath>
 		<!-- Include HarmonyX file inside $(BeaverBuddiesModsPath) -->
@@ -34,9 +41,9 @@
 	<!-- Reference DLL -->
 	<ItemGroup>
 		<!-- BepInEx (Harmony, Mono.Cecil & MonoMod DLL) -->
-		<Reference Include="$(BepInExPath)BepInEx\core\0Harmony.dll" Private="$(includeHarmonyX)" />
-		<Reference Include="$(BepInExPath)BepInEx\core\Mono.Cecil.*.dll" Private="$(includeHarmonyX)" />
-		<Reference Include="$(BepInExPath)BepInEx\core\MonoMod.*.dll" Private="$(includeHarmonyX)" />
+		<Reference Include="$(BepInExPath)core\0Harmony.dll" Private="$(includeHarmonyX)" />
+		<Reference Include="$(BepInExPath)core\Mono.Cecil.*.dll" Private="$(includeHarmonyX)" />
+		<Reference Include="$(BepInExPath)core\MonoMod.*.dll" Private="$(includeHarmonyX)" />
 		
 		<!-- Timberborn DLL & Publicize (BepInEx.AssemblyPublicizer.MSBuild) -->
 		<Reference Include="$(BeaverBuddiesManagedPath)Bindito.Core.dll" Private="false" />
