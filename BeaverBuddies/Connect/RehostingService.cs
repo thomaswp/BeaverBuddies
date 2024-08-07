@@ -61,7 +61,7 @@ namespace BeaverBuddies.Connect
                     // i.e. after the callback has run.
                     _gameSaver.StartCoroutine(RunOnNextFrameCoroutine(() =>
                     {
-                        ServerHostingUI.LoadAndHost(_validatingGameLoader, saveReference);
+                        ServerHostingUtils.LoadIfSaveValidAndHost(_validatingGameLoader, saveReference);
                     }));
                 });
             }

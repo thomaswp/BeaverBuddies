@@ -17,18 +17,14 @@ BeaverBuddies is a mod to allow multiplayer co-op in Timberborn.
 # Default value: false
 Enabled = true # Change this to true
 ```
-3. Install TimberAPI, using the same version in [mod.json](BeaverBuddies/mod.json), by downloading the "modio" file, and putting its contents into your `Timberborn\BepInEx\plugins\` folder, such that it now contains a folder called `TimberAPI`.
-4. Install [Visual Studio 2022 community edition](https://visualstudio.microsoft.com/downloads/) and open this solution with it.
-5. Go to Tools->Options->Nuget Package Manager->Package Sources and click the green [+] button. Call it BepInEx and give it the URL `https://nuget.bepinex.dev/v3/index.json`.
-6. Create a folder in `Timberborn\BepInEx\plugins\` called `BeaverBuddies`. Make note of the location of this folder.
-7. Open the BeaverBuddies project (by double-clicking on it in Visual Studio). Find the Build->Events->Post build event option and make sure that the path it gives matches your path to Timberborn. By default it reads:
-```
-xcopy /y "$(ProjectDir)$(OutDir)*"  "C:\Program Files (x86)\Steam\steamapps\common\Timberborn\BepInEx\plugins\BeaverBuddies"
-```
-8. Build and run the project (Ctrl+shift+B). You should see some .dll files in the `BeaverBuddies` folder you created earlier.
+3. Install [Visual Studio 2022 community edition](https://visualstudio.microsoft.com/downloads/) and open this solution with it.
+4. Build and run the project (Ctrl+shift+B). You may get errors about missing dependencies. To fix them, open `BeaverBuddies/BeaverBuddies/env.props` and adjust the environmental variables as needed.
+   * `env.props` should have been created automatically, but if not you can copy `env.props.template` to `env.props`.
+   * 
 
 ## Running the Mod
 
 1. Make sure your project has been built with no errors. 
-2. Follow the instructions [on the Wiki](https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running#running-a-game).
+2. Confirm that the mod files were copied to your Timberborn mods folder (e.g. `Documets/Timberborn/Mods/BeaverBuddies`
+3. Launch Timberborn and select the BeaverBuddies mod on the mod selection screen.
 

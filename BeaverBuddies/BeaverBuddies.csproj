@@ -1,42 +1,93 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- Import system-specific properties -->
+  <Import Project="env.props" Condition="Exists('env.props')" />
+  <!-- Or the default properties if they don't exist -->
+  <Import Project="env.props.template" Condition="!Exists('env.props')" />
+
+  <!-- Before building, create a copy if it doesn't exist -->
+  <Target Name="EnsureEnvProps" BeforeTargets="BeforeBuild">
+    <Message Importance="high" Text="Checking for env.props file..." />
+    <Exec Command="if not exist env.props copy env.props.template env.props" />
+  </Target>
+
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>BeaverBuddies</AssemblyName>
     <Description>TimberModTest</Description>
-    <Version>1.1.8</Version>
+    <Version>1.2.1</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
-    <NoWarn>$(NoWarn);Harmony003</NoWarn>
+    <NoWarn>$(NoWarn)</NoWarn>		
+    <!-- Path Config -->
+    <BeaverBuddiesModsPath>$(DocumentsPath)Timberborn\Mods\BeaverBuddies\</BeaverBuddiesModsPath>
+    <BeaverBuddiesManagedPath>$(TimberbornPath)Timberborn_Data\Managed\</BeaverBuddiesManagedPath>
+    <TempDir>$(ProjectDir)temp/</TempDir>
+    <!-- Include HarmonyX file inside $(BeaverBuddiesModsPath) -->
+    <includeHarmonyX>true</includeHarmonyX>
   </PropertyGroup>
 
-
+  <!-- NuGet -->
   <ItemGroup>
-    <PackageReference Include="Lib.Harmony" Version="2.3.3" />
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2" PrivateAssets="all" /> 
     <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
-    <PackageReference Include="Timberborn.GameLibs" Version="0.6.0.4-r.0" />
-    <PackageReference Include="UnityEngine.Modules" Version="2022.2.17" IncludeAssets="compile" />
-  </ItemGroup>
-  
-  <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
-  </ItemGroup>
-  
+  </ItemGroup> 
+
+  <!-- OutSide Project -->
   <ItemGroup>
     <ProjectReference Include="..\TimberNet\TimberNet.csproj" />
   </ItemGroup>
-  
+
+  <!-- Reference DLL -->
   <ItemGroup>
-    <None Update="manifest.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="thumbnail.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <!-- BepInEx (Harmony, Mono.Cecil & MonoMod DLL) -->
+    <Reference Include="$(BepInExPath)core\0Harmony.dll" Private="$(includeHarmonyX)" />
+    <Reference Include="$(BepInExPath)core\Mono.Cecil.*.dll" Private="$(includeHarmonyX)" />
+    <Reference Include="$(BepInExPath)core\MonoMod.*.dll" Private="$(includeHarmonyX)" />
+    
+    <!-- Timberborn DLL & Publicize (BepInEx.AssemblyPublicizer.MSBuild) -->
+    <Reference Include="$(BeaverBuddiesManagedPath)Bindito.Core.dll" Private="false" />
+    <Reference Include="$(BeaverBuddiesManagedPath)Bindito.Unity.dll" Private="false" />
+    <Reference Include="$(BeaverBuddiesManagedPath)UnityEngine.*.dll" Publicize="true" Private="false" />
+    <Reference Include="$(BeaverBuddiesManagedPath)Timberborn.*.dll" Publicize="true" Private="false" />
   </ItemGroup>
-  
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /y &quot;$(ProjectDir)$(OutDir)*&quot;  &quot;$(USERPROFILE)\Documents\Timberborn\Mods\BeaverBuddies&quot;&#xD;&#xA;" />
+
+  <!-- Add files to Output folder -->
+  <ItemGroup>
+    <None Update="manifest.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="thumbnail.jpg" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="workshop_data.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Localizations\*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- PreBuild -->
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <!-- Empty -->
   </Target>
+
+  <!-- PostBuild -->
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Message Importance="High" Text="DestinationFolder -&gt; $(BeaverBuddiesModsPath)" />
+    <!-- Create Folder -->
+    <MakeDir Directories="$(BeaverBuddiesModsPath)" />
+    <ItemGroup>
+      <!-- For copy -->
+      <FilesToCopy Include="$(ProjectDir)$(OutDir)*" />
+      <LocalizationFileToCopy Include="$(ProjectDir)$(OutDir)Localizations\*" />
+    </ItemGroup>
+    <!-- Copy files we don't want to delete to a temp directory -->
+    <MakeDir Directories="$(TempDir)" />
+    <Copy SourceFiles="$(BeaverBuddiesModsPath)ReplayConfig.json" DestinationFolder="$(TempDir)" Condition="Exists('$(BeaverBuddiesModsPath)ReplayConfig.json')" />
+    <!-- Clear BeaverBuddiesModsPath Directory & Copy Output files inside -->
+    <RemoveDir Directories="$(BeaverBuddiesModsPath)" />
+    <MakeDir Directories="$(BeaverBuddiesModsPath)" />
+    <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(BeaverBuddiesModsPath)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(LocalizationFileToCopy)" DestinationFolder="$(BeaverBuddiesModsPath)\Localizations" SkipUnchangedFiles="true" />
+    <!-- Copy files stored in the temp folder back to the Mods directory -->
+    <Copy SourceFiles="$(TempDir)ReplayConfig.json" DestinationFolder="$(BeaverBuddiesModsPath)" Condition="Exists('$(TempDir)ReplayConfig.json')" />
+  </Target>
+
 </Project>
