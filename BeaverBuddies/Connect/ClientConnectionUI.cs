@@ -14,7 +14,7 @@ namespace BeaverBuddies.Connect
     [HarmonyPatch(typeof(MainMenuPanel), "GetPanel")]
     public class MainMenuGetPanelPatcher
     {
-        public static void Postfix(MainMenuPanel __instance, ref VisualElement __result)
+        public static void Postfix(IPanelController __instance, ref VisualElement __result)
         {
             ClientConnectionUI.DoPostfix(__instance, __result);
         }
@@ -23,7 +23,7 @@ namespace BeaverBuddies.Connect
     [HarmonyPatch(typeof(GameOptionsBox), "GetPanel")]
     public class GameOptionsBoxGetPanelPatcher
     {
-        public static void Postfix(MainMenuPanel __instance, ref VisualElement __result)
+        public static void Postfix(IPanelController __instance, ref VisualElement __result)
         {
             ClientConnectionUI.DoPostfix(__instance, __result);
         }
@@ -51,24 +51,33 @@ namespace BeaverBuddies.Connect
             _configIOService = configIOService;
         }
 
-        public static void DoPostfix(MainMenuPanel __instance, VisualElement __result)
+        public static void DoPostfix(IPanelController __instance, VisualElement __result)
         {
-            ILoc _loc = __instance._loc;
             Button button = ButtonInserter.DuplicateOrGetButton(__result, "LoadGameButton", "JoinButton", button =>
             {
-                button.text = _loc.T("BeaverBuddies.Menu.JoinCoopGame");
-                button.clicked += OpenBox;
-                /*
-                // Extract Dictionary to Player.log
-                Dictionary<string, string> localization = ((Loc)_loc)._localization;
-                Plugin.Log("List of all key for Localization BEGIN");
-                foreach (var item in localization)
+                if (__instance is MainMenuPanel)
                 {
-                    var valueAsString = "{" + String.Join("},{", item.Value) + "}";
-                    Plugin.Log($"{item.Key}=[{valueAsString}]");
+                    ILoc _loc = ((MainMenuPanel)__instance)._loc;
+                    button.text = _loc.T("BeaverBuddies.Menu.JoinCoopGame");
+                    /*
+                    // Extract Dictionary to Player.log
+                    Dictionary<string, string> localization = ((Loc)_loc)._localization;
+                    Plugin.Log("List of all key for Localization BEGIN");
+                    foreach (var item in localization)
+                    {
+                        var valueAsString = "{" + String.Join("},{", item.Value) + "}";
+                        Plugin.Log($"{item.Key}=[{valueAsString}]");
+                    }
+                    Plugin.Log("List of all key for Localization END");
+                    */
                 }
-                Plugin.Log("List of all key for Localization END");
-                */
+
+                if (__instance is GameOptionsBox)
+                {
+                    ILoc _loc = ((GameOptionsBox)__instance)._loadGameBox._loc;
+                    button.text = _loc.T("BeaverBuddies.Menu.JoinCoopGame");
+                }
+                button.clicked += OpenBox;
             });
         }
 
