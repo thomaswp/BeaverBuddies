@@ -13,6 +13,8 @@ assignees: ''
 * What happened: [Desync / Crash / Unexpected behavior]
 * What were your doing right before this happened?: [Were your doing anything you had not previously done (e.g. created a specific type of building, did something in the user interface?]
 
+**Save File**: On the Server, [find the save file](https://timberborn.fandom.com/wiki/Game_Save_File#Location) for the game the desynced or crashed, and upload it here (e.g., by drag-and-drop).
+
 **Logs**: On both the server and client computer, do the following steps:
 1. Go to the BepInEx folder (inside your Timberborn folder), e.g. `C:\Program Files (x86)\Steam\steamapps\common\Timberborn\BepInEx`
 2. Rename the LogOutput.txt file to server.txt (for server) and client.txt (for client).
