@@ -2,6 +2,8 @@ Beaver Buddies is a Timberborn mod that adds multiplayer co-op!
 
 [b]Note[/b]: This mod is still in beta, so it's quite playable, but you may encounter some issues. We appreciate your patience! For Update 6 especially, you may encounter a number of issues, but this allows testing with the new workshop installation!
 
+[b]Note[/b]: This mod [i]no longer[/i] requires BepInEx to run. It should work with or without it. Additionally, please do not use it [i]with[/i] the Harmony mod, as this mod provides its own version of Harmony.
+
 If you're already sold, dive right into our [url=https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running]installation and troubleshooting guide[/url].
 
 
