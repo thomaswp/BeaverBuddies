@@ -1,13 +1,13 @@
 ID,Text,Comment
-BeaverBuddies.Menu.JoinCoopGame,"Join co-op game","Join co-op game"
-BeaverBuddies.JoinCoopGame.EnterIp,"Enter the global IP address of the Host:","Enter the global IP address of the Host:"
-BeaverBuddies.FirstTimer.Message,"It looks like this is your first time using BeaverBuddies. We recommend taking a quick look through our guide to make sure you are set up to play. Would you like to do that now?","It looks like this is your first time using BeaverBuddies. We recommend taking a quick look through our guide to make sure you are set up to play. Would you like to do that now?"
+BeaverBuddies.Menu.JoinCoopGame,"加入合作游戏","Join co-op game"
+BeaverBuddies.JoinCoopGame.EnterIp,"输入主机的全局IP地址:","Enter the global IP address of the Host:"
+BeaverBuddies.FirstTimer.Message,"看起来这是您第一次使用BeaverBuddies。我们建议快速浏览一下我们的指南，以确保您已准备好进行游戏。您现在要这样做吗？","It looks like this is your first time using BeaverBuddies. We recommend taking a quick look through our guide to make sure you are set up to play. Would you like to do that now?"
 BeaverBuddies.FirstTimer.GuideURL,"https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running","https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running"
-BeaverBuddies.Saving.HostCoopGame,"Host co-op game","Host co-op game"
-BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError,"Joining failed with error:
+BeaverBuddies.Saving.HostCoopGame,"主持合作游戏","Host co-op game"
+BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError,"连接失败，错误：
 {0}
-Would you like to open the troubleshooting guide?","Joining failed with error:
+您要打开故障排除指南吗？","Joining failed with error:
 {0}
 Would you like to open the troubleshooting guide?"
-BeaverBuddies.JoinCoopGame.ConnectionFailedMessage,"Failed to connect to Host. Would you like to open the troubleshooting guide?","Failed to connect to Host. Would you like to open the troubleshooting guide?"
+BeaverBuddies.JoinCoopGame.ConnectionFailedMessage,"无法连接到主机。您要打开故障排除指南吗？","Failed to connect to Host. Would you like to open the troubleshooting guide?"
 BeaverBuddies.JoinCoopGame.TroubleshootingUrl,"https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running#troubleshooting","https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running#troubleshooting"

@@ -1,13 +1,13 @@
 ID,Text,Comment
-BeaverBuddies.Menu.JoinCoopGame,"Join co-op game","Join co-op game"
-BeaverBuddies.JoinCoopGame.EnterIp,"Enter the global IP address of the Host:","Enter the global IP address of the Host:"
-BeaverBuddies.FirstTimer.Message,"It looks like this is your first time using BeaverBuddies. We recommend taking a quick look through our guide to make sure you are set up to play. Would you like to do that now?","It looks like this is your first time using BeaverBuddies. We recommend taking a quick look through our guide to make sure you are set up to play. Would you like to do that now?"
+BeaverBuddies.Menu.JoinCoopGame,"Unirse al juego cooperativo","Join co-op game"
+BeaverBuddies.JoinCoopGame.EnterIp,"Ingrese la dirección IP global del anfitrión:","Enter the global IP address of the Host:"
+BeaverBuddies.FirstTimer.Message,"Parece que es la primera vez que usas BeaverBuddies. Recomendamos echar un vistazo rápido a nuestra guía para asegurarte de que estás listo para jugar. ¿Te gustaría hacerlo ahora?","It looks like this is your first time using BeaverBuddies. We recommend taking a quick look through our guide to make sure you are set up to play. Would you like to do that now?"
 BeaverBuddies.FirstTimer.GuideURL,"https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running","https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running"
-BeaverBuddies.Saving.HostCoopGame,"Host co-op game","Host co-op game"
-BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError,"Joining failed with error:
+BeaverBuddies.Saving.HostCoopGame,"Hostear juego cooperativo","Host co-op game"
+BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError,"Fallo al unirse con error:
 {0}
-Would you like to open the troubleshooting guide?","Joining failed with error:
+¿Te gustaría abrir la guía de solución de problemas?","Joining failed with error:
 {0}
 Would you like to open the troubleshooting guide?"
-BeaverBuddies.JoinCoopGame.ConnectionFailedMessage,"Failed to connect to Host. Would you like to open the troubleshooting guide?","Failed to connect to Host. Would you like to open the troubleshooting guide?"
+BeaverBuddies.JoinCoopGame.ConnectionFailedMessage,"No se pudo conectar al anfitrión. ¿Te gustaría abrir la guía de solución de problemas?","Failed to connect to Host. Would you like to open the troubleshooting guide?"
 BeaverBuddies.JoinCoopGame.TroubleshootingUrl,"https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running#troubleshooting","https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running#troubleshooting"
