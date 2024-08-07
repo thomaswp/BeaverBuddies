@@ -85,7 +85,7 @@ namespace BeaverBuddies
     {
 
         // TODO: Need to manually keep this updated now
-        public const string Version = "1.2.0.0";
+        public const string Version = "1.2.1";
         public const string Name = "BeaverBuddies";
         public const string ID = "beaverbuddies";
 
