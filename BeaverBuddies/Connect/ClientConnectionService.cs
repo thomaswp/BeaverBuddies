@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BeaverBuddies.Util;
+using System;
 using System.IO;
 using Timberborn.CoreUI;
 using Timberborn.GameSaveRepositorySystem;
@@ -81,13 +82,9 @@ namespace BeaverBuddies.Connect
 
             var action = () =>
             {
-                _urlOpener.OpenUrl("BeaverBuddies.JoinCoopGame.TroubleshootingUrl");
+                _urlOpener.OpenUrl(LinkHelper.TroubleshootingUrl);
             };
 
-            //if (error != null)
-            //{
-            //    error = _loc.T(error);
-            //}
             message = _loc.T(message, error);
             _dialogBoxShower.Create()
                 .SetMessage(message)

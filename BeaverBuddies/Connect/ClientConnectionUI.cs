@@ -16,7 +16,7 @@ namespace BeaverBuddies.Connect
     {
         public static void Postfix(IPanelController __instance, ref VisualElement __result)
         {
-            ClientConnectionUI.DoPostfix(__instance, __result);
+            SingletonManager.GetSingleton<ClientConnectionUI>().AddJoinButton(__result);
         }
     }
 
@@ -25,59 +25,39 @@ namespace BeaverBuddies.Connect
     {
         public static void Postfix(IPanelController __instance, ref VisualElement __result)
         {
-            ClientConnectionUI.DoPostfix(__instance, __result);
+            SingletonManager.GetSingleton<ClientConnectionUI>().AddJoinButton(__result);
         }
     }
 
-    public class ClientConnectionUI
+    public class ClientConnectionUI : RegisteredSingleton
     {
-        private static ClientConnectionUI instance;
         private DialogBoxShower _dialogBoxShower;
         private InputBoxShower _inputBoxShower;
         private ClientConnectionService _clientConnectionService;
         private ConfigIOService _configIOService;
+        private ILoc _loc;
 
         ClientConnectionUI(
             DialogBoxShower dialogBoxShower, 
             InputBoxShower inputBoxShower, 
             ClientConnectionService clientConnectionService,
-            ConfigIOService configIOService
+            ConfigIOService configIOService,
+            ILoc loc
         ) 
         {
-            instance = this;
             _dialogBoxShower = dialogBoxShower;
             _inputBoxShower = inputBoxShower;
             _clientConnectionService = clientConnectionService;
             _configIOService = configIOService;
+            _loc = loc;
         }
 
-        public static void DoPostfix(IPanelController __instance, VisualElement __result)
+        public void AddJoinButton(VisualElement __result)
         {
             Button button = ButtonInserter.DuplicateOrGetButton(__result, "LoadGameButton", "JoinButton", button =>
             {
-                if (__instance is MainMenuPanel)
-                {
-                    ILoc _loc = ((MainMenuPanel)__instance)._loc;
-                    button.text = _loc.T("BeaverBuddies.Menu.JoinCoopGame");
-                    /*
-                    // Extract Dictionary to Player.log
-                    Dictionary<string, string> localization = ((Loc)_loc)._localization;
-                    Plugin.Log("List of all key for Localization BEGIN");
-                    foreach (var item in localization)
-                    {
-                        var valueAsString = "{" + String.Join("},{", item.Value) + "}";
-                        Plugin.Log($"{item.Key}=[{valueAsString}]");
-                    }
-                    Plugin.Log("List of all key for Localization END");
-                    */
-                }
-
-                if (__instance is GameOptionsBox)
-                {
-                    ILoc _loc = ((GameOptionsBox)__instance)._loadGameBox._loc;
-                    button.text = _loc.T("BeaverBuddies.Menu.JoinCoopGame");
-                }
-                button.clicked += OpenBox;
+                button.text = _loc.T("BeaverBuddies.Menu.JoinCoopGame");
+                button.clicked += () => ShowBox();
             });
         }
 
@@ -94,11 +74,6 @@ namespace BeaverBuddies.Connect
                 });
             builder._input.value = EventIO.Config.ClientConnectionAddress;
             builder.Show();
-        }
-
-        public static void OpenBox()
-        {
-            instance?.ShowBox();
         }
     }
 }

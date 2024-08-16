@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BeaverBuddies.Util;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Timberborn.CoreUI;
@@ -46,7 +47,7 @@ namespace BeaverBuddies.Connect
             var action = () =>
             {
                 unsetFirstTimer();
-                _urlOpener.OpenUrl(_loc.T("BeaverBuddies.FirstTimer.GuideURL"));
+                _urlOpener.OpenUrl(LinkHelper.GuideURL);
             };
 
             _dialogBoxShower.Create()
