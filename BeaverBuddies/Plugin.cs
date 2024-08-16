@@ -95,8 +95,9 @@ namespace BeaverBuddies
         {
             logger = new UnityLogger();
 
-            // TODO: Recreate config system!
-            ReplayConfig config = new ReplayConfig(); // mod.Configs.Get<ReplayConfig>();
+            // Create a default config temporarily
+            // Will be loaded later by ConfigIOService
+            ReplayConfig config = new ReplayConfig();
 
             EventIO.Config = config;
 
