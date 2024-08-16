@@ -1,0 +1,13 @@
+ID,Text,Comment
+BeaverBuddies.Menu.JoinCoopGame,"Koop-Spiel beitreten","Join co-op game"
+BeaverBuddies.JoinCoopGame.EnterIp,"Geben Sie die globale IP-Adresse des Hosts ein:","Enter the global IP address of the Host:"
+BeaverBuddies.FirstTimer.Message,"Es sieht so aus, als wäre dies das erste Mal, dass Sie BeaverBuddies verwenden. Wir empfehlen, einen kurzen Blick in unseren Leitfaden zu werfen, um sicherzustellen, dass Sie zum Spielen bereit sind. Möchten Sie das jetzt tun?","It looks like this is your first time using BeaverBuddies. We recommend taking a quick look through our guide to make sure you are set up to play. Would you like to do that now?"
+BeaverBuddies.FirstTimer.GuideURL,"https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running","https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running"
+BeaverBuddies.Saving.HostCoopGame,"Koop-Spiel hosten","Host co-op game"
+BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError,"Verbindung fehlgeschlagen mit Fehler:
+{0}
+Möchten Sie die Fehlerbehebung öffnen?","Joining failed with error:
+{0}
+Would you like to open the troubleshooting guide?"
+BeaverBuddies.JoinCoopGame.ConnectionFailedMessage,"Verbindung zum Host fehlgeschlagen. Möchten Sie die Fehlerbehebung öffnen?","Failed to connect to Host. Would you like to open the troubleshooting guide?"
+BeaverBuddies.JoinCoopGame.TroubleshootingUrl,"https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running#troubleshooting","https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running#troubleshooting"

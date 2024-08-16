@@ -1,4 +1,5 @@
 ﻿using BeaverBuddies.Connect;
+using BeaverBuddies.Util;
 using System;
 using Timberborn.CoreUI;
 using Timberborn.Versioning;
@@ -51,15 +52,6 @@ namespace BeaverBuddies.Events
     [Serializable]
     public class ClientDesyncedEvent : ReplayEvent
     {
-        const string MESSAGE = 
-            "A connected player desynced and cannot continue playing - sorry about that!\n" +
-            "The Host should hit Rehost and, AFTER that, the Client should Reconnect.\n" +
-            "You may need to restart the game if problems persist.\n" +
-            "Before reloading, would you like to file a bug report to " +
-            "help us fix this issue?";
-
-        const string BUG_REPORT_URL = "https://github.com/thomaswp/TimberReplay/issues";
-
         public override void Replay(IReplayContext context)
         {
             context.GetSingleton<ReplayService>().SetTargetSpeed(0);
@@ -67,7 +59,7 @@ namespace BeaverBuddies.Events
             var urlOpener = context.GetSingleton<UrlOpener>();
             Action bugReportAction = () =>
             {
-                urlOpener.OpenUrl(BUG_REPORT_URL);
+                urlOpener.OpenUrl(LinkHelper.BugReportURL);
             };
             bool isHost = EventIO.Get() is ServerEventIO;
             RehostingService rehostingService = context.GetSingleton<RehostingService>();
@@ -89,7 +81,7 @@ namespace BeaverBuddies.Events
                 }
             };
             string reconnectText = isHost ? "Save and Rehost" : "Reconnect (wait for Rehost)";
-            shower.Create().SetMessage(MESSAGE)
+            shower.Create().SetLocalizedMessage("BeaverBuddies.ClientDesynced.Message")
                 .SetInfoButton(bugReportAction, "Post Bug Report")
                 .SetConfirmButton(reconnectAction, reconnectText)
                 .SetDefaultCancelButton()

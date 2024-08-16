@@ -1,7 +1,9 @@
-﻿using System;
+﻿using BeaverBuddies.Util;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Timberborn.CoreUI;
+using Timberborn.Localization;
 using Timberborn.SingletonSystem;
 using Timberborn.WebNavigation;
 
@@ -12,12 +14,6 @@ namespace BeaverBuddies.Connect
         private DialogBoxShower _dialogBoxShower;
         private UrlOpener _urlOpener;
         private ConfigIOService _configIOService;
-
-        private const string Message = 
-            "It looks like this is your first time using BeaverBuddies. " +
-            "We recommend taking a quick look through our guide to make sure " +
-            "you are set up to play. Would you like to do that now?";
-        private const string GuideURL = "https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running";
 
         internal FirstTimerService(
             DialogBoxShower dialogBoxShower,
@@ -40,6 +36,8 @@ namespace BeaverBuddies.Connect
                 return;
             }
 
+            ILoc _loc = _dialogBoxShower._loc;
+
             var unsetFirstTimer = new Action(() =>
             {
                 config.FirstTimer = false;
@@ -49,11 +47,11 @@ namespace BeaverBuddies.Connect
             var action = () =>
             {
                 unsetFirstTimer();
-                _urlOpener.OpenUrl(GuideURL);
+                _urlOpener.OpenUrl(LinkHelper.GuideURL);
             };
 
             _dialogBoxShower.Create()
-                .SetMessage(Message)
+                .SetMessage(_loc.T("BeaverBuddies.FirstTimer.Message"))
                 .SetConfirmButton(action)
                 .SetCancelButton(unsetFirstTimer)
                 .Show();
