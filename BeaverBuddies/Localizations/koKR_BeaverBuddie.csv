@@ -2,7 +2,6 @@ ID,Text,Comment
 BeaverBuddies.Menu.JoinCoopGame,"협동 게임 참여","Join co-op game"
 BeaverBuddies.JoinCoopGame.EnterIp,"호스트의 글로벌 IP 주소를 입력하십시오:","Enter the global IP address of the Host:"
 BeaverBuddies.FirstTimer.Message,"BeaverBuddies를 처음 사용하는 것 같습니다. 게임을 시작하기 위해 가이드를 간단히 살펴보는 것을 권장합니다. 지금 확인하시겠습니까?","It looks like this is your first time using BeaverBuddies. We recommend taking a quick look through our guide to make sure you are set up to play. Would you like to do that now?"
-BeaverBuddies.FirstTimer.GuideURL,"https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running","https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running"
 BeaverBuddies.Saving.HostCoopGame,"협동 게임 호스트","Host co-op game"
 BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError,"오류로 연결 실패:
 {0}
@@ -10,4 +9,4 @@ BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError,"오류로 연결 �
 {0}
 Would you like to open the troubleshooting guide?"
 BeaverBuddies.JoinCoopGame.ConnectionFailedMessage,"호스트에 연결하지 못했습니다. 문제 해결 가이드를 여시겠습니까?","Failed to connect to Host. Would you like to open the troubleshooting guide?"
-BeaverBuddies.JoinCoopGame.TroubleshootingUrl,"https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running#troubleshooting","https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running#troubleshooting"
+BeaverBuddies.ClientDesynced.Message,"연결된 플레이어가 비동기화되어 게임을 계속할 수 없습니다. 죄송합니다! 호스트가 다시 게임을 열어야 하고, 그 후 클라이언트가 재접속해야 합니다. 문제가 지속되면 게임을 재시작해야 할 수 있습니다. 다시 로드하기 전에 이 문제를 해결할 수 있도록 버그 보고서를 제출하시겠습니까?","A connected player desynced and cannot continue playing - sorry about that! The Host should hit Rehost and, AFTER that, the Client should Reconnect. You may need to restart the game if problems persist. Before reloading, would you like to file a bug report to help us fix this issue?"
