@@ -71,7 +71,7 @@ namespace BeaverBuddies.Events
                 {
                     if (!rehostingService.RehostGame())
                     {
-                        shower.Create()                        
+                        shower.Create()
                             .SetLocalizedMessage("BeaverBuddies.ClientDesynced.FailedToRehostMessage")
                             .Show();
                     }
