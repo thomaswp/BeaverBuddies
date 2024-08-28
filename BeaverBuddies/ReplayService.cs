@@ -281,7 +281,8 @@ namespace BeaverBuddies
                     int s0 = UnityEngine.Random.state.s0;
                     if (s0 != replayEvent.randomS0Before)
                     {
-                        Plugin.LogWarning($"Random state mismatch: {s0} != {replayEvent.randomS0Before}");
+                        int randomS0Before = (int)replayEvent.randomS0Before;
+                        Plugin.LogWarning($"Random state mismatch: {s0.ToString("X8")} != {randomS0Before.ToString("X8")}");
                         HandleDesync();
                         break;
                     }
