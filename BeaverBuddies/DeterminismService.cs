@@ -841,7 +841,6 @@ namespace BeaverBuddies
             for (int i = 0; i < 100; i++)
             {
                 var existingEntity = __instance._entityRegistry.GetEntity(id);
-                //Plugin.Log($"GUID {id} - test");
                 if (existingEntity == null) break;
                 string logMessage = $"Duplicate GUID {id} detected, generating new GUID. Attempt #{i}.";
                 if (replayService != null && replayService.TicksSinceLoad > 0)

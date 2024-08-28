@@ -1,7 +1,6 @@
 ﻿using BeaverBuddies.Connect;
 using BeaverBuddies.Util;
 using System;
-using System.Net.Sockets;
 using Timberborn.CoreUI;
 using Timberborn.Localization;
 using Timberborn.Versioning;
