@@ -36,6 +36,7 @@ using Timberborn.WaterBuildings;
 using Timberborn.WorkshopsEffects;
 using TimberNet;
 using UnityEngine;
+using Unity.Services.Analytics;
 using static Timberborn.GameSaveRuntimeSystem.GameSaver;
 using static BeaverBuddies.SingletonManager;
 using System.Collections.Immutable;
@@ -703,6 +704,20 @@ namespace BeaverBuddies
         static void Postfix()
         {
             DeterminismService.SetNonGamePatcherActive(typeof(DescriptionPanelSetDescriptionPatcher), false);
+        }
+    }
+
+    [HarmonyPatch(typeof(AnalyticsContainer), nameof(AnalyticsContainer.Update))]
+    public class AnalyticsContainerUpdatePatcher
+    {
+        static void Prefix()
+        {
+            DeterminismService.SetNonGamePatcherActive(typeof(AnalyticsContainerUpdatePatcher), true);
+        }
+
+        static void Postfix()
+        {
+            DeterminismService.SetNonGamePatcherActive(typeof(AnalyticsContainerUpdatePatcher), false);
         }
     }
 
