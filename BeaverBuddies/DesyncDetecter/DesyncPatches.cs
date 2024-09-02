@@ -182,7 +182,7 @@ namespace BeaverBuddies.DesyncDetecter
             int hash = 13;
             foreach (var level in levels)
             {
-                hash = (hash * 7) + level.GetHashCode();
+                hash = (hash * 7) + BitConverter.SingleToInt32Bits(level);
             }
             DesyncDetecterService.Trace($"Updating moisture levels with hash {hash:X8}");
         }
