@@ -57,6 +57,7 @@ using Timberborn.WaterObjects;
 using Timberborn.TerrainSystemRendering;
 using Timberborn.CommandLine;
 using Timberborn.ToolSystem;
+using Timberborn.Analytics;
 
 namespace BeaverBuddies
 {
@@ -709,17 +710,24 @@ namespace BeaverBuddies
         }
     }
 
+    // Disable analytics while this mod is enabled, since Unity's Analytics
+    // package seems to cause a bunch of desyncs, and I'm not confident
+    // my patches have fixed them.
+    [HarmonyPatch(typeof(AnalyticsManager), nameof(AnalyticsManager.CanBeEnabled))]
+    public class AnalyticsManagerCanBeEnabledPatcher
+    {
+        static void Prefix(ref bool __result)
+        {
+            __result = false;
+        }
+    }
+
     [HarmonyPatch(typeof(AnalyticsContainer), nameof(AnalyticsContainer.Update))]
     public class AnalyticsContainerUpdatePatcher
     {
         static void Prefix()
         {
-            DeterminismService.SetNonGamePatcherActive(typeof(AnalyticsContainerUpdatePatcher), true);
-        }
-
-        static void Postfix()
-        {
-            DeterminismService.SetNonGamePatcherActive(typeof(AnalyticsContainerUpdatePatcher), false);
+            Plugin.LogWarning("AnalyticsContainer.Update is being called; analytics should be disabled!");
         }
     }
 
