@@ -714,7 +714,7 @@ namespace BeaverBuddies
     // package seems to cause a bunch of desyncs, and I'm not confident
     // my patches have fixed them.
     [HarmonyPatch(typeof(AnalyticsManager), nameof(AnalyticsManager.Enable))]
-    public class AnalyticsManagerCanBeEnabledPatcher
+    public class AnalyticsManagerEnablePatcher
     {
         static bool Prefix()
         {
