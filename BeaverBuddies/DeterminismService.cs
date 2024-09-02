@@ -1,5 +1,5 @@
 ﻿// If defined, parallel actions occur on the main thread
-//#define NO_PARALLEL
+#define NO_PARALLEL
 // If defined, the game will use constant values instead of random
 // numbers, making it as deterministic as possible w.r.t random
 //#define NO_RANDOM
@@ -1032,8 +1032,21 @@ public TimeOfDay FluidTimeOfDay => CalculateTimeOfDay(FluidSecondsPassedToday);
     }
 
 #if NO_PARALLEL
-    [HarmonyPatch(typeof(TickableSingletonService), nameof(TickableSingletonService.StartParallelTick))]
     [ManualMethodOverwrite]
+    /*
+9/2/202024
+_parallelTickStartTimestamp = Stopwatch.GetTimestamp();
+ImmutableArray<IParallelTickableSingleton>.Enumerator enumerator = _parallelTickableSingletons.GetEnumerator();
+while (enumerator.MoveNext())
+{
+	IParallelTickableSingleton parallelTickable = enumerator.Current;
+	_parallelizerContext.Run(delegate
+	{
+		parallelTickable.ParallelTick();
+	});
+}
+     */
+    [HarmonyPatch(typeof(TickableSingletonService), nameof(TickableSingletonService.StartParallelTick))]
     class TickableSingletonServiceStartParallelTickPatcher
     {
         static bool Prefix(TickableSingletonService __instance)
