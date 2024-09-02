@@ -117,7 +117,7 @@ namespace BeaverBuddies
             {
                 // The client shouldn't tick until the server has sent a heartbeat
                 // Check the *next* tick, since current tick has already happened
-                return io is ClientEventIO && !io.HasEventsForTick(TicksSinceLoad + 1);
+                return !(io is ClientEventIO && !io.HasEventsForTick(TicksSinceLoad + 1));
             }
         }
 
