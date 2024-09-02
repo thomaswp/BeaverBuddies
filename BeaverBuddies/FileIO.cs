@@ -168,6 +168,11 @@ namespace BeaverBuddies
                 locker.ReleaseWriterLock();
             }
         }
+
+        public bool HasEventsForTick(int tick)
+        {
+            return false;
+        }
     }
 
     public class FileReadIO : EventIO
@@ -224,6 +229,10 @@ namespace BeaverBuddies
         public void Close()
         {
 
+        }
+        public bool HasEventsForTick(int tick)
+        {
+            return events.Any(e => e.ticksSinceLoad == tick);
         }
     }
 

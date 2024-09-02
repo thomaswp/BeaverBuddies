@@ -62,5 +62,11 @@ namespace BeaverBuddies
                 netBase.DoUserInitiatedEvent(JObject.Parse(JsonSettings.Serialize(e)));
             }
         }
+
+        public bool HasEventsForTick(int tick)
+        {
+            if (netBase == null) return false;
+            return netBase.HasEventsForTick(tick);
+        }
     }
 }

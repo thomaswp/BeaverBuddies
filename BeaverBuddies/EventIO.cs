@@ -42,6 +42,8 @@ namespace BeaverBuddies
          */
         bool ShouldSendHeartbeat {  get; }
 
+        bool HasEventsForTick(int tick);
+
         private static EventIO instance;
 
         public static bool IsNull => instance == null;
