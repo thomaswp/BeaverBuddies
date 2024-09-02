@@ -279,10 +279,10 @@ namespace BeaverBuddies
                 if (replayEvent.randomS0Before != null)
                 {
                     int s0 = UnityEngine.Random.state.s0;
-                    if (s0 != replayEvent.randomS0Before)
+                    int randomS0Before = (int)replayEvent.randomS0Before;
+                    if (s0 != randomS0Before)
                     {
-                        int randomS0Before = (int)replayEvent.randomS0Before;
-                        Plugin.LogWarning($"Random state mismatch: {s0.ToString("X8")} != {randomS0Before.ToString("X8")}");
+                        Plugin.LogWarning($"Random state mismatch: {s0:X8} != {randomS0Before:X8}");
                         HandleDesync();
                         break;
                     }
@@ -489,9 +489,9 @@ namespace BeaverBuddies
 
             // IO Complete for Tick
             Plugin.Log($"Tick {ticksSinceLoad:D5} IO done; " +
-                $"Order hash: {TEBPatcher.EntityUpdateHash.ToString("X8")}; " +
-                $"Move hash: {TEBPatcher.PositionHash.ToString("X8")}; " +
-                $"Random s0: {UnityEngine.Random.state.s0.ToString("X8")}");
+                $"Order hash: {TEBPatcher.EntityUpdateHash:X8}; " +
+                $"Move hash: {TEBPatcher.PositionHash:X8}; " +
+                $"Random s0: {UnityEngine.Random.state.s0:X8}");
 
             if (ticksSinceLoad % 20 == 0)
             {
