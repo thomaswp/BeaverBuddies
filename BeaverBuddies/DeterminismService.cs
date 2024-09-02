@@ -811,7 +811,9 @@ namespace BeaverBuddies
 #endif
             if (ReplayService.IsLoaded)
             {
-                if (EventIO.Config.Debug)
+                // Only trace this Guid if it would use Unity random, and that would
+                // use the Game RNG.
+                if (EventIO.Config.Debug && !DeterminismService.ShouldUseNonGameRNG())
                 {
                     DesyncDetecterService.Trace($"Generating new GUID: {__result}");
                 }
