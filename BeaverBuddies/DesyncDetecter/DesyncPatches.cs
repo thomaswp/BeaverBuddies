@@ -170,4 +170,21 @@ namespace BeaverBuddies.DesyncDetecter
     //        DesyncDetecterService.Trace($"Setting moisture level for {coordinates} to {newLevel}");
     //    }
     //}
+
+    [HarmonyPatch(typeof(SoilMoistureMap), nameof(SoilMoistureMap.UpdateMoistureLevels))]
+    public class SoilMoistureMapSetMoistureLevelPatcher
+    {
+        public static void Postfix(SoilMoistureMap __instance)
+        {
+            if (!EventIO.Config.Debug) return;
+
+            var levels = __instance._soilMoistureSimulator.MoistureLevels;
+            int hash = 13;
+            foreach (var level in levels)
+            {
+                hash = (hash * 7) + level.GetHashCode();
+            }
+            DesyncDetecterService.Trace($"Updating moisture levels with hash {hash:X8}");
+        }
+    }
 }
