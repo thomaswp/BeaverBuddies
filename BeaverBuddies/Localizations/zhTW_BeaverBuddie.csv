@@ -10,3 +10,7 @@ BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError,"連接失敗，錯�
 Would you like to open the troubleshooting guide?"
 BeaverBuddies.JoinCoopGame.ConnectionFailedMessage,"無法連接到主機。您要打開故障排除指南嗎？","Failed to connect to Host. Would you like to open the troubleshooting guide?"
 BeaverBuddies.ClientDesynced.Message,"連接的玩家失去同步，無法繼續遊戲 - 抱歉！主機應重新托管遊戲，之後客戶端應重新連接。如果問題持續存在，可能需要重新啟動遊戲。在重新加載之前，您是否希望提交錯誤報告來幫助我們修復此問題？","A connected player desynced and cannot continue playing - sorry about that! The Host should hit Rehost and, AFTER that, the Client should Reconnect. You may need to restart the game if problems persist. Before reloading, would you like to file a bug report to help us fix this issue?"
+BeaverBuddies.ClientDesynced.FailedToRehostMessage,"重新託管失敗。請手動保存並再次託管。","Failed to Rehost. Manually save and Host again."
+BeaverBuddies.ClientDesynced.SaveAndRehostButton,"保存並重新託管","Save and Rehost"
+BeaverBuddies.ClientDesynced.WaitForRehostButton,"重新連接（等待重新託管）","Reconnect (wait for Rehost)"
+BeaverBuddies.ClientDesynced.PostBugReportButton,"提交錯誤報告","Post Bug Report"

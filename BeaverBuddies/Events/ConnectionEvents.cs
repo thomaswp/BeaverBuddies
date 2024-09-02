@@ -2,6 +2,7 @@
 using BeaverBuddies.Util;
 using System;
 using Timberborn.CoreUI;
+using Timberborn.Localization;
 using Timberborn.Versioning;
 using Timberborn.WebNavigation;
 
@@ -56,6 +57,7 @@ namespace BeaverBuddies.Events
         {
             context.GetSingleton<ReplayService>().SetTargetSpeed(0);
             var shower = context.GetSingleton<DialogBoxShower>();
+            ILoc _loc = shower._loc;
             var urlOpener = context.GetSingleton<UrlOpener>();
             Action bugReportAction = () =>
             {
@@ -70,7 +72,7 @@ namespace BeaverBuddies.Events
                     if (!rehostingService.RehostGame())
                     {
                         shower.Create()
-                            .SetMessage("Failed to rehost. Manually save and host again.")
+                            .SetLocalizedMessage("BeaverBuddies.ClientDesynced.FailedToRehostMessage")
                             .Show();
                     }
                 }
@@ -80,9 +82,9 @@ namespace BeaverBuddies.Events
                     ?.ConnectOrShowFailureMessage();
                 }
             };
-            string reconnectText = isHost ? "Save and Rehost" : "Reconnect (wait for Rehost)";
+            string reconnectText = isHost ? _loc.T("BeaverBuddies.ClientDesynced.SaveAndRehostButton") : _loc.T("BeaverBuddies.ClientDesynced.WaitForRehostButton");
             shower.Create().SetLocalizedMessage("BeaverBuddies.ClientDesynced.Message")
-                .SetInfoButton(bugReportAction, "Post Bug Report")
+                .SetInfoButton(bugReportAction, _loc.T("BeaverBuddies.ClientDesynced.PostBugReportButton"))
                 .SetConfirmButton(reconnectAction, reconnectText)
                 .SetDefaultCancelButton()
                 .Show();

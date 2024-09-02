@@ -10,3 +10,7 @@ BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError,"Ошибка под
 Would you like to open the troubleshooting guide?"
 BeaverBuddies.JoinCoopGame.ConnectionFailedMessage,"Не удалось подключиться к хосту. Хотите открыть руководство по устранению неполадок?","Failed to connect to Host. Would you like to open the troubleshooting guide?"
 BeaverBuddies.ClientDesynced.Message,"Подключённый игрок потерял синхронизацию и не может продолжать игру - извините за это! Хост должен перезапустить игру, и ПОСЛЕ этого клиент должен переподключиться. Если проблема сохранится, возможно, потребуется перезапустить игру. Перед перезагрузкой хотите отправить отчёт об ошибке, чтобы помочь нам исправить эту проблему?","A connected player desynced and cannot continue playing - sorry about that! The Host should hit Rehost and, AFTER that, the Client should Reconnect. You may need to restart the game if problems persist. Before reloading, would you like to file a bug report to help us fix this issue?"
+BeaverBuddies.ClientDesynced.FailedToRehostMessage,"Не удалось перезапустить хостинг. Сохраните вручную и запустите хост снова.","Failed to Rehost. Manually save and Host again."
+BeaverBuddies.ClientDesynced.SaveAndRehostButton,"Сохранить и перезапустить хост","Save and Rehost"
+BeaverBuddies.ClientDesynced.WaitForRehostButton,"Переподключиться (ожидание перезапуска хоста)","Reconnect (wait for Rehost)"
+BeaverBuddies.ClientDesynced.PostBugReportButton,"Отправить отчет об ошибке","Post Bug Report"
