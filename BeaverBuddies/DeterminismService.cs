@@ -713,12 +713,13 @@ namespace BeaverBuddies
     // Disable analytics while this mod is enabled, since Unity's Analytics
     // package seems to cause a bunch of desyncs, and I'm not confident
     // my patches have fixed them.
-    [HarmonyPatch(typeof(AnalyticsManager), nameof(AnalyticsManager.CanBeEnabled))]
+    [HarmonyPatch(typeof(AnalyticsManager), nameof(AnalyticsManager.Enable))]
     public class AnalyticsManagerCanBeEnabledPatcher
     {
-        static void Prefix(ref bool __result)
+        static bool Prefix()
         {
-            __result = false;
+            Plugin.Log("Skipping AnalyticsManager.Enable");
+            return false;
         }
     }
 
