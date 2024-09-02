@@ -238,6 +238,8 @@ namespace BeaverBuddies
 
                 // If we are replaying/playing events recorded from this
                 // user or other clients, we should always use the game's random.
+                // These mostly happen during ticks, but can also happen
+                // when the game is paused.
                 if (ReplayService.IsReplayingEvents) return false;
 
                 // If we're not ticking/replaying, and random is happening from an

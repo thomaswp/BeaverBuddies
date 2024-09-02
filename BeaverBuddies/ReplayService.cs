@@ -630,8 +630,11 @@ namespace BeaverBuddies
                     // In theory the game should be paused to prevent this, but some logs
                     // suggest the client can get ahead of the server, which would
                     // trigger this warning (and now prevent the client's tick)
-                    Plugin.LogWarning($"Client trying to tick before receiving " +
-                        $"Heartbeat at tick: {replayService.TicksSinceLoad}");
+                    if (replayService.TicksSinceLoad > 0)
+                    {
+                        Plugin.LogWarning($"Client trying to tick before receiving " +
+                            $"Heartbeat at tick: {replayService.TicksSinceLoad}");
+                    }
                     return false;
                 }
             }
