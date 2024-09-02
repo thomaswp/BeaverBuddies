@@ -298,7 +298,9 @@ namespace BeaverBuddies
                 
                 // If this event was played (e.g. on the server) and recorded a 
                 // random state, make sure we're in the same state.
-                if (replayEvent.randomS0Before != null)
+                // Skip if we're in Debug mode, since we'll get more details
+                // if we look at the full trace.
+                if (!EventIO.Config.Debug && replayEvent.randomS0Before != null)
                 {
                     int s0 = UnityEngine.Random.state.s0;
                     int randomS0Before = (int)replayEvent.randomS0Before;
