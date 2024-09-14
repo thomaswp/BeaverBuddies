@@ -26,14 +26,14 @@
     <TempDir>$(ProjectDir)temp/</TempDir>
     <!-- Include HarmonyX file inside $(BeaverBuddiesModsPath) -->
     <includeHarmonyX>true</includeHarmonyX>
+    <NuGetPackagesDir>$(UserProfile)\.nuget\packages\</NuGetPackagesDir>
   </PropertyGroup>
 
   <!-- NuGet -->
   <ItemGroup>
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2" PrivateAssets="all" />
-    <PackageReference Include="Steamworks.NET" Version="2024.8.0" /> 
     <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
-  </ItemGroup> 
+  </ItemGroup>
 
   <!-- OutSide Project -->
   <ItemGroup>
@@ -48,6 +48,7 @@
     <Reference Include="$(BepInExPath)core\MonoMod.*.dll" Private="$(includeHarmonyX)" />
     
     <!-- Timberborn DLL & Publicize (BepInEx.AssemblyPublicizer.MSBuild) -->
+    <Reference Include="$(BeaverBuddiesManagedPath)com.rlabrecque.steamworks.net.dll" Private="false" />
     <Reference Include="$(BeaverBuddiesManagedPath)Bindito.Core.dll" Private="false" />
     <Reference Include="$(BeaverBuddiesManagedPath)Bindito.Unity.dll" Private="false" />
     <Reference Include="$(BeaverBuddiesManagedPath)UnityEngine.*.dll" Publicize="true" Private="false" />
@@ -90,6 +91,8 @@
     <Copy SourceFiles="@(LocalizationFileToCopy)" DestinationFolder="$(BeaverBuddiesModsPath)\Localizations" SkipUnchangedFiles="true" />
     <!-- Copy files stored in the temp folder back to the Mods directory -->
     <Copy SourceFiles="$(TempDir)ReplayConfig.json" DestinationFolder="$(BeaverBuddiesModsPath)" Condition="Exists('$(TempDir)ReplayConfig.json')" />
+
+    <!-- <Copy SourceFiles="$(NuGetPackagesDir)steamworks.net\2024.8.0\lib\netstandard2.1\Steamworks.NET.dll" DestinationFolder="$(BeaverBuddiesModsPath)" /> -->
   </Target>
 
 </Project>
