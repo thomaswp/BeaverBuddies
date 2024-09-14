@@ -6,6 +6,7 @@ using Timberborn.SingletonSystem;
 using Timberborn.SteamStoreSystem;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 
 namespace BeaverBuddies.Steam
 {
@@ -23,6 +24,7 @@ namespace BeaverBuddies.Steam
         bool done = false;
         public void UpdateSingleton()
         {
+            Read();
             if (!done)
             {
                 if (_steamManager.Initialized)
@@ -31,13 +33,58 @@ namespace BeaverBuddies.Steam
                     Plugin.Log(name);
                     done = true;
 
-                    var lobby = SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 4);
+                    SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 4);
                     Callback<LobbyCreated_t>.Create(OnLobbyCreated);
+                    Callback<LobbyEnter_t>.Create(OnLobbyEntered);
+
+                    Callback<P2PSessionRequest_t>.Create(OnP2PSessionRequest);
                 }
                 else
                 {
                     Plugin.Log("Waiting on Steamworks to initialize...");
                 }
+            }
+        }
+
+        void Read()
+        {
+            uint size;
+
+            // repeat while there's a P2P message available
+            // will write its size to size variable
+            while (SteamNetworking.IsP2PPacketAvailable(out size))
+            {
+                // allocate buffer and needed variables
+                var buffer = new byte[size];
+                uint bytesRead;
+                CSteamID remoteId;
+
+                // read the message into the buffer
+                if (SteamNetworking.ReadP2PPacket(buffer, size, out bytesRead, out remoteId))
+                {
+                    // convert to string
+                    char[] chars = new char[bytesRead / sizeof(char)];
+                    Buffer.BlockCopy(buffer, 0, chars, 0, chars.Length);
+
+                    string message = new string(chars, 0, chars.Length);
+                    Debug.Log($"Received a message: {message} from {remoteId}");
+                }
+            }
+        }
+
+        private void OnP2PSessionRequest(P2PSessionRequest_t callback)
+        {
+            CSteamID clientId = callback.m_steamIDRemote;
+            SteamNetworking.AcceptP2PSessionWithUser(clientId);
+        }
+
+        private void OnLobbyEntered(LobbyEnter_t callback)
+        {
+            int memberCount = SteamMatchmaking.GetNumLobbyMembers(new CSteamID(callback.m_ulSteamIDLobby));
+            for (int i = 0; i < memberCount; i++)
+            {
+                CSteamID memberId = SteamMatchmaking.GetLobbyMemberByIndex(new CSteamID(callback.m_ulSteamIDLobby), i);
+                UnityEngine.Debug.Log("Lobby member: " + memberId);
             }
         }
 
