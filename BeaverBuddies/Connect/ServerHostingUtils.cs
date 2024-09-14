@@ -11,6 +11,7 @@ using UnityEngine.UIElements;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices.ComTypes;
 using Newtonsoft.Json.Bson;
+using Timberborn.GameSceneLoading;
 
 namespace BeaverBuddies.Connect
 {
@@ -60,50 +61,60 @@ namespace BeaverBuddies.Connect
 
     internal class ServerHostingUtils
     {
-        private static HostingSaveReference ToHostingSaveReference(SaveReference saveReference)
-        {
-            return new HostingSaveReference(saveReference.SettlementName, saveReference.SaveName);
-        }
         public static void LoadIfSaveValidAndHost(ValidatingGameLoader loader, SaveReference saveReferece)
         {
-            loader.LoadGameIfSaveValid(ToHostingSaveReference(saveReferece));
+            CheckNextValidator(loader, saveReferece, 0);
         }
 
-        public static void LoadAndHost(ValidatingGameLoader loader, SaveReference saveReferece)
+        [ManualMethodOverwrite]
+        /*
+9/14/2024
+if (index >= _gameLoadValidators.Length)
+{
+	_gameSceneLoader.StartSaveGame(saveReference);
+	return;
+}
+_gameLoadValidators[index].ValidateSave(saveReference, delegate
+{
+	CheckNextValidator(saveReference, index + 1);
+});
+         */
+        private static void CheckNextValidator(ValidatingGameLoader loader, SaveReference saveReference, int index)
         {
-            loader._modCompatibleGameLoader.LoadGame(ToHostingSaveReference(saveReferece));
-        }
-    }
-
-
-    [HarmonyPatch(typeof(ModCompatibleGameLoader), nameof(ModCompatibleGameLoader.LoadGame))]
-    public class ModCompatibleGameLoaderLoadGamePatcher
-    {
-        public static void Prefix(ModCompatibleGameLoader __instance, SaveReference saveReference)
-        {
-            if (saveReference is HostingSaveReference)
+            if (index >= loader._gameLoadValidators.Length)
             {
-                var repository = __instance._gameSceneLoader._gameSaveRepository;
-                var inputStream = repository.OpenSaveWithoutLogging(saveReference);
-                byte[] data;
-                using (var memoryStream = new MemoryStream())
-                {
-                    inputStream.CopyTo(memoryStream);
-                    data = memoryStream.ToArray();
-                }
-                inputStream.Close();
-                Plugin.Log($"Reading map with length {data.Length}");
-
-                ServerEventIO io = new ServerEventIO();
-                EventIO.Set(io);
-                io.Start(data);
-
-                // Make sure to set the RNG seed before loading the map
-                // The client will do the same
-                DeterminismService.InitGameStartState(data);
+                LoadAndHost(loader, saveReference);
+                return;
             }
+            loader._gameLoadValidators[index].ValidateSave(saveReference, delegate
+            {
+                CheckNextValidator(loader, saveReference, index + 1);
+            });
+        }
+
+        public static void LoadAndHost(ValidatingGameLoader loader, SaveReference saveReference)
+        {
+            var sceneLoader = loader._gameSceneLoader;
+            var repository = sceneLoader._gameSaveRepository;
+            var inputStream = repository.OpenSaveWithoutLogging(saveReference);
+            byte[] data;
+            using (var memoryStream = new MemoryStream())
+            {
+                inputStream.CopyTo(memoryStream);
+                data = memoryStream.ToArray();
+            }
+            inputStream.Close();
+            Plugin.Log($"Reading map with length {data.Length}");
+
+            ServerEventIO io = new ServerEventIO();
+            EventIO.Set(io);
+            io.Start(data);
+
+            // Make sure to set the RNG seed before loading the map
+            // The client will do the same
+            DeterminismService.InitGameStartState(data);
+
+            sceneLoader.StartSaveGame(saveReference);
         }
     }
-
-
 }
