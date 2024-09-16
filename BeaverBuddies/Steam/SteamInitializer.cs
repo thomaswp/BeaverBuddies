@@ -84,7 +84,8 @@ namespace BeaverBuddies.Steam
             for (int i = 0; i < memberCount; i++)
             {
                 CSteamID memberId = SteamMatchmaking.GetLobbyMemberByIndex(new CSteamID(callback.m_ulSteamIDLobby), i);
-                UnityEngine.Debug.Log("Lobby member: " + memberId);
+                string name = SteamFriends.GetFriendPersonaName(memberId);
+                UnityEngine.Debug.Log("Lobby member: " + name);
             }
         }
 
@@ -97,7 +98,7 @@ namespace BeaverBuddies.Steam
                 CSteamID lobbyId = new CSteamID(callback.m_ulSteamIDLobby);
                 UnityEngine.Debug.Log("Lobby created with ID: " + lobbyId);
 
-                SteamFriends.ActivateGameOverlayInviteDialog(lobbyId);
+                //SteamFriends.ActivateGameOverlayInviteDialog(lobbyId);
             }
             else
             {
