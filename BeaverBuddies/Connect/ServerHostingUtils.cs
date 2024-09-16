@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices.ComTypes;
 using Newtonsoft.Json.Bson;
 using Timberborn.GameSceneLoading;
+using BeaverBuddies.IO;
 
 namespace BeaverBuddies.Connect
 {

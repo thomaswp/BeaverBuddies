@@ -5,7 +5,7 @@ using System.Linq;
 using BeaverBuddies.Events;
 using TimberNet;
 
-namespace BeaverBuddies
+namespace BeaverBuddies.IO
 {
     public abstract class NetIOBase<T> : EventIO where T : TimberNetBase
     {

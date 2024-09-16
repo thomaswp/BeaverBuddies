@@ -2,7 +2,7 @@
 using TimberNet;
 using static TimberNet.TimberNetBase;
 
-namespace BeaverBuddies
+namespace BeaverBuddies.IO
 {
     public class ClientEventIO : NetIOBase<TimberClient>
     {
@@ -40,7 +40,8 @@ namespace BeaverBuddies
             try
             {
                 netBase.Start();
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Plugin.LogError(ex.ToString());
                 CleanUp();
@@ -56,7 +57,7 @@ namespace BeaverBuddies
             netBase = null;
         }
 
-        public static ClientEventIO Create(string address, int port, MapReceived mapReceivedCallback, Action<String> onError)
+        public static ClientEventIO Create(string address, int port, MapReceived mapReceivedCallback, Action<string> onError)
         {
             ClientEventIO eventIO = new ClientEventIO(address, port, mapReceivedCallback, onError);
             if (eventIO.FailedToConnect) return null;

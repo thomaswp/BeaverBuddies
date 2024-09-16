@@ -1,5 +1,6 @@
 ﻿using BeaverBuddies.Connect;
 using BeaverBuddies.DesyncDetecter;
+using BeaverBuddies.IO;
 using BeaverBuddies.Util.Logging;
 using Bindito.Core;
 using HarmonyLib;

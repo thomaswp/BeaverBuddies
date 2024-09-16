@@ -1,5 +1,6 @@
 ﻿//# define NO_SMOOTH_ANIMATION
 
+using BeaverBuddies.IO;
 using HarmonyLib;
 using Timberborn.CharacterMovementSystem;
 using Timberborn.EntitySystem;

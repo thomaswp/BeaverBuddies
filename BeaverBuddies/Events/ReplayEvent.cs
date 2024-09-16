@@ -8,6 +8,7 @@ using Timberborn.BaseComponentSystem;
 using static BeaverBuddies.SingletonManager;
 using Timberborn.OptionsGame;
 using Timberborn.Options;
+using BeaverBuddies.IO;
 
 namespace BeaverBuddies.Events
 {

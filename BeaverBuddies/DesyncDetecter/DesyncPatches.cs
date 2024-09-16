@@ -12,6 +12,7 @@ using UnityEngine;
 using Timberborn.WalkingSystem;
 using Timberborn.NaturalResourcesMoisture;
 using Timberborn.SoilMoistureSystem;
+using BeaverBuddies.IO;
 
 namespace BeaverBuddies.DesyncDetecter
 {
