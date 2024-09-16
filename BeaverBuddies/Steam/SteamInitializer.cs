@@ -1,11 +1,13 @@
 ﻿using Steamworks;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using Timberborn.SingletonSystem;
 using Timberborn.SteamStoreSystem;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using UnityEngine.UIElements;
 
 namespace BeaverBuddies.Steam
@@ -44,6 +46,27 @@ namespace BeaverBuddies.Steam
                     Plugin.Log("Waiting on Steamworks to initialize...");
                 }
             }
+            ReceiveMessages();
+        }
+
+        public void ReceiveMessages()
+        {
+            uint messageSize;
+            // Check if there are packets available
+            while (SteamNetworking.IsP2PPacketAvailable(out messageSize))
+            {
+                byte[] buffer = new byte[messageSize];
+                uint bytesRead;
+                CSteamID remoteSteamID;
+
+                // Read the incoming packet
+                if (SteamNetworking.ReadP2PPacket(buffer, messageSize, out bytesRead, out remoteSteamID))
+                {
+                    // Process the received data
+                    UnityEngine.Debug.Log("Received message from: " + remoteSteamID);
+                    UnityEngine.Debug.Log("Data: " + System.Text.Encoding.UTF8.GetString(buffer));
+                }
+            }
         }
 
         void Read()
@@ -62,12 +85,29 @@ namespace BeaverBuddies.Steam
                 // read the message into the buffer
                 if (SteamNetworking.ReadP2PPacket(buffer, size, out bytesRead, out remoteId))
                 {
-                    // convert to string
-                    char[] chars = new char[bytesRead / sizeof(char)];
-                    Buffer.BlockCopy(buffer, 0, chars, 0, chars.Length);
+                    string name = SteamFriends.GetFriendPersonaName(remoteId);
+                    int avatarHandle = SteamFriends.GetSmallFriendAvatar(remoteId);
+                    SteamUtils.GetImageSize(avatarHandle, out uint width, out uint height);
+                    byte[] avatarBuffer = new byte[width * height * 4];
+                    SteamUtils.GetImageRGBA(avatarHandle, avatarBuffer, avatarBuffer.Length);
 
-                    string message = new string(chars, 0, chars.Length);
-                    Debug.Log($"Received a message: {message} from {remoteId}");
+                    GameObject obj = new GameObject();
+                    RawImage img = obj.AddComponent<RawImage>();
+
+                    Texture2D texture = new Texture2D((int)width, (int)height, TextureFormat.RGBA32, false);
+                    texture.LoadRawTextureData(avatarBuffer);
+                    texture.Apply();
+
+                    img.texture = texture;
+
+                    obj.AddComponent<Canvas>().sortingOrder = 999;
+
+
+                    string imageBase64 = Convert.ToBase64String(texture.EncodeToPNG());
+                    Debug.Log(imageBase64);
+
+                    string message = Encoding.UTF8.GetString(buffer, 0, (int)bytesRead);
+                    Debug.Log($"Received a message: {message} from {name}");
                 }
             }
         }
@@ -86,6 +126,11 @@ namespace BeaverBuddies.Steam
                 CSteamID memberId = SteamMatchmaking.GetLobbyMemberByIndex(new CSteamID(callback.m_ulSteamIDLobby), i);
                 string name = SteamFriends.GetFriendPersonaName(memberId);
                 UnityEngine.Debug.Log("Lobby member: " + name);
+
+                //SteamNetworking.CreateP2PConnectionSocket(memberId, 0, )
+                string message = "Hello, beaver buddy!";
+                byte[] data = Encoding.UTF8.GetBytes(message);
+                SteamNetworking.SendP2PPacket(memberId, data, (uint)data.Length, EP2PSend.k_EP2PSendReliable);
             }
         }
 
