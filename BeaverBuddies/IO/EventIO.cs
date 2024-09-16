@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using BeaverBuddies.Events;
 
-namespace BeaverBuddies
+namespace BeaverBuddies.IO
 {
     public enum UserEventBehavior
     {
@@ -40,7 +40,7 @@ namespace BeaverBuddies
         /**
          * Should return true if this IO should send hearbeats on tick
          */
-        bool ShouldSendHeartbeat {  get; }
+        bool ShouldSendHeartbeat { get; }
 
         bool HasEventsForTick(int tick);
 
@@ -49,14 +49,14 @@ namespace BeaverBuddies
         public static bool IsNull => instance == null;
 
         public static EventIO Get() { return instance; }
-        public static void Set(EventIO io) 
+        public static void Set(EventIO io)
         {
             if (io != instance)
             {
                 // Clean up the old IO (if it exists)
                 Reset();
             }
-            instance = io; 
+            instance = io;
         }
 
         public static void Reset()

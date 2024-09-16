@@ -12,7 +12,7 @@ using BeaverBuddies.Events;
 using TimberNet;
 using UnityEngine;
 
-namespace BeaverBuddies
+namespace BeaverBuddies.IO
 {
     class Vector3IntConverter : JsonConverter
     {
@@ -112,7 +112,7 @@ namespace BeaverBuddies
 
         }
     }
-    
+
     public class FileWriteIO : EventIO
     {
         public bool RecordReplayedEvents => true;
@@ -131,7 +131,7 @@ namespace BeaverBuddies
             WriteToFile("[");
         }
 
-        
+
         public List<ReplayEvent> ReadEvents(int ticksSinceLoad)
         {
             return new List<ReplayEvent>();
@@ -153,7 +153,7 @@ namespace BeaverBuddies
         {
             WriteToFile("]");
         }
-       
+
         private static ReaderWriterLock locker = new ReaderWriterLock();
 
         public void WriteToFile(string text)
@@ -161,7 +161,7 @@ namespace BeaverBuddies
             try
             {
                 locker.AcquireWriterLock(1000);
-                File.AppendAllText(filePath, text );
+                File.AppendAllText(filePath, text);
             }
             finally
             {
