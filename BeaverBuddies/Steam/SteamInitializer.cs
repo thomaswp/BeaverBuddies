@@ -58,6 +58,12 @@ namespace BeaverBuddies.Steam
                 CSteamID userJoined = new CSteamID(callback.m_ulSteamIDUserChanged);
                 string name = SteamFriends.GetFriendPersonaName(userJoined);
                 Debug.Log("User " + name + " has joined the lobby.");
+
+
+                //SteamNetworking.CreateP2PConnectionSocket(memberId, 0, )
+                string message = "Hello, beaver buddy!";
+                byte[] data = Encoding.UTF8.GetBytes(message);
+                SteamNetworking.SendP2PPacket(userJoined, data, (uint)data.Length, EP2PSend.k_EP2PSendReliable);
             }
         }
 
@@ -144,11 +150,6 @@ namespace BeaverBuddies.Steam
                 CSteamID memberId = SteamMatchmaking.GetLobbyMemberByIndex(new CSteamID(callback.m_ulSteamIDLobby), i);
                 string name = SteamFriends.GetFriendPersonaName(memberId);
                 UnityEngine.Debug.Log("Lobby member: " + name);
-
-                //SteamNetworking.CreateP2PConnectionSocket(memberId, 0, )
-                string message = "Hello, beaver buddy!";
-                byte[] data = Encoding.UTF8.GetBytes(message);
-                SteamNetworking.SendP2PPacket(memberId, data, (uint)data.Length, EP2PSend.k_EP2PSendReliable);
             }
         }
 
