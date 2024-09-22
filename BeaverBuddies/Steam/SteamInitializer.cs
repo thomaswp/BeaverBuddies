@@ -38,6 +38,8 @@ namespace BeaverBuddies.Steam
                     SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 4);
                     Callback<LobbyCreated_t>.Create(OnLobbyCreated);
                     Callback<LobbyEnter_t>.Create(OnLobbyEntered);
+                    Callback<LobbyInvite_t>.Create(OnLobbyInvite);
+                    Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
 
                     Callback<P2PSessionRequest_t>.Create(OnP2PSessionRequest);
                 }
@@ -47,6 +49,22 @@ namespace BeaverBuddies.Steam
                 }
             }
             ReceiveMessages();
+        }
+
+        private void OnLobbyChatUpdate(LobbyChatUpdate_t callback)
+        {
+            if ((callback.m_rgfChatMemberStateChange & (uint)EChatMemberStateChange.k_EChatMemberStateChangeEntered) != 0)
+            {
+                CSteamID userJoined = new CSteamID(callback.m_ulSteamIDUserChanged);
+                string name = SteamFriends.GetFriendPersonaName(userJoined);
+                Debug.Log("User " + name + " has joined the lobby.");
+            }
+        }
+
+        private void OnLobbyInvite(LobbyInvite_t param)
+        {
+            string invitingUser = SteamFriends.GetFriendPersonaName(new CSteamID(param.m_ulSteamIDUser));
+            Plugin.Log($"Invited to lobby {param.m_ulSteamIDLobby} by {invitingUser}");
         }
 
         public void ReceiveMessages()
