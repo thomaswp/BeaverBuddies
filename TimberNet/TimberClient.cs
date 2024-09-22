@@ -16,18 +16,13 @@ namespace TimberNet
     public class TimberClient : TimberNetBase
     {
 
-        private readonly TcpClient client;
-
-        public readonly string address;
-        public readonly int port;
+        private readonly ISocketStream client;
 
         public override bool ShouldTick => base.ShouldTick && receivedEvents.Count > 0;
 
-        public TimberClient(string address, int port) : base()
+        public TimberClient(ISocketStream client) : base()
         {
-            client = new TcpClient();
-            this.address = address;
-            this.port = port;
+            this.client = client;
         }
 
         public override void DoUserInitiatedEvent(JObject message)
@@ -48,7 +43,7 @@ namespace TimberNet
             base.Start();
             // TODO: Handle async properly and cleanup
             // TODO: Make wait configurable?
-            if (!client.ConnectAsync(address, port).Wait(3000))
+            if (!client.ConnectAsync().Wait(3000))
             {
                 throw new ConnectionFailureException();
             }
@@ -60,11 +55,7 @@ namespace TimberNet
         public override void Close()
         {
             base.Close();
-            try
-            {
-                client.GetStream().Close();
-                client.Close();
-            } catch { }
+            client.Close();
         }
     }
 }

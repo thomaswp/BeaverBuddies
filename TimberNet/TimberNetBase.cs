@@ -162,7 +162,7 @@ namespace TimberNet
             Log($"Event: {GetType(message)}");
         }
 
-        protected void SendLength(NetworkStream stream, int length)
+        protected void SendLength(ISocketStream stream, int length)
         {
             byte[] buffer = BitConverter.GetBytes(length);
             if (BitConverter.IsLittleEndian)
@@ -170,7 +170,7 @@ namespace TimberNet
             stream.Write(buffer, 0, buffer.Length);
         }
 
-        protected void SendEvent(TcpClient client, JObject message)
+        protected void SendEvent(ISocketStream client, JObject message)
         {
             Log($"Sending: {GetType(message)} for tick {GetTick(message)}");
             string json = message.ToString(Newtonsoft.Json.Formatting.None);
@@ -178,16 +178,15 @@ namespace TimberNet
 
             try
             {
-                var stream = client.GetStream();
-                SendLength(stream, buffer.Length);
-                stream.Write(buffer, 0, buffer.Length);
+                SendLength(client, buffer.Length);
+                client.Write(buffer, 0, buffer.Length);
             } catch (Exception e)
             {
                 Log($"Error sending event: {e.Message}");
             }
         }
 
-        protected bool TryReadLength(NetworkStream stream, out int length)
+        protected bool TryReadLength(ISocketStream stream, out int length)
         {
             byte[] headerBuffer = new byte[HEADER_SIZE];
             try
@@ -206,25 +205,24 @@ namespace TimberNet
             return true;
         }
 
-        protected void StartListening(TcpClient client, bool isClient)
+        protected void StartListening(ISocketStream client, bool isClient)
         {
             //Log("Client connected");
-            var stream = client.GetStream();
             int messageCount = 0;
             while (client.Connected && !IsStopped)
             {
-                if (!TryReadLength(stream, out int messageLength)) break;
+                if (!TryReadLength(client, out int messageLength)) break;
 
                 // First message is always the file
                 if (messageCount == 0 && isClient)
                 {
                     if (messageLength == 0)
                     {
-                        ReadErrorMessage(stream);
+                        ReadErrorMessage(client);
                         return;
                     }
 
-                    ReceiveFile(stream, messageLength);
+                    ReceiveFile(client, messageLength);
                     messageCount++;
                     continue;
                 }
@@ -240,7 +238,7 @@ namespace TimberNet
                 int read = 0;
                 while (read < messageLength)
                 {
-                    read += stream.Read(buffer, read, messageLength - read);
+                    read += client.Read(buffer, read, messageLength - read);
                 }
 
                 string message = Encoding.UTF8.GetString(buffer);
@@ -249,7 +247,7 @@ namespace TimberNet
             }
         }
 
-        private void ReadErrorMessage(NetworkStream stream)
+        private void ReadErrorMessage(ISocketStream stream)
         {
             if (TryReadLength(stream, out int length))
             {
@@ -293,7 +291,7 @@ namespace TimberNet
             AddToHash(bytes);
         }
 
-        private void ReceiveFile(NetworkStream stream, int messageLength)
+        private void ReceiveFile(ISocketStream stream, int messageLength)
         {
             // TODO: How should this fail?
             int totalBytesRead = 0;

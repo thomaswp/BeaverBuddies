@@ -36,7 +36,7 @@ namespace BeaverBuddies.IO
             try
             {
                 netBase = new TimberServer(
-                    EventIO.Config.Port,
+                    new TCPListenerWrapper(EventIO.Config.Port),
                     () =>
                     {
                         // TODO: Probably don't need to hold it in memory after the first tick...

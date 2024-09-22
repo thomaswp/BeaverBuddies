@@ -27,7 +27,7 @@ namespace BeaverBuddies.IO
         {
             this.mapReceivedCallback = mapReceivedCallback;
 
-            netBase = new TimberClient(address, port);
+            netBase = new TimberClient(new TCPClientWrapper(address, port));
             netBase.OnMapReceived += mapReceivedCallback;
             netBase.OnLog += Plugin.Log;
             netBase.OnError += (error) =>
