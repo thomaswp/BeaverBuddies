@@ -35,13 +35,16 @@ namespace BeaverBuddies.Steam
                     Plugin.Log(name);
                     done = true;
 
-                    SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 4);
                     Callback<LobbyCreated_t>.Create(OnLobbyCreated);
                     Callback<LobbyEnter_t>.Create(OnLobbyEntered);
                     Callback<LobbyInvite_t>.Create(OnLobbyInvite);
                     Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
+                    Callback<GameLobbyJoinRequested_t>.Create(OnLobbyJoinRequested);
 
                     Callback<P2PSessionRequest_t>.Create(OnP2PSessionRequest);
+
+                    SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 4);
+
                 }
                 else
                 {
@@ -51,8 +54,16 @@ namespace BeaverBuddies.Steam
             ReceiveMessages();
         }
 
+        private void OnLobbyJoinRequested(GameLobbyJoinRequested_t callback)
+        {
+            string name = SteamFriends.GetFriendPersonaName(callback.m_steamIDFriend);
+            Debug.Log("User " + name + " has requested to join the lobby.");
+            SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
+        }
+
         private void OnLobbyChatUpdate(LobbyChatUpdate_t callback)
         {
+            Debug.Log("Lobby chat update: " + callback.m_ulSteamIDLobby);
             if ((callback.m_rgfChatMemberStateChange & (uint)EChatMemberStateChange.k_EChatMemberStateChangeEntered) != 0)
             {
                 CSteamID userJoined = new CSteamID(callback.m_ulSteamIDUserChanged);
@@ -160,7 +171,8 @@ namespace BeaverBuddies.Steam
             {
                 // Lobby created successfully
                 CSteamID lobbyId = new CSteamID(callback.m_ulSteamIDLobby);
-                UnityEngine.Debug.Log("Lobby created with ID: " + lobbyId);
+                bool joinable = SteamMatchmaking.SetLobbyJoinable(lobbyId, true);
+                Debug.Log($"Lobby created with ID: {lobbyId} is joinable={joinable}");
 
                 //SteamFriends.ActivateGameOverlayInviteDialog(lobbyId);
             }
