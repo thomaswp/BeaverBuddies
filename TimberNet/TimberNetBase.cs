@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace TimberNet
@@ -188,10 +189,10 @@ namespace TimberNet
 
         protected bool TryReadLength(ISocketStream stream, out int length)
         {
-            byte[] headerBuffer = new byte[HEADER_SIZE];
+            byte[] headerBuffer;
             try
             {
-                stream.Read(headerBuffer, 0, headerBuffer.Length);
+                headerBuffer = stream.ReadUntilComplete(HEADER_SIZE);
             }
             catch
             {
@@ -234,12 +235,7 @@ namespace TimberNet
                 }
 
                 // TODO: How should this fail and not hang if map stops sending?
-                byte[] buffer = new byte[messageLength];
-                int read = 0;
-                while (read < messageLength)
-                {
-                    read += client.Read(buffer, read, messageLength - read);
-                }
+                byte[] buffer = client.ReadUntilComplete(messageLength);
 
                 string message = Encoding.UTF8.GetString(buffer);
                 receivedEventQueue.Enqueue(message);
@@ -251,8 +247,7 @@ namespace TimberNet
         {
             if (TryReadLength(stream, out int length))
             {
-                byte[] bytes = new byte[length];
-                stream.Read(bytes, 0, length);
+                byte[] bytes = stream.ReadUntilComplete(length);
                 string message = Encoding.UTF8.GetString(bytes);
                 if (OnError != null)
                 {
@@ -294,18 +289,18 @@ namespace TimberNet
         private void ReceiveFile(ISocketStream stream, int messageLength)
         {
             // TODO: How should this fail?
-            int totalBytesRead = 0;
-            MemoryStream ms = new MemoryStream();
-            while (totalBytesRead < messageLength)
-            {
-                int bytesToRead = Math.Min(messageLength - totalBytesRead, MAX_BUFFER_SIZE);
-                byte[] buffer = new byte[bytesToRead];
-                //Log($"{buffer.Length}, {GetHashCode(buffer).ToString("X8")}");
-                int bytesRead = stream.Read(buffer, 0, bytesToRead);
-                totalBytesRead += bytesRead;
-                ms.Write(buffer, 0, bytesRead);
-            }
-            byte[] mapBytes = ms.ToArray();
+            //int totalBytesRead = 0;
+            //MemoryStream ms = new MemoryStream();
+            //while (totalBytesRead < messageLength)
+            //{
+            //    int bytesToRead = Math.Min(messageLength - totalBytesRead, MAX_BUFFER_SIZE);
+            //    byte[] buffer = new byte[bytesToRead];
+            //    //Log($"{buffer.Length}, {GetHashCode(buffer).ToString("X8")}");
+            //    int bytesRead = stream.Read(buffer, 0, bytesToRead);
+            //    totalBytesRead += bytesRead;
+            //    ms.Write(buffer, 0, bytesRead);
+            //}
+            byte[] mapBytes = stream.ReadUntilComplete(messageLength);
             AddFileToHash(mapBytes);
             Log($"Received map with length {mapBytes.Length} and Hash: {GetHashCode(mapBytes).ToString("X8")}");
             this.mapBytes = mapBytes;
