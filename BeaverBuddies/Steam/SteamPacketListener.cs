@@ -35,7 +35,7 @@ namespace BeaverBuddies.Steam
                 if (SteamNetworking.ReadP2PPacket(buffer, messageSize, out bytesRead, out remoteSteamID))
                 {
                     // Process the received data
-                    Plugin.Log("Received message from: " + remoteSteamID);
+                    Plugin.Log($"Received {messageSize} bytes from: {remoteSteamID}");
                     if (buffer.Length < 1000)
                     {
                         Plugin.Log("Data: " + Encoding.UTF8.GetString(buffer));

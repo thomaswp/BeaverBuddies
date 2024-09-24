@@ -6,6 +6,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Timberborn.BuildingsUI;
 using Timberborn.Workshops;
 using TimberNet;
 using UnityEngine.PlayerLoop;
@@ -43,6 +44,7 @@ namespace BeaverBuddies.Steam
         {
             // TODO: Check if we're already successfully connected
             Connected = true;
+            Plugin.Log("SteamSocket requested to connect!");
             return Task.CompletedTask;
         }
 
@@ -66,6 +68,7 @@ namespace BeaverBuddies.Steam
             {
                 readOffset = bytesToCopy;
             }
+            Plugin.Log($"SteamSocket receiving {bytesToCopy} bytes");
 
             return bytesToCopy;
         }
@@ -78,6 +81,8 @@ namespace BeaverBuddies.Steam
                 Array.Copy(buffer, offset, newBuffer, 0, count);
                 buffer = newBuffer;
             }
+            // TODO: Remove for privacy!
+            Plugin.Log($"SteamSocket sending {buffer.Length} bytes to {SteamFriends.GetFriendPersonaName(friendID)}");
             SteamNetworking.SendP2PPacket(friendID, buffer, (uint)count, EP2PSend.k_EP2PSendReliable);
         }
 
