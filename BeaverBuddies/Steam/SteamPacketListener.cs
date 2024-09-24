@@ -22,7 +22,6 @@ namespace BeaverBuddies.Steam
 
         public void Update()
         {
-            Plugin.LogWarning("SPL Update");
             uint messageSize;
             while (SteamNetworking.IsP2PPacketAvailable(out messageSize))
             {
