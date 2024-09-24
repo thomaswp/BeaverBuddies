@@ -47,10 +47,9 @@ namespace BeaverBuddies.Steam
                     Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
                     Callback<GameLobbyJoinRequested_t>.Create(OnLobbyJoinRequested);
                     Callback<LobbyEnter_t>.Create(OnLobbyEntered);
+                    Callback<P2PSessionRequest_t>.Create(OnP2PSessionRequest);
 
-                    //Callback<P2PSessionRequest_t>.Create(OnP2PSessionRequest);
-
-                    //SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 4);
+                    SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 4);
 
                 }
                 else
