@@ -78,6 +78,7 @@ namespace BeaverBuddies.IO
             if (!(receiver is ISteamPacketReceiver)) return;
             if (steamPacketListener == null)
             {
+                Plugin.Log("Creating SteamPacketListener");
                 steamPacketListener = new SteamPacketListener();
             }
             ((ISteamPacketReceiver)receiver).RegisterSteamPacketListener(steamPacketListener);

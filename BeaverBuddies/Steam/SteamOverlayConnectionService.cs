@@ -91,7 +91,7 @@ namespace BeaverBuddies.Steam
             Plugin.Log($"Invited to lobby {param.m_ulSteamIDLobby} by {invitingUser}");
         }
 
-        public void ReceiveMessages()
+        private void ReceiveMessages()
         {
             uint messageSize;
             // Check if there are packets available

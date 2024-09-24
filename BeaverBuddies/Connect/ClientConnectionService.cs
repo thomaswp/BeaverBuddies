@@ -125,6 +125,7 @@ namespace BeaverBuddies.Connect
 
         public void UpdateSingleton()
         {
+            EventIO.Get()?.Update(); // TODO: Remove!!
             if (client == null) return;
             //Plugin.Log("Updating client!");
             client.Update();

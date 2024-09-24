@@ -29,9 +29,10 @@ namespace BeaverBuddies.Steam
 
         private SteamPacketListener packetListener;
 
-        public SteamSocket(CSteamID friendID)
+        public SteamSocket(CSteamID friendID, bool autoconnect = false)
         {
             this.friendID = friendID;
+            this.Connected = autoconnect;
         }
 
         public void RegisterSteamPacketListener(SteamPacketListener listener)

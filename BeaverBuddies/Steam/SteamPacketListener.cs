@@ -22,6 +22,7 @@ namespace BeaverBuddies.Steam
 
         public void Update()
         {
+            Plugin.LogWarning("SPL Update");
             uint messageSize;
             while (SteamNetworking.IsP2PPacketAvailable(out messageSize))
             {
@@ -49,6 +50,10 @@ namespace BeaverBuddies.Steam
                     {
                         Plugin.LogWarning("Received message from unknown user: " + remoteSteamID);
                     }
+                }
+                else
+                {
+                    Plugin.LogWarning("Failed to read packet!");
                 }
             }
         }

@@ -66,6 +66,7 @@ namespace TimberNet
                     ISocketStream client;
                     try
                     {
+                        Log("Accepting client...");
                         client = listener.AcceptClient();
                     } catch (Exception e)
                     {

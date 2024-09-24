@@ -49,7 +49,7 @@ namespace BeaverBuddies.Steam
                 Plugin.Log($"Lobby created with ID: {LobbyID} is joinable={joinable}");
 
                 // TODO: Maybe?
-                SteamFriends.ActivateGameOverlayInviteDialog(LobbyID);
+                //SteamFriends.ActivateGameOverlayInviteDialog(LobbyID);
             }
             else
             {
@@ -65,9 +65,10 @@ namespace BeaverBuddies.Steam
             {
                 CSteamID userJoined = new CSteamID(callback.m_ulSteamIDUserChanged);
                 string name = SteamFriends.GetFriendPersonaName(userJoined);
+                // TODO: Remove for privacy
                 Plugin.Log("User " + name + " has joined the lobby.");
 
-                var socket = new SteamSocket(userJoined);
+                var socket = new SteamSocket(userJoined, true);
                 steamPacketListener.RegisterSocket(socket);
                 sockets.Add(userJoined, socket);
                 joiningUsers.Enqueue(socket);
@@ -81,6 +82,7 @@ namespace BeaverBuddies.Steam
 
         public ISocketStream AcceptClient()
         {
+            Plugin.Log("Waiting to accept a client...");
             SteamSocket socket;
             while (!joiningUsers.TryDequeue(out socket))
             {

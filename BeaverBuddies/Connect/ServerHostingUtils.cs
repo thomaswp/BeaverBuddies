@@ -115,7 +115,7 @@ _gameLoadValidators[index].ValidateSave(saveReference, delegate
             // The client will do the same
             DeterminismService.InitGameStartState(data);
 
-            sceneLoader.StartSaveGame(saveReference);
+            //sceneLoader.StartSaveGame(saveReference);
         }
     }
 }
