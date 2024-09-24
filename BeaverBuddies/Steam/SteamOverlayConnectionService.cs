@@ -42,14 +42,17 @@ namespace BeaverBuddies.Steam
                     Plugin.Log(name);
                     done = true;
 
+                    // TODO: Find a way to remove these callbacks and
+                    // re-handle them when the MainMenu is reloaded...
+
                     //Callback<LobbyCreated_t>.Create(OnLobbyCreated);
                     //Callback<LobbyInvite_t>.Create(OnLobbyInvite);
-                    Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
+                    //Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
                     Callback<GameLobbyJoinRequested_t>.Create(OnLobbyJoinRequested);
                     Callback<LobbyEnter_t>.Create(OnLobbyEntered);
                     Callback<P2PSessionRequest_t>.Create(OnP2PSessionRequest);
 
-                    SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 4);
+                    //SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 4);
 
                 }
                 else
@@ -57,7 +60,7 @@ namespace BeaverBuddies.Steam
                     Plugin.Log("Waiting on Steamworks to initialize...");
                 }
             }
-            ReceiveMessages();
+            //ReceiveMessages();
         }
 
         private void OnLobbyJoinRequested(GameLobbyJoinRequested_t callback)
@@ -110,49 +113,6 @@ namespace BeaverBuddies.Steam
             }
         }
 
-        void Read()
-        {
-            uint size;
-
-            // repeat while there's a P2P message available
-            // will write its size to size variable
-            while (SteamNetworking.IsP2PPacketAvailable(out size))
-            {
-                // allocate buffer and needed variables
-                var buffer = new byte[size];
-                uint bytesRead;
-                CSteamID remoteId;
-
-                // read the message into the buffer
-                if (SteamNetworking.ReadP2PPacket(buffer, size, out bytesRead, out remoteId))
-                {
-                    string name = SteamFriends.GetFriendPersonaName(remoteId);
-                    int avatarHandle = SteamFriends.GetSmallFriendAvatar(remoteId);
-                    SteamUtils.GetImageSize(avatarHandle, out uint width, out uint height);
-                    byte[] avatarBuffer = new byte[width * height * 4];
-                    SteamUtils.GetImageRGBA(avatarHandle, avatarBuffer, avatarBuffer.Length);
-
-                    GameObject obj = new GameObject();
-                    RawImage img = obj.AddComponent<RawImage>();
-
-                    Texture2D texture = new Texture2D((int)width, (int)height, TextureFormat.RGBA32, false);
-                    texture.LoadRawTextureData(avatarBuffer);
-                    texture.Apply();
-
-                    img.texture = texture;
-
-                    obj.AddComponent<Canvas>().sortingOrder = 999;
-
-
-                    string imageBase64 = Convert.ToBase64String(texture.EncodeToPNG());
-                    Debug.Log(imageBase64);
-
-                    string message = Encoding.UTF8.GetString(buffer, 0, (int)bytesRead);
-                    Debug.Log($"Received a message: {message} from {name}");
-                }
-            }
-        }
-
         private void OnP2PSessionRequest(P2PSessionRequest_t callback)
         {
             CSteamID clientId = callback.m_steamIDRemote;
@@ -173,7 +133,7 @@ namespace BeaverBuddies.Steam
             if (owner != SteamUser.GetSteamID())
             {
                 Plugin.Log("Joining another's lobby...");
-                //_clientConnectionService.TryToConnect(owner);
+                _clientConnectionService.TryToConnect(owner);
             }
         }
 
