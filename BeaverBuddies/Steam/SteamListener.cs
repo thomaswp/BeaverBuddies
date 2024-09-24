@@ -74,9 +74,9 @@ namespace BeaverBuddies.Steam
                 joiningUsers.Enqueue(socket);
 
                 //SteamNetworking.CreateP2PConnectionSocket(memberId, 0, )
-                string message = "Hello, beaver buddy!";
-                byte[] data = Encoding.UTF8.GetBytes(message);
-                SteamNetworking.SendP2PPacket(userJoined, data, (uint)data.Length, EP2PSend.k_EP2PSendReliable);
+                //string message = "Hello, beaver buddy!";
+                //byte[] data = Encoding.UTF8.GetBytes(message);
+                //SteamNetworking.SendP2PPacket(userJoined, data, (uint)data.Length, EP2PSend.k_EP2PSendReliable);
             }
         }
 

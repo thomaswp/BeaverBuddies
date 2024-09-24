@@ -44,7 +44,7 @@ namespace BeaverBuddies.Steam
 
                     //Callback<LobbyCreated_t>.Create(OnLobbyCreated);
                     //Callback<LobbyInvite_t>.Create(OnLobbyInvite);
-                    //Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
+                    Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
                     Callback<GameLobbyJoinRequested_t>.Create(OnLobbyJoinRequested);
                     Callback<LobbyEnter_t>.Create(OnLobbyEntered);
 
@@ -58,7 +58,7 @@ namespace BeaverBuddies.Steam
                     Plugin.Log("Waiting on Steamworks to initialize...");
                 }
             }
-            //ReceiveMessages();
+            ReceiveMessages();
         }
 
         private void OnLobbyJoinRequested(GameLobbyJoinRequested_t callback)
@@ -174,7 +174,7 @@ namespace BeaverBuddies.Steam
             if (owner != SteamUser.GetSteamID())
             {
                 Plugin.Log("Joining another's lobby...");
-                _clientConnectionService.TryToConnect(owner);
+                //_clientConnectionService.TryToConnect(owner);
             }
         }
 
