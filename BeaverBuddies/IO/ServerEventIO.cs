@@ -4,6 +4,7 @@ using TimberNet;
 using System.Threading.Tasks;
 using BeaverBuddies.Events;
 using BeaverBuddies.Steam;
+using System.Net.Sockets;
 
 namespace BeaverBuddies.IO
 {
@@ -36,10 +37,12 @@ namespace BeaverBuddies.IO
         {
             try
             {
-                netBase = new TimberServer(
-                    // TODO: Menu / Config
-                    //new TCPListenerWrapper(EventIO.Config.Port),
-                    new SteamListener(),
+                // TODO: Menu / Config
+                //new TCPListenerWrapper(EventIO.Config.Port),
+                ISocketListener listener = new SteamListener();
+                TryRegisterSteamPacketReceiver(listener);
+                netBase = new TimberServer(    
+                    listener,
                     () =>
                     {
                         // TODO: Probably don't need to hold it in memory after the first tick...

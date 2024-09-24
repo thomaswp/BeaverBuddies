@@ -6,12 +6,13 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Timberborn.Workshops;
 using TimberNet;
 using UnityEngine.PlayerLoop;
 
 namespace BeaverBuddies.Steam
 {
-    public class SteamSocket : ISocketStream
+    public class SteamSocket : ISocketStream, ISteamPacketReceiver
     {
         // TODO: When tested, use ConcurrentQueueWithWaitInstead
         // A little over a frame, so the update should be called again
@@ -25,9 +26,17 @@ namespace BeaverBuddies.Steam
         private readonly ConcurrentQueue<byte[]> readBuffer = new ConcurrentQueue<byte[]>();
         private int readOffset = 0;
 
+        private SteamPacketListener packetListener;
+
         public SteamSocket(CSteamID friendID)
         {
             this.friendID = friendID;
+        }
+
+        public void RegisterSteamPacketListener(SteamPacketListener listener)
+        {
+            packetListener = listener;
+            listener.RegisterSocket(this);
         }
 
         public Task ConnectAsync()
@@ -40,6 +49,7 @@ namespace BeaverBuddies.Steam
         public void Close()
         {
             Connected = false;
+            packetListener?.UnregisterSocket(this);
         }
 
         public int Read(byte[] buffer, int offset, int count)

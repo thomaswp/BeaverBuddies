@@ -30,6 +30,8 @@ namespace BeaverBuddies.IO
         {
             this.mapReceivedCallback = mapReceivedCallback;
 
+            TryRegisterSteamPacketReceiver(socket);
+
             netBase = new TimberClient(socket);
             netBase.OnMapReceived += mapReceivedCallback;
             netBase.OnLog += Plugin.Log;

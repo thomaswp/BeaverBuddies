@@ -69,7 +69,7 @@ namespace BeaverBuddies
             containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
             containerDefinition.Bind<FirstTimerService>().AsSingleton();
             containerDefinition.Bind<ConfigIOService>().AsSingleton();
-            containerDefinition.Bind<SteamInitializer>().AsSingleton();
+            containerDefinition.Bind<SteamOverlayConnectionService>().AsSingleton();
 
             //ReflectionUtils.PrintChildClasses(typeof(MonoBehaviour), 
             //    "Start", "Awake", "Update", "FixedUpdate", "LateUpdate", "OnEnable", "OnDisable", "OnDestroy");

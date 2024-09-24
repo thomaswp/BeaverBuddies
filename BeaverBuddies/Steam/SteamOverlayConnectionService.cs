@@ -14,12 +14,12 @@ using UnityEngine.UIElements;
 
 namespace BeaverBuddies.Steam
 {
-    class SteamInitializer : IUpdatableSingleton
+    class SteamOverlayConnectionService : IUpdatableSingleton
     {
         private SteamManager _steamManager;
         private ClientConnectionService _clientConnectionService;
 
-        public SteamInitializer(
+        public SteamOverlayConnectionService(
             SteamManager steamManager,
             ClientConnectionService clientConnectionService
             ) 
@@ -33,7 +33,7 @@ namespace BeaverBuddies.Steam
         bool done = false;
         public void UpdateSingleton()
         {
-            Read();
+            //Read();
             if (!done)
             {
                 if (_steamManager.Initialized)
@@ -58,13 +58,13 @@ namespace BeaverBuddies.Steam
                     Plugin.Log("Waiting on Steamworks to initialize...");
                 }
             }
-            ReceiveMessages();
+            //ReceiveMessages();
         }
 
         private void OnLobbyJoinRequested(GameLobbyJoinRequested_t callback)
         {
             string name = SteamFriends.GetFriendPersonaName(callback.m_steamIDFriend);
-            Debug.Log("User " + name + " has requested to join the lobby.");
+            Debug.Log("User " + name + " has requested to join the lobby; joining...");
             SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
         }
 
@@ -173,7 +173,7 @@ namespace BeaverBuddies.Steam
             var owner = SteamMatchmaking.GetLobbyOwner(new CSteamID(callback.m_ulSteamIDLobby));
             if (owner != SteamUser.GetSteamID())
             {
-                Plugin.Log("Joining lobby...");
+                Plugin.Log("Joining another's lobby...");
                 _clientConnectionService.TryToConnect(owner);
             }
         }

@@ -8,7 +8,7 @@ using TimberNet;
 
 namespace BeaverBuddies.Steam
 {
-    public class SteamListener : ISocketListener
+    public class SteamListener : ISocketListener, ISteamPacketReceiver
     {
         // TODO: When tested, use ConcurrentQueueWithWaitInstead
         public const int AWAIT_THREAD_SLEEP_INTERVAL_MS = 250;
@@ -18,9 +18,20 @@ namespace BeaverBuddies.Steam
         private List<IDisposable> callbacks = new List<IDisposable>();
         private Dictionary<CSteamID, SteamSocket> sockets = new Dictionary<CSteamID, SteamSocket>();
         private ConcurrentQueue<SteamSocket> joiningUsers = new ConcurrentQueue<SteamSocket>();
+        private SteamPacketListener steamPacketListener;
+
+        public void RegisterSteamPacketListener(SteamPacketListener steamPacketListener)
+        {
+            this.steamPacketListener = steamPacketListener;
+        }
 
         public void Start()
         {
+            if (steamPacketListener == null)
+            {
+                throw new InvalidOperationException("SteamPacketListener must be registered before starting the SteamListener.");
+            }
+            Plugin.Log("SteamListener started...");
             callbacks.Add(Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate));
             callbacks.Add(Callback<LobbyCreated_t>.Create(OnLobbyCreated));
             SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 4);
@@ -57,6 +68,7 @@ namespace BeaverBuddies.Steam
                 Plugin.Log("User " + name + " has joined the lobby.");
 
                 var socket = new SteamSocket(userJoined);
+                steamPacketListener.RegisterSocket(socket);
                 sockets.Add(userJoined, socket);
                 joiningUsers.Enqueue(socket);
 
@@ -74,11 +86,13 @@ namespace BeaverBuddies.Steam
             {
                 Thread.Sleep(AWAIT_THREAD_SLEEP_INTERVAL_MS);
             }
+            Plugin.Log("New client accepted!");
             return socket;
         }
 
         public void Stop()
         {
+            Plugin.Log("Stopping listener...");
             SteamMatchmaking.LeaveLobby(LobbyID);
             foreach (IDisposable callback in callbacks)
             {
@@ -89,32 +103,7 @@ namespace BeaverBuddies.Steam
         // TODO: Need this to be called
         public void Update()
         {
-            uint messageSize;
-            while (SteamNetworking.IsP2PPacketAvailable(out messageSize))
-            {
-                byte[] buffer = new byte[messageSize];
-                uint bytesRead;
-
-                // TODO: Make sure this is for us
-                CSteamID remoteSteamID;
-
-                // Read the incoming packet
-                if (SteamNetworking.ReadP2PPacket(buffer, messageSize, out bytesRead, out remoteSteamID))
-                {
-                    // Process the received data
-                    Plugin.Log("Received message from: " + remoteSteamID);
-                    Plugin.Log("Data: " + System.Text.Encoding.UTF8.GetString(buffer));
-
-                    if (sockets.ContainsKey(remoteSteamID))
-                    {
-                        sockets[remoteSteamID].ReceiveData(buffer);
-                    }
-                    else
-                    {
-                        Plugin.LogWarning("Received message from unknown user: " + remoteSteamID);
-                    }
-                }
-            }
+            
         }
     }
 }
