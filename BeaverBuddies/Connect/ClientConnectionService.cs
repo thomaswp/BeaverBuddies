@@ -1,7 +1,10 @@
 ﻿using BeaverBuddies.IO;
+using BeaverBuddies.Steam;
 using BeaverBuddies.Util;
+using Steamworks;
 using System;
 using System.IO;
+using System.Net;
 using Timberborn.CoreUI;
 using Timberborn.GameSaveRepositorySystem;
 using Timberborn.GameSceneLoading;
@@ -48,14 +51,24 @@ namespace BeaverBuddies.Connect
             }
         }
 
+        public bool TryToConnect(CSteamID friendID)
+        {
+            return TryToConnect(new SteamSocket(friendID));
+        }
+
         public bool TryToConnect(string address)
+        {
+            return TryToConnect(new TCPClientWrapper(address, EventIO.Config.Port));
+        }
+
+        private bool TryToConnect(ISocketStream socket)
         {
             // Clean up our current co-op state before connecting,
             // so we don't, for example, end up ticking the client before
             // it's actually loaded.
             SingletonManager.Reset();
             Plugin.Log("Connecting client");
-            client = ClientEventIO.Create(address, EventIO.Config.Port, LoadMap, (error) =>
+            client = ClientEventIO.Create(socket, LoadMap, (error) =>
             {
                 ShowError("BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError", error);
             });

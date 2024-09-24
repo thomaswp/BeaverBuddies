@@ -3,6 +3,7 @@ using System;
 using TimberNet;
 using System.Threading.Tasks;
 using BeaverBuddies.Events;
+using BeaverBuddies.Steam;
 
 namespace BeaverBuddies.IO
 {
@@ -36,7 +37,9 @@ namespace BeaverBuddies.IO
             try
             {
                 netBase = new TimberServer(
-                    new TCPListenerWrapper(EventIO.Config.Port),
+                    // TODO: Menu / Config
+                    //new TCPListenerWrapper(EventIO.Config.Port),
+                    new SteamListener(),
                     () =>
                     {
                         // TODO: Probably don't need to hold it in memory after the first tick...

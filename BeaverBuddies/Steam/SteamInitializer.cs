@@ -1,4 +1,6 @@
-﻿using Steamworks;
+﻿using BeaverBuddies.Connect;
+using BeaverBuddies.IO;
+using Steamworks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,10 +17,15 @@ namespace BeaverBuddies.Steam
     class SteamInitializer : IUpdatableSingleton
     {
         private SteamManager _steamManager;
+        private ClientConnectionService _clientConnectionService;
 
-        public SteamInitializer(SteamManager steamManager) 
+        public SteamInitializer(
+            SteamManager steamManager,
+            ClientConnectionService clientConnectionService
+            ) 
         {
             _steamManager = steamManager;
+            _clientConnectionService = clientConnectionService;
             //GameObject obj = new GameObject("SteamManagerHost");
             //obj.AddComponent<SteamManager>();
         }
@@ -35,15 +42,15 @@ namespace BeaverBuddies.Steam
                     Plugin.Log(name);
                     done = true;
 
-                    Callback<LobbyCreated_t>.Create(OnLobbyCreated);
-                    Callback<LobbyEnter_t>.Create(OnLobbyEntered);
-                    Callback<LobbyInvite_t>.Create(OnLobbyInvite);
-                    Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
+                    //Callback<LobbyCreated_t>.Create(OnLobbyCreated);
+                    //Callback<LobbyInvite_t>.Create(OnLobbyInvite);
+                    //Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
                     Callback<GameLobbyJoinRequested_t>.Create(OnLobbyJoinRequested);
+                    Callback<LobbyEnter_t>.Create(OnLobbyEntered);
 
-                    Callback<P2PSessionRequest_t>.Create(OnP2PSessionRequest);
+                    //Callback<P2PSessionRequest_t>.Create(OnP2PSessionRequest);
 
-                    SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 4);
+                    //SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 4);
 
                 }
                 else
@@ -155,12 +162,19 @@ namespace BeaverBuddies.Steam
 
         private void OnLobbyEntered(LobbyEnter_t callback)
         {
-            int memberCount = SteamMatchmaking.GetNumLobbyMembers(new CSteamID(callback.m_ulSteamIDLobby));
-            for (int i = 0; i < memberCount; i++)
+            //int memberCount = SteamMatchmaking.GetNumLobbyMembers(new CSteamID(callback.m_ulSteamIDLobby));
+            //for (int i = 0; i < memberCount; i++)
+            //{
+            //    CSteamID memberId = SteamMatchmaking.GetLobbyMemberByIndex(new CSteamID(callback.m_ulSteamIDLobby), i);
+            //    string name = SteamFriends.GetFriendPersonaName(memberId);
+            //    UnityEngine.Debug.Log("Lobby member: " + name);
+            //}
+
+            var owner = SteamMatchmaking.GetLobbyOwner(new CSteamID(callback.m_ulSteamIDLobby));
+            if (owner != SteamUser.GetSteamID())
             {
-                CSteamID memberId = SteamMatchmaking.GetLobbyMemberByIndex(new CSteamID(callback.m_ulSteamIDLobby), i);
-                string name = SteamFriends.GetFriendPersonaName(memberId);
-                UnityEngine.Debug.Log("Lobby member: " + name);
+                Plugin.Log("Joining lobby...");
+                _clientConnectionService.TryToConnect(owner);
             }
         }
 

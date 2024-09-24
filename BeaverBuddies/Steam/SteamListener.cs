@@ -10,6 +10,7 @@ namespace BeaverBuddies.Steam
 {
     public class SteamListener : ISocketListener
     {
+        // TODO: When tested, use ConcurrentQueueWithWaitInstead
         public const int AWAIT_THREAD_SLEEP_INTERVAL_MS = 250;
 
         public CSteamID LobbyID { get; private set; }
@@ -36,7 +37,8 @@ namespace BeaverBuddies.Steam
                 bool joinable = SteamMatchmaking.SetLobbyJoinable(LobbyID, true);
                 Plugin.Log($"Lobby created with ID: {LobbyID} is joinable={joinable}");
 
-                //SteamFriends.ActivateGameOverlayInviteDialog(lobbyId);
+                // TODO: Maybe?
+                SteamFriends.ActivateGameOverlayInviteDialog(LobbyID);
             }
             else
             {

@@ -13,6 +13,7 @@ namespace BeaverBuddies.Steam
 {
     public class SteamSocket : ISocketStream
     {
+        // TODO: When tested, use ConcurrentQueueWithWaitInstead
         // A little over a frame, so the update should be called again
         public const int AWAIT_THREAD_SLEEP_INTERVAL_MS = 25;
 
