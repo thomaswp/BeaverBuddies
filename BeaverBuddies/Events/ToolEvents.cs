@@ -179,10 +179,10 @@ namespace BeaverBuddies.Events
     [Serializable]
     class ClearResourcesMarkedEvent : ReplayEvent
     {
-        List<Guid> blocks;
-        Vector3Int start;
-        Vector3Int end;
-        bool markForDemolition;
+        public List<Guid> blocks;
+        public Vector3Int start;
+        public Vector3Int end;
+        public bool markForDemolition;
 
         public override void Replay(IReplayContext context)
         {
