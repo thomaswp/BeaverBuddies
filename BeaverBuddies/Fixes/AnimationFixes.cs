@@ -7,7 +7,7 @@ using Timberborn.EntitySystem;
 using Timberborn.WaterSystem;
 using UnityEngine;
 
-namespace BeaverBuddies
+namespace BeaverBuddies.Fixes
 {
 #if !NO_SMOOTH_ANIMATION
     [ManualMethodOverwrite]

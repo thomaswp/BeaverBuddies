@@ -1,6 +1,8 @@
 ﻿using BeaverBuddies.Connect;
 using BeaverBuddies.DesyncDetecter;
+using BeaverBuddies.Fixes;
 using BeaverBuddies.IO;
+using BeaverBuddies.Util;
 using BeaverBuddies.Util.Logging;
 using Bindito.Core;
 using HarmonyLib;
@@ -41,6 +43,7 @@ namespace BeaverBuddies
             containerDefinition.Bind<DeterminismService>().AsSingleton();
             containerDefinition.Bind<TickReplacerService>().AsSingleton();
             containerDefinition.Bind<RehostingService>().AsSingleton();
+            containerDefinition.Bind<LateTickableBuffer>().AsSingleton();
 
             if (EventIO.Config.Debug)
             {
@@ -101,7 +104,7 @@ namespace BeaverBuddies
             ReplayConfig config = new ReplayConfig();
 
             EventIO.Config = config;
-
+            
             Log($"{Name} is loaded!");
 
             if (config.GetNetMode() == NetMode.None) return;
