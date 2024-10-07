@@ -1104,7 +1104,7 @@ while (enumerator.MoveNext())
             Plugin.Log($"TickSingletons through: {max}");
             if (max > 0)
             {
-                Plugin.Log($"Last ticking singletong: {__instance._tickableSingletons[max - 1]}");
+                Plugin.Log($"Last ticking singletong: {__instance._tickableSingletons[max - 1].GetType().Name}");
             }
             for (int i = 0; i < max; i++)
             {
