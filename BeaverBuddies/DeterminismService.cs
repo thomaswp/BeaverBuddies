@@ -1097,13 +1097,20 @@ while (enumerator.MoveNext())
     [HarmonyPatch(typeof(TickableSingletonService), nameof(TickableSingletonService.TickSingletons))]
     class TickableSingletonServiceTickSingletonsPatcher
     {
+        static int tick = 0;
         static bool Prefix(TickableSingletonService __instance)
         {
-            int max = 0; // __instance._tickableSingletons.Length
+            int max = tick; // __instance._tickableSingletons.Length
+            Plugin.Log($"TickSingletons through: {max}");
+            if (max > 0)
+            {
+                Plugin.Log($"Last ticking singletong: {__instance._tickableSingletons[max - 1]}");
+            }
             for (int i = 0; i < max; i++)
             {
                 __instance._tickableSingletons[i].Tick();
             }
+            tick++;
             return false;
         }
     }
