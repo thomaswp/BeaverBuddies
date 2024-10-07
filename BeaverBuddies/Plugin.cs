@@ -1,5 +1,6 @@
 ﻿using BeaverBuddies.Connect;
 using BeaverBuddies.DesyncDetecter;
+using BeaverBuddies.Fixes;
 using BeaverBuddies.IO;
 using BeaverBuddies.Util;
 using BeaverBuddies.Util.Logging;
@@ -43,6 +44,7 @@ namespace BeaverBuddies
             containerDefinition.Bind<DeterminismService>().AsSingleton();
             containerDefinition.Bind<TickReplacerService>().AsSingleton();
             containerDefinition.Bind<RehostingService>().AsSingleton();
+            containerDefinition.Bind<WaterSourceStrengthChangeBuffer>().AsSingleton();
 
             if (EventIO.Config.Debug)
             {

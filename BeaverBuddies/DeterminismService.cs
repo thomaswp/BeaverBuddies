@@ -1096,7 +1096,7 @@ while (enumerator.MoveNext())
         static bool Prefix(TickableSingletonService __instance)
         {
             int max = tick / 3; // __instance._tickableSingletons.Length
-            max = 0;
+            //max = 0;
             Plugin.Log($"TickSingletons through: {max}");
             if (max > 0)
             {
@@ -1155,19 +1155,19 @@ while (enumerator.MoveNext())
                     {
                         continue;
                     }
-                    if (!whitelist.Contains(type))
-                    {
-                        if (currentTick > lastTick)
-                        {
-                            lastTick = currentTick;
-                            whitelist.Add(type);
-                            Plugin.Log($"Adding {type.Name}");
-                        }
-                        else
-                        {
-                            continue;
-                        }
-                    }
+                    //if (!whitelist.Contains(type))
+                    //{
+                    //    if (currentTick > lastTick)
+                    //    {
+                    //        lastTick = currentTick;
+                    //        whitelist.Add(type);
+                    //        Plugin.Log($"Adding {type.Name}");
+                    //    }
+                    //    else
+                    //    {
+                    //        continue;
+                    //    }
+                    //}
                     current.StartAndTick();
                 }
             }
@@ -1198,4 +1198,6 @@ while (enumerator.MoveNext())
             return false;
         }
     }
+
+
 }
