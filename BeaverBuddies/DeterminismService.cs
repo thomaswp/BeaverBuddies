@@ -1104,7 +1104,8 @@ while (enumerator.MoveNext())
         {
             typeof (ThreadSafeWaterMap),
             typeof (WaterSourceRegistry),
-            typeof (TerrainMaterialMap),
+            //typeof (TerrainMaterialMap),
+            typeof (DayNightCycle),
         };
 
         static bool Prefix(TickableSingletonService __instance)
