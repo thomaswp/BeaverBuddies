@@ -1135,7 +1135,7 @@ while (enumerator.MoveNext())
         static int lastTick = 0;
         static HashSet<Type> whitelist = new HashSet<Type>();
 
-        public bool Prefix(TickableEntity __instance)
+        public static bool Prefix(TickableEntity __instance)
         {
             int currentTick = GetSingleton<ReplayService>()?.TicksSinceLoad ?? 0;
 
