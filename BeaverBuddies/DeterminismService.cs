@@ -1082,9 +1082,9 @@ while (enumerator.MoveNext())
             {
                 // Run directly rather than using the thread pool
                 IParallelTickableSingleton parallelTickable = enumerator.Current;
-                if (parallelTickable is SoilContaminationSimulationController) continue;
-                if (parallelTickable is WaterRenderer) continue;
-                if (parallelTickable is SoilMoistureSimulationController) continue;
+                //if (parallelTickable is SoilContaminationSimulationController) continue;
+                //if (parallelTickable is WaterRenderer) continue;
+                //if (parallelTickable is SoilMoistureSimulationController) continue;
                 __instance._parallelizerContext.Run(delegate
                 {
                     parallelTickable.ParallelTick();
