@@ -40,7 +40,7 @@ namespace BeaverBuddies.Fixes
     [HarmonyPatch(typeof(WaterSource), nameof(WaterSource.Tick))]
     class WaterSourceTickPatcher
     {
-        static bool Prefix(WaterSource __instance)
+        public static bool Prefix(WaterSource __instance)
         {
             if (LateTickableBuffer.TickingLate)
             {
@@ -59,7 +59,7 @@ namespace BeaverBuddies.Fixes
     [HarmonyPatch(typeof(TickableSingletonService), nameof(TickableSingletonService.FinishParallelTick))]
     class TickableSingletonServiceFinishParallelTickPatcher
     {
-        public void Postfix()
+        public static void Postfix()
         {
             // Once the simulation has finished, enact the changes to water sources
             var buffer = SingletonManager.GetSingleton<LateTickableBuffer>();
