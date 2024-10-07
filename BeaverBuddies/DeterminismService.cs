@@ -59,6 +59,7 @@ using Timberborn.CommandLine;
 using Timberborn.ToolSystem;
 using Timberborn.Analytics;
 using BeaverBuddies.IO;
+using Timberborn.SoilContaminationSystem;
 
 namespace BeaverBuddies
 {
@@ -1065,6 +1066,30 @@ while (enumerator.MoveNext())
         }
     }
 #endif
+
+    // TODO: Remove - testing only
+    [HarmonyPatch(typeof(TickableSingletonService), nameof(TickableSingletonService.StartParallelTick))]
+    class TickableSingletonServiceStartParallelTickPatcher
+    {
+        static bool Prefix(TickableSingletonService __instance)
+        {
+            if (EventIO.IsNull) return true;
+            ImmutableArray<IParallelTickableSingleton>.Enumerator enumerator =
+                __instance._parallelTickableSingletons.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                // Run directly rather than using the thread pool
+                IParallelTickableSingleton parallelTickable = enumerator.Current;
+                if (parallelTickable is SoilContaminationSimulationController) continue;
+                __instance._parallelizerContext.Run(delegate
+                {
+                    parallelTickable.ParallelTick();
+                });
+            }
+            return false;
+        }
+    }
+
 
     // If there's more than ~3 of these, I could probably make a
     // generalizable approach to prevent Singletons from updating

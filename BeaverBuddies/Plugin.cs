@@ -101,7 +101,7 @@ namespace BeaverBuddies
             ReplayConfig config = new ReplayConfig();
 
             EventIO.Config = config;
-
+            
             Log($"{Name} is loaded!");
 
             if (config.GetNetMode() == NetMode.None) return;
