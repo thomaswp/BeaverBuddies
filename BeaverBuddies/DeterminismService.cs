@@ -60,6 +60,7 @@ using Timberborn.ToolSystem;
 using Timberborn.Analytics;
 using BeaverBuddies.IO;
 using Timberborn.SoilContaminationSystem;
+using Timberborn.WaterSystemRendering;
 
 namespace BeaverBuddies
 {
@@ -1081,6 +1082,7 @@ while (enumerator.MoveNext())
                 // Run directly rather than using the thread pool
                 IParallelTickableSingleton parallelTickable = enumerator.Current;
                 if (parallelTickable is SoilContaminationSimulationController) continue;
+                if (parallelTickable is WaterRenderer) continue;
                 __instance._parallelizerContext.Run(delegate
                 {
                     parallelTickable.ParallelTick();
