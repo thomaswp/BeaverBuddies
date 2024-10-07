@@ -62,6 +62,7 @@ using BeaverBuddies.IO;
 using Timberborn.SoilContaminationSystem;
 using Timberborn.WaterSystemRendering;
 using Timberborn.SoilMoistureSystem;
+using Timberborn.WaterSystem;
 
 namespace BeaverBuddies
 {
@@ -1101,12 +1102,22 @@ while (enumerator.MoveNext())
         static bool Prefix(TickableSingletonService __instance)
         {
             int max = tick / 3; // __instance._tickableSingletons.Length
+            max = 0;
             Plugin.Log($"TickSingletons through: {max}");
             if (max > 0)
             {
                 var singleton = __instance._tickableSingletons[max - 1];
                 Plugin.Log($"Last ticking singletong: {singleton._tickableSingleton.GetType().Name}");
             }
+            for (int i = 0; i < __instance._tickableSingletons.Length; i++)
+            {
+                var singleton = __instance._tickableSingletons[i];
+                if (singleton._tickableSingleton is ThreadSafeWaterMap)
+                {
+                    singleton.Tick();
+                }
+            }
+
             for (int i = 0; i < max; i++)
             {
                 __instance._tickableSingletons[i].Tick();
