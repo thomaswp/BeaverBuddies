@@ -1132,7 +1132,7 @@ while (enumerator.MoveNext())
             for (int i = 0; i < max; i++)
             {
                 var singleton = __instance._tickableSingletons[i];
-                if (singleton._tickableSingleton is ThreadSafeWaterMap)
+                if (whitelist.Contains(singleton._tickableSingleton.GetType()))
                 {
                     continue;
                 }
