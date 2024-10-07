@@ -1100,7 +1100,7 @@ while (enumerator.MoveNext())
         static int tick = 0;
         static bool Prefix(TickableSingletonService __instance)
         {
-            int max = tick; // __instance._tickableSingletons.Length
+            int max = tick / 3; // __instance._tickableSingletons.Length
             Plugin.Log($"TickSingletons through: {max}");
             if (max > 0)
             {
