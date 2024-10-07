@@ -51,6 +51,8 @@
     <Reference Include="$(BeaverBuddiesManagedPath)Bindito.Unity.dll" Private="false" />
     <Reference Include="$(BeaverBuddiesManagedPath)UnityEngine.*.dll" Publicize="true" Private="false" />
     <Reference Include="$(BeaverBuddiesManagedPath)Timberborn.*.dll" Publicize="true" Private="false" />
+    <Compile Remove="Fixes\TestingStrategies_Scrap.cs" />
+    <None Include="Fixes\TestingStrategies_Scrap.cs" />
     <Reference Include="$(BeaverBuddiesManagedPath)Unity.Services.Analytics.dll" Publicize="true" Private="false" />
   </ItemGroup>
 
