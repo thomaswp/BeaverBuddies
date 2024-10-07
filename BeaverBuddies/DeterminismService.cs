@@ -1095,7 +1095,8 @@ while (enumerator.MoveNext())
 
         static bool Prefix(TickableSingletonService __instance)
         {
-            int max = tick / 3; // __instance._tickableSingletons.Length
+            int max = tick / 3;
+            max = __instance._tickableSingletons.Length;
             //max = 0;
             Plugin.Log($"TickSingletons through: {max}");
             if (max > 0)
@@ -1116,7 +1117,7 @@ while (enumerator.MoveNext())
                 }
             }
 
-            for (int i = 0; i < max; i++)
+            for (int i = 0; i < max && i < __instance._tickableSingletons.Length; i++)
             {
                 var singleton = __instance._tickableSingletons[i];
                 if (whitelist.Contains(singleton._tickableSingleton.GetType()))
@@ -1130,50 +1131,50 @@ while (enumerator.MoveNext())
         }
     }
 
-    [HarmonyPatch(typeof(TickableEntity), nameof(TickableEntity.TickTickableComponents))]
-    class TickableEntityTickPatcher
-    {
-        static int lastTick = 0;
-        static HashSet<Type> whitelist = new HashSet<Type>();
-        static HashSet<Type> blacklist = new HashSet<Type>()
-        {
-            typeof (WaterSource),
-        };
+    //[HarmonyPatch(typeof(TickableEntity), nameof(TickableEntity.TickTickableComponents))]
+    //class TickableEntityTickPatcher
+    //{
+    //    static int lastTick = 0;
+    //    static HashSet<Type> whitelist = new HashSet<Type>();
+    //    static HashSet<Type> blacklist = new HashSet<Type>()
+    //    {
+    //        typeof (WaterSource),
+    //    };
 
-        public static bool Prefix(TickableEntity __instance)
-        {
-            int currentTick = GetSingleton<ReplayService>()?.TicksSinceLoad ?? 0;
+    //    public static bool Prefix(TickableEntity __instance)
+    //    {
+    //        int currentTick = GetSingleton<ReplayService>()?.TicksSinceLoad ?? 0;
 
-            ImmutableArray<MeteredTickableComponent>.Enumerator enumerator = __instance._tickableComponents.GetEnumerator();
-            while (enumerator.MoveNext())
-            {
-                MeteredTickableComponent current = enumerator.Current;
-                if (current.Enabled)
-                {
-                    Type type = current._tickableComponent.GetType();
-                    if (blacklist.Contains(type))
-                    {
-                        continue;
-                    }
-                    //if (!whitelist.Contains(type))
-                    //{
-                    //    if (currentTick > lastTick)
-                    //    {
-                    //        lastTick = currentTick;
-                    //        whitelist.Add(type);
-                    //        Plugin.Log($"Adding {type.Name}");
-                    //    }
-                    //    else
-                    //    {
-                    //        continue;
-                    //    }
-                    //}
-                    current.StartAndTick();
-                }
-            }
-            return false;
-        }
-    }
+    //        ImmutableArray<MeteredTickableComponent>.Enumerator enumerator = __instance._tickableComponents.GetEnumerator();
+    //        while (enumerator.MoveNext())
+    //        {
+    //            MeteredTickableComponent current = enumerator.Current;
+    //            if (current.Enabled)
+    //            {
+    //                Type type = current._tickableComponent.GetType();
+    //                if (blacklist.Contains(type))
+    //                {
+    //                    continue;
+    //                }
+    //                //if (!whitelist.Contains(type))
+    //                //{
+    //                //    if (currentTick > lastTick)
+    //                //    {
+    //                //        lastTick = currentTick;
+    //                //        whitelist.Add(type);
+    //                //        Plugin.Log($"Adding {type.Name}");
+    //                //    }
+    //                //    else
+    //                //    {
+    //                //        continue;
+    //                //    }
+    //                //}
+    //                current.StartAndTick();
+    //            }
+    //        }
+    //        return false;
+    //    }
+    //}
 
 
     // If there's more than ~3 of these, I could probably make a

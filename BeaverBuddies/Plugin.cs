@@ -44,7 +44,7 @@ namespace BeaverBuddies
             containerDefinition.Bind<DeterminismService>().AsSingleton();
             containerDefinition.Bind<TickReplacerService>().AsSingleton();
             containerDefinition.Bind<RehostingService>().AsSingleton();
-            containerDefinition.Bind<WaterSourceStrengthChangeBuffer>().AsSingleton();
+            containerDefinition.Bind<LateTickableBuffer>().AsSingleton();
 
             if (EventIO.Config.Debug)
             {
