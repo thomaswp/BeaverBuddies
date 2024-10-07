@@ -1109,7 +1109,7 @@ while (enumerator.MoveNext())
         static bool Prefix(TickableSingletonService __instance)
         {
             int max = tick / 3; // __instance._tickableSingletons.Length
-            max = 0;
+            //max = 0;
             Plugin.Log($"TickSingletons through: {max}");
             if (max > 0)
             {
@@ -1124,6 +1124,7 @@ while (enumerator.MoveNext())
                 var singleton = __instance._tickableSingletons[i];
                 if (whitelist.Contains(singleton._tickableSingleton.GetType()))
                 {
+                    Plugin.Log("Whitelist");
                     singleton.Tick();
                 }
             }
