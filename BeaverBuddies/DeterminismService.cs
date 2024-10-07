@@ -903,22 +903,6 @@ namespace BeaverBuddies
         }
     }
 
-    [HarmonyPatch(typeof(TickableEntityBucket), nameof(TickableEntityBucket.Add))]
-    public class TEBAddPatcher
-    {
-
-        static void Postfix(TickableEntityBucket __instance, TickableEntity tickableEntity)
-        {
-            if (!ReplayService.IsLoaded) return;
-            int index = __instance._tickableEntities.Values.IndexOf(tickableEntity);
-            if (EventIO.Config.Debug)
-            {
-                DesyncDetecterService.Trace($"Adding: {tickableEntity.EntityId} at index {index}");
-            }
-            //Plugin.LogStackTrace();
-        }
-    }
-
     [HarmonyPatch(typeof(Time), nameof(Time.time), MethodType.Getter)]
     public class TimeTimePatcher
     {
@@ -967,7 +951,12 @@ public TimeOfDay FluidTimeOfDay => CalculateTimeOfDay(FluidSecondsPassedToday);
             PositionHash = positionHash;
         }
 
-        static void Prefix(TickableEntityBucket __instance)
+        static bool Prefix(TickableEntityBucket __instance)
+        {
+            return false;
+        }
+
+        static void Prefix_(TickableEntityBucket __instance)
         {
             if (EventIO.IsNull) return;
 
@@ -1126,7 +1115,7 @@ while (enumerator.MoveNext())
                 var singleton = __instance._tickableSingletons[i];
                 if (whitelist.Contains(singleton._tickableSingleton.GetType()))
                 {
-                    Plugin.Log("Whitelist");
+                    //Plugin.Log("Whitelist");
                     singleton.Tick();
                 }
             }
@@ -1146,10 +1135,10 @@ while (enumerator.MoveNext())
     }
 
 
-        // If there's more than ~3 of these, I could probably make a
-        // generalizable approach to prevent Singletons from updating
-        // and instead update them on tick.
-        [HarmonyPatch(typeof(RecoveredGoodStackSpawner), nameof(RecoveredGoodStackSpawner.UpdateSingleton))]
+    // If there's more than ~3 of these, I could probably make a
+    // generalizable approach to prevent Singletons from updating
+    // and instead update them on tick.
+    [HarmonyPatch(typeof(RecoveredGoodStackSpawner), nameof(RecoveredGoodStackSpawner.UpdateSingleton))]
     class RecoveredGoodStackSpawnerUpdateSingletonPatcher
     {
         private static bool doBaseUpdate = false;

@@ -14,6 +14,7 @@ using Timberborn.NaturalResourcesMoisture;
 using Timberborn.SoilMoistureSystem;
 using BeaverBuddies.IO;
 using Timberborn.WaterSystem;
+using Timberborn.TickSystem;
 
 namespace BeaverBuddies.DesyncDetecter
 {
@@ -223,6 +224,22 @@ namespace BeaverBuddies.DesyncDetecter
             hash = (hash * 7) + BitConverter.SingleToInt32Bits(waterColumn.Overflow);
             hash = (hash * 7) + BitConverter.SingleToInt32Bits(waterColumn.WaterDepth);
             return hash;
+        }
+    }
+
+    [HarmonyPatch(typeof(TickableEntityBucket), nameof(TickableEntityBucket.Add))]
+    public class TEBAddPatcher
+    {
+
+        static void Postfix(TickableEntityBucket __instance, TickableEntity tickableEntity)
+        {
+            if (!ReplayService.IsLoaded) return;
+            int index = __instance._tickableEntities.Values.IndexOf(tickableEntity);
+            if (EventIO.Config.Debug)
+            {
+                DesyncDetecterService.Trace($"Adding: {tickableEntity.EntityId} at index {index}");
+            }
+            //Plugin.LogStackTrace();
         }
     }
 }
