@@ -1094,11 +1094,25 @@ while (enumerator.MoveNext())
         }
     }
 
+    [HarmonyPatch(typeof(TickableSingletonService), nameof(TickableSingletonService.TickSingletons))]
+    class TickableSingletonServiceTickSingletonsPatcher
+    {
+        static bool Prefix(TickableSingletonService __instance)
+        {
+            int max = 0; // __instance._tickableSingletons.Length
+            for (int i = 0; i < max; i++)
+            {
+                __instance._tickableSingletons[i].Tick();
+            }
+            return false;
+        }
+    }
 
-    // If there's more than ~3 of these, I could probably make a
-    // generalizable approach to prevent Singletons from updating
-    // and instead update them on tick.
-    [HarmonyPatch(typeof(RecoveredGoodStackSpawner), nameof(RecoveredGoodStackSpawner.UpdateSingleton))]
+
+        // If there's more than ~3 of these, I could probably make a
+        // generalizable approach to prevent Singletons from updating
+        // and instead update them on tick.
+        [HarmonyPatch(typeof(RecoveredGoodStackSpawner), nameof(RecoveredGoodStackSpawner.UpdateSingleton))]
     class RecoveredGoodStackSpawnerUpdateSingletonPatcher
     {
         private static bool doBaseUpdate = false;
