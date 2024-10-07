@@ -63,6 +63,7 @@ using Timberborn.SoilContaminationSystem;
 using Timberborn.WaterSystemRendering;
 using Timberborn.SoilMoistureSystem;
 using Timberborn.WaterSystem;
+using Timberborn.WaterSourceSystem;
 
 namespace BeaverBuddies
 {
@@ -1134,6 +1135,10 @@ while (enumerator.MoveNext())
     {
         static int lastTick = 0;
         static HashSet<Type> whitelist = new HashSet<Type>();
+        static HashSet<Type> blacklist = new HashSet<Type>()
+        {
+            typeof (WaterSource),
+        };
 
         public static bool Prefix(TickableEntity __instance)
         {
@@ -1146,6 +1151,10 @@ while (enumerator.MoveNext())
                 if (current.Enabled)
                 {
                     Type type = current._tickableComponent.GetType();
+                    if (blacklist.Contains(type))
+                    {
+                        continue;
+                    }
                     if (!whitelist.Contains(type))
                     {
                         if (currentTick > lastTick)
