@@ -951,12 +951,7 @@ public TimeOfDay FluidTimeOfDay => CalculateTimeOfDay(FluidSecondsPassedToday);
             PositionHash = positionHash;
         }
 
-        static bool Prefix(TickableEntityBucket __instance)
-        {
-            return false;
-        }
-
-        static void Prefix_(TickableEntityBucket __instance)
+        static void Prefix(TickableEntityBucket __instance)
         {
             if (EventIO.IsNull) return;
 
@@ -1130,6 +1125,43 @@ while (enumerator.MoveNext())
                 __instance._tickableSingletons[i].Tick();
             }
             tick++;
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(TickableEntity), nameof(TickableEntity.TickTickableComponents))]
+    class TickableEntityTickPatcher
+    {
+        static int lastTick = 0;
+        static HashSet<Type> whitelist = new HashSet<Type>();
+
+        public bool Prefix(TickableEntity __instance)
+        {
+            int currentTick = GetSingleton<ReplayService>()?.TicksSinceLoad ?? 0;
+
+            ImmutableArray<MeteredTickableComponent>.Enumerator enumerator = __instance._tickableComponents.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                MeteredTickableComponent current = enumerator.Current;
+                if (current.Enabled)
+                {
+                    Type type = current._tickableComponent.GetType();
+                    if (!whitelist.Contains(type))
+                    {
+                        if (currentTick > lastTick)
+                        {
+                            lastTick = currentTick;
+                            whitelist.Add(type);
+                            Plugin.Log($"Adding {type.Name}");
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                    current.StartAndTick();
+                }
+            }
             return false;
         }
     }
