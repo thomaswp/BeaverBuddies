@@ -15,7 +15,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>BeaverBuddies</AssemblyName>
     <Description>TimberModTest</Description>
-    <Version>1.2.5</Version>
+    <Version>1.2.6</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>

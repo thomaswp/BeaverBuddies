@@ -7,12 +7,6 @@ using Timberborn.WaterSourceSystem;
 
 namespace BeaverBuddies.Fixes
 {
-    internal struct WaterSourceChange
-    {
-        public WaterSource source;
-        public float newStrength;
-    }
-
     public class LateTickableBuffer : RegisteredSingleton
     {
         private List<TickableComponent> buffer = new List<TickableComponent>();
