@@ -1103,12 +1103,13 @@ while (enumerator.MoveNext())
         static HashSet<Type> whitelist = new HashSet<Type>()
         {
             typeof (ThreadSafeWaterMap),
+            typeof (WaterSourceRegistry),
         };
 
         static bool Prefix(TickableSingletonService __instance)
         {
             int max = tick / 3; // __instance._tickableSingletons.Length
-            //max = 0;
+            max = 0;
             Plugin.Log($"TickSingletons through: {max}");
             if (max > 0)
             {
@@ -1121,7 +1122,7 @@ while (enumerator.MoveNext())
             for (int i = 0; i < __instance._tickableSingletons.Length; i++)
             {
                 var singleton = __instance._tickableSingletons[i];
-                if (singleton._tickableSingleton is ThreadSafeWaterMap)
+                if (whitelist.Contains(singleton._tickableSingleton.GetType()))
                 {
                     singleton.Tick();
                 }
