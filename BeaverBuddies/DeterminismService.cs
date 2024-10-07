@@ -1104,12 +1104,13 @@ while (enumerator.MoveNext())
         {
             typeof (ThreadSafeWaterMap),
             typeof (WaterSourceRegistry),
+            typeof (TerrainMaterialMap),
         };
 
         static bool Prefix(TickableSingletonService __instance)
         {
             int max = tick / 3; // __instance._tickableSingletons.Length
-            //max = 0;
+            max = 0;
             Plugin.Log($"TickSingletons through: {max}");
             if (max > 0)
             {
