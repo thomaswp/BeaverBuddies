@@ -8,7 +8,6 @@ using Bindito.Core;
 using HarmonyLib;
 using System.Diagnostics;
 using Timberborn.ModManagerScene;
-using Timberborn.TickSystem;
 
 namespace BeaverBuddies
 {
