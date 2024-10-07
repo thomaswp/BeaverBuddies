@@ -1099,16 +1099,25 @@ while (enumerator.MoveNext())
     class TickableSingletonServiceTickSingletonsPatcher
     {
         static int tick = 0;
+
+        static HashSet<Type> whitelist = new HashSet<Type>()
+        {
+            typeof (ThreadSafeWaterMap),
+        };
+
         static bool Prefix(TickableSingletonService __instance)
         {
             int max = tick / 3; // __instance._tickableSingletons.Length
-            max = 0;
+            //max = 0;
             Plugin.Log($"TickSingletons through: {max}");
             if (max > 0)
             {
                 var singleton = __instance._tickableSingletons[max - 1];
                 Plugin.Log($"Last ticking singletong: {singleton._tickableSingleton.GetType().Name}");
             }
+
+
+
             for (int i = 0; i < __instance._tickableSingletons.Length; i++)
             {
                 var singleton = __instance._tickableSingletons[i];
@@ -1120,6 +1129,11 @@ while (enumerator.MoveNext())
 
             for (int i = 0; i < max; i++)
             {
+                var singleton = __instance._tickableSingletons[i];
+                if (singleton._tickableSingleton is ThreadSafeWaterMap)
+                {
+                    continue;
+                }
                 __instance._tickableSingletons[i].Tick();
             }
             tick++;
