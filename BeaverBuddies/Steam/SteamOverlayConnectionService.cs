@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using Timberborn.CoreUI;
 using Timberborn.SingletonSystem;
 using Timberborn.SteamStoreSystem;
 using UnityEngine;
@@ -18,14 +19,19 @@ namespace BeaverBuddies.Steam
     {
         private SteamManager _steamManager;
         private ClientConnectionService _clientConnectionService;
+        private DialogBoxShower _dialogBoxShower;
+
+        private static List<IDisposable> callbacks = new List<IDisposable>();
 
         public SteamOverlayConnectionService(
             SteamManager steamManager,
-            ClientConnectionService clientConnectionService
+            ClientConnectionService clientConnectionService,
+            DialogBoxShower dialogBoxShower
             ) 
         {
             _steamManager = steamManager;
             _clientConnectionService = clientConnectionService;
+            _dialogBoxShower = dialogBoxShower;
             //GameObject obj = new GameObject("SteamManagerHost");
             //obj.AddComponent<SteamManager>();
         }
@@ -38,6 +44,11 @@ namespace BeaverBuddies.Steam
             {
                 if (_steamManager.Initialized)
                 {
+                    foreach (var callback in callbacks)
+                    {
+                        callback.Dispose();
+                    }
+
                     string name = SteamFriends.GetPersonaName();
                     Plugin.Log(name);
                     done = true;
@@ -48,9 +59,9 @@ namespace BeaverBuddies.Steam
                     //Callback<LobbyCreated_t>.Create(OnLobbyCreated);
                     //Callback<LobbyInvite_t>.Create(OnLobbyInvite);
                     //Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
-                    Callback<GameLobbyJoinRequested_t>.Create(OnLobbyJoinRequested);
-                    Callback<LobbyEnter_t>.Create(OnLobbyEntered);
-                    Callback<P2PSessionRequest_t>.Create(OnP2PSessionRequest);
+                    callbacks.Add(Callback<GameLobbyJoinRequested_t>.Create(OnLobbyJoinRequested));
+                    callbacks.Add(Callback<LobbyEnter_t>.Create(OnLobbyEntered));
+                    callbacks.Add(Callback<P2PSessionRequest_t>.Create(OnP2PSessionRequest));
 
                     //SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 4);
 
@@ -133,7 +144,14 @@ namespace BeaverBuddies.Steam
             if (owner != SteamUser.GetSteamID())
             {
                 Plugin.Log("Joining another's lobby...");
-                _clientConnectionService.TryToConnect(owner);
+                bool success = _clientConnectionService.TryToConnect(owner);
+
+                // TOOD: loc
+                _dialogBoxShower.Create()
+                    .SetLocalizedMessage(success ? 
+                    "Joined! Receiving map..." : 
+                    "Failed to join lobby.")
+                    .Show();
             }
         }
 

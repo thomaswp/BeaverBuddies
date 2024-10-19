@@ -29,6 +29,7 @@ namespace BeaverBuddies
             containerDefinition.Bind<ClientConnectionService>().AsSingleton();
             containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
             containerDefinition.Bind<ConfigIOService>().AsSingleton();
+            containerDefinition.Bind<SteamOverlayConnectionService>().AsSingleton();
 
             // EventIO gets set before load, so if it's null, this is a regular
             // game, so don't initialize these services.

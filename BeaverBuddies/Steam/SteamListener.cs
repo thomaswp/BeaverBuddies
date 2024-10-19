@@ -107,5 +107,10 @@ namespace BeaverBuddies.Steam
         {
             
         }
+
+        public void ShowInviteFriendsPanel()
+        {
+            SteamFriends.ActivateGameOverlayInviteDialog(LobbyID);
+        }
     }
 }

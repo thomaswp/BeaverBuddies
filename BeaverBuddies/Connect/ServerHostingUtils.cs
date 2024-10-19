@@ -16,6 +16,9 @@ using BeaverBuddies.IO;
 using BeaverBuddies.Util;
 using Timberborn.CoreUI;
 using System.Collections;
+using Steamworks;
+using BeaverBuddies.Steam;
+using TimberNet;
 
 namespace BeaverBuddies.Connect
 {
@@ -98,8 +101,9 @@ _gameLoadValidators[index].ValidateSave(saveReference, delegate
 
         private static IEnumerator UpdateDialogBox(DialogBox box, ServerEventIO io, ILoc loc)
         {
+            // TODO: Localization!
             var label = box._root.Q<Label>("Message");
-            string baseMessage = label.text;
+            string baseMessage = loc.T("Wait for clients to connect...\nCurrently connected clients:");
             int nonLocalID = 1;
             while (true)
             {
@@ -136,9 +140,15 @@ _gameLoadValidators[index].ValidateSave(saveReference, delegate
             var behavior = sceneLoader._sceneLoader;
             UnityEngine.Coroutine coroutine = null;
 
-            DialogBox box = shower.Create()
-                // TODO: loc
-                .SetMessage("Wait for clients to connect...\nCurrently connected clients:")
+            var socketListener = io.SocketListener;
+            SteamListener steamListener = socketListener as SteamListener;
+            if (socketListener is MultiSocketListener)
+            {
+                steamListener = ((MultiSocketListener)socketListener).GetListener<SteamListener>();
+            }
+
+            var boxCreator = shower.Create()
+                .SetMessage("")
                 .SetConfirmButton(() =>
                 {
                     if (coroutine != null)
@@ -151,6 +161,7 @@ _gameLoadValidators[index].ValidateSave(saveReference, delegate
                     DeterminismService.InitGameStartState(data);
 
                     sceneLoader.StartSaveGame(saveReference);
+                    // TODO: loc
                 }, "Start Game")
                 .SetCancelButton(() =>
                 {
@@ -159,8 +170,16 @@ _gameLoadValidators[index].ValidateSave(saveReference, delegate
                         behavior.StopCoroutine(coroutine);
                     }
                     io.Close();
-                })
-                .Show();
+                });
+            if (steamListener != null)
+            {
+                boxCreator.SetInfoButton(() =>
+                {
+                    steamListener.ShowInviteFriendsPanel();
+                }, "Invite Friends");
+            }
+
+            DialogBox box = boxCreator.Show();
             coroutine = behavior.StartCoroutine(UpdateDialogBox(box, io, shower._loc));
 
         }

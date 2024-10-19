@@ -54,5 +54,10 @@ namespace TimberNet
             listeners.ForEach(listener => listener.Stop());
             isStopped = true;
         }
+
+        public T GetListener<T>()
+        {
+            return (T)listeners.Find(listener => listener is T);
+        }
     }
 }

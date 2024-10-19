@@ -31,6 +31,7 @@ namespace BeaverBuddies.IO
         // happen in the same order for the server and clients.
         public override UserEventBehavior UserEventBehavior => UserEventBehavior.QueuePlay;
 
+        public ISocketListener SocketListener { get; private set; }
 
         // We only support a static map; see note above
         public void Start(byte[] mapBytes)
@@ -38,8 +39,10 @@ namespace BeaverBuddies.IO
             try
             {
                 // TODO: Menu / Config
-                //ISocketListener listener = new TCPListenerWrapper(EventIO.Config.Port);
-                ISocketListener listener = new SteamListener();
+                ISocketListener listener = new MultiSocketListener(
+                    new TCPListenerWrapper(EventIO.Config.Port),
+                    new SteamListener()
+                );
                 TryRegisterSteamPacketReceiver(listener);
                 NetBase = new TimberServer(    
                     listener,
