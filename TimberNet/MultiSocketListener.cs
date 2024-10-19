@@ -10,9 +10,12 @@ namespace TimberNet
     public class MultiSocketListener : ISocketListener
     {
         private readonly List<ISocketListener> listeners = new List<ISocketListener>();
+
         private readonly ConcurrentQueueWithWait<ISocketStream> accepted = new ConcurrentQueueWithWait<ISocketStream>();
         private bool isAccepting = false;
         private bool isStopped = false;
+
+        public IEnumerable<ISocketListener> Listeners => listeners;
 
         public MultiSocketListener(params ISocketListener[] listeners) 
         {
@@ -38,7 +41,7 @@ namespace TimberNet
                 {
                     while (!isStopped)
                     {
-                        accepted.Enqueue(AcceptClient());
+                        accepted.Enqueue(listener.AcceptClient());
                     }
                 });
             }

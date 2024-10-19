@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using BeaverBuddies.Events;
 using BeaverBuddies.Steam;
 using System.Net.Sockets;
+using UnityEngine;
 
 namespace BeaverBuddies.IO
 {
@@ -39,13 +40,23 @@ namespace BeaverBuddies.IO
             try
             {
                 // TODO: Menu / Config
-                ISocketListener listener = new MultiSocketListener(
+                SocketListener = new MultiSocketListener(
                     new TCPListenerWrapper(EventIO.Config.Port),
                     new SteamListener()
                 );
-                TryRegisterSteamPacketReceiver(listener);
-                NetBase = new TimberServer(    
-                    listener,
+                if (SocketListener is MultiSocketListener)
+                {
+                    foreach (ISocketListener child in ((MultiSocketListener)SocketListener).Listeners)
+                    {
+                        TryRegisterSteamPacketReceiver(child);
+                    }
+                }
+                else
+                {
+                    TryRegisterSteamPacketReceiver(SocketListener);
+                }
+                NetBase = new TimberServer(
+                    SocketListener,
                     () =>
                     {
                         // TODO: Probably don't need to hold it in memory after the first tick...

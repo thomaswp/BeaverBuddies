@@ -108,7 +108,7 @@ _gameLoadValidators[index].ValidateSave(saveReference, delegate
             while (true)
             {
                 List<string> clients = io.NetBase.GetConnectedClients();
-                string content = baseMessage + ":";
+                string content = baseMessage;
                 foreach (string client in clients)
                 {
                     string name = client ?? $"{loc.T("Non-steam Client")} ({nonLocalID++})";
@@ -146,6 +146,7 @@ _gameLoadValidators[index].ValidateSave(saveReference, delegate
             {
                 steamListener = ((MultiSocketListener)socketListener).GetListener<SteamListener>();
             }
+            Plugin.Log($"Steam listener: {steamListener}");
 
             var boxCreator = shower.Create()
                 .SetMessage("")

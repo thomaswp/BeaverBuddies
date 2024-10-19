@@ -7,11 +7,15 @@ using ICSharpCode.Decompiler.TypeSystem;
 using ICSharpCode.Decompiler.CSharp.Syntax;
 using ICSharpCode.Decompiler.Metadata;
 using System.Linq;
+using Inspector;
 
 class Program
 {
     static void Main(string[] args)
     {
+        ConcurrentQueueWithWaitTests.Test();
+
+        return;
         string folderPath = @"C:\Program Files (x86)\Steam\steamapps\common\Timberborn\Timberborn_Data\Managed";
         HashSet<string> methodNames = new HashSet<string>(new string[] {
             "First",

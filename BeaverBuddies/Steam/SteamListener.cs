@@ -10,14 +10,11 @@ namespace BeaverBuddies.Steam
 {
     public class SteamListener : ISocketListener, ISteamPacketReceiver
     {
-        // TODO: When tested, use ConcurrentQueueWithWaitInstead
-        public const int AWAIT_THREAD_SLEEP_INTERVAL_MS = 250;
-
         public CSteamID LobbyID { get; private set; }
 
         private List<IDisposable> callbacks = new List<IDisposable>();
         private Dictionary<CSteamID, SteamSocket> sockets = new Dictionary<CSteamID, SteamSocket>();
-        private ConcurrentQueue<SteamSocket> joiningUsers = new ConcurrentQueue<SteamSocket>();
+        private ConcurrentQueueWithWait<SteamSocket> joiningUsers = new ConcurrentQueueWithWait<SteamSocket>();
         private SteamPacketListener steamPacketListener;
 
         public void RegisterSteamPacketListener(SteamPacketListener steamPacketListener)
@@ -84,10 +81,7 @@ namespace BeaverBuddies.Steam
         {
             Plugin.Log("Waiting to accept a client...");
             SteamSocket socket;
-            while (!joiningUsers.TryDequeue(out socket))
-            {
-                Thread.Sleep(AWAIT_THREAD_SLEEP_INTERVAL_MS);
-            }
+            while (!joiningUsers.WaitAndTryDequeue(out socket)) { }
             Plugin.Log("New client accepted!");
             return socket;
         }

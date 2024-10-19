@@ -27,9 +27,10 @@ namespace TimberNet
             Wait();
             if (queue.TryDequeue(out item))
             {
-                if (queue.IsEmpty)
+                hasAvailable.Reset();
+                if (!queue.IsEmpty)
                 {
-                    hasAvailable.Reset();
+                    hasAvailable.Set();
                 }
                 return true;
             }

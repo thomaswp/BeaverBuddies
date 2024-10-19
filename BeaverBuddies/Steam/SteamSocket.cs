@@ -15,9 +15,6 @@ namespace BeaverBuddies.Steam
 {
     public class SteamSocket : ISocketStream, ISteamPacketReceiver
     {
-        // TODO: When tested, use ConcurrentQueueWithWaitInstead
-        // A little over a frame, so the update should be called again
-        public const int AWAIT_THREAD_SLEEP_INTERVAL_MS = 25;
 
         public bool Connected { get; private set; }
 
@@ -26,7 +23,7 @@ namespace BeaverBuddies.Steam
         public readonly CSteamID friendID;
         //public readonly CSteamID lobbyID;
 
-        private readonly ConcurrentQueue<byte[]> readBuffer = new ConcurrentQueue<byte[]>();
+        private readonly ConcurrentQueueWithWait<byte[]> readBuffer = new ConcurrentQueueWithWait<byte[]>();
         private int readOffset = 0;
 
         private SteamPacketListener packetListener;
@@ -62,10 +59,7 @@ namespace BeaverBuddies.Steam
         {
             // Block until we've read something
             byte[] result;
-            while (!readBuffer.TryDequeue(out result))
-            {
-                Thread.Sleep(AWAIT_THREAD_SLEEP_INTERVAL_MS);
-            }
+            while (!readBuffer.WaitAndTryDequeue(out result)) { }
             int bytesToCopy = Math.Min(count, result.Length - readOffset);
             Array.Copy(result, readOffset, buffer, offset, bytesToCopy);
             if (result.Length > bytesToCopy)
