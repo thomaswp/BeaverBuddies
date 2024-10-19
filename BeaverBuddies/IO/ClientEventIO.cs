@@ -32,10 +32,10 @@ namespace BeaverBuddies.IO
 
             TryRegisterSteamPacketReceiver(socket);
 
-            netBase = new TimberClient(socket);
-            netBase.OnMapReceived += mapReceivedCallback;
-            netBase.OnLog += Plugin.Log;
-            netBase.OnError += (error) =>
+            NetBase = new TimberClient(socket);
+            NetBase.OnMapReceived += mapReceivedCallback;
+            NetBase.OnLog += Plugin.Log;
+            NetBase.OnError += (error) =>
             {
                 Plugin.LogError(error);
                 CleanUp();
@@ -44,7 +44,7 @@ namespace BeaverBuddies.IO
             };
             try
             {
-                netBase.Start();
+                NetBase.Start();
             }
             catch (Exception ex)
             {
@@ -56,10 +56,10 @@ namespace BeaverBuddies.IO
 
         private void CleanUp()
         {
-            if (netBase == null) return;
-            netBase.OnMapReceived -= mapReceivedCallback;
-            netBase.OnLog -= Plugin.Log;
-            netBase = null;
+            if (NetBase == null) return;
+            NetBase.OnMapReceived -= mapReceivedCallback;
+            NetBase.OnLog -= Plugin.Log;
+            NetBase = null;
         }
 
         public static ClientEventIO Create(ISocketStream socket, MapReceived mapReceivedCallback, Action<string> onError)

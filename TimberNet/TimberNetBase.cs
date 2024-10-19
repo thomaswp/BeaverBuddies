@@ -21,7 +21,7 @@ namespace TimberNet
         public const string TYPE_KEY = "type";
         public const string SET_STATE_EVENT = "SetState";
         public const string HEARTBEAT_EVENT = "Heartbeat";
-        public const int MAX_BUFFER_SIZE = 8192; // 8K
+        public const int MAX_BUFFER_SIZE = 8192 * 4; // 32K
 
         public delegate void MessageReceived(string message);
         public delegate void MapReceived(byte[] mapBytes);
@@ -288,18 +288,6 @@ namespace TimberNet
 
         private void ReceiveFile(ISocketStream stream, int messageLength)
         {
-            // TODO: How should this fail?
-            //int totalBytesRead = 0;
-            //MemoryStream ms = new MemoryStream();
-            //while (totalBytesRead < messageLength)
-            //{
-            //    int bytesToRead = Math.Min(messageLength - totalBytesRead, MAX_BUFFER_SIZE);
-            //    byte[] buffer = new byte[bytesToRead];
-            //    //Log($"{buffer.Length}, {GetHashCode(buffer).ToString("X8")}");
-            //    int bytesRead = stream.Read(buffer, 0, bytesToRead);
-            //    totalBytesRead += bytesRead;
-            //    ms.Write(buffer, 0, bytesRead);
-            //}
             byte[] mapBytes = stream.ReadUntilComplete(messageLength);
             AddFileToHash(mapBytes);
             Log($"Received map with length {mapBytes.Length} and Hash: {GetHashCode(mapBytes).ToString("X8")}");

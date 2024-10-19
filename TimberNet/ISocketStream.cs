@@ -10,6 +10,8 @@ namespace TimberNet
     {
         bool Connected { get; }
 
+        string? Name { get; }
+
         int Read(byte[] buffer, int offset, int count);
         void Write(byte[] buffer, int offset, int count);
         void Close();
@@ -25,6 +27,7 @@ namespace TimberNet
 
         public void ReadUntilComplete(byte[] buffer, int count)
         {
+            // TODO: How should this fail?
             int totalBytesRead = 0;
             while (totalBytesRead < count)
             {

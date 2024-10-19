@@ -30,6 +30,11 @@ namespace TimberNet
         private string? errorMessage = null;
         public bool IsAcceptingClients => errorMessage == null;
 
+        public List<string> GetConnectedClients()
+        {
+            return clients.Select(c => c.Name).ToList();
+        }
+
         public TimberServer(ISocketListener listener, Func<Task<byte[]>> mapProvider, Func<JObject>? initEventProvider)
         {
             this.listener = listener;

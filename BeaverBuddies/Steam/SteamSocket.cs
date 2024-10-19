@@ -21,6 +21,8 @@ namespace BeaverBuddies.Steam
 
         public bool Connected { get; private set; }
 
+        public string Name { get; private set; }
+
         public readonly CSteamID friendID;
         //public readonly CSteamID lobbyID;
 
@@ -32,7 +34,8 @@ namespace BeaverBuddies.Steam
         public SteamSocket(CSteamID friendID, bool autoconnect = false)
         {
             this.friendID = friendID;
-            this.Connected = autoconnect;
+            Name = SteamFriends.GetFriendPersonaName(friendID);
+            Connected = autoconnect;
         }
 
         public void RegisterSteamPacketListener(SteamPacketListener listener)
@@ -83,7 +86,7 @@ namespace BeaverBuddies.Steam
                 buffer = newBuffer;
             }
             // TODO: Remove for privacy!
-            Plugin.Log($"SteamSocket sending {buffer.Length} bytes to {SteamFriends.GetFriendPersonaName(friendID)}");
+            Plugin.Log($"SteamSocket sending {count} bytes to {Name}");
             SteamNetworking.SendP2PPacket(friendID, buffer, (uint)count, EP2PSend.k_EP2PSendReliable);
         }
 

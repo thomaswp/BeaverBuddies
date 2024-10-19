@@ -12,6 +12,8 @@ namespace TimberNet
         public readonly int port;
         private readonly TcpClient client;
 
+        public string? Name => null;
+
         public TCPClientWrapper(string address, int port) 
         {
             client = new TcpClient();

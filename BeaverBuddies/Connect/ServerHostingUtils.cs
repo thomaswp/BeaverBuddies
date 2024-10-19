@@ -13,6 +13,9 @@ using System.Runtime.InteropServices.ComTypes;
 using Newtonsoft.Json.Bson;
 using Timberborn.GameSceneLoading;
 using BeaverBuddies.IO;
+using BeaverBuddies.Util;
+using Timberborn.CoreUI;
+using System.Collections;
 
 namespace BeaverBuddies.Connect
 {
@@ -53,7 +56,7 @@ namespace BeaverBuddies.Connect
             {
                 if (__instance._gameSaveRepository.SaveExists(selectedSave.SaveReference))
                 {
-                    ServerHostingUtils.LoadIfSaveValidAndHost(__instance._validatingGameLoader, selectedSave.SaveReference);
+                    ServerHostingUtils.LoadIfSaveValidAndHost(__instance._validatingGameLoader, __instance._dialogBoxShower, selectedSave.SaveReference);
                 }
                 // Debug.LogWarning("Save: " + selectedSave.DisplayName + " doesn't exist, failed to load.");
             }
@@ -62,9 +65,9 @@ namespace BeaverBuddies.Connect
 
     internal class ServerHostingUtils
     {
-        public static void LoadIfSaveValidAndHost(ValidatingGameLoader loader, SaveReference saveReferece)
+        public static void LoadIfSaveValidAndHost(ValidatingGameLoader loader, DialogBoxShower shower, SaveReference saveReferece)
         {
-            CheckNextValidator(loader, saveReferece, 0);
+            CheckNextValidator(loader, shower, saveReferece, 0);
         }
 
         [ManualMethodOverwrite]
@@ -80,20 +83,39 @@ _gameLoadValidators[index].ValidateSave(saveReference, delegate
 	CheckNextValidator(saveReference, index + 1);
 });
          */
-        private static void CheckNextValidator(ValidatingGameLoader loader, SaveReference saveReference, int index)
+        private static void CheckNextValidator(ValidatingGameLoader loader, DialogBoxShower shower, SaveReference saveReference, int index)
         {
             if (index >= loader._gameLoadValidators.Length)
             {
-                LoadAndHost(loader, saveReference);
+                LoadAndHost(loader, shower, saveReference);
                 return;
             }
             loader._gameLoadValidators[index].ValidateSave(saveReference, delegate
             {
-                CheckNextValidator(loader, saveReference, index + 1);
+                CheckNextValidator(loader, shower, saveReference, index + 1);
             });
         }
 
-        public static void LoadAndHost(ValidatingGameLoader loader, SaveReference saveReference)
+        private static IEnumerator UpdateDialogBox(DialogBox box, ServerEventIO io, ILoc loc)
+        {
+            var label = box._root.Q<Label>("Message");
+            string baseMessage = label.text;
+            int nonLocalID = 1;
+            while (true)
+            {
+                List<string> clients = io.NetBase.GetConnectedClients();
+                string content = baseMessage + ":";
+                foreach (string client in clients)
+                {
+                    string name = client ?? $"{loc.T("Non-steam Client")} ({nonLocalID++})";
+                    content += client + $"\n* {name}";
+                }
+                label.text = content;
+                yield return 0;
+            }
+        }
+
+        private static void LoadAndHost(ValidatingGameLoader loader, DialogBoxShower shower, SaveReference saveReference)
         {
             var sceneLoader = loader._gameSceneLoader;
             var repository = sceneLoader._gameSaveRepository;
@@ -111,11 +133,36 @@ _gameLoadValidators[index].ValidateSave(saveReference, delegate
             EventIO.Set(io);
             io.Start(data);
 
-            // Make sure to set the RNG seed before loading the map
-            // The client will do the same
-            DeterminismService.InitGameStartState(data);
+            var behavior = sceneLoader._sceneLoader;
+            UnityEngine.Coroutine coroutine = null;
 
-            sceneLoader.StartSaveGame(saveReference);
+            DialogBox box = shower.Create()
+                // TODO: loc
+                .SetMessage("Wait for clients to connect...\nCurrently connected clients:")
+                .SetConfirmButton(() =>
+                {
+                    if (coroutine != null)
+                    {
+                        behavior.StopCoroutine(coroutine);
+                    }
+
+                    // Make sure to set the RNG seed before loading the map
+                    // The client will do the same
+                    DeterminismService.InitGameStartState(data);
+
+                    sceneLoader.StartSaveGame(saveReference);
+                }, "Start Game")
+                .SetCancelButton(() =>
+                {
+                    if (coroutine != null)
+                    {
+                        behavior.StopCoroutine(coroutine);
+                    }
+                    io.Close();
+                })
+                .Show();
+            coroutine = behavior.StartCoroutine(UpdateDialogBox(box, io, shower._loc));
+
         }
     }
 }

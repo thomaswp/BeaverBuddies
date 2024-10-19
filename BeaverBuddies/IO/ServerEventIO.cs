@@ -38,10 +38,10 @@ namespace BeaverBuddies.IO
             try
             {
                 // TODO: Menu / Config
-                //new TCPListenerWrapper(EventIO.Config.Port),
+                //ISocketListener listener = new TCPListenerWrapper(EventIO.Config.Port);
                 ISocketListener listener = new SteamListener();
                 TryRegisterSteamPacketReceiver(listener);
-                netBase = new TimberServer(    
+                NetBase = new TimberServer(    
                     listener,
                     () =>
                     {
@@ -60,9 +60,9 @@ namespace BeaverBuddies.IO
                 return;
             }
             //netBase = new TimberServer(port, mapProvider, null);
-            netBase.OnLog += Plugin.Log;
-            netBase.OnMapReceived += NetBase_OnClientConnected;
-            netBase.Start();
+            NetBase.OnLog += Plugin.Log;
+            NetBase.OnMapReceived += NetBase_OnClientConnected;
+            NetBase.Start();
         }
 
         private Func<JObject> CreateInitEvent()
@@ -85,7 +85,7 @@ namespace BeaverBuddies.IO
             Plugin.Log("Game started: no longer accepting clients");
             string message = $"The Host has already started the game, and the game can no longer be joined. " +
                 $"Ask the Host to rehost and join before they unpause.";
-            netBase.StopAcceptingClients(message);
+            NetBase.StopAcceptingClients(message);
             // TODO: remove map from memory
         }
 

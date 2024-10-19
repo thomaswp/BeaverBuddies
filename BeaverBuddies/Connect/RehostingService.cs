@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using BeaverBuddies.Util;
+using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using Timberborn.Autosaving;
+using Timberborn.CoreUI;
 using Timberborn.GameSaveRepositorySystem;
 using Timberborn.GameSaveRepositorySystemUI;
 using Timberborn.GameSaveRuntimeSystem;
@@ -26,6 +28,7 @@ namespace BeaverBuddies.Connect
         private readonly GameSaveRepository _gameSaveRepository;
         private readonly SettlementNameService _settlementNameService;
         private readonly ValidatingGameLoader _validatingGameLoader;
+        private readonly DialogBoxShower _dialogBoxShower;
 
 
         public RehostingService(
@@ -33,7 +36,8 @@ namespace BeaverBuddies.Connect
             GameSaver gameSaver, 
             GameSaveRepository gameSaveRepository, 
             SettlementNameService settlementNameService,
-            ValidatingGameLoader validatingGameLoader
+            ValidatingGameLoader validatingGameLoader,
+            DialogBoxShower dialogBoxShower
         ) 
         {
             _autosaveNameService = autosaveNameService;
@@ -41,6 +45,7 @@ namespace BeaverBuddies.Connect
             _gameSaveRepository = gameSaveRepository;
             _settlementNameService = settlementNameService;
             _validatingGameLoader = validatingGameLoader;
+            _dialogBoxShower = dialogBoxShower;
         }
 
         // TODO: Should probably check IEnumerable<IAutosaveBlocker> autosaveBlockers
@@ -59,10 +64,10 @@ namespace BeaverBuddies.Connect
                     // Run on next frame because the GameSaver doesn't release its
                     // handle on the save stream until the method finishes executing
                     // i.e. after the callback has run.
-                    _gameSaver.StartCoroutine(RunOnNextFrameCoroutine(() =>
+                    TimeoutUtils.RunAfterFrames(_gameSaver, () =>
                     {
-                        ServerHostingUtils.LoadIfSaveValidAndHost(_validatingGameLoader, saveReference);
-                    }));
+                        ServerHostingUtils.LoadIfSaveValidAndHost(_validatingGameLoader, _dialogBoxShower, saveReference);
+                    });
                 });
             }
             catch (GameSaverException ex)
@@ -76,12 +81,6 @@ namespace BeaverBuddies.Connect
                 return false;
             }
             return true;
-        }
-
-        private IEnumerator RunOnNextFrameCoroutine(Action action)
-        {
-            yield return null;
-            action?.Invoke();
         }
     }
 }
