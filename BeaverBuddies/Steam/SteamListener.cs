@@ -13,7 +13,6 @@ namespace BeaverBuddies.Steam
         public CSteamID LobbyID { get; private set; }
 
         private List<IDisposable> callbacks = new List<IDisposable>();
-        private Dictionary<CSteamID, SteamSocket> sockets = new Dictionary<CSteamID, SteamSocket>();
         private ConcurrentQueueWithWait<SteamSocket> joiningUsers = new ConcurrentQueueWithWait<SteamSocket>();
         private SteamPacketListener steamPacketListener;
 
@@ -67,7 +66,6 @@ namespace BeaverBuddies.Steam
 
                 var socket = new SteamSocket(userJoined, true);
                 steamPacketListener.RegisterSocket(socket);
-                sockets.Add(userJoined, socket);
                 joiningUsers.Enqueue(socket);
 
                 //SteamNetworking.CreateP2PConnectionSocket(memberId, 0, )

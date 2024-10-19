@@ -104,11 +104,11 @@ _gameLoadValidators[index].ValidateSave(saveReference, delegate
             // TODO: Localization!
             var label = box._root.Q<Label>("Message");
             string baseMessage = loc.T("Wait for clients to connect...\nCurrently connected clients:");
-            int nonLocalID = 1;
             while (true)
             {
                 List<string> clients = io.NetBase.GetConnectedClients();
                 string content = baseMessage;
+                int nonLocalID = 1;
                 foreach (string client in clients)
                 {
                     string name = client ?? $"{loc.T("Non-steam Client")} ({nonLocalID++})";

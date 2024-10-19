@@ -30,7 +30,7 @@ namespace TimberNet
         private string? errorMessage = null;
         public bool IsAcceptingClients => errorMessage == null;
 
-        public List<string> GetConnectedClients()
+        public List<string?> GetConnectedClients()
         {
             return clients.Select(c => c.Name).ToList();
         }
