@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace BeaverBuddies
+namespace BeaverBuddies.Util
 {
     public static class ReflectionUtils
     {
@@ -21,9 +21,9 @@ namespace BeaverBuddies
                 .Where(type => baseType.IsAssignableFrom(type) && type != baseType)
                 //.Where(type => type.GetMethods().Any(method => methods.Contains(method.Name)))
                 .OrderBy(type => type.FullName);
-                ;
+            ;
 
-            
+
 
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"Classes inhereting: {baseType.Name}");

@@ -51,11 +51,6 @@ namespace BeaverBuddies.DesyncDetecter
             Reset();
         }
 
-        public static List<string> GetCurrentTrace()
-        {
-            return CurrentTrace.Select(t => t.message).ToList();
-        }
-
         public void Reset()
         {
             currentTick = -1;
@@ -119,6 +114,8 @@ namespace BeaverBuddies.DesyncDetecter
                 //Plugin.LogStackTrace();
                 return;
             }
+            // Trace called before the service has been initialized
+            if (traces.Count == 0) return;
             CurrentTrace.Add(new Trace()
             {
                 message = message,

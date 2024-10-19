@@ -13,6 +13,8 @@ using Timberborn.WalkingSystem;
 using Timberborn.NaturalResourcesMoisture;
 using Timberborn.SoilMoistureSystem;
 using BeaverBuddies.IO;
+using Timberborn.WaterSystem;
+using Timberborn.TickSystem;
 
 namespace BeaverBuddies.DesyncDetecter
 {
@@ -186,6 +188,58 @@ namespace BeaverBuddies.DesyncDetecter
                 hash = (hash * 7) + BitConverter.SingleToInt32Bits(level);
             }
             DesyncDetecterService.Trace($"Updating moisture levels with hash {hash:X8}");
+        }
+    }
+
+    [HarmonyPatch(typeof(ThreadSafeWaterMap), nameof(ThreadSafeWaterMap.UpdateData))]
+    public class ThreadSafeWaterMapUpdateDataPatcher
+    {
+        public static void Postfix(ThreadSafeWaterMap __instance)
+        {
+            if (!EventIO.Config.Debug) return;
+
+            var columns = __instance._waterColumns;
+            int hash = 13;
+            foreach (var level in columns)
+            {
+                hash = (hash * 7) + GetHashCode(level);
+            }
+            DesyncDetecterService.Trace($"Updating water map columns with hash {hash:X8}");
+            
+            hash = 13;
+            var counts = __instance._columnCount;
+            foreach (byte count in counts)
+            {
+                hash = (hash * 7) + count;
+            }
+            DesyncDetecterService.Trace($"Updating water map column counts with hash {hash:X8}");
+        }
+
+        private static int GetHashCode(WaterColumn waterColumn)
+        {
+            int hash = 13;
+            hash = (hash * 7) + BitConverter.SingleToInt32Bits(waterColumn.Ceiling);
+            hash = (hash * 7) + BitConverter.SingleToInt32Bits(waterColumn.Contamination);
+            hash = (hash * 7) + BitConverter.SingleToInt32Bits(waterColumn.Floor);
+            hash = (hash * 7) + BitConverter.SingleToInt32Bits(waterColumn.Overflow);
+            hash = (hash * 7) + BitConverter.SingleToInt32Bits(waterColumn.WaterDepth);
+            return hash;
+        }
+    }
+
+    [HarmonyPatch(typeof(TickableEntityBucket), nameof(TickableEntityBucket.Add))]
+    public class TEBAddPatcher
+    {
+
+        static void Postfix(TickableEntityBucket __instance, TickableEntity tickableEntity)
+        {
+            if (!ReplayService.IsLoaded) return;
+            int index = __instance._tickableEntities.Values.IndexOf(tickableEntity);
+            if (EventIO.Config.Debug)
+            {
+                DesyncDetecterService.Trace($"Adding: {tickableEntity.EntityId} at index {index}");
+            }
+            //Plugin.LogStackTrace();
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using BeaverBuddies.Connect;
 using BeaverBuddies.DesyncDetecter;
 using BeaverBuddies.Steam;
+using BeaverBuddies.Fixes;
 using BeaverBuddies.IO;
 using BeaverBuddies.Util.Logging;
 using Bindito.Core;
@@ -42,6 +43,7 @@ namespace BeaverBuddies
             containerDefinition.Bind<DeterminismService>().AsSingleton();
             containerDefinition.Bind<TickReplacerService>().AsSingleton();
             containerDefinition.Bind<RehostingService>().AsSingleton();
+            containerDefinition.Bind<LateTickableBuffer>().AsSingleton();
 
             if (EventIO.Config.Debug)
             {
@@ -88,7 +90,7 @@ namespace BeaverBuddies
     {
 
         // TODO: Need to manually keep this updated now
-        public const string Version = "1.2.4";
+        public const string Version = "1.2.6";
         public const string Name = "BeaverBuddies";
         public const string ID = "beaverbuddies";
 
@@ -103,7 +105,7 @@ namespace BeaverBuddies
             ReplayConfig config = new ReplayConfig();
 
             EventIO.Config = config;
-
+            
             Log($"{Name} is loaded!");
 
             if (config.GetNetMode() == NetMode.None) return;
