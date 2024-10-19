@@ -111,7 +111,7 @@ _gameLoadValidators[index].ValidateSave(saveReference, delegate
                 int nonLocalID = 1;
                 foreach (string client in clients)
                 {
-                    string name = client ?? $"{loc.T("Non-steam Client")} ({nonLocalID++})";
+                    string name = client ?? $"{loc.T("Direct Connect Client")} ({nonLocalID++})";
                     content += client + $"\n* {name}";
                 }
                 label.text = content;
