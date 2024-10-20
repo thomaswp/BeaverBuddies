@@ -4,16 +4,20 @@
 // numbers, making it as deterministic as possible w.r.t random
 //#define NO_RANDOM
 
+using BeaverBuddies.DesyncDetecter;
+using BeaverBuddies.IO;
 using Bindito.Core.Internal;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
+using Timberborn.Analytics;
 using Timberborn.Autosaving;
+using Timberborn.BaseComponentSystem;
 using Timberborn.Beavers;
 using Timberborn.BotUpkeep;
+using Timberborn.Brushes;
 using Timberborn.CharacterMovementSystem;
 using Timberborn.Common;
 using Timberborn.CoreSound;
@@ -29,30 +33,18 @@ using Timberborn.RecoveredGoodSystem;
 using Timberborn.Ruins;
 using Timberborn.SoundSystem;
 using Timberborn.StockpileVisualization;
-using Timberborn.TerrainSystem;
+using Timberborn.TerrainSystemRendering;
 using Timberborn.TickSystem;
+using Timberborn.TimeSystem;
+using Timberborn.ToolSystem;
 using Timberborn.WalkingSystem;
 using Timberborn.WaterBuildings;
 using Timberborn.WorkshopsEffects;
 using TimberNet;
+using Unity.Services.Analytics;
 using UnityEngine;
-using static Timberborn.GameSaveRuntimeSystem.GameSaver;
 using static BeaverBuddies.SingletonManager;
-using System.Collections.Immutable;
-using System.Threading.Tasks;
-using Timberborn.NaturalResources;
-using Timberborn.BlockSystem;
-using static Timberborn.NaturalResourcesReproduction.NaturalResourceReproducer;
-using System.Linq;
-using Timberborn.NaturalResourcesReproduction;
-using Timberborn.TimeSystem;
-using Timberborn.BaseComponentSystem;
-using Timberborn.SlotSystem;
-using Timberborn.EnterableSystem;
-using System.Collections;
-using BeaverBuddies.DesyncDetecter;
-using Timberborn.Brushes;
-using Timberborn.WaterObjects;
+using static Timberborn.GameSaveRuntimeSystem.GameSaver;
 
 namespace BeaverBuddies
 {
@@ -75,6 +67,13 @@ namespace BeaverBuddies
      * - Remove interpolating animations
      * - Remove all water logic (this might get complicated...)
      * - Log random calls during load to look for non-gameplay logic
+     * 
+     * Known Issues:
+     * - Either NaturalResourceReproducer.TryReprosuceResources (less likely)
+     *   or WateredNaturalResource.StartDryingOut (more likely) is desyncing,
+     *   and if the later it's likely because of a timer being created.
+     *   Time logging produces lots of false positives, so I don't typically
+     *   do it, but I could try to find a way to...
      * 
      * Monitoring:
      * - There may be other Singleton's with game logic updates.
@@ -191,7 +190,10 @@ namespace BeaverBuddies
                 // So we want to use gameplay random.
                 if (!ReplayService.IsLoaded)
                 {
-                    DesyncDetecterService.Trace($"Load RNG; s0 before: {UnityEngine.Random.state.s0:X8}");
+                    if (EventIO.Config.Debug)
+                    {
+                        DesyncDetecterService.Trace($"Load RNG; s0 before: {UnityEngine.Random.state.s0:X8}");
+                    }
                     return false;
                 }
 
@@ -213,14 +215,19 @@ namespace BeaverBuddies
                 if (IsTicking)
                 {
                     var entity = TickableEntityTickPatcher.currentlyTickingEntity;
-                    DesyncDetecterService.Trace($"Tick RNG; " +
+                    if (EventIO.Config.Debug)
+                    {
+                        DesyncDetecterService.Trace($"Tick RNG; " +
                         $"s0 before: {UnityEngine.Random.state.s0:X8}; " +
                         $"Last entity: {entity?.name} - {entity?.EntityId}");
+                    }
                     return false;
                 }
 
                 // If we are replaying/playing events recorded from this
                 // user or other clients, we should always use the game's random.
+                // These mostly happen during ticks, but can also happen
+                // when the game is paused.
                 if (ReplayService.IsReplayingEvents) return false;
 
                 // If we're not ticking/replaying, and random is happening from an
@@ -483,7 +490,7 @@ namespace BeaverBuddies
                 }
             }
 
-            //if (__result.Any(o => o is TimeTriggerFactory || o is TimeTriggerService))
+            //if (__result.Any(o => o is CommandLineArguments))
             //{
             //    string name = method.DeclaringType?.FullName;
             //    if (types.Add(name))
@@ -673,6 +680,45 @@ namespace BeaverBuddies
         }
     }
 
+    // Sometimes tool descriptions need an instance of the object they describe to describe it
+    // and when it activates this can use randomness (e.g. WateredNaturalResource), which should
+    // be considered UI randomness, since this object never gets in the game.
+    [HarmonyPatch(typeof(DescriptionPanel), nameof(DescriptionPanel.SetDescription))]
+    public class DescriptionPanelSetDescriptionPatcher
+    {
+        static void Prefix()
+        {
+            DeterminismService.SetNonGamePatcherActive(typeof(DescriptionPanelSetDescriptionPatcher), true);
+        }
+
+        static void Postfix()
+        {
+            DeterminismService.SetNonGamePatcherActive(typeof(DescriptionPanelSetDescriptionPatcher), false);
+        }
+    }
+
+    // Disable analytics while this mod is enabled, since Unity's Analytics
+    // package seems to cause a bunch of desyncs, and I'm not confident
+    // my patches have fixed them.
+    [HarmonyPatch(typeof(AnalyticsManager), nameof(AnalyticsManager.Enable))]
+    public class AnalyticsManagerEnablePatcher
+    {
+        static bool Prefix()
+        {
+            Plugin.Log("Skipping AnalyticsManager.Enable");
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(AnalyticsContainer), nameof(AnalyticsContainer.Update))]
+    public class AnalyticsContainerUpdatePatcher
+    {
+        static void Prefix()
+        {
+            Plugin.LogWarning("AnalyticsContainer.Update is being called; analytics should be disabled!");
+        }
+    }
+
     [HarmonyPatch(typeof(TickableBucketService), nameof(TickableBucketService.FinishFullTick))]
     static class TickableBucketService_FinishFullTick_Patch
     {
@@ -691,7 +737,6 @@ namespace BeaverBuddies
 
     // TODO: Double check that this still works - the arguments have
     // changed and now it gets saved on LateUpdate as a queueing process
-    [ManualMethodOverwrite]
     [HarmonyPatch(typeof(GameSaver), nameof(GameSaver.Save), typeof(QueuedSave))]
     public class GameSaverSavePatcher
     {
@@ -764,7 +809,12 @@ namespace BeaverBuddies
 #endif
             if (ReplayService.IsLoaded)
             {
-                DesyncDetecterService.Trace($"Generating new GUID: {__result}");
+                // Only trace this Guid if it would use Unity random, and that would
+                // use the Game RNG.
+                if (EventIO.Config.Debug && !DeterminismService.ShouldUseNonGameRNG())
+                {
+                    DesyncDetecterService.Trace($"Generating new GUID: {__result}");
+                }
             }
             return false;
         }
@@ -835,19 +885,6 @@ namespace BeaverBuddies
         }
     }
 
-    [HarmonyPatch(typeof(TickableEntityBucket), nameof(TickableEntityBucket.Add))]
-    public class TEBAddPatcher
-    {
-
-        static void Postfix(TickableEntityBucket __instance, TickableEntity tickableEntity)
-        {
-            if (!ReplayService.IsLoaded) return;
-            int index = __instance._tickableEntities.Values.IndexOf(tickableEntity);
-            DesyncDetecterService.Trace($"Adding: {tickableEntity.EntityId} at index {index}");
-            //Plugin.LogStackTrace();
-        }
-    }
-
     [HarmonyPatch(typeof(Time), nameof(Time.time), MethodType.Getter)]
     public class TimeTimePatcher
     {
@@ -866,12 +903,12 @@ namespace BeaverBuddies
         }
     }
 
-    // TODO: Check whether this is ever called by game logic
-    // or just override it to _secondsPassedToday
-    // DayNightCycle.FluidSecondsPassedToday
 
-    [HarmonyPatch(typeof(DayNightCycle), nameof(DayNightCycle.FluidSecondsPassedToday), MethodType.Getter)]
     [ManualMethodOverwrite]
+    /*
+public TimeOfDay FluidTimeOfDay => CalculateTimeOfDay(FluidSecondsPassedToday);
+     */
+    [HarmonyPatch(typeof(DayNightCycle), nameof(DayNightCycle.FluidSecondsPassedToday), MethodType.Getter)]
     public class DayNightCycleFluidSecondsPassedTodayPatcher
     {
         static bool Prefix(DayNightCycle __instance, ref float __result)
@@ -906,7 +943,7 @@ namespace BeaverBuddies
                 EntityUpdateHash = TimberNetBase.CombineHash(EntityUpdateHash, entity.EntityId.GetHashCode());
 
                 var entityComponent = entity._entityComponent;
-                var pathFollower = entityComponent.GetComponentFast<Walker>()?._pathFollower;
+                var pathFollower = entityComponent.GetComponentFast<Walker>()?.PathFollower;
                 var animatedPathFollower = entityComponent.GetComponentFast<MovementAnimator>()?._animatedPathFollower;
                 if (pathFollower != null && animatedPathFollower != null)
                 {
@@ -966,8 +1003,21 @@ namespace BeaverBuddies
     }
 
 #if NO_PARALLEL
-    [HarmonyPatch(typeof(TickableSingletonService), nameof(TickableSingletonService.StartParallelTick))]
     [ManualMethodOverwrite]
+    /*
+9/2/202024
+_parallelTickStartTimestamp = Stopwatch.GetTimestamp();
+ImmutableArray<IParallelTickableSingleton>.Enumerator enumerator = _parallelTickableSingletons.GetEnumerator();
+while (enumerator.MoveNext())
+{
+	IParallelTickableSingleton parallelTickable = enumerator.Current;
+	_parallelizerContext.Run(delegate
+	{
+		parallelTickable.ParallelTick();
+	});
+}
+     */
+    [HarmonyPatch(typeof(TickableSingletonService), nameof(TickableSingletonService.StartParallelTick))]
     class TickableSingletonServiceStartParallelTickPatcher
     {
         static bool Prefix(TickableSingletonService __instance)
@@ -990,7 +1040,6 @@ namespace BeaverBuddies
     // generalizable approach to prevent Singletons from updating
     // and instead update them on tick.
     [HarmonyPatch(typeof(RecoveredGoodStackSpawner), nameof(RecoveredGoodStackSpawner.UpdateSingleton))]
-    [ManualMethodOverwrite]
     class RecoveredGoodStackSpawnerUpdateSingletonPatcher
     {
         private static bool doBaseUpdate = false;
@@ -1011,24 +1060,4 @@ namespace BeaverBuddies
     }
 
 
-    [HarmonyPatch(typeof(WaterObjectService), nameof(WaterObjectService.UpdateSingleton))]
-    [ManualMethodOverwrite]
-    class WaterObjectServiceUpdateSingletonPatcher
-    {
-        private static bool doBaseUpdate = false;
-
-        public static void BaseUpdateSingleton(WaterObjectService __instance)
-        {
-            doBaseUpdate = true;
-            __instance.UpdateSingleton();
-            doBaseUpdate = false;
-        }
-
-        static bool Prefix(WaterObjectService __instance)
-        {
-            if (EventIO.IsNull) return true;
-            if (doBaseUpdate) return true;
-            return false;
-        }
-    }
 }

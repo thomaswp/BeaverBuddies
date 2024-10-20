@@ -4,7 +4,7 @@ using TimberNet;
 using System.Threading.Tasks;
 using BeaverBuddies.Events;
 
-namespace BeaverBuddies
+namespace BeaverBuddies.IO
 {
     // TODO: With TimberBorn's current architecture, we cannot feasibly
     // support joining after the game has started. This is because a number
@@ -37,7 +37,8 @@ namespace BeaverBuddies
             {
                 netBase = new TimberServer(
                     EventIO.Config.Port,
-                    () => {
+                    () =>
+                    {
                         // TODO: Probably don't need to hold it in memory after the first tick...
                         Task<byte[]> task = new Task<byte[]>(() => mapBytes);
                         task.Start();
@@ -84,7 +85,7 @@ namespace BeaverBuddies
 
         private void NetBase_OnClientConnected(byte[] mapBytes)
         {
-            
+
         }
     }
 }

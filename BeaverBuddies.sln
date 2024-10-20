@@ -14,11 +14,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TimberNet", "TimberNet\Timb
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{818CBCAA-11F9-44CA-9C38-2E98396E0FFB}"
 	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
 		License.txt = License.txt
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inspector", "Inspector\Inspector.csproj", "{0515AAAB-9D23-4433-A179-AE5064C7A04A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Inspector", "Inspector\Inspector.csproj", "{0515AAAB-9D23-4433-A179-AE5064C7A04A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

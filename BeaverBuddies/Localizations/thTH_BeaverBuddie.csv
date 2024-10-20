@@ -1,0 +1,16 @@
+ID,Text,Comment
+BeaverBuddies.Menu.JoinCoopGame,"เข้าร่วมเกมแบบร่วมมือ","Join co-op game"
+BeaverBuddies.JoinCoopGame.EnterIp,"ป้อนที่อยู่ IP สากลของโฮสต์:","Enter the global IP address of the Host:"
+BeaverBuddies.FirstTimer.Message,"ดูเหมือนว่านี่จะเป็นครั้งแรกที่คุณใช้ BeaverBuddies เราขอแนะนำให้ดูคำแนะนำของเราอย่างรวดเร็วเพื่อให้แน่ใจว่าคุณพร้อมที่จะเล่นแล้ว คุณต้องการทำเช่นนั้นตอนนี้หรือไม่?","It looks like this is your first time using BeaverBuddies. We recommend taking a quick look through our guide to make sure you are set up to play. Would you like to do that now?"
+BeaverBuddies.Saving.HostCoopGame,"โฮสต์เกมแบบร่วมมือ","Host co-op game"
+BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError,"การเชื่อมต่อล้มเหลวพร้อมข้อผิดพลาด:
+{0}
+คุณต้องการเปิดคู่มือการแก้ไขปัญหาหรือไม่?","Joining failed with error:
+{0}
+Would you like to open the troubleshooting guide?"
+BeaverBuddies.JoinCoopGame.ConnectionFailedMessage,"ไม่สามารถเชื่อมต่อกับโฮสต์ได้ คุณต้องการเปิดคู่มือการแก้ไขปัญหาหรือไม่?","Failed to connect to Host. Would you like to open the troubleshooting guide?"
+BeaverBuddies.ClientDesynced.Message,"ผู้เล่นที่เชื่อมต่อเกิดการดีซิงค์และไม่สามารถเล่นต่อได้ - ขออภัยในความไม่สะดวก! โฮสต์ควรเริ่มเกมใหม่ และหลังจากนั้นคลไอเอนต์ควรเชื่อมต่อใหม่ หากปัญหายังคงอยู่ คุณอาจต้องรีสตาร์ทเกมใหม่ ก่อนที่จะโหลดใหม่ คุณต้องการรายงานบั๊กเพื่อช่วยเราแก้ไขปัญหานี้หรือไม่?","A connected player desynced and cannot continue playing - sorry about that! The Host should hit Rehost and, AFTER that, the Client should Reconnect. You may need to restart the game if problems persist. Before reloading, would you like to file a bug report to help us fix this issue?"
+BeaverBuddies.ClientDesynced.FailedToRehostMessage,"ไม่สามารถโฮสต์ใหม่ได้ กรุณาบันทึกและโฮสต์ใหม่ด้วยตนเอง","Failed to Rehost. Manually save and Host again."
+BeaverBuddies.ClientDesynced.SaveAndRehostButton,"บันทึกและโฮสต์ใหม่","Save and Rehost"
+BeaverBuddies.ClientDesynced.WaitForRehostButton,"เชื่อมต่อใหม่ (รอโฮสต์ใหม่)","Reconnect (wait for Rehost)"
+BeaverBuddies.ClientDesynced.PostBugReportButton,"รายงานข้อผิดพลาด","Post Bug Report"

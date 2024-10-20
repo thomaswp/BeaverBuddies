@@ -1,14 +1,14 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.IO;
-using TimberApi.ConfigSystem;
-using TimberApi.ModSystem;
+using Timberborn.Modding;
 
 namespace BeaverBuddies
 {
     public enum NetMode { Manual, AutoconnectClient, Record, Replay, None }
 
-    public class ReplayConfig : IConfig
+    // TODO: Save/load
+    public class ReplayConfig
     {
         public const string MODE_NONE = "none";
         public const string MODE_MANUAL = "manual";
@@ -18,7 +18,6 @@ namespace BeaverBuddies
         public const string MODE_RECORD = "record";
         public const string MODE_REPLAY = "replay";
 
-        public string ConfigFileName => "ReplayConfig";
 
         public string Mode { get; set; } = MODE_MANUAL;
         public string ClientConnectionAddress { get; set; } = "127.0.0.1";
@@ -46,19 +45,5 @@ namespace BeaverBuddies
                     return NetMode.None;
             }
         }
-
-        public void SaveConfig()
-        {
-            string configPath = Path.Combine(Plugin.Mod.DirectoryPath, "configs", $"{ConfigFileName}.json");
-            try
-            {
-                File.WriteAllText(configPath, JsonConvert.SerializeObject(this, Formatting.Indented));
-            }
-            catch (Exception e)
-            {
-                Plugin.LogWarning($"Failed to save config: {e}");
-            }
-        }
-
     }
 }

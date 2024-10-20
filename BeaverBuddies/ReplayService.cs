@@ -6,13 +6,11 @@ using HarmonyLib;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using Timberborn.BaseComponentSystem;
 using Timberborn.BlockObjectTools;
 using Timberborn.Buildings;
-using Timberborn.Core;
 using Timberborn.CoreUI;
 using Timberborn.DemolishingUI;
 using Timberborn.EntitySystem;
@@ -33,6 +31,9 @@ using static BeaverBuddies.SingletonManager;
 using BeaverBuddies.Connect;
 using static UnityEngine.ParticleSystem.PlaybackState;
 using BeaverBuddies.DesyncDetecter;
+using Timberborn.WebNavigation;
+using System.Collections.Immutable;
+using BeaverBuddies.IO;
 
 namespace BeaverBuddies
 {
@@ -107,6 +108,20 @@ namespace BeaverBuddies
         private ConcurrentQueue<ReplayEvent> eventsToSend = new ConcurrentQueue<ReplayEvent>();
         private ConcurrentQueue<ReplayEvent> eventsToPlay = new ConcurrentQueue<ReplayEvent>();
 
+        /// <summary>
+        /// Returns true if the ReplayService is ready for the game to
+        /// start a new a tick, and false if not (e.g. because the client
+        /// has not yet received a heartbeat from the server for the next tick).
+        /// </summary>
+        public bool IsReadyToStartTick {
+            get
+            {
+                // The client shouldn't tick until the server has sent a heartbeat
+                // Check the *next* tick, since current tick has already happened
+                return !(io is ClientEventIO && !io.HasEventsForTick(TicksSinceLoad + 1));
+            }
+        }
+
         public static bool IsLoaded { get; private set; } = false;
         private bool isReset = false;
 
@@ -136,7 +151,8 @@ namespace BeaverBuddies
             EntityRegistry entityRegistry,
             EntityService entityService,
             RecipeSpecificationService recipeSpecificationService,
-            DemolishableSelectionService demolishableSelectionService,
+            DemolishableSelectionTool demolishableSelectionTool,
+            DemolishableUnselectionTool demolishableUnselectionTool,
             BuildingUnlockingService buildingUnlockingService,
             WorkingHoursManager workingHoursManager,
             WorkingHoursPanel workingHoursPanel,
@@ -161,7 +177,8 @@ namespace BeaverBuddies
             AddSingleton(entityRegistry);
             AddSingleton(entityService);
             AddSingleton(recipeSpecificationService);
-            AddSingleton(demolishableSelectionService);
+            AddSingleton(demolishableSelectionTool);
+            AddSingleton(demolishableUnselectionTool);
             AddSingleton(buildingUnlockingService);
             AddSingleton(workingHoursManager);
             AddSingleton(workingHoursPanel);
@@ -239,6 +256,17 @@ namespace BeaverBuddies
             }
         }
 
+        private List<ReplayEvent> ReadEventsFromIO(int tick)
+        {
+            List<ReplayEvent> eventsToReplay = io.ReadEvents(tick);
+            // Spread grouped events into a flat list because we need to
+            // replay each individually (since we only record them if successful).
+            eventsToReplay = eventsToReplay
+                .SelectMany(e => e is GroupedEvent grouped ? grouped.events.ToArray() : new ReplayEvent[] { e })
+                .ToList();
+            return eventsToReplay;
+        }
+
         private void ReplayEvents()
         {
             if (_tickingService.NextBucket != 0)
@@ -246,12 +274,9 @@ namespace BeaverBuddies
                 Plugin.LogWarning($"Warning, replaying events when bucket != 0: {_tickingService.NextBucket}");
             }
 
-            List<ReplayEvent> eventsToReplay = io.ReadEvents(ticksSinceLoad);
-            // Spread grouped events into a flat list because we need to
-            // replay each individually (since we only record them if successful).
-            eventsToReplay = eventsToReplay
-                .SelectMany(e => e is GroupedEvent grouped ? grouped.events.ToArray() : new ReplayEvent[] { e })
-                .ToList();
+            // Start with any events received from connected users
+            List<ReplayEvent> eventsToReplay = ReadEventsFromIO(TicksSinceLoad);
+            // Then add any from this user that have been deferred
             while (eventsToPlay.TryDequeue(out ReplayEvent replayEvent))
             {
                 replayEvent.ticksSinceLoad = ticksSinceLoad;
@@ -274,12 +299,15 @@ namespace BeaverBuddies
                 
                 // If this event was played (e.g. on the server) and recorded a 
                 // random state, make sure we're in the same state.
-                if (replayEvent.randomS0Before != null)
+                // Skip if we're in Debug mode, since we'll get more details
+                // if we look at the full trace.
+                if (!EventIO.Config.Debug && replayEvent.randomS0Before != null)
                 {
                     int s0 = UnityEngine.Random.state.s0;
-                    if (s0 != replayEvent.randomS0Before)
+                    int randomS0Before = (int)replayEvent.randomS0Before;
+                    if (s0 != randomS0Before)
                     {
-                        Plugin.LogWarning($"Random state mismatch: {s0} != {replayEvent.randomS0Before}");
+                        Plugin.LogWarning($"Random state mismatch: {s0:X8} != {randomS0Before:X8}");
                         HandleDesync();
                         break;
                     }
@@ -416,24 +444,28 @@ namespace BeaverBuddies
         public void SetTargetSpeed(float speed)
         {
             TargetSpeed = speed;
-            // If we're paused, we should interrupt the ticking, so we end
-            // before more of the tick happens.
-            _tickingService.ShouldStopTicking = speed == 0;
             UpdateSpeed();
         }
 
         private void UpdateSpeed()
         {
             if (EventIO.IsNull) return;
-            if (io.IsOutOfEvents && _speedManager.CurrentSpeed != 0)
+
+            if (io.IsOutOfEvents)
             {
-                SpeedChangePatcher.SetSpeedSilently(_speedManager, 0);
+                // Also pause the game (silently) if we're out of events
+                if (_speedManager.CurrentSpeed != 0)
+                {
+                    SpeedChangePatcher.SetSpeedSilently(_speedManager, 0);
+                }
+                // And return early
+                return;
             }
-            if (io.IsOutOfEvents) return;
-            float targetSpeed = this.TargetSpeed;
+
+            // If we're not out of ticks to process, check if we're behind
+            float targetSpeed = TargetSpeed;
             int ticksBehind = io.TicksBehind;
 
-            //Plugin.Log($"Ticks behind {ticksBehind}");
             // If we're behind, speed up to match.
             if (ticksBehind > targetSpeed)
             {
@@ -486,9 +518,9 @@ namespace BeaverBuddies
 
             // IO Complete for Tick
             Plugin.Log($"Tick {ticksSinceLoad:D5} IO done; " +
-                $"Order hash: {TEBPatcher.EntityUpdateHash.ToString("X8")}; " +
-                $"Move hash: {TEBPatcher.PositionHash.ToString("X8")}; " +
-                $"Random s0: {UnityEngine.Random.state.s0.ToString("X8")}");
+                $"Order hash: {TEBPatcher.EntityUpdateHash:X8}; " +
+                $"Move hash: {TEBPatcher.PositionHash:X8}; " +
+                $"Random s0: {UnityEngine.Random.state.s0:X8}");
 
             if (ticksSinceLoad % 20 == 0)
             {
@@ -540,12 +572,6 @@ namespace BeaverBuddies
     {
         /// <summary>
         /// If true, the TickingService will stop as soon as possible (interrupting
-        /// a normal update, but finishing it's current bucket) and stop ticking
-        /// until set to false.
-        /// </summary>
-        public bool ShouldStopTicking { get; set; } = false;
-        /// <summary>
-        /// If true, the TickingService will stop as soon as possible (interrupting
         /// a normal update, but finishing it's current bucket), but it will then resume
         /// on the following update.
         /// </summary>
@@ -590,8 +616,31 @@ namespace BeaverBuddies
         private bool ShouldTick(TickableBucketService __instance, int numberOfBucketsToTick)
         {
 
-            // Never tick if we've been interrupted by a forced pause
-            if (ShouldStopTicking || ShouldInterruptTicking) return false;
+            // Don't tick if we've been interrupted by a forced pause
+            if (ShouldInterruptTicking) return false;
+
+            // Don't tick if we've set the game speed to 0 (paused)
+            if (replayService.TargetSpeed == 0) return false;
+
+            if (IsAtStartOfTick(__instance) && !HasTickedReplayService)
+            {
+                // Don't start a brand new tick until the ReplayService
+                // is ready. Note that this is only a reason to stop if
+                // we're at the *very start* of a new tick - otherwise
+                // it would be overly conservative.
+                if (!replayService.IsReadyToStartTick)
+                {
+                    // In theory the game should be paused to prevent this, but some logs
+                    // suggest the client can get ahead of the server, which would
+                    // trigger this warning (and now prevent the client's tick)
+                    if (replayService.TicksSinceLoad > 0)
+                    {
+                        Plugin.LogWarning($"Client trying to tick before receiving " +
+                            $"Heartbeat at tick: {replayService.TicksSinceLoad}");
+                    }
+                    return false;
+                }
+            }
 
             // If we need to complete a full tick, make sure to go exactly until
             // the end of this tick, to ensure an update follows immediately.
@@ -617,7 +666,8 @@ namespace BeaverBuddies
                 if (!HasTickedReplayService)
                 {
                     // First finish any parallel ticks
-                    __instance._tickableSingletonService.FinishParallelTick();
+                    ((TickableSingletonService)__instance._tickableSingletonService).FinishParallelTick();
+
                     // Tick it and stop
                     HasTickedReplayService = true;
                     replayService?.DoTick();
@@ -665,11 +715,18 @@ namespace BeaverBuddies
         }
     }
 
+    [ManualMethodOverwrite]
+    /*
+        7/20/2024
+        // Also check TickNextBucket - we rework everything
+		while (numberOfBucketsToTick-- > 0)
+		{
+			TickNextBucket();
+		}
+     */
     [HarmonyPatch(typeof(TickableBucketService), nameof(TickableBucketService.TickBuckets))]
     static class TickableBucketServiceTickUpdatePatcher
     {
-
-        [ManualMethodOverwrite]
         static bool Prefix(TickableBucketService __instance, int numberOfBucketsToTick)
         {
             if (EventIO.IsNull) return true;

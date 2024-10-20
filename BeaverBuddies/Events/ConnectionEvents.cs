@@ -1,8 +1,11 @@
 ﻿using BeaverBuddies.Connect;
+using BeaverBuddies.IO;
+using BeaverBuddies.Util;
 using System;
-using TimberApi;
-using Timberborn.Core;
 using Timberborn.CoreUI;
+using Timberborn.Localization;
+using Timberborn.Versioning;
+using Timberborn.WebNavigation;
 
 namespace BeaverBuddies.Events
 {
@@ -16,14 +19,14 @@ namespace BeaverBuddies.Events
         public override void Replay(IReplayContext context)
         {
             string warningMessage = null;
-            if (serverGameVersion != Versions.GameVersion.ToString())
+            if (serverGameVersion != Versions.CurrentGameVersion.ToString())
             {
-                warningMessage = $"Warning! Server Timberborn version ({serverGameVersion}) does not match client Timberborn version ({Versions.GameVersion}).\n" +
+                warningMessage = $"Warning! Server Timberborn version ({serverGameVersion}) does not match client Timberborn version ({Versions.CurrentGameVersion}).\n" +
                     $"Please ensure that you are running the same version of the game.";
             } else if (serverModVersion != Plugin.Version)
             {
                 warningMessage = $"Warning! Server mod version ({serverModVersion}) does not match client mod version ({Plugin.Version}).\n" +
-                    $"Please ensure that you are running the same version of the {PluginInfo.PLUGIN_NAME} mod.";
+                    $"Please ensure that you are running the same version of the {Plugin.ID} mod.";
             } else if (isDebugMode != EventIO.Config.Debug)
             {
                 warningMessage = $"Warning! Server debug mode ({isDebugMode}) does not match client debug mode ({EventIO.Config.Debug}).\n" +
@@ -41,7 +44,7 @@ namespace BeaverBuddies.Events
             InitializeClientEvent message = new InitializeClientEvent()
             {
                 serverModVersion = Plugin.Version,
-                serverGameVersion = Versions.GameVersion.ToString(),
+                serverGameVersion = Versions.CurrentGameVersion.ToString(),
                 isDebugMode = EventIO.Config.Debug,
             };
             return message;
@@ -51,23 +54,15 @@ namespace BeaverBuddies.Events
     [Serializable]
     public class ClientDesyncedEvent : ReplayEvent
     {
-        const string MESSAGE = 
-            "A connected player desynced and cannot continue playing - sorry about that!\n" +
-            "The Host should hit Rehost and, AFTER that, the Client should Reconnect.\n" +
-            "You may need to restart the game if problems persist.\n" +
-            "Before reloading, would you like to file a bug report to " +
-            "help us fix this issue?";
-
-        const string BUG_REPORT_URL = "https://github.com/thomaswp/TimberReplay/issues";
-
         public override void Replay(IReplayContext context)
         {
             context.GetSingleton<ReplayService>().SetTargetSpeed(0);
             var shower = context.GetSingleton<DialogBoxShower>();
+            ILoc _loc = shower._loc;
             var urlOpener = context.GetSingleton<UrlOpener>();
             Action bugReportAction = () =>
             {
-                urlOpener.OpenUrl(BUG_REPORT_URL);
+                urlOpener.OpenUrl(LinkHelper.BugReportURL);
             };
             bool isHost = EventIO.Get() is ServerEventIO;
             RehostingService rehostingService = context.GetSingleton<RehostingService>();
@@ -77,7 +72,9 @@ namespace BeaverBuddies.Events
                 {
                     if (!rehostingService.RehostGame())
                     {
-                        // TODO: Failure message
+                        shower.Create()
+                            .SetLocalizedMessage("BeaverBuddies.ClientDesynced.FailedToRehostMessage")
+                            .Show();
                     }
                 }
                 else
@@ -86,9 +83,9 @@ namespace BeaverBuddies.Events
                     ?.ConnectOrShowFailureMessage();
                 }
             };
-            string reconnectText = isHost ? "Save and Rehost" : "Reconnect (wait for Rehost)";
-            shower.Create().SetMessage(MESSAGE)
-                .SetInfoButton(bugReportAction, "Post Bug Report")
+            string reconnectText = isHost ? _loc.T("BeaverBuddies.ClientDesynced.SaveAndRehostButton") : _loc.T("BeaverBuddies.ClientDesynced.WaitForRehostButton");
+            shower.Create().SetLocalizedMessage("BeaverBuddies.ClientDesynced.Message")
+                .SetInfoButton(bugReportAction, _loc.T("BeaverBuddies.ClientDesynced.PostBugReportButton"))
                 .SetConfirmButton(reconnectAction, reconnectText)
                 .SetDefaultCancelButton()
                 .Show();

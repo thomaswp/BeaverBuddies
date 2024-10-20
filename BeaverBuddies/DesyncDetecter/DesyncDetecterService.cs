@@ -1,4 +1,5 @@
 ﻿using BeaverBuddies.Events;
+using BeaverBuddies.IO;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -48,11 +49,6 @@ namespace BeaverBuddies.DesyncDetecter
         DesyncDetecterService()
         {
             Reset();
-        }
-
-        public static List<string> GetCurrentTrace()
-        {
-            return CurrentTrace.Select(t => t.message).ToList();
         }
 
         public void Reset()
@@ -111,10 +107,15 @@ namespace BeaverBuddies.DesyncDetecter
         {
             if (!EventIO.Config.Debug)
             {
+                // We warn here because these debug messages are often called many
+                // times per frame and do string manipulation, so we don't want to
+                // create the debug string at all if we don't need to.
                 Plugin.LogWarning("DesyncDetectorService.Trace called not in debug mode");
                 //Plugin.LogStackTrace();
                 return;
             }
+            // Trace called before the service has been initialized
+            if (traces.Count == 0) return;
             CurrentTrace.Add(new Trace()
             {
                 message = message,
@@ -192,27 +193,35 @@ namespace BeaverBuddies.DesyncDetecter
                 LogTrace(myTraces[i], true);
             }
             Plugin.Log("========== Desynced Trace ==========");
+
             Plugin.Log("---------- My Trace ----------");
-            if (errorIndex >= myTraces.Count)
-            {
-                Plugin.Log("No trace (index out of bounds)");
-            }
-            else
-            {
-                LogTrace(myTraces[errorIndex], true);
-            }
+            PrintTracesAt(myTraces, errorIndex);
+
             Plugin.Log("---------- Other Trace ----------");
-            if (errorIndex >= otherTraces.Count)
-            {
-                Plugin.Log("No trace (index out of bounds)");
-            }
-            else
-            {
-                LogTrace(otherTraces[errorIndex], true);
-            }
+            PrintTracesAt(otherTraces, errorIndex);
+
             Plugin.Log("========== Desynced Log End ==========");
 
             return false;
+        }
+
+        private static void PrintTracesAt(List<Trace> traces, int startIndex, int maxToPrint = 3)
+        {
+            if (startIndex >= traces.Count)
+            {
+                Plugin.Log("No trace (index out of bounds)");
+                return;
+            }
+            int count = 0;
+            for (int i = startIndex; i < traces.Count; i++)
+            {
+                LogTrace(traces[i], true);
+                if (++count > maxToPrint)
+                {
+                    Plugin.Log("... (more traces)");
+                    break;
+                }
+            }
         }
 
         private static void LogTraces(int index)

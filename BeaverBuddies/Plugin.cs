@@ -1,18 +1,17 @@
 ﻿using BeaverBuddies.Connect;
 using BeaverBuddies.DesyncDetecter;
+using BeaverBuddies.Fixes;
+using BeaverBuddies.IO;
+using BeaverBuddies.Util;
+using BeaverBuddies.Util.Logging;
 using Bindito.Core;
 using HarmonyLib;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using TimberApi.ConfiguratorSystem;
-using TimberApi.ConsoleSystem;
-using TimberApi.ModSystem;
-using TimberApi.SceneSystem;
-using Timberborn.TickSystem;
+using Timberborn.ModManagerScene;
 
 namespace BeaverBuddies
 {
-    [Configurator(SceneEntrypoint.InGame)]  // This attribute registers the configurator and tells where it should be loaded
+    [Context("Game")]
     public class ReplayConfigurator : IConfigurator
     {
         public void Configure(IContainerDefinition containerDefinition)
@@ -29,6 +28,7 @@ namespace BeaverBuddies
             // playing co-op right now).
             containerDefinition.Bind<ClientConnectionService>().AsSingleton();
             containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
+            containerDefinition.Bind<ConfigIOService>().AsSingleton();
 
             // EventIO gets set before load, so if it's null, this is a regular
             // game, so don't initialize these services.
@@ -43,6 +43,7 @@ namespace BeaverBuddies
             containerDefinition.Bind<DeterminismService>().AsSingleton();
             containerDefinition.Bind<TickReplacerService>().AsSingleton();
             containerDefinition.Bind<RehostingService>().AsSingleton();
+            containerDefinition.Bind<LateTickableBuffer>().AsSingleton();
 
             if (EventIO.Config.Debug)
             {
@@ -53,7 +54,7 @@ namespace BeaverBuddies
         }
     }
 
-    [Configurator(SceneEntrypoint.MainMenu)]
+    [Context("MainMenu")]
     public class ConnectionMenuConfigurator : IConfigurator
     {
         public void Configure(IContainerDefinition containerDefinition)
@@ -69,6 +70,7 @@ namespace BeaverBuddies
             containerDefinition.Bind<ClientConnectionService>().AsSingleton();
             containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
             containerDefinition.Bind<FirstTimerService>().AsSingleton();
+            containerDefinition.Bind<ConfigIOService>().AsSingleton();
 
             //ReflectionUtils.PrintChildClasses(typeof(MonoBehaviour), 
             //    "Start", "Awake", "Update", "FixedUpdate", "LateUpdate", "OnEnable", "OnDisable", "OnDestroy");
@@ -83,30 +85,32 @@ namespace BeaverBuddies
     }
 
     [HarmonyPatch]
-    public class Plugin : IModEntrypoint
+    public class Plugin : IModStarter
     {
-        private static IConsoleWriter logger;
-        public static IMod Mod { get; private set; }
 
-        public const string Guid = PluginInfo.PLUGIN_GUID;
-        public const string Version = PluginInfo.PLUGIN_VERSION;
+        // TODO: Need to manually keep this updated now
+        public const string Version = "1.2.6";
+        public const string Name = "BeaverBuddies";
+        public const string ID = "beaverbuddies";
 
-        public void Entry(IMod mod, IConsoleWriter consoleWriter)
+        private static ILogger logger;
+
+        public void StartMod()
         {
-            Mod = mod;
-            logger = consoleWriter;
+            logger = new UnityLogger();
 
-            ReplayConfig config = mod.Configs.Get<ReplayConfig>();
+            // Create a default config temporarily
+            // Will be loaded later by ConfigIOService
+            ReplayConfig config = new ReplayConfig();
+
             EventIO.Config = config;
-
-            Log($"Plugin {Guid} is loaded!");
+            
+            Log($"{Name} is loaded!");
 
             if (config.GetNetMode() == NetMode.None) return;
 
-            Harmony harmony = new Harmony(Guid);
+            Harmony harmony = new Harmony(ID);
             harmony.PatchAll();
-            //EnumerableFirstPatcher.CreatePatch(harmony);
-            //DeterminismPatcher.PatchDeterminism(harmony);
         }
 
         public static string GetWithDate(string message)

@@ -1,0 +1,16 @@
+ID,Text,Comment
+BeaverBuddies.Menu.JoinCoopGame,"Rejoindre partie co-op","Join co-op game"
+BeaverBuddies.JoinCoopGame.EnterIp,"Entrez l'adresse IP de l'Hôte :","Enter the global IP address of the Host:"
+BeaverBuddies.FirstTimer.Message,"Il semble que vous utilisiez BeaverBuddies pour la première fois. Nous vous recommandons de jeter un coup d'œil rapide à notre guide pour vous assurer que vous êtes prêt à jouer. Voulez-vous le faire maintenant ?","It looks like this is your first time using BeaverBuddies. We recommend taking a quick look through our guide to make sure you are set up to play. Would you like to do that now?"
+BeaverBuddies.Saving.HostCoopGame,"Héberger partie co-op","Host co-op game"
+BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError,"La connexion a échoué en raison d'une erreur :
+{0}
+Souhaitez-vous consulter le guide de dépannage ?","Joining failed with error:
+{0}
+Would you like to open the troubleshooting guide?"
+BeaverBuddies.JoinCoopGame.ConnectionFailedMessage,"Échec de connexion à l'Hôte. Souhaitez-vous consulter le guide de dépannage ?","Failed to connect to Host. Would you like to open the troubleshooting guide?"
+BeaverBuddies.ClientDesynced.Message,"Un joueur connecté s'est désynchronisé et ne peut plus continuer à jouer - désolé ! L'hôte doit relancer la partie, et APRÈS cela, le client doit se reconnecter. Vous devrez peut-être redémarrer le jeu si les problèmes persistent. Avant de recharger, souhaitez-vous envoyer un rapport de bug pour nous aider à corriger ce problème ?","A connected player desynced and cannot continue playing - sorry about that! The Host should hit Rehost and, AFTER that, the Client should Reconnect. You may need to restart the game if problems persist. Before reloading, would you like to file a bug report to help us fix this issue?"
+BeaverBuddies.ClientDesynced.FailedToRehostMessage,"Échec de réhébergement. Sauvegardez manuellement et hébergez à nouveau.","Failed to Rehost. Manually save and Host again."
+BeaverBuddies.ClientDesynced.SaveAndRehostButton,"Sauvegarder et réhéberger","Save and Rehost"
+BeaverBuddies.ClientDesynced.WaitForRehostButton,"Reconnexion (attendre le réhébergement)","Reconnect (wait for Rehost)"
+BeaverBuddies.ClientDesynced.PostBugReportButton,"Envoyer un rapport de bug","Post Bug Report"

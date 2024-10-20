@@ -1,10 +1,13 @@
-﻿using System;
+﻿using BeaverBuddies.IO;
+using BeaverBuddies.Util;
+using System;
 using System.IO;
-using Timberborn.Core;
 using Timberborn.CoreUI;
 using Timberborn.GameSaveRepositorySystem;
 using Timberborn.GameSceneLoading;
+using Timberborn.Localization;
 using Timberborn.SingletonSystem;
+using Timberborn.WebNavigation;
 using TimberNet;
 
 namespace BeaverBuddies.Connect
@@ -52,20 +55,14 @@ namespace BeaverBuddies.Connect
             // it's actually loaded.
             SingletonManager.Reset();
             Plugin.Log("Connecting client");
-            client = ClientEventIO.Create(address, EventIO.Config.Port, LoadMap, (message) =>
+            client = ClientEventIO.Create(address, EventIO.Config.Port, LoadMap, (error) =>
             {
-                message = "Joining failed with error:\n" + message;
-                message += "\nWould you like to open the troubleshooting guide?";
-                ShowError(message);
+                ShowError("BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError", error);
             });
             if (client == null) return false;
             EventIO.Set(client);
             return true;
         }
-
-        const string ConnectionFailedMessage =
-            "Failed to connect to Host. Would you like to open the troubleshooting guide?";
-        const string TroubleshootingUrl = "https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running#troubleshooting";
 
         public void ConnectOrShowFailureMessage()
         {
@@ -76,17 +73,20 @@ namespace BeaverBuddies.Connect
         {
             if (TryToConnect(address)) return;
 
-            ShowError(ConnectionFailedMessage);
+            ShowError("BeaverBuddies.JoinCoopGame.ConnectionFailedMessage");
         }
 
-        private void ShowError(string message)
+        private void ShowError(string message, string error = null)
         {
+
+            ILoc _loc = _dialogBoxShower._loc;
 
             var action = () =>
             {
-                _urlOpener.OpenUrl(TroubleshootingUrl);
+                _urlOpener.OpenUrl(LinkHelper.TroubleshootingUrl);
             };
 
+            message = _loc.T(message, error);
             _dialogBoxShower.Create()
                 .SetMessage(message)
                 .SetConfirmButton(action)

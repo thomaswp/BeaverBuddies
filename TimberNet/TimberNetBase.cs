@@ -388,5 +388,11 @@ namespace TimberNet
             toProcess.ForEach(e => ProcessReceivedEvent(e));
             return FilterEvents(toProcess);
         }
+
+        public bool HasEventsForTick(int tickSinceLoad)
+        {
+            Update();
+            return receivedEvents.Any(e => GetTick(e) == tickSinceLoad);
+        }
     }
 }

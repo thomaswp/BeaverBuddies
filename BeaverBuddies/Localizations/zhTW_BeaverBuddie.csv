@@ -1,0 +1,16 @@
+ID,Text,Comment
+BeaverBuddies.Menu.JoinCoopGame,"加入合作遊戲","Join co-op game"
+BeaverBuddies.JoinCoopGame.EnterIp,"輸入主機的全域IP地址:","Enter the global IP address of the Host:"
+BeaverBuddies.FirstTimer.Message,"看起來這是您第一次使用BeaverBuddies。我們建議快速瀏覽一下我們的指南，以確保您已準備好進行遊戲。您現在要這樣做嗎？","It looks like this is your first time using BeaverBuddies. We recommend taking a quick look through our guide to make sure you are set up to play. Would you like to do that now?"
+BeaverBuddies.Saving.HostCoopGame,"主持合作遊戲","Host co-op game"
+BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError,"連接失敗，錯誤：
+{0}
+您要打開故障排除指南嗎？","Joining failed with error:
+{0}
+Would you like to open the troubleshooting guide?"
+BeaverBuddies.JoinCoopGame.ConnectionFailedMessage,"無法連接到主機。您要打開故障排除指南嗎？","Failed to connect to Host. Would you like to open the troubleshooting guide?"
+BeaverBuddies.ClientDesynced.Message,"連接的玩家失去同步，無法繼續遊戲 - 抱歉！主機應重新托管遊戲，之後客戶端應重新連接。如果問題持續存在，可能需要重新啟動遊戲。在重新加載之前，您是否希望提交錯誤報告來幫助我們修復此問題？","A connected player desynced and cannot continue playing - sorry about that! The Host should hit Rehost and, AFTER that, the Client should Reconnect. You may need to restart the game if problems persist. Before reloading, would you like to file a bug report to help us fix this issue?"
+BeaverBuddies.ClientDesynced.FailedToRehostMessage,"重新託管失敗。請手動保存並再次託管。","Failed to Rehost. Manually save and Host again."
+BeaverBuddies.ClientDesynced.SaveAndRehostButton,"保存並重新託管","Save and Rehost"
+BeaverBuddies.ClientDesynced.WaitForRehostButton,"重新連接（等待重新託管）","Reconnect (wait for Rehost)"
+BeaverBuddies.ClientDesynced.PostBugReportButton,"提交錯誤報告","Post Bug Report"

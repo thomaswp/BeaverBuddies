@@ -1,19 +1,27 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Text;
 using Timberborn.Autosaving;
 using Timberborn.GameSaveRepositorySystem;
 using Timberborn.GameSaveRepositorySystemUI;
 using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.GameSaveRuntimeSystemUI;
+using Timberborn.InputSystem;
+using Timberborn.SaveSystem;
 using Timberborn.SettlementNameSystem;
 using Timberborn.SingletonSystem;
+using Timberborn.TickSystem;
+using static Timberborn.GameSaveRuntimeSystem.GameSaver;
 
 namespace BeaverBuddies.Connect
 {
     public class RehostingService
     {
-        private readonly SaveTimestampFormatter _saveTimestampFormatter;
+        private readonly AutosaveNameService _autosaveNameService;
         private readonly GameSaver _gameSaver;
         private readonly GameSaveRepository _gameSaveRepository;
         private readonly SettlementNameService _settlementNameService;
@@ -21,14 +29,14 @@ namespace BeaverBuddies.Connect
 
 
         public RehostingService(
-            SaveTimestampFormatter saveTimestampFormatter, 
+            AutosaveNameService autosaveNameService, 
             GameSaver gameSaver, 
             GameSaveRepository gameSaveRepository, 
             SettlementNameService settlementNameService,
             ValidatingGameLoader validatingGameLoader
         ) 
-        { 
-            _saveTimestampFormatter = saveTimestampFormatter;
+        {
+            _autosaveNameService = autosaveNameService;
             _gameSaver = gameSaver;
             _gameSaveRepository = gameSaveRepository;
             _settlementNameService = settlementNameService;
@@ -42,13 +50,19 @@ namespace BeaverBuddies.Connect
         public bool RehostGame()
         {
             string settlementName = _settlementNameService.SettlementName;
-            string saveName = _saveTimestampFormatter.Timestamp() + " Rehost";
+            string saveName = _autosaveNameService.Timestamp().Replace(",", "") + " Rehost";
             SaveReference saveReference = new SaveReference(settlementName, saveName);
             try
             {
-                _gameSaver.InstantSaveSkippingNameValidation(saveReference, () =>
+                _gameSaver.InstantSaveSkippingNameValidation(saveReference, () => 
                 {
-                    ServerHostingUI.LoadAndHost(_validatingGameLoader, saveReference);
+                    // Run on next frame because the GameSaver doesn't release its
+                    // handle on the save stream until the method finishes executing
+                    // i.e. after the callback has run.
+                    _gameSaver.StartCoroutine(RunOnNextFrameCoroutine(() =>
+                    {
+                        ServerHostingUtils.LoadIfSaveValidAndHost(_validatingGameLoader, saveReference);
+                    }));
                 });
             }
             catch (GameSaverException ex)
@@ -56,8 +70,18 @@ namespace BeaverBuddies.Connect
                 Plugin.LogError($"Error occured while saving: {ex.InnerException}");
                 _gameSaveRepository.DeleteSaveSafely(saveReference);
                 return false;
+            } catch (Exception ex)
+            {
+                Plugin.LogError($"Failed to rehost: {ex}");
+                return false;
             }
             return true;
+        }
+
+        private IEnumerator RunOnNextFrameCoroutine(Action action)
+        {
+            yield return null;
+            action?.Invoke();
         }
     }
 }

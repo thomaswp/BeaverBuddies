@@ -15,6 +15,7 @@ using Timberborn.ScienceSystem;
 using Timberborn.ToolSystem;
 using Timberborn.WorkSystemUI;
 using UnityEngine;
+using UnityEngine.UIElements.Collections;
 
 namespace BeaverBuddies.Events
 {
@@ -178,20 +179,26 @@ namespace BeaverBuddies.Events
     [Serializable]
     class ClearResourcesMarkedEvent : ReplayEvent
     {
-        public List<Vector3Int> blocks;
-        public Ray ray;
+        public List<Guid> blocks;
+        public Vector3Int start;
+        public Vector3Int end;
         public bool markForDemolition;
 
         public override void Replay(IReplayContext context)
         {
-            var demolitionService = context.GetSingleton<DemolishableSelectionService>();
+            var entityService = context.GetSingleton<EntityService>();
+            var blockObjects = blocks.Select(guid => {
+                return context.GetSingleton<EntityRegistry>()
+                .GetEntity(guid)
+                .GetComponentFast<BlockObject>();
+            }).ToList();
             if (markForDemolition)
             {
-                demolitionService.MarkDemolishablesInArea(blocks, ray);
+                context.GetSingleton<DemolishableSelectionTool>().ActionCallback(blockObjects, start, end, false, false);
             }
             else
             {
-                demolitionService.UnmarkDemolishablesInArea(blocks, ray);
+                context.GetSingleton<DemolishableUnselectionTool>().ActionCallback(blockObjects, start, end, false, false);
             }
         }
 
@@ -200,35 +207,37 @@ namespace BeaverBuddies.Events
             return $"Setting {blocks.Count()} as marked: {markForDemolition}";
         }
 
-        public static bool DoPrefix(IEnumerable<Vector3Int> blocks, Ray ray, bool markForDemolition)
+        public static bool DoPrefix(IEnumerable<BlockObject> blockObjects, Vector3Int start, Vector3Int end, bool forDemolition)
         {
             return DoPrefix(() =>
             {
+                var ids = blockObjects.Select(obj => obj.GetComponentFast<EntityComponent>().EntityId);
                 return new ClearResourcesMarkedEvent()
                 {
-                    markForDemolition = markForDemolition,
-                    ray = ray,
-                    blocks = new List<Vector3Int>(blocks)
+                    blocks = ids.ToList(),
+                    start = start,
+                    end = end,
+                    markForDemolition = forDemolition
                 };
             });
         }
     }
 
-    [HarmonyPatch(typeof(DemolishableSelectionService), nameof(DemolishableSelectionService.MarkDemolishablesInArea))]
+    [HarmonyPatch(typeof(DemolishableSelectionTool), nameof(DemolishableSelectionTool.ActionCallback))]
     class DemolishableSelectionServiceMarkPatcher
     {
-        static bool Prefix(IEnumerable<Vector3Int> blocks, Ray ray)
+        static bool Prefix(IEnumerable<BlockObject> blockObjects, Vector3Int start, Vector3Int end, bool selectionStarted, bool selectingArea)
         {
-            return ClearResourcesMarkedEvent.DoPrefix(blocks, ray, true);
+            return ClearResourcesMarkedEvent.DoPrefix(blockObjects, start, end, true);
         }
     }
 
-    [HarmonyPatch(typeof(DemolishableSelectionService), nameof(DemolishableSelectionService.UnmarkDemolishablesInArea))]
+    [HarmonyPatch(typeof(DemolishableUnselectionTool), nameof(DemolishableUnselectionTool.ActionCallback))]
     class DemolishableSelectionServiceUnmarkPatcher
     {
-        static bool Prefix(IEnumerable<Vector3Int> blocks, Ray ray)
+        static bool Prefix(IEnumerable<BlockObject> blockObjects, Vector3Int start, Vector3Int end, bool selectionStarted, bool selectingArea)
         {
-            return ClearResourcesMarkedEvent.DoPrefix(blocks, ray, false);
+            return ClearResourcesMarkedEvent.DoPrefix(blockObjects, start, end, false);
         }
     }
 

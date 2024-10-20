@@ -5,7 +5,7 @@ using System.Linq;
 using BeaverBuddies.Events;
 using TimberNet;
 
-namespace BeaverBuddies
+namespace BeaverBuddies.IO
 {
     public abstract class NetIOBase<T> : EventIO where T : TimberNetBase
     {
@@ -61,6 +61,12 @@ namespace BeaverBuddies
                 // a better way to do it.
                 netBase.DoUserInitiatedEvent(JObject.Parse(JsonSettings.Serialize(e)));
             }
+        }
+
+        public bool HasEventsForTick(int tick)
+        {
+            if (netBase == null) return false;
+            return netBase.HasEventsForTick(tick);
         }
     }
 }
