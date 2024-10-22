@@ -1,5 +1,6 @@
 ﻿using BeaverBuddies.Connect;
 using BeaverBuddies.DesyncDetecter;
+using BeaverBuddies.Editor;
 using BeaverBuddies.Fixes;
 using BeaverBuddies.IO;
 using BeaverBuddies.Util;
@@ -8,9 +9,33 @@ using Bindito.Core;
 using HarmonyLib;
 using System.Diagnostics;
 using Timberborn.ModManagerScene;
+using Timberborn.StartingLocationSystem;
+using Timberborn.TemplateSystem;
 
 namespace BeaverBuddies
 {
+
+
+    [Context("MapEditor")]
+    public class EditorConfigurator : IConfigurator
+    {
+        public void Configure(IContainerDefinition containerDefinition)
+        {
+            containerDefinition.Bind<StartingLocationNumbererService>().AsSingleton();
+            containerDefinition.MultiBind<TemplateModule>().ToProvider<TemplateModuleProvider>().AsSingleton();
+        }
+
+        private class TemplateModuleProvider : IProvider<TemplateModule>
+        {
+            public TemplateModule Get()
+            {
+                TemplateModule.Builder builder = new TemplateModule.Builder();
+                builder.AddDecorator<StartingLocation, StartingLocationPlayer>();
+                return builder.Build();
+            }
+        }
+    }
+
     [Context("Game")]
     public class ReplayConfigurator : IConfigurator
     {
