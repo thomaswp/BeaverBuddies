@@ -1,4 +1,5 @@
 ﻿using BeaverBuddies.Editor;
+using BeaverBuddies.MultiStart;
 using Bindito.Core;
 using System;
 using System.Collections.Generic;
@@ -14,18 +15,7 @@ namespace BeaverBuddies.Events
     {
         public void Configure(IContainerDefinition containerDefinition)
         {
-            containerDefinition.Bind<StartingLocationNumbererService>().AsSingleton();
-            //containerDefinition.MultiBind<TemplateModule>().ToProvider<TemplateModuleProvider>().AsSingleton();
-        }
-
-        private class TemplateModuleProvider : IProvider<TemplateModule>
-        {
-            public TemplateModule Get()
-            {
-                TemplateModule.Builder builder = new TemplateModule.Builder();
-                builder.AddDecorator<StartingLocation, StartingLocationPlayer>();
-                return builder.Build();
-            }
+            MultiStartConfigurator.Configure(containerDefinition);
         }
     }
 }

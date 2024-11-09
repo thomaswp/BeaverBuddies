@@ -1,5 +1,6 @@
 ﻿using BeaverBuddies.Connect;
 using BeaverBuddies.DesyncDetecter;
+using BeaverBuddies.Editor;
 using BeaverBuddies.Fixes;
 using BeaverBuddies.IO;
 using BeaverBuddies.MultiStart;
@@ -18,6 +19,7 @@ namespace BeaverBuddies
     [Context("Game")]
     public class ReplayConfigurator : IConfigurator
     {
+
         public void Configure(IContainerDefinition containerDefinition)
         {
             if (EventIO.Config.GetNetMode() == NetMode.None) return;
@@ -34,7 +36,7 @@ namespace BeaverBuddies
             containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
             containerDefinition.Bind<ConfigIOService>().AsSingleton();
 
-            containerDefinition.Bind<StartBuildingsService>().AsSingleton();
+            MultiStartConfigurator.Configure(containerDefinition);
 
             // EventIO gets set before load, so if it's null, this is a regular
             // game, so don't initialize these services.

@@ -146,6 +146,7 @@ namespace BeaverBuddies.Editor
                 Plugin.LogWarning("Missing StartingLocationPlayer!");
                 return true;
             }
+            Plugin.Log($"Deleting other starting locations for {player.PlayerIndex}");
             foreach (StartingLocationPlayer item in (from startingLocation in __instance._entityComponentRegistry.GetEnabled<StartingLocationPlayer>()
                                                // Get only the starting locations that match this player index
                                                where startingLocation != player && startingLocation.PlayerIndex == player.PlayerIndex

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Timberborn.BaseComponentSystem;
 using Timberborn.Buildings;
 using Timberborn.EntitySystem;
 using Timberborn.GameSceneLoading;
@@ -38,6 +39,7 @@ namespace BeaverBuddies.MultiStart
 
 			// TODO(BUG): Somehow when I have multiple starting locations they all get deleted
 			// Would love to know what is causing that...
+			// They are getting initialized and registered, but by the time this method is called they're gone
 			Plugin.Log($"Found {startingLocations.Count} starting locations");
 
 			// If we don't have multiple starting locations, then use default behavior
@@ -113,4 +115,17 @@ namespace BeaverBuddies.MultiStart
 			return false;
         }
 	}
+
+	//[HarmonyPatch(typeof(EntityService), nameof(EntityService.Delete))]
+	//public class EntityServiceDeletePatcher
+	//{
+	//	public static void Prefix(EntityService __instance, BaseComponent entity)
+	//	{
+	//		if (entity.GetComponentFast<StartingLocation>() != null)
+	//		{
+ //               Plugin.Log("Deleting starting location");
+	//			Plugin.LogStackTrace();
+ //           }
+	//	}
+	//}
 }
