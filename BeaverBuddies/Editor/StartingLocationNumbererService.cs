@@ -7,6 +7,7 @@ using Timberborn.StartingLocationSystem;
 
 namespace BeaverBuddies.Editor
 {
+    // TODO: Can probably just delete this
     public class StartingLocationNumbererService : ILoadableSingleton
     {
         private readonly EntityComponentRegistry _entityComponentRegistry;

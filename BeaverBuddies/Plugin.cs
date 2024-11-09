@@ -2,6 +2,7 @@
 using BeaverBuddies.DesyncDetecter;
 using BeaverBuddies.Fixes;
 using BeaverBuddies.IO;
+using BeaverBuddies.MultiStart;
 using BeaverBuddies.Util;
 using BeaverBuddies.Util.Logging;
 using Bindito.Core;
@@ -10,6 +11,7 @@ using System.Diagnostics;
 using Timberborn.ModManagerScene;
 using Timberborn.StartingLocationSystem;
 using Timberborn.TemplateSystem;
+using Timberborn.TutorialSystemUI;
 
 namespace BeaverBuddies
 {
@@ -31,6 +33,8 @@ namespace BeaverBuddies
             containerDefinition.Bind<ClientConnectionService>().AsSingleton();
             containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
             containerDefinition.Bind<ConfigIOService>().AsSingleton();
+
+            containerDefinition.Bind<StartBuildingsService>().AsSingleton();
 
             // EventIO gets set before load, so if it's null, this is a regular
             // game, so don't initialize these services.

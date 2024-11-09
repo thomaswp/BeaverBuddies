@@ -142,6 +142,7 @@ namespace BeaverBuddies.Editor
             var player = remainingStartingLocation.GetComponentFast<StartingLocationPlayer>();
             if (!player)
             {
+                // TODO: Only show warning in Editor - normal in Game as the entity hasn't yet been fully loaded (I guess?)
                 Plugin.LogWarning("Missing StartingLocationPlayer!");
                 return true;
             }
@@ -176,7 +177,7 @@ namespace BeaverBuddies.Editor
         public static bool Prefix(StartingLocationService __instance, ref StartingLocation __result)
         {
             List<StartingLocation> list = __instance._entityComponentRegistry.GetEnabled<StartingLocation>().ToList();
-            if (list.IsEmpty())
+            if (list.Count <= 1)
             {
                 return true;
             }
