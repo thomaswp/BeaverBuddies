@@ -32,7 +32,7 @@ namespace BeaverBuddies.Editor
         {
             if (entityInitializedEvent.Entity.TryGetComponentFast<StartingLocation>(out var component))
             {
-                Plugin.Log("String location placed!");
+                //Plugin.Log("String location placed!");
                 StartingLocationPlayer startingLocationPlayer = entityInitializedEvent.Entity.GetComponentFast<StartingLocationPlayer>();
                 if (startingLocationPlayer == null)
                 {
@@ -41,7 +41,7 @@ namespace BeaverBuddies.Editor
                 }
                 // TODO: Why are a bunch of starting locations creation?
                 // E.g. is it that each block in the structure is a separate one?
-                Plugin.Log(entityInitializedEvent.Entity.EntityId.ToString() + " -> #" + startingLocationPlayer.PlayerIndex);
+                //Plugin.Log(entityInitializedEvent.Entity.EntityId.ToString() + " -> #" + startingLocationPlayer.PlayerIndex);
             }
         }
     }
