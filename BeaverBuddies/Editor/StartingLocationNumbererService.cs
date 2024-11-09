@@ -41,7 +41,7 @@ namespace BeaverBuddies.Editor
                 }
                 // TODO: Why are a bunch of starting locations creation?
                 // E.g. is it that each block in the structure is a separate one?
-                Plugin.Log(entityInitializedEvent.Entity.EntityId.ToString());
+                Plugin.Log(entityInitializedEvent.Entity.EntityId.ToString() + " -> #" + startingLocationPlayer.PlayerIndex);
             }
         }
     }

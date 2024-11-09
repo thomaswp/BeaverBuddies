@@ -46,7 +46,17 @@ namespace BeaverBuddies.Editor
             List<PlaceableBlockObject> startingLocations = new List<PlaceableBlockObject>();
             for (int i = 0; i < MAX_STARTING_LOCATIONS; i++)
             {
-                startingLocations.Add(startingLocation);
+                // Duplicate the block object
+                var playerStartingLocation = UnityEngine.Object.Instantiate(startingLocation);
+                //var startingLocationComponents = playerStartingLocation.GetComponentsInChildren<StartingLocation>();
+                //Plugin.Log($"Found {startingLocationComponents.Length} starting locs");
+                //foreach (var component in startingLocationComponents)
+                //{
+                //    // Add the StartingLocationPlayer component and set its PlayerIndex
+                //    component.GameObjectFast.AddComponent<StartingLocationPlayer>().PlayerIndex = i;
+                //}
+                playerStartingLocation.GameObjectFast.AddComponent<StartingLocationPlayer>().PlayerIndex = i;
+                startingLocations.Add(playerStartingLocation);
             }
 
             ToolGroupSpecification spec = new ToolGroupSpecification(
