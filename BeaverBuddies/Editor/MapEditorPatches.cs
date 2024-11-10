@@ -57,6 +57,8 @@ namespace BeaverBuddies.Editor
                 // Duplicate the block object
                 var playerStartingLocation = UnityEngine.Object.Instantiate(startingLocation);
                 playerStartingLocation.GameObjectFast.AddComponent<StartingLocationPlayer>().PlayerIndex = i;
+                // TODO: Loc!
+                playerStartingLocation.GetComponentFast<LabeledEntitySpec>()._displayNameLocKey = $"Starting Location - Player {i + 1}";
                 startingLocations.Add(playerStartingLocation);
 
                 // TODO: Find a way to update the icons (they're created dynamically when the button is created)
@@ -67,7 +69,7 @@ namespace BeaverBuddies.Editor
             ToolGroupSpecification spec = new ToolGroupSpecification(
                 null,
                 0,
-                startingLocation.name, // TODO: Find loc key, or add it
+                startingLocation.GetComponentFast<LabeledEntitySpec>()._displayNameLocKey, // TODO: Find loc key, or add it
                 baseSprite,
                 false
             );
