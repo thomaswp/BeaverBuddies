@@ -9,10 +9,12 @@ using Timberborn.Buildings;
 using Timberborn.EntitySystem;
 using Timberborn.GameSceneLoading;
 using Timberborn.GameStartup;
+using Timberborn.MainMenuPanels;
 using Timberborn.SceneLoading;
 using Timberborn.SelectionSystem;
 using Timberborn.StartingLocationSystem;
 using UnityEngine;
+using UnityEngine.UIElements;
 using static BeaverBuddies.SingletonManager;
 using static Timberborn.GameStartup.GameInitializer;
 
@@ -34,12 +36,11 @@ namespace BeaverBuddies.MultiStart
 	{
 		public static bool Prefix(StartingBuildingInitializer __instance)
 		{
-			// TODO: Get number of active players from startup config
-			var startingLocations = GetAllStartingLocations(__instance._startingLocationService);
+            var startBuildingService = GetSingleton<StartBuildingsService>();
 
-			// TODO(BUG): Somehow when I have multiple starting locations they all get deleted
-			// Would love to know what is causing that...
-			// They are getting initialized and registered, but by the time this method is called they're gone
+            // TODO: Get number of active players from startup config
+            var startingLocations = GetAllStartingLocations(__instance._startingLocationService);
+
 			Plugin.Log($"Found {startingLocations.Count} starting locations");
 
 			// If we don't have multiple starting locations, then use default behavior
@@ -50,7 +51,9 @@ namespace BeaverBuddies.MultiStart
 				sl => sl.GetComponentFast<StartingLocationPlayer>()?.PlayerIndex ?? 0
 			).ToList();
 
-			var startBuildingService = GetSingleton<StartBuildingsService>();
+			int count = 0;
+			int maxStartingLocations = startBuildingService.MaxStartLocations();
+			Plugin.Log($"Max players: {maxStartingLocations}; Map supports players: {startingLocations.Count}");
 
 			// Initialize each starting location; not just the first
 			foreach (var startingLocation in startingLocations)
@@ -58,7 +61,12 @@ namespace BeaverBuddies.MultiStart
 				__instance._startingBuildingSpawner.Place(startingLocation.Placement);
 				// Register all start buildings
 				startBuildingService.RegisterStartingBuilding(__instance._startingBuildingSpawner.StartingBuilding);
-			}
+
+
+                // If we're playing with fewer players than the map can support, stop early
+                count++;
+                if (count >= maxStartingLocations) break;
+            }
 
 			// Center on the first spawn location
 			__instance._startingBuildingSpawner._cameraTargeter
@@ -78,7 +86,7 @@ namespace BeaverBuddies.MultiStart
 	}
 
 	[ManualMethodOverwrite]
-    /*
+	/*
      * 11/9/2024
 		Building startingBuilding = _startingBuildingSpawner.StartingBuilding;
 		if ((bool)startingBuilding)
@@ -93,39 +101,102 @@ namespace BeaverBuddies.MultiStart
 		}
 		return InitializationState.UpdateStats;
      */
-    [HarmonyPatch(typeof(GameInitializer), nameof(GameInitializer.SpawnBeavers))]
+	[HarmonyPatch(typeof(GameInitializer), nameof(GameInitializer.SpawnBeavers))]
 	public class GameInitializerSpawnBeaversPatcher
 	{
 		public static bool Prefix(GameInitializer __instance, ref InitializationState __result)
 		{
-            StartBuildingsService startBuildingsService = GetSingleton<StartBuildingsService>();
+			StartBuildingsService startBuildingsService = GetSingleton<StartBuildingsService>();
 			if (!startBuildingsService.IsMultiStart) return true;
 
-            foreach (Building startingBuilding in startBuildingsService.StartingBuildings)
+			foreach (Building startingBuilding in startBuildingsService.StartingBuildings)
+			{
+				Vector3? unblockedSingleAccess = startingBuilding.GetComponentFast<BuildingAccessible>().Accessible.UnblockedSingleAccess;
+				if (unblockedSingleAccess.HasValue)
+				{
+					Vector3 valueOrDefault = unblockedSingleAccess.GetValueOrDefault();
+					NewGameMode newGameMode = __instance._sceneLoader.GetSceneParameters<GameSceneParameters>().NewGameConfiguration.NewGameMode;
+					__instance._startingBeaverInitializer.Initialize(valueOrDefault, newGameMode.StartingAdults, newGameMode.AdultAgeProgress, newGameMode.StartingChildren, newGameMode.ChildAgeProgress);
+				}
+			}
+			__result = InitializationState.UpdateStats;
+			return false;
+		}
+	}
+
+	[HarmonyPatch(typeof(CustomNewGameModeController), nameof(CustomNewGameModeController.Initialize))]
+	public class CustomNewGameModeControllerInitializePatcher
+	{
+        static T RecursiveClone<T>(T original) where T : VisualElement, new()
+        {
+            T clone = (T)Activator.CreateInstance(original.GetType());
+			//Plugin.Log(clone.GetType().Name);
+			//Plugin.Log("0");
+
+            // Copy styles, classes, name, etc.
+			if (original.styleSheetList != null)
             {
-                Vector3? unblockedSingleAccess = startingBuilding.GetComponentFast<BuildingAccessible>().Accessible.UnblockedSingleAccess;
-                if (unblockedSingleAccess.HasValue)
+                foreach (var sheet in original.styleSheetList)
                 {
-                    Vector3 valueOrDefault = unblockedSingleAccess.GetValueOrDefault();
-                    NewGameMode newGameMode = __instance._sceneLoader.GetSceneParameters<GameSceneParameters>().NewGameConfiguration.NewGameMode;
-                    __instance._startingBeaverInitializer.Initialize(valueOrDefault, newGameMode.StartingAdults, newGameMode.AdultAgeProgress, newGameMode.StartingChildren, newGameMode.ChildAgeProgress);
+                    clone.styleSheets.Add(sheet);
                 }
             }
-            __result = InitializationState.UpdateStats;
-			return false;
+            //Plugin.Log("1");
+            clone.name = original.name;
+            clone.classList.AddRange(original.classList);
+            //Plugin.Log("2");
+
+			// Some primitive types have children that don't need to cloned
+			if (clone is IntegerField) return clone;
+
+            // Recursively clone children
+            foreach (var child in original.Children())
+            {
+                clone.Add(RecursiveClone(child));
+            }
+            //Plugin.Log("3");
+
+            return clone;
+        }
+
+        public static void Postfix(CustomNewGameModeController __instance, VisualElement root, NewGameMode defaultNewGameMode, Action newGameModeChangedCallback)
+		{
+			string baseFieldName = "StartingWater";
+			string indexFieldName = "StartingAdults";
+
+            // Get the wrapper for the top field, and clone it
+            var originalParent = root.Q<IntegerField>(baseFieldName).parent;
+            var parent = RecursiveClone(originalParent);
+            parent.name = "PlayersWrapper";
+
+			// Add it right above this field
+			var indexParent = root.Q<IntegerField>(indexFieldName).parent;
+            int index = indexParent.parent.IndexOf(indexParent);
+			originalParent.parent.Insert(index, parent);
+
+			// Update the label text
+			var label = parent.Q<Label>();
+			label.text = "Max Starting Locations:"; // TODO: loc!
+			label.name = "PlayersLabel";
+
+
+			// Rename the number field
+            var playersField = parent.Q<IntegerField>(baseFieldName);
+			playersField.name = "Players";
+
+			// Initialize it with the right start value and max/min, etc.
+            // TODO: get this from map metadata
+            __instance.QInitializedIntField(root, "Players", 4, 1, 4);
         }
 	}
 
-	//[HarmonyPatch(typeof(EntityService), nameof(EntityService.Delete))]
-	//public class EntityServiceDeletePatcher
-	//{
-	//	public static void Prefix(EntityService __instance, BaseComponent entity)
-	//	{
-	//		if (entity.GetComponentFast<StartingLocation>() != null)
-	//		{
- //               Plugin.Log("Deleting starting location");
-	//			Plugin.LogStackTrace();
- //           }
-	//	}
-	//}
+    [HarmonyPatch(typeof(CustomNewGameModeController), nameof(CustomNewGameModeController.GetNewGameMode))]
+    public class CustomNewGameModeControllerGetNewGameModePatcher
+	{
+		public static void Postfix(CustomNewGameModeController __instance, ref NewGameMode __result)
+		{
+			var playersField = __instance._integerFields.Where(x => x.name == "Players").First();
+			__result = new MultiplayerNewGameMode(__result, CustomNewGameModeController.GetInt(playersField));
+		}
+	}
 }
