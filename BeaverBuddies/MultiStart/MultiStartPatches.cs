@@ -159,6 +159,7 @@ namespace BeaverBuddies.MultiStart
             return clone;
         }
 
+		public const string playersFieldName = "Players";
         public static void Postfix(CustomNewGameModeController __instance, VisualElement root, NewGameMode defaultNewGameMode, Action newGameModeChangedCallback)
 		{
 			string baseFieldName = "StartingWater";
@@ -182,11 +183,11 @@ namespace BeaverBuddies.MultiStart
 
 			// Rename the number field
             var playersField = parent.Q<IntegerField>(baseFieldName);
-			playersField.name = "Players";
+			playersField.name = playersFieldName;
 
 			// Initialize it with the right start value and max/min, etc.
             // TODO: get this from map metadata
-            __instance.QInitializedIntField(root, "Players", 4, 1, 4);
+            __instance.QInitializedIntField(root, "Players", StartingLocationPlayer.DEFAULT_MAX_STARTING_LOCS, 1, 4);
         }
 	}
 
@@ -195,7 +196,8 @@ namespace BeaverBuddies.MultiStart
 	{
 		public static void Postfix(CustomNewGameModeController __instance, ref NewGameMode __result)
 		{
-			var playersField = __instance._integerFields.Where(x => x.name == "Players").First();
+			string fieldName = CustomNewGameModeControllerInitializePatcher.playersFieldName;
+            var playersField = __instance._integerFields.Where(x => x.name == fieldName).First();
 			__result = new MultiplayerNewGameMode(__result, CustomNewGameModeController.GetInt(playersField));
 		}
 	}

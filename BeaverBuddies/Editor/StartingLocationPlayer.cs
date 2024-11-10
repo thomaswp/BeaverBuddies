@@ -19,6 +19,7 @@ namespace BeaverBuddies.Editor
         };
 
         public const int MAX_PLAYERS = 4;
+        public const int DEFAULT_MAX_STARTING_LOCS = 2;
 
         public static readonly ComponentKey StartingLocationPlayerKey = new ComponentKey("StartingLocationPlayer");
         public static readonly PropertyKey<int> PlayerIndexKey = new PropertyKey<int>("PlayerIndex");

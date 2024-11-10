@@ -35,7 +35,7 @@ namespace BeaverBuddies.MultiStart
                 return multiplayerNewGameMode.Players;
             }
             // This is just a max, so if not specified, we use infinity
-            return StartingLocationPlayer.MAX_PLAYERS;
+            return StartingLocationPlayer.DEFAULT_MAX_STARTING_LOCS;
         }
     }
 }
