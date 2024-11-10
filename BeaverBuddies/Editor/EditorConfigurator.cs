@@ -1,5 +1,4 @@
-﻿using BeaverBuddies.Editor;
-using BeaverBuddies.MultiStart;
+﻿using BeaverBuddies.MultiStart;
 using Bindito.Core;
 using System;
 using System.Collections.Generic;
@@ -7,7 +6,7 @@ using System.Text;
 using Timberborn.StartingLocationSystem;
 using Timberborn.TemplateSystem;
 
-namespace BeaverBuddies.Events
+namespace BeaverBuddies.Editor
 {
 
     [Context("MapEditor")]
@@ -15,6 +14,8 @@ namespace BeaverBuddies.Events
     {
         public void Configure(IContainerDefinition containerDefinition)
         {
+            SingletonManager.Reset();
+            containerDefinition.Bind<StartingLocationNumberService>().AsSingleton();
             MultiStartConfigurator.Configure(containerDefinition);
         }
     }

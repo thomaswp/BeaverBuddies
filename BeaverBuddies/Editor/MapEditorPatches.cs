@@ -12,6 +12,9 @@ using Timberborn.BottomBarSystem;
 using Timberborn.Common;
 using Timberborn.EntitySystem;
 using Timberborn.MapEditorUI;
+using Timberborn.MapMetadataSystem;
+using Timberborn.MapMetadataSystemUI;
+using Timberborn.SerializationSystem;
 using Timberborn.StartingLocationSystem;
 using Timberborn.ToolSystem;
 using UnityEngine;
@@ -188,6 +191,48 @@ namespace BeaverBuddies.Editor
             return false;
         }
     }
+
+
+    [HarmonyPatch(typeof(MapMetadataSaveEntryWriter), nameof(MapMetadataSaveEntryWriter.CreateMapMetadata))]
+    public class MapMetadataSaveEntryWriterCreateMapMetadataPatcher
+    {
+        public static void Postfix(MapMetadataSaveEntryWriter __instance, ref MapMetadata __result)
+        {
+            var startingLocNumberService = SingletonManager.GetSingleton<StartingLocationNumberService>();
+            startingLocNumberService.ResetNumbering();
+            int maxPlayers = startingLocNumberService.GetMaxPlayers();
+            Plugin.Log($"Saving map with max players: {maxPlayers}");
+            __result = new MultiplayerMapMetadata(__result, maxPlayers);
+        }
+    }
+
+    [HarmonyPatch(typeof(MapMetadataSerializer), nameof(MapMetadataSerializer.GetMapMetadataObjectSave))]
+    public class MapMetadataSerializerGetMapMetadataObjectSavePatcher
+    {
+        public static readonly string MaxPlayersKey = "MaxPlayers";
+
+        public static void Postfix(MapMetadata mapMetadata, ref ObjectSave __result)
+        {
+            if (mapMetadata is MultiplayerMapMetadata)
+            {
+                __result.Set(MaxPlayersKey, (mapMetadata as MultiplayerMapMetadata).MaxPlayers);
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(MapMetadataSerializer), nameof(MapMetadataSerializer.Deserialize))]
+    public class MapMetadataSerializerDeserializePatcher
+    {
+        public static void Postfix(ObjectSave objectSave, ref MapMetadata __result)
+        {
+            string key = MapMetadataSerializerGetMapMetadataObjectSavePatcher.MaxPlayersKey;
+            if (objectSave.Has(key))
+            {
+                __result = new MultiplayerMapMetadata(__result, objectSave.Get<int>(key));
+            }
+        }
+    }
+
 
     // TODO: Timberborn.MapThumbnailCapturing.StartingLocationThumbnailRenderingListener.PreThumbnailRendering
 
