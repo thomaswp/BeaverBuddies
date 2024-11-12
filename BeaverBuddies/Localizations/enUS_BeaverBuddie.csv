@@ -14,3 +14,8 @@ BeaverBuddies.ClientDesynced.FailedToRehostMessage,"Failed to Rehost. Manually s
 BeaverBuddies.ClientDesynced.SaveAndRehostButton,"Save and Rehost","Save and Rehost"
 BeaverBuddies.ClientDesynced.WaitForRehostButton,"Reconnect (wait for Rehost)","Reconnect (wait for Rehost)"
 BeaverBuddies.ClientDesynced.PostBugReportButton,"Post Bug Report","Post Bug Report"
+BeaverBuddies.Editor.StartingLocation1,"Starting Location - Player 1",""
+BeaverBuddies.Editor.StartingLocation2,"Starting Location - Player 2",""
+BeaverBuddies.Editor.StartingLocation3,"Starting Location - Player 3",""
+BeaverBuddies.Editor.StartingLocation4,"Starting Location - Player 4",""
+BeaverBuddies.NewGame.MaxStartingLocations,"Max Starting Locations",""

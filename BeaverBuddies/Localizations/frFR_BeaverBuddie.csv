@@ -14,3 +14,8 @@ BeaverBuddies.ClientDesynced.FailedToRehostMessage,"Échec de réhébergement. S
 BeaverBuddies.ClientDesynced.SaveAndRehostButton,"Sauvegarder et réhéberger","Save and Rehost"
 BeaverBuddies.ClientDesynced.WaitForRehostButton,"Reconnexion (attendre le réhébergement)","Reconnect (wait for Rehost)"
 BeaverBuddies.ClientDesynced.PostBugReportButton,"Envoyer un rapport de bug","Post Bug Report"
+BeaverBuddies.Editor.StartingLocation1,"Emplacement de départ - Joueur 1",""
+BeaverBuddies.Editor.StartingLocation2,"Emplacement de départ - Joueur 2",""
+BeaverBuddies.Editor.StartingLocation3,"Emplacement de départ - Joueur 3",""
+BeaverBuddies.Editor.StartingLocation4,"Emplacement de départ - Joueur 4",""
+BeaverBuddies.NewGame.MaxStartingLocations,"Emplacements de départ max",""

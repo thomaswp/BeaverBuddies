@@ -14,3 +14,8 @@ BeaverBuddies.ClientDesynced.FailedToRehostMessage,"ไม่สามารถ�
 BeaverBuddies.ClientDesynced.SaveAndRehostButton,"บันทึกและโฮสต์ใหม่","Save and Rehost"
 BeaverBuddies.ClientDesynced.WaitForRehostButton,"เชื่อมต่อใหม่ (รอโฮสต์ใหม่)","Reconnect (wait for Rehost)"
 BeaverBuddies.ClientDesynced.PostBugReportButton,"รายงานข้อผิดพลาด","Post Bug Report"
+BeaverBuddies.Editor.StartingLocation1,"ตำแหน่งเริ่มต้น - ผู้เล่น 1",""
+BeaverBuddies.Editor.StartingLocation2,"ตำแหน่งเริ่มต้น - ผู้เล่น 2",""
+BeaverBuddies.Editor.StartingLocation3,"ตำแหน่งเริ่มต้น - ผู้เล่น 3",""
+BeaverBuddies.Editor.StartingLocation4,"ตำแหน่งเริ่มต้น - ผู้เล่น 4",""
+BeaverBuddies.NewGame.MaxStartingLocations,"ตำแหน่งเริ่มต้นสูงสุด",""

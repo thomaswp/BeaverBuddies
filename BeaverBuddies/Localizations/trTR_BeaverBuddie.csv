@@ -14,3 +14,8 @@ BeaverBuddies.ClientDesynced.FailedToRehostMessage,"Yeniden barındırma başar�
 BeaverBuddies.ClientDesynced.SaveAndRehostButton,"Kaydet ve Yeniden Barındır","Save and Rehost"
 BeaverBuddies.ClientDesynced.WaitForRehostButton,"Yeniden Bağlan (yeniden barındırmayı bekle)","Reconnect (wait for Rehost)"
 BeaverBuddies.ClientDesynced.PostBugReportButton,"Hata Raporu Gönder","Post Bug Report"
+BeaverBuddies.Editor.StartingLocation1,"Başlangıç Konumu - Oyuncu 1",""
+BeaverBuddies.Editor.StartingLocation2,"Başlangıç Konumu - Oyuncu 2",""
+BeaverBuddies.Editor.StartingLocation3,"Başlangıç Konumu - Oyuncu 3",""
+BeaverBuddies.Editor.StartingLocation4,"Başlangıç Konumu - Oyuncu 4",""
+BeaverBuddies.NewGame.MaxStartingLocations,"Maksimum Başlangıç Konumu",""

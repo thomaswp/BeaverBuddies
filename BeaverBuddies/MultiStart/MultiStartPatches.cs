@@ -1,4 +1,6 @@
-﻿using BeaverBuddies.Editor;
+﻿using AsmResolver.PE.DotNet.Metadata;
+using BeaverBuddies.Editor;
+using BeaverBuddies.Util;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -14,6 +16,7 @@ using Timberborn.SceneLoading;
 using Timberborn.SelectionSystem;
 using Timberborn.StartingLocationSystem;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 using UnityEngine.UIElements;
 using static BeaverBuddies.SingletonManager;
 using static Timberborn.GameStartup.GameInitializer;
@@ -160,34 +163,43 @@ namespace BeaverBuddies.MultiStart
         }
 
 		public const string playersFieldName = "Players";
+
         public static void Postfix(CustomNewGameModeController __instance, VisualElement root, NewGameMode defaultNewGameMode, Action newGameModeChangedCallback)
 		{
-			string baseFieldName = "StartingWater";
-			string indexFieldName = "StartingAdults";
+			IntegerField playersField = root.Query<IntegerField>(playersFieldName);
 
-            // Get the wrapper for the top field, and clone it
-            var originalParent = root.Q<IntegerField>(baseFieldName).parent;
-            var parent = RecursiveClone(originalParent);
-            parent.name = "PlayersWrapper";
+            // Don't create multiple times!
+            if (playersField == null)
+			{
 
-			// Add it right above this field
-			var indexParent = root.Q<IntegerField>(indexFieldName).parent;
-            int index = indexParent.parent.IndexOf(indexParent);
-			originalParent.parent.Insert(index, parent);
+				string baseFieldName = "StartingWater";
+				string indexFieldName = "StartingAdults";
 
-			// Update the label text
-			var label = parent.Q<Label>();
-			label.text = "Max Starting Locations:"; // TODO: loc!
-			label.name = "PlayersLabel";
+				// Get the wrapper for the top field, and clone it
+				var originalParent = root.Q<IntegerField>(baseFieldName).parent;
+				var parent = RecursiveClone(originalParent);
+				parent.name = "PlayersWrapper";
 
+				// Add it right above this field
+				var indexParent = root.Q<IntegerField>(indexFieldName).parent;
+				int index = indexParent.parent.IndexOf(indexParent);
+				originalParent.parent.Insert(index, parent);
 
-			// Rename the number field
-            var playersField = parent.Q<IntegerField>(baseFieldName);
-			playersField.name = playersFieldName;
+				// Update the label text
+				var label = parent.Q<Label>();
 
-			// Initialize it with the right start value and max/min, etc.
-            // TODO: get this from map metadata
-            __instance.QInitializedIntField(root, "Players", StartingLocationPlayer.DEFAULT_MAX_STARTING_LOCS, 1, 4);
+				label.text = RegisteredLocalizationService.T("BeaverBuddies.NewGame.MaxStartingLocations"); ;
+				label.name = "PlayersLabel";
+				label.style.unityFontStyleAndWeight = FontStyle.Bold;
+
+                // Rename the number field
+                playersField = parent.Q<IntegerField>(baseFieldName);
+                playersField.name = playersFieldName;
+            }
+
+            // Initialize it with the right start value and max/min, etc.
+            __instance.QInitializedIntField(
+                root, playersFieldName, StartingLocationPlayer.DEFAULT_MAX_STARTING_LOCS, 1, StartingLocationPlayer.MAX_PLAYERS);
         }
 	}
 
@@ -197,8 +209,97 @@ namespace BeaverBuddies.MultiStart
 		public static void Postfix(CustomNewGameModeController __instance, ref NewGameMode __result)
 		{
 			string fieldName = CustomNewGameModeControllerInitializePatcher.playersFieldName;
-            var playersField = __instance._integerFields.Where(x => x.name == fieldName).First();
-			__result = new MultiplayerNewGameMode(__result, CustomNewGameModeController.GetInt(playersField));
+            var playersField = __instance._integerFields.Where(x => x.name == fieldName).FirstOrDefault();
+			if (playersField != null)
+			{
+				int maxStartingSpots = CustomNewGameModeController.GetInt(playersField);
+				__result = new MultiplayerNewGameMode(__result, maxStartingSpots);
+			}
 		}
 	}
+
+	static class MultiplayerSettingsUpdater
+	{
+		public static bool IsMultiplayer(NewGameModePanel __instance)
+		{
+			return GetMetadata(__instance) != null;
+		}
+
+		public static MultiplayerMapMetadata GetMetadata(NewGameModePanel __instance)
+		{
+            var mapRef = __instance?._map?.MapFileReference;
+            if (!mapRef.HasValue) return null;
+
+            var metadata = GetSingleton<MultiplayerMapMetadataService>().TryGetMultiplayerMapMetadata(mapRef.Value);
+			return metadata;
+        }
+
+        // This doesn't seem to work; update too late; too buggy to use
+        // And isn't doing anything that important anyway...
+        public static void MapOrDifficultyChanged(NewGameModePanel __instance)
+        {
+			var metadata = GetMetadata(__instance);
+
+            string playersFieldName = CustomNewGameModeControllerInitializePatcher.playersFieldName;
+            var playersField = __instance._root.Q<IntegerField>(playersFieldName);
+
+            if (playersField == null) return;
+
+            // Show/hide the field depending on if we have multiplayer metadata
+			// Seems this has a delay to it
+            playersField.parent.style.display = metadata == null ? DisplayStyle.None : DisplayStyle.Flex;
+
+            if (metadata == null) return;
+
+            Plugin.Log($"Map max players: {metadata.MaxPlayers}");
+			int currentValue = CustomNewGameModeController.GetInt(playersField);
+			if (currentValue > metadata.MaxPlayers)
+			{
+				playersField.value = metadata.MaxPlayers;
+			}
+        }
+    }
+
+    [HarmonyPatch(typeof(NewGameModePanel), nameof(NewGameModePanel.SelectModeButton))]
+    public class NewGameModePanelSelectModeButtonPatcher
+	{
+		public static void Postfix(NewGameModePanel __instance, Button button, NewGameMode predefinedNewGameMode)
+		{
+            if (button == null || predefinedNewGameMode == null)
+			{
+				return;
+			}
+
+			if (MultiplayerSettingsUpdater.IsMultiplayer(__instance))
+            {
+                // Automatically open the customization panel, so they can select max starting locs
+                __instance.OnCustomizeButtonClicked();
+
+            }
+        }
+	}
+
+	// Doesn't seem necessary
+	//[HarmonyPatch(typeof(NewGameModePanel), nameof(NewGameModePanel.OnCustomizeButtonClicked))]
+	//public class NewGameModePanelOnCustomizeButtonClickedPatcher
+	//{
+	//	public static void Postfix(NewGameModePanel __instance)
+	//	{
+ //       }
+	//}
+
+    [HarmonyPatch(typeof(NewGameModePanel), nameof(NewGameModePanel.SelectFactionAndMap))]
+    public class NewGameModePanelSelectFactionAndMapPatcher
+    {
+        public static void Postfix(NewGameModePanel __instance)
+        {
+            if (MultiplayerSettingsUpdater.IsMultiplayer(__instance))
+			{
+				if (__instance._selectedModeButton != null)
+				{
+					__instance.OnCustomizeButtonClicked();
+				}
+			}
+        }
+    }
 }

@@ -14,3 +14,8 @@ BeaverBuddies.ClientDesynced.FailedToRehostMessage,"Fehler beim erneuten Hosten.
 BeaverBuddies.ClientDesynced.SaveAndRehostButton,"Speichern und erneut hosten","Save and Rehost"
 BeaverBuddies.ClientDesynced.WaitForRehostButton,"Erneut verbinden (auf erneutes Hosten warten)","Reconnect (wait for Rehost)"
 BeaverBuddies.ClientDesynced.PostBugReportButton,"Fehlerbericht senden","Post Bug Report"
+BeaverBuddies.Editor.StartingLocation1,"Startposition - Spieler 1",""
+BeaverBuddies.Editor.StartingLocation2,"Startposition - Spieler 2",""
+BeaverBuddies.Editor.StartingLocation3,"Startposition - Spieler 3",""
+BeaverBuddies.Editor.StartingLocation4,"Startposition - Spieler 4",""
+BeaverBuddies.NewGame.MaxStartingLocations,"Maximale Startpositionen",""

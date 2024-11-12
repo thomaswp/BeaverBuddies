@@ -14,3 +14,8 @@ BeaverBuddies.ClientDesynced.FailedToRehostMessage,"Nie udało się ponownie hos
 BeaverBuddies.ClientDesynced.SaveAndRehostButton,"Zapisz i ponownie hostuj","Save and Rehost"
 BeaverBuddies.ClientDesynced.WaitForRehostButton,"Ponowne połączenie (czekaj na ponowne hostowanie)","Reconnect (wait for Rehost)"
 BeaverBuddies.ClientDesynced.PostBugReportButton,"Zgłoś błąd","Post Bug Report"
+BeaverBuddies.Editor.StartingLocation1,"Punkt początkowy - Gracz 1",""
+BeaverBuddies.Editor.StartingLocation2,"Punkt początkowy - Gracz 2",""
+BeaverBuddies.Editor.StartingLocation3,"Punkt początkowy - Gracz 3",""
+BeaverBuddies.Editor.StartingLocation4,"Punkt początkowy - Gracz 4",""
+BeaverBuddies.NewGame.MaxStartingLocations,"Maksymalna liczba punktów początkowych",""

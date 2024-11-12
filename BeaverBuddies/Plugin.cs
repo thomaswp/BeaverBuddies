@@ -35,6 +35,7 @@ namespace BeaverBuddies
             containerDefinition.Bind<ClientConnectionService>().AsSingleton();
             containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
             containerDefinition.Bind<ConfigIOService>().AsSingleton();
+            containerDefinition.Bind<RegisteredLocalizationService>().AsSingleton();
 
             MultiStartConfigurator.Configure(containerDefinition);
 
@@ -79,6 +80,8 @@ namespace BeaverBuddies
             containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
             containerDefinition.Bind<FirstTimerService>().AsSingleton();
             containerDefinition.Bind<ConfigIOService>().AsSingleton();
+            containerDefinition.Bind<RegisteredLocalizationService>().AsSingleton();
+            containerDefinition.Bind<MultiplayerMapMetadataService>().AsSingleton();
 
             //ReflectionUtils.PrintChildClasses(typeof(MonoBehaviour), 
             //    "Start", "Awake", "Update", "FixedUpdate", "LateUpdate", "OnEnable", "OnDisable", "OnDestroy");

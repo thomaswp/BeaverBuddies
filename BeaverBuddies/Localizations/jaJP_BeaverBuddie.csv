@@ -14,3 +14,8 @@ BeaverBuddies.ClientDesynced.FailedToRehostMessage,"再ホストに失敗しま�
 BeaverBuddies.ClientDesynced.SaveAndRehostButton,"保存して再ホスト","Save and Rehost"
 BeaverBuddies.ClientDesynced.WaitForRehostButton,"再ホストを待って再接続","Reconnect (wait for Rehost)"
 BeaverBuddies.ClientDesynced.PostBugReportButton,"バグ報告を投稿","Post Bug Report"
+BeaverBuddies.Editor.StartingLocation1,"開始地点 - プレイヤー 1",""
+BeaverBuddies.Editor.StartingLocation2,"開始地点 - プレイヤー 2",""
+BeaverBuddies.Editor.StartingLocation3,"開始地点 - プレイヤー 3",""
+BeaverBuddies.Editor.StartingLocation4,"開始地点 - プレイヤー 4",""
+BeaverBuddies.NewGame.MaxStartingLocations,"最大開始地点数",""

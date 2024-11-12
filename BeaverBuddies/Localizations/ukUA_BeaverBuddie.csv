@@ -14,3 +14,8 @@ BeaverBuddies.ClientDesynced.FailedToRehostMessage,"Не вдалося повт
 BeaverBuddies.ClientDesynced.SaveAndRehostButton,"Зберегти і повторно розмістити","Save and Rehost"
 BeaverBuddies.ClientDesynced.WaitForRehostButton,"Перепідключитися (очікування повторного розміщення)","Reconnect (wait for Rehost)"
 BeaverBuddies.ClientDesynced.PostBugReportButton,"Подати звіт про помилку","Post Bug Report"
+BeaverBuddies.Editor.StartingLocation1,"Початкова локація - Гравець 1",""
+BeaverBuddies.Editor.StartingLocation2,"Початкова локація - Гравець 2",""
+BeaverBuddies.Editor.StartingLocation3,"Початкова локація - Гравець 3",""
+BeaverBuddies.Editor.StartingLocation4,"Початкова локація - Гравець 4",""
+BeaverBuddies.NewGame.MaxStartingLocations,"Максимальна кількість початкових локацій",""

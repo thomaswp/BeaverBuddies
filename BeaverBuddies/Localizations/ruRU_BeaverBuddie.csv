@@ -14,3 +14,8 @@ BeaverBuddies.ClientDesynced.FailedToRehostMessage,"Не удалось пере
 BeaverBuddies.ClientDesynced.SaveAndRehostButton,"Сохранить и перезапустить хост","Save and Rehost"
 BeaverBuddies.ClientDesynced.WaitForRehostButton,"Переподключиться (ожидание перезапуска хоста)","Reconnect (wait for Rehost)"
 BeaverBuddies.ClientDesynced.PostBugReportButton,"Отправить отчет об ошибке","Post Bug Report"
+BeaverBuddies.Editor.StartingLocation1,"Начальная локация - Игрок 1",""
+BeaverBuddies.Editor.StartingLocation2,"Начальная локация - Игрок 2",""
+BeaverBuddies.Editor.StartingLocation3,"Начальная локация - Игрок 3",""
+BeaverBuddies.Editor.StartingLocation4,"Начальная локация - Игрок 4",""
+BeaverBuddies.NewGame.MaxStartingLocations,"Максимальное количество начальных локаций",""

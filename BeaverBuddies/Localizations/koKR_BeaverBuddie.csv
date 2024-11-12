@@ -14,3 +14,8 @@ BeaverBuddies.ClientDesynced.FailedToRehostMessage,"재호스팅에 실패했습
 BeaverBuddies.ClientDesynced.SaveAndRehostButton,"저장하고 재호스팅","Save and Rehost"
 BeaverBuddies.ClientDesynced.WaitForRehostButton,"재호스팅 대기 중 재접속","Reconnect (wait for Rehost)"
 BeaverBuddies.ClientDesynced.PostBugReportButton,"버그 보고서 제출","Post Bug Report"
+BeaverBuddies.Editor.StartingLocation1,"시작 위치 - 플레이어 1",""
+BeaverBuddies.Editor.StartingLocation2,"시작 위치 - 플레이어 2",""
+BeaverBuddies.Editor.StartingLocation3,"시작 위치 - 플레이어 3",""
+BeaverBuddies.Editor.StartingLocation4,"시작 위치 - 플레이어 4",""
+BeaverBuddies.NewGame.MaxStartingLocations,"최대 시작 위치",""

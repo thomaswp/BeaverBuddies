@@ -14,3 +14,8 @@ BeaverBuddies.ClientDesynced.FailedToRehostMessage,"Falha ao Reanfitriar. Salve 
 BeaverBuddies.ClientDesynced.SaveAndRehostButton,"Salvar e Reanfitriar","Save and Rehost"
 BeaverBuddies.ClientDesynced.WaitForRehostButton,"Reconectar (aguardar reanfitriamento)","Reconnect (wait for Rehost)"
 BeaverBuddies.ClientDesynced.PostBugReportButton,"Enviar Relatório de Bug","Post Bug Report"
+BeaverBuddies.Editor.StartingLocation1,"Local de Início - Jogador 1",""
+BeaverBuddies.Editor.StartingLocation2,"Local de Início - Jogador 2",""
+BeaverBuddies.Editor.StartingLocation3,"Local de Início - Jogador 3",""
+BeaverBuddies.Editor.StartingLocation4,"Local de Início - Jogador 4",""
+BeaverBuddies.NewGame.MaxStartingLocations,"Máximo de Locais de Início",""

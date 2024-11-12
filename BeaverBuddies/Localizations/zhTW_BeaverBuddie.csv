@@ -14,3 +14,8 @@ BeaverBuddies.ClientDesynced.FailedToRehostMessage,"重新託管失敗。請手�
 BeaverBuddies.ClientDesynced.SaveAndRehostButton,"保存並重新託管","Save and Rehost"
 BeaverBuddies.ClientDesynced.WaitForRehostButton,"重新連接（等待重新託管）","Reconnect (wait for Rehost)"
 BeaverBuddies.ClientDesynced.PostBugReportButton,"提交錯誤報告","Post Bug Report"
+BeaverBuddies.Editor.StartingLocation1,"起始位置 - 玩家 1",""
+BeaverBuddies.Editor.StartingLocation2,"起始位置 - 玩家 2",""
+BeaverBuddies.Editor.StartingLocation3,"起始位置 - 玩家 3",""
+BeaverBuddies.Editor.StartingLocation4,"起始位置 - 玩家 4",""
+BeaverBuddies.NewGame.MaxStartingLocations,"最大起始位置",""

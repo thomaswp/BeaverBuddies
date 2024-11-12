@@ -14,3 +14,8 @@ BeaverBuddies.ClientDesynced.FailedToRehostMessage,"Impossibile ri-ospitare. Sal
 BeaverBuddies.ClientDesynced.SaveAndRehostButton,"Salva e ri-ospita","Save and Rehost"
 BeaverBuddies.ClientDesynced.WaitForRehostButton,"Riconnettiti (attendi il ri-ospitaggio)","Reconnect (wait for Rehost)"
 BeaverBuddies.ClientDesynced.PostBugReportButton,"Invia segnalazione bug","Post Bug Report"
+BeaverBuddies.Editor.StartingLocation1,"Posizione iniziale - Giocatore 1",""
+BeaverBuddies.Editor.StartingLocation2,"Posizione iniziale - Giocatore 2",""
+BeaverBuddies.Editor.StartingLocation3,"Posizione iniziale - Giocatore 3",""
+BeaverBuddies.Editor.StartingLocation4,"Posizione iniziale - Giocatore 4",""
+BeaverBuddies.NewGame.MaxStartingLocations,"Posizioni iniziali massime",""
