@@ -59,7 +59,9 @@
   <!-- Add files to Output folder -->
   <ItemGroup>
     <None Update="manifest.json" CopyToOutputDirectory="PreserveNewest" />
-    <None Update="thumbnail.jpg" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="thumbnail.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="workshop_data.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
