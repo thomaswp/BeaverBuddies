@@ -29,7 +29,6 @@ namespace BeaverBuddies.Editor
         public void Start()
         {
             Plugin.Log($"Start index initialized with PlayerIndex: {PlayerIndex}");
-            // TODO: Only in editor
             StartingLocationRenderer renderer = GetComponentFast<StartingLocationRenderer>();
             if (renderer != null )
             {

@@ -41,7 +41,6 @@ namespace BeaverBuddies.MultiStart
 		{
             var startBuildingService = GetSingleton<StartBuildingsService>();
 
-            // TODO: Get number of active players from startup config
             var startingLocations = GetAllStartingLocations(__instance._startingLocationService);
 
 			Plugin.Log($"Found {startingLocations.Count} starting locations");

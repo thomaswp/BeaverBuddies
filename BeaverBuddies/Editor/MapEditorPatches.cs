@@ -14,6 +14,7 @@ using Timberborn.EntitySystem;
 using Timberborn.MapEditorUI;
 using Timberborn.MapMetadataSystem;
 using Timberborn.MapMetadataSystemUI;
+using Timberborn.MapThumbnailCapturing;
 using Timberborn.SerializationSystem;
 using Timberborn.StartingLocationSystem;
 using Timberborn.ToolSystem;
@@ -60,9 +61,8 @@ namespace BeaverBuddies.Editor
                 playerStartingLocation.GetComponentFast<LabeledEntitySpec>()._displayNameLocKey = $"BeaverBuddies.Editor.StartingLocation{i + 1}";
                 startingLocations.Add(playerStartingLocation);
 
-                // TODO: Find a way to update the icons (they're created dynamically when the button is created)
-                // Could override the method below
-                //icons.Add(TintSprite(baseSprite, StartingLocationPlayer.PLAYER_COLORS[i]));
+                // To update the icons, I would need to create actual media, since they're
+                // loaded from a path, given in the LabeledEntitySpec
             }
 
             ToolGroupSpecification spec = new ToolGroupSpecification(
@@ -146,8 +146,6 @@ namespace BeaverBuddies.Editor
             var player = remainingStartingLocation.GetComponentFast<StartingLocationPlayer>();
             if (!player)
             {
-                // TODO: Only show warning in Editor - normal in Game as the entity hasn't yet been fully loaded (I guess?)
-                Plugin.LogWarning("Missing StartingLocationPlayer!");
                 return true;
             }
             Plugin.Log($"Deleting other starting locations for {player.PlayerIndex}");
@@ -234,7 +232,13 @@ namespace BeaverBuddies.Editor
         }
     }
 
-
-    // TODO: Timberborn.MapThumbnailCapturing.StartingLocationThumbnailRenderingListener.PreThumbnailRendering
-
+    // Include starting locations in the renderer, since they're important
+    [HarmonyPatch(typeof(StartingLocationThumbnailRenderingListener), nameof(StartingLocationThumbnailRenderingListener.PreThumbnailRendering))]
+    public class StartingLocationThumbnailRenderingListenerPreThumnailRenderingPatcher
+    {
+        public static bool Prefix()
+        {
+            return false;
+        }
+    }
 }
