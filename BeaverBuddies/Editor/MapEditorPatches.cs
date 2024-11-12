@@ -106,23 +106,6 @@ namespace BeaverBuddies.Editor
 
             return tintedSprite;
         }
-
-
-        //[ManualMethodOverwrite]
-        //private static BottomBarElement CreateFromButton(BlockObjectToolGroupFactory factory, ToolGroupSpecification spec, IEnumerable<PlaceableBlockObject> blockObjects)
-        //{
-        //    BlockObjectToolGroup toolGroup = new BlockObjectToolGroup(spec);
-        //    ToolGroupButton toolGroupButton = factory._toolGroupButtonFactory.CreateGreen(toolGroup);
-        //    foreach (PlaceableBlockObject blockObject in blockObjects)
-        //    {
-        //        if (blockObject.UsableWithCurrentFeatureToggles)
-        //        {
-        //            ToolButton button = factory._blockObjectToolButtonFactory.Create(blockObject, toolGroup, toolGroupButton.ToolButtonsElement);
-        //            toolGroupButton.AddTool(button);
-        //        }
-        //    }
-        //    return BottomBarElement.CreateMultiLevel(toolGroupButton.Root, toolGroupButton.ToolButtonsElement);
-        //}
     }
 
     [ManualMethodOverwrite]
