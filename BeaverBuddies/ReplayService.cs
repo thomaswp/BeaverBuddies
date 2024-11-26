@@ -336,7 +336,10 @@ namespace BeaverBuddies
         {
             if (IsDesynced) return;
 
-            ClientDesyncedEvent e = new ClientDesyncedEvent();
+            ClientDesyncedEvent e = new ClientDesyncedEvent()
+            {
+                desyncID = DesyncDetecterService.GetLastDesyncID()
+            };
             // Set IsDesynced to true so event play instead of sending
             // to the host, allowing the Client to continue play.
             IsDesynced = true;

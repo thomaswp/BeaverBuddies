@@ -54,6 +54,8 @@ namespace BeaverBuddies.Events
     [Serializable]
     public class ClientDesyncedEvent : ReplayEvent
     {
+        public string desyncID;
+
         public override void Replay(IReplayContext context)
         {
             context.GetSingleton<ReplayService>().SetTargetSpeed(0);

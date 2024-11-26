@@ -43,26 +43,16 @@ namespace BeaverBuddies.Connect
             _validatingGameLoader = validatingGameLoader;
         }
 
-        // TODO: Should probably check IEnumerable<IAutosaveBlocker> autosaveBlockers
-        // that Autosaver uses, both here and in general when a client joins to avoid
-        // saving when it could corrupt things. Hopefully the save would fail if
-        // there's a real issue, rather than corrupting, but I don't know...
-        public bool RehostGame()
+        public bool SaveRehostFile(Action<SaveReference> callback)
         {
             string settlementName = _settlementNameService.SettlementName;
             string saveName = _autosaveNameService.Timestamp().Replace(",", "") + " Rehost";
             SaveReference saveReference = new SaveReference(settlementName, saveName);
             try
             {
-                _gameSaver.InstantSaveSkippingNameValidation(saveReference, () => 
+                _gameSaver.InstantSaveSkippingNameValidation(saveReference, () =>
                 {
-                    // Run on next frame because the GameSaver doesn't release its
-                    // handle on the save stream until the method finishes executing
-                    // i.e. after the callback has run.
-                    _gameSaver.StartCoroutine(RunOnNextFrameCoroutine(() =>
-                    {
-                        ServerHostingUtils.LoadIfSaveValidAndHost(_validatingGameLoader, saveReference);
-                    }));
+                    callback(saveReference);
                 });
             }
             catch (GameSaverException ex)
@@ -70,12 +60,31 @@ namespace BeaverBuddies.Connect
                 Plugin.LogError($"Error occured while saving: {ex.InnerException}");
                 _gameSaveRepository.DeleteSaveSafely(saveReference);
                 return false;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Plugin.LogError($"Failed to rehost: {ex}");
                 return false;
             }
             return true;
+        }
+
+        // TODO: Should probably check IEnumerable<IAutosaveBlocker> autosaveBlockers
+        // that Autosaver uses, both here and in general when a client joins to avoid
+        // saving when it could corrupt things. Hopefully the save would fail if
+        // there's a real issue, rather than corrupting, but I don't know...
+        public bool RehostGame()
+        {
+            return SaveRehostFile((saveReference) =>
+            {
+                // Run on next frame because the GameSaver doesn't release its
+                // handle on the save stream until the method finishes executing
+                // i.e. after the callback has run.
+                _gameSaver.StartCoroutine(RunOnNextFrameCoroutine(() =>
+                {
+                    ServerHostingUtils.LoadIfSaveValidAndHost(_validatingGameLoader, saveReference);
+                }));
+            });
         }
 
         private IEnumerator RunOnNextFrameCoroutine(Action action)
