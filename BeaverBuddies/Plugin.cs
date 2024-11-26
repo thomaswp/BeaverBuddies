@@ -9,6 +9,7 @@ using BeaverBuddies.Util.Logging;
 using Bindito.Core;
 using HarmonyLib;
 using System.Diagnostics;
+using System.Reflection;
 using Timberborn.ModManagerScene;
 using Timberborn.StartingLocationSystem;
 using Timberborn.TemplateSystem;
@@ -98,9 +99,7 @@ namespace BeaverBuddies
     [HarmonyPatch]
     public class Plugin : IModStarter
     {
-
-        // TODO: Need to manually keep this updated now
-        public const string Version = "1.3.0";
+        public static readonly string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         public const string Name = "BeaverBuddies";
         public const string ID = "beaverbuddies";
 
@@ -116,7 +115,7 @@ namespace BeaverBuddies
 
             EventIO.Config = config;
             
-            Log($"{Name} is loaded!");
+            Log($"{Name} v{Version} is loaded!");
 
             if (config.GetNetMode() == NetMode.None) return;
 

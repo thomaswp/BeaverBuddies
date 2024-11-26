@@ -1,10 +1,6 @@
 Beaver Buddies is a Timberborn mod that adds multiplayer co-op!
 
-[b]Note[/b]: This mod is still in beta, so it's quite playable, but you may encounter some issues. We appreciate your patience! For Update 6 especially, you may encounter a number of issues, but this allows testing with the new workshop installation!
-
-[b]Note[/b]: This mod [i]no longer[/i] requires BepInEx to run. It should work with or without it. Additionally, please do not use it [i]with[/i] the Harmony mod, as this mod provides its own version of Harmony.
-
-If you're already sold, dive right into our [url=https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running]installation and troubleshooting guide[/url].
+If you're already sold, dive right into our [url=https://github.com/thomaswp/BeaverBuddies/wiki/Installation-and-Running]installation and troubleshooting guide[/url]. Or [url=https://discord.com/channels/558398674389172225/1203786573142032445]join us on Discord[/url] (first you must join the [url=https://discord.com/invite/timberborn]Tiberborn Discord[/url])!
 
 
 Features
@@ -12,12 +8,13 @@ Features
 [*] Players work together to build a Beaver civilization.
 [*] Players work on the same map in real-time, but each player has their own camera and user interface.
 [*] The multiplayer works similar to co-op games like Stardew Valley, Factorio, Dungeons 3, and Parkitect.
-[*] All resources and abilities are shared among players, but players who want more independence can create their own Districts to control separate areas, while still being able to trade resources as needed.
-[*] New: Host and connect from in-game menus.
+[*] All resources and abilities are shared among players, but players who want more independence can use a multi-start map (below). 
+[*] Each player can start with their own district! Download a [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3372147096]multiplayer map[/url] or create your own in the map editor.
+[*] Host and connect from in-game menus.
 [/list]
 
-[b]Note[/b]: BeaverBuddies is still undergoing heavy testing and improvement. You may experience desyncs or game crashes. The mod may not work on the most complex saves yet. It also may not work on all systems equally well. You can help improve the mod by playing and reporting any bugs you find.
 
+[b]Note[/b]: BeaverBuddies is still undergoing heavy testing and improvement. You may experience desyncs or game crashes. The mod may not work on the most complex saves yet. It also may not work on all systems equally well. You can help improve the mod by playing and reporting any bugs you find.
  
 Want to learn more? Have an issue to report?
 
