@@ -26,11 +26,9 @@ namespace BeaverBuddies.Reporting
         const string UPLOAD_URL = "https://content.airtable.com/v0/appdIpScGqlZ5FX3r/{0}/Data/uploadAttachment";
 
         private string accessToken;
-        private ReplayService _replayService;
 
-        public ReportingService(ReplayService replayService)
+        public ReportingService()
         {
-            _replayService = replayService;
             accessToken = GetEmbeddedResource("BeaverBuddies.pat.properties");
             Plugin.Log(accessToken);
         }
@@ -45,10 +43,12 @@ namespace BeaverBuddies.Reporting
             return $"{TimberNetBase.GetHashCode(bytes):X8}";
         }
 
-        public async Task<bool> PostDesync(string eventID, string desyncTrace, string role, byte[] mapBytes)
+        public async Task<bool> PostDesync(string eventID, string desyncTrace, string role, string mapName, byte[] mapBytes)
         {
+            mapName = GetStringHash(mapName);
+
             JObject fields = new JObject();
-            fields["SaveID"] = GetStringHash(_replayService.ServerMapName);
+            fields["SaveID"] = mapName;
             fields["EventID"] = eventID;
             fields["Role"] = role;
             fields["IsCrash"] = false;
@@ -104,7 +104,7 @@ namespace BeaverBuddies.Reporting
             {
                 { "contentType", "application/zip" },
                 { "file", base64Encoded },
-                { "filename", "map.zip" },
+                { "filename", $"{mapName}.zip" },
             };
 
             HttpContent uploadContent = new StringContent(body.ToString(), Encoding.UTF8, "application/json");

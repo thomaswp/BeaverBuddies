@@ -65,7 +65,8 @@ namespace BeaverBuddies.Events
 
         public override void Replay(IReplayContext context)
         {
-            context.GetSingleton<ReplayService>().SetTargetSpeed(0);
+            ReplayService replayService = context.GetSingleton<ReplayService>();
+            replayService.SetTargetSpeed(0);
             ReportingService reportingService = context.GetSingleton<ReportingService>();
             RehostingService rehostingService = context.GetSingleton<RehostingService>();
             GameSaveRepository repository = context.GetSingleton<GameSaveRepository>();
@@ -73,6 +74,7 @@ namespace BeaverBuddies.Events
             ILoc _loc = shower._loc;
             var urlOpener = context.GetSingleton<UrlOpener>();
             string ioType = EventIO.Get()?.GetType().Name;
+            string mapName = replayService.ServerMapName;
             Button infoButton = null;
             Action bugReportAction = () =>
             {
@@ -96,10 +98,10 @@ namespace BeaverBuddies.Events
                 {
                     // TODO: Is there any way to include the log data too?
                     byte[] mapBytes = ServerHostingUtils.GetMapBtyes(repository, saveReference);
-                    reportingService.PostDesync(desyncID, desyncTrace, ioType, mapBytes).ContinueWith(onPost);
+                    reportingService.PostDesync(desyncID, desyncTrace, ioType, mapName, mapBytes).ContinueWith(onPost);
                 }, true))
                 {
-                    _ = reportingService.PostDesync(desyncID, desyncTrace, ioType, null).ContinueWith(onPost);
+                    _ = reportingService.PostDesync(desyncID, desyncTrace, ioType, mapName, null).ContinueWith(onPost);
                 };
                 
             };
