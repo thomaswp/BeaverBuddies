@@ -26,11 +26,11 @@ namespace BeaverBuddies.Reporting
         const string UPLOAD_URL = "https://content.airtable.com/v0/appdIpScGqlZ5FX3r/{0}/Data/uploadAttachment";
 
         private string accessToken;
-        private SettlementNameService _settlementNameService;
+        private ReplayService _replayService;
 
-        public ReportingService(SettlementNameService settlementNameService)
+        public ReportingService(ReplayService replayService)
         {
-            _settlementNameService = settlementNameService;
+            _replayService = replayService;
             accessToken = GetEmbeddedResource("BeaverBuddies.pat.properties");
             Plugin.Log(accessToken);
         }
@@ -45,14 +45,14 @@ namespace BeaverBuddies.Reporting
             return $"{TimberNetBase.GetHashCode(bytes):X8}";
         }
 
-        public async Task<bool> PostDesync(string eventID, string role, byte[] mapBytes)
+        public async Task<bool> PostDesync(string eventID, string desyncTrace, string role, byte[] mapBytes)
         {
             JObject fields = new JObject();
-            fields["SaveID"] = GetStringHash(_settlementNameService.SettlementName);
+            fields["SaveID"] = GetStringHash(_replayService.ServerMapName);
             fields["EventID"] = eventID;
             fields["Role"] = role;
             fields["IsCrash"] = false;
-            fields["DesyncTrace"] = DesyncDetecterService.GetLastDesyncTrace();
+            fields["DesyncTrace"] = desyncTrace;
 
 
             Plugin.Log(EventIO.Get()?.ToString());

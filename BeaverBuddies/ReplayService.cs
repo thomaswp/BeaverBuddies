@@ -36,6 +36,7 @@ using System.Collections.Immutable;
 using BeaverBuddies.IO;
 using BeaverBuddies.Reporting;
 using Timberborn.GameSaveRepositorySystem;
+using Timberborn.SettlementNameSystem;
 
 namespace BeaverBuddies
 {
@@ -131,6 +132,8 @@ namespace BeaverBuddies
 
         public static bool IsReplayingEvents { get; private set; } = false;
 
+        public string ServerMapName { get; private set; } = null;
+
         public void Reset()
         {
             Plugin.Log("Resetting Replay Service...");
@@ -164,7 +167,8 @@ namespace BeaverBuddies
             UrlOpener urlOpener,
             RehostingService rehostingService,
             ReportingService reportingService,
-            GameSaveRepository gameSaveRepository
+            GameSaveRepository gameSaveRepository,
+            SettlementNameService settlementNameService
         )
         {
             //_tickWathcerService = AddSingleton(tickWathcerService);
@@ -193,6 +197,7 @@ namespace BeaverBuddies
             AddSingleton(rehostingService);
             AddSingleton(reportingService);
             AddSingleton(gameSaveRepository);
+            AddSingleton(settlementNameService);
 
             AddSingleton(this);
 
@@ -217,6 +222,20 @@ namespace BeaverBuddies
         {
             Plugin.Log("PostLoad");
             _determinismService.UnityThread = Thread.CurrentThread;
+
+            // Send the map name to clients
+            if (io != null && io.ShouldSendHeartbeat)
+            {
+                RecordEvent(new SendMapNameEvent()
+                { 
+                    mapName = GetSingleton<SettlementNameService>().SettlementName
+                });
+            }
+        }
+
+        public void SetServerMapName(string serverMapName)
+        {
+            this.ServerMapName = serverMapName;
         }
 
         private T AddSingleton<T>(T singleton)
@@ -344,7 +363,8 @@ namespace BeaverBuddies
 
             ClientDesyncedEvent e = new ClientDesyncedEvent()
             {
-                desyncID = DesyncDetecterService.GetLastDesyncID()
+                desyncID = DesyncDetecterService.GetLastDesyncID(),
+                desyncTrace = DesyncDetecterService.GetLastDesyncTrace(),
             };
             // Set IsDesynced to true so event play instead of sending
             // to the host, allowing the Client to continue play.

@@ -61,6 +61,7 @@ namespace BeaverBuddies.Events
     public class ClientDesyncedEvent : ReplayEvent
     {
         public string desyncID;
+        public string desyncTrace;
 
         public override void Replay(IReplayContext context)
         {
@@ -95,10 +96,10 @@ namespace BeaverBuddies.Events
                 {
                     // TODO: Is there any way to include the log data too?
                     byte[] mapBytes = ServerHostingUtils.GetMapBtyes(repository, saveReference);
-                    reportingService.PostDesync(desyncID, ioType, mapBytes).ContinueWith(onPost);
+                    reportingService.PostDesync(desyncID, desyncTrace, ioType, mapBytes).ContinueWith(onPost);
                 }, true))
                 {
-                    _ = reportingService.PostDesync(desyncID, ioType, null).ContinueWith(onPost);
+                    _ = reportingService.PostDesync(desyncID, desyncTrace, ioType, null).ContinueWith(onPost);
                 };
                 
             };
