@@ -1,11 +1,17 @@
 ﻿using BeaverBuddies.Connect;
 using BeaverBuddies.IO;
+using BeaverBuddies.Reporting;
 using BeaverBuddies.Util;
 using System;
+using System.Threading.Tasks;
 using Timberborn.CoreUI;
+using Timberborn.GameSaveRepositorySystem;
+using Timberborn.GameSaveRepositorySystemUI;
+using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.Localization;
 using Timberborn.Versioning;
 using Timberborn.WebNavigation;
+using UnityEngine.UIElements;
 
 namespace BeaverBuddies.Events
 {
@@ -59,15 +65,44 @@ namespace BeaverBuddies.Events
         public override void Replay(IReplayContext context)
         {
             context.GetSingleton<ReplayService>().SetTargetSpeed(0);
+            ReportingService reportingService = context.GetSingleton<ReportingService>();
+            RehostingService rehostingService = context.GetSingleton<RehostingService>();
+            GameSaveRepository repository = context.GetSingleton<GameSaveRepository>();
             var shower = context.GetSingleton<DialogBoxShower>();
             ILoc _loc = shower._loc;
             var urlOpener = context.GetSingleton<UrlOpener>();
+            string ioType = EventIO.Get()?.GetType().Name;
+            Button infoButton = null;
             Action bugReportAction = () =>
             {
-                urlOpener.OpenUrl(LinkHelper.BugReportURL);
+                infoButton?.SetEnabled(false);
+                Action<Task<bool>> onPost = (success) =>
+                {
+                    if (infoButton == null) return;
+                    if (success.Result)
+                    {
+                        // TODO: loc
+                        infoButton.text = "Success!";
+                    }
+                    else
+                    {
+                        // TODO: loc
+                        infoButton.text = "Report Failed :(";
+                    }
+                };
+
+                if (!rehostingService.SaveRehostFile(saveReference =>
+                {
+                    // TODO: Is there any way to include the log data too?
+                    byte[] mapBytes = ServerHostingUtils.GetMapBtyes(repository, saveReference);
+                    reportingService.PostDesync(desyncID, ioType, mapBytes).ContinueWith(onPost);
+                }, true))
+                {
+                    _ = reportingService.PostDesync(desyncID, ioType, null).ContinueWith(onPost);
+                };
+                
             };
             bool isHost = EventIO.Get() is ServerEventIO;
-            RehostingService rehostingService = context.GetSingleton<RehostingService>();
             Action reconnectAction = () =>
             {
                 if (isHost)
@@ -86,11 +121,12 @@ namespace BeaverBuddies.Events
                 }
             };
             string reconnectText = isHost ? _loc.T("BeaverBuddies.ClientDesynced.SaveAndRehostButton") : _loc.T("BeaverBuddies.ClientDesynced.WaitForRehostButton");
-            shower.Create().SetLocalizedMessage("BeaverBuddies.ClientDesynced.Message")
+            DialogBox box = shower.Create().SetLocalizedMessage("BeaverBuddies.ClientDesynced.Message")
                 .SetInfoButton(bugReportAction, _loc.T("BeaverBuddies.ClientDesynced.PostBugReportButton"))
                 .SetConfirmButton(reconnectAction, reconnectText)
                 .SetDefaultCancelButton()
                 .Show();
+            infoButton = box.GetPanel().Q<Button>("InfoButton");
         }
     }
 }

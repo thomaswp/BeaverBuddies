@@ -93,10 +93,8 @@ _gameLoadValidators[index].ValidateSave(saveReference, delegate
             });
         }
 
-        public static void LoadAndHost(ValidatingGameLoader loader, SaveReference saveReference)
+        public static byte[] GetMapBtyes(GameSaveRepository repository, SaveReference saveReference)
         {
-            var sceneLoader = loader._gameSceneLoader;
-            var repository = sceneLoader._gameSaveRepository;
             var inputStream = repository.OpenSaveWithoutLogging(saveReference);
             byte[] data;
             using (var memoryStream = new MemoryStream())
@@ -105,6 +103,14 @@ _gameLoadValidators[index].ValidateSave(saveReference, delegate
                 data = memoryStream.ToArray();
             }
             inputStream.Close();
+            return data;
+        }
+
+        public static void LoadAndHost(ValidatingGameLoader loader, SaveReference saveReference)
+        {
+            var sceneLoader = loader._gameSceneLoader;
+            var repository = sceneLoader._gameSaveRepository;
+            byte[] data = GetMapBtyes(repository, saveReference);
             Plugin.Log($"Reading map with length {data.Length}");
 
             ServerEventIO io = new ServerEventIO();

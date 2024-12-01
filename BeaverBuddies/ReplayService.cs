@@ -34,6 +34,8 @@ using BeaverBuddies.DesyncDetecter;
 using Timberborn.WebNavigation;
 using System.Collections.Immutable;
 using BeaverBuddies.IO;
+using BeaverBuddies.Reporting;
+using Timberborn.GameSaveRepositorySystem;
 
 namespace BeaverBuddies
 {
@@ -160,7 +162,9 @@ namespace BeaverBuddies
             IOptionsBox optionsBox,
             DialogBoxShower dialogBoxShower,
             UrlOpener urlOpener,
-            RehostingService rehostingService
+            RehostingService rehostingService,
+            ReportingService reportingService,
+            GameSaveRepository gameSaveRepository
         )
         {
             //_tickWathcerService = AddSingleton(tickWathcerService);
@@ -187,6 +191,8 @@ namespace BeaverBuddies
             AddSingleton(dialogBoxShower);
             AddSingleton(urlOpener);
             AddSingleton(rehostingService);
+            AddSingleton(reportingService);
+            AddSingleton(gameSaveRepository);
 
             AddSingleton(this);
 

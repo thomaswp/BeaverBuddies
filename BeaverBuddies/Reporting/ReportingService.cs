@@ -1,18 +1,22 @@
-﻿using BeaverBuddies.DesyncDetecter;
+﻿using BeaverBuddies.Connect;
+using BeaverBuddies.DesyncDetecter;
 using BeaverBuddies.IO;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using Timberborn.Autosaving;
 using Timberborn.GameSaveRepositorySystem;
 using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.SettlementNameSystem;
 using TimberNet;
+using UnityEngine.Bindings;
 
 namespace BeaverBuddies.Reporting
 {
@@ -22,16 +26,13 @@ namespace BeaverBuddies.Reporting
         const string UPLOAD_URL = "https://content.airtable.com/v0/appdIpScGqlZ5FX3r/{0}/Data/uploadAttachment";
 
         private string accessToken;
+        private SettlementNameService _settlementNameService;
 
-        private DesyncDetecterService _desyncDetecterService;
-
-        public ReportingService(DesyncDetecterService desyncDetecterService)
+        public ReportingService(SettlementNameService settlementNameService)
         {
-            _desyncDetecterService = desyncDetecterService;
-
+            _settlementNameService = settlementNameService;
             accessToken = GetEmbeddedResource("BeaverBuddies.pat.properties");
             Plugin.Log(accessToken);
-
         }
 
         public static string GetStringHash(string str)
@@ -44,41 +45,77 @@ namespace BeaverBuddies.Reporting
             return $"{TimberNetBase.GetHashCode(bytes):X8}";
         }
 
-        public async bool PostDesync(string eventID)
+        public async Task<bool> PostDesync(string eventID, string role, byte[] mapBytes)
         {
-            JObject body = new JObject();
-            body["SaveID"] = "?";
-            body["EventID"] = eventID;
-            body["Role"] = EventIO.Get()?.GetType()?.Name;
-            body["IsCrash"] = false;
-            body["DesyncTrace"] = DesyncDetecterService.GetLastDesyncTrace();
+            JObject fields = new JObject();
+            fields["SaveID"] = GetStringHash(_settlementNameService.SettlementName);
+            fields["EventID"] = eventID;
+            fields["Role"] = role;
+            fields["IsCrash"] = false;
+            fields["DesyncTrace"] = DesyncDetecterService.GetLastDesyncTrace();
+
+
+            Plugin.Log(EventIO.Get()?.ToString());
+            
+            JObject record = new JObject
+            {
+                { "fields", fields }
+            };
+            JArray records = [record];
+            JObject body = new JObject
+            {
+                { "records", records }
+            };
             
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
 
-            HttpContent content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
+            string bodyContent = body.ToString();
+            Plugin.Log(bodyContent);
+            HttpContent content = new StringContent(bodyContent, Encoding.UTF8, "application/json");
 
             HttpResponseMessage response = await client.PostAsync(CREATE_URL, content);
             if (!response.IsSuccessStatusCode)
             {
                 Plugin.LogError($"Report post failed: {response.ReasonPhrase}");
+                Plugin.LogError(await response.Content.ReadAsStringAsync());
                 return false;
             }
             string responseString = await response.Content.ReadAsStringAsync();
+            Plugin.Log(responseString);
+
+            // If we didn't have a map, stop here
+            if (mapBytes == null) return true;
+
             string recordID;
             try
             {
                 JObject responseJSON = JObject.Parse(responseString);
-                recordID = (String) responseJSON["records"][0]["id"];
-            } catch (Exception e)
+                recordID = (string) responseJSON["records"][0]["id"];
+            } catch
             {
                 Plugin.LogError($"Invalid response: {responseString}");
                 return false;
             }
 
-            // TODO
-            //_rehostingService.SaveRehostFile();
+            string base64Encoded = Convert.ToBase64String(mapBytes);
+
+            body = new JObject()
+            {
+                { "contentType", "application/zip" },
+                { "file", base64Encoded },
+                { "filename", "map.zip" },
+            };
+
             HttpContent uploadContent = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
+            response = await client.PostAsync(string.Format(UPLOAD_URL, recordID), uploadContent);
+            if (!response.IsSuccessStatusCode)
+            {
+                Plugin.LogError($"Upload map failed: {response.ReasonPhrase}");
+                return false;
+            }
+
+            return true;
         }
         
 
