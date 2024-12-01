@@ -234,9 +234,9 @@ namespace BeaverBuddies.DesyncDetecter
         static void Postfix(TickableEntityBucket __instance, TickableEntity tickableEntity)
         {
             if (!ReplayService.IsLoaded) return;
-            int index = __instance._tickableEntities.Values.IndexOf(tickableEntity);
             if (EventIO.Config.Debug)
             {
+                int index = __instance._tickableEntities.Values.IndexOf(tickableEntity);
                 DesyncDetecterService.Trace($"Adding: {tickableEntity.EntityId} at index {index}");
             }
             //Plugin.LogStackTrace();
