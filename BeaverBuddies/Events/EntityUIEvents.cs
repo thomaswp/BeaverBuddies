@@ -57,7 +57,7 @@ namespace BeaverBuddies.Events
     {
         protected override void SetValue(IReplayContext context, GatherablePrioritizer prioritizer, string prefabName)
         {
-            Gatherable gatherable = null;
+            GatherableSpec gatherable = null;
             if (itemID != null)
             {
                 gatherable = prioritizer.GetGatherable(prefabName);
@@ -79,11 +79,11 @@ namespace BeaverBuddies.Events
     [HarmonyPatch(typeof(GatherablePrioritizer), nameof(GatherablePrioritizer.PrioritizeGatherable))]
     class GatherablePrioritizerPatcher
     {
-        static bool Prefix(GatherablePrioritizer __instance, Gatherable gatherable)
+        static bool Prefix(GatherablePrioritizer __instance, GatherableSpec gatherableSpec)
         {
             return ReplayEvent.DoEntityPrefix(__instance, entityID =>
             {
-                var name = gatherable?.GetComponentFast<Prefab>()?.PrefabName;
+                var name = gatherableSpec?.GetComponentFast<PrefabSpec>()?.PrefabName;
                 return new GatheringPrioritizedEvent()
                 {
                     entityID = entityID,
@@ -137,7 +137,7 @@ namespace BeaverBuddies.Events
     {
         protected override void SetValue(IReplayContext context, PlantablePrioritizer prioritizer, string itemID)
         {
-            Plantable plantable = null;
+            PlantableSpec plantable = null;
             if (itemID != null)
             {
                 var planterBuilding = prioritizer.GetComponentFast<PlanterBuilding>();
@@ -439,7 +439,7 @@ namespace BeaverBuddies.Events
         public static bool DoPrefix(Workplace __instance, bool increased)
         {
             // Ignore if we're already at max/min workers
-            if (increased && __instance.DesiredWorkers >= __instance._workplaceSpecification.MaxWorkers) return true;
+            if (increased && __instance.DesiredWorkers >= __instance._workplaceSpec.MaxWorkers) return true;
             if (!increased && __instance.DesiredWorkers <= 1) return true;
 
             return DoEntityPrefix(__instance, entityID =>

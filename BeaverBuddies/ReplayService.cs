@@ -34,6 +34,7 @@ using BeaverBuddies.DesyncDetecter;
 using Timberborn.WebNavigation;
 using System.Collections.Immutable;
 using BeaverBuddies.IO;
+using Timberborn.Workshops;
 
 namespace BeaverBuddies
 {

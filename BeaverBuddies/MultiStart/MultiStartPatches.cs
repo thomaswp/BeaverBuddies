@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Timberborn.BaseComponentSystem;
+using Timberborn.BlockSystem;
 using Timberborn.Buildings;
 using Timberborn.EntitySystem;
 using Timberborn.GameSceneLoading;
@@ -24,8 +25,8 @@ using static Timberborn.GameStartup.GameInitializer;
 namespace BeaverBuddies.MultiStart
 {
 	[ManualMethodOverwrite]
-	/*
-     * 11/9/2024
+    /*
+     * 4/19/2025
         if (_startingLocationService.HasStartingLocation())
         {
             InitialPlacement = _startingLocationService.GetPlacement();
@@ -35,7 +36,7 @@ namespace BeaverBuddies.MultiStart
         SetCamera();
         _startingLocationService.DeleteStartingLocations();
      */
-	[HarmonyPatch(typeof(StartingBuildingInitializer), nameof(StartingBuildingInitializer.Initialize))]
+    [HarmonyPatch(typeof(StartingBuildingInitializer), nameof(StartingBuildingInitializer.Initialize))]
 	public class StartingBuildingInitializerInitializePatcher
 	{
 		public static bool Prefix(StartingBuildingInitializer __instance)
@@ -61,9 +62,9 @@ namespace BeaverBuddies.MultiStart
 			// Initialize each starting location; not just the first
 			foreach (var startingLocation in startingLocations)
 			{
-				__instance._startingBuildingSpawner.Place(startingLocation.Placement);
+				__instance._startingBuildingSpawner.Place(startingLocation.GetComponentFast<BlockObject>().Placement);
 				// Register all start buildings
-				startBuildingService.RegisterStartingBuilding(__instance._startingBuildingSpawner.StartingBuilding);
+				startBuildingService.RegisterStartingBuilding(__instance._startingBuildingSpawner.StartingBuildingSpec);
 
 
                 // If we're playing with fewer players than the map can support, stop early
@@ -82,15 +83,15 @@ namespace BeaverBuddies.MultiStart
 			return false;
 		}
 
-		public static List<StartingLocation> GetAllStartingLocations(StartingLocationService sls)
+		public static List<StartingLocationSpec> GetAllStartingLocations(StartingLocationService sls)
 		{
-			return sls._entityComponentRegistry.GetEnabled<StartingLocation>().ToList();
+			return sls._entityComponentRegistry.GetEnabled<StartingLocationSpec>().ToList();
 		}
 	}
 
 	[ManualMethodOverwrite]
 	/*
-     * 11/9/2024
+     * 4/19/2025
 		Building startingBuilding = _startingBuildingSpawner.StartingBuilding;
 		if ((bool)startingBuilding)
 		{
@@ -102,7 +103,8 @@ namespace BeaverBuddies.MultiStart
 				_startingBeaverInitializer.Initialize(valueOrDefault, newGameMode.StartingAdults, newGameMode.AdultAgeProgress, newGameMode.StartingChildren, newGameMode.ChildAgeProgress);
 			}
 		}
-		return InitializationState.UpdateStats;
+		return InitializationState.PostSpawnBeavers;
+
      */
 	[HarmonyPatch(typeof(GameInitializer), nameof(GameInitializer.SpawnBeavers))]
 	public class GameInitializerSpawnBeaversPatcher
@@ -112,7 +114,7 @@ namespace BeaverBuddies.MultiStart
 			StartBuildingsService startBuildingsService = GetSingleton<StartBuildingsService>();
 			if (!startBuildingsService.IsMultiStart) return true;
 
-			foreach (Building startingBuilding in startBuildingsService.StartingBuildings)
+			foreach (BuildingSpec startingBuilding in startBuildingsService.StartingBuildings)
 			{
 				Vector3? unblockedSingleAccess = startingBuilding.GetComponentFast<BuildingAccessible>().Accessible.UnblockedSingleAccess;
 				if (unblockedSingleAccess.HasValue)
@@ -122,7 +124,7 @@ namespace BeaverBuddies.MultiStart
 					__instance._startingBeaverInitializer.Initialize(valueOrDefault, newGameMode.StartingAdults, newGameMode.AdultAgeProgress, newGameMode.StartingChildren, newGameMode.ChildAgeProgress);
 				}
 			}
-			__result = InitializationState.UpdateStats;
+			__result = InitializationState.PostSpawnBeavers;
 			return false;
 		}
 	}

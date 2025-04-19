@@ -19,9 +19,9 @@ namespace BeaverBuddies.Events
         public override void Replay(IReplayContext context)
         {
             string warningMessage = null;
-            if (serverGameVersion != Versions.CurrentGameVersion.ToString())
+            if (serverGameVersion != GameVersions.CurrentVersion.ToString())
             {
-                warningMessage = $"Warning! Server Timberborn version ({serverGameVersion}) does not match client Timberborn version ({Versions.CurrentGameVersion}).\n" +
+                warningMessage = $"Warning! Server Timberborn version ({serverGameVersion}) does not match client Timberborn version ({GameVersions.CurrentVersion}).\n" +
                     $"Please ensure that you are running the same version of the game.";
             } else if (serverModVersion != Plugin.Version)
             {
@@ -44,7 +44,7 @@ namespace BeaverBuddies.Events
             InitializeClientEvent message = new InitializeClientEvent()
             {
                 serverModVersion = Plugin.Version,
-                serverGameVersion = Versions.CurrentGameVersion.ToString(),
+                serverGameVersion = GameVersions.CurrentVersion.ToString(),
                 isDebugMode = EventIO.Config.Debug,
             };
             return message;

@@ -460,7 +460,8 @@ namespace BeaverBuddies
             typeof(StockpileGoodPileVisualizer),
             typeof(TerrainBlockRandomizer),
             typeof(ObservatoryAnimator),
-            typeof(WaterInputPipeSegmentFactory),
+            // Seems to no longer use random...
+            //typeof(WaterInputPipeSegmentFactory),
         };
 
         // Currently unused - could be used for warnings on items we don't
