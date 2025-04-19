@@ -20,10 +20,12 @@ namespace BeaverBuddies.Events
     {
         public string serverModVersion;
         public string serverGameVersion;
+        public string mapName;
         public bool isDebugMode;
 
         public override void Replay(IReplayContext context)
         {
+            context.GetSingleton<ReplayService>().SetServerMapName(mapName);
             string warningMessage = null;
             if (serverGameVersion != Versions.CurrentGameVersion.ToString())
             {
@@ -45,13 +47,14 @@ namespace BeaverBuddies.Events
             }
         }
 
-        public static InitializeClientEvent Create()
+        public static InitializeClientEvent Create(string mapName)
         {
             InitializeClientEvent message = new InitializeClientEvent()
             {
                 serverModVersion = Plugin.Version,
                 serverGameVersion = Versions.CurrentGameVersion.ToString(),
                 isDebugMode = EventIO.Config.Debug,
+                mapName = mapName,
             };
             return message;
         }
