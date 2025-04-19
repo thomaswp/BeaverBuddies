@@ -99,13 +99,13 @@ namespace BeaverBuddies.DesyncDetecter
     [HarmonyPatch(typeof(SpawnValidationService), nameof(SpawnValidationService.CanSpawn))]
     class SpawnValidationServiceCanSpawnPatcher
     {
-        public static void Postfix(SpawnValidationService __instance, bool __result, Vector3Int coordinates, Blocks blocks, string resourcePrefabName)
+        public static void Postfix(SpawnValidationService __instance, bool __result, Vector3Int coordinates, BlockObjectSpec blockObjectSpec, string resourcePrefabName)
         {
             if (!EventIO.Config.Debug) return;
             DesyncDetecterService.Trace($"Trying to spawn {resourcePrefabName} at {coordinates}: {__result}\n" +
                 $"IsSuitableTerrain: {__instance.IsSuitableTerrain(coordinates)}\n" +
                 $"SpotIsValid: {__instance.SpotIsValid(coordinates, resourcePrefabName)}\n" +
-                $"IsUnobstructed: {__instance.IsUnobstructed(coordinates, blocks)}");
+                $"IsUnobstructed: {__instance.IsUnobstructed(coordinates, resourcePrefabName)}");
         }
     }
 
@@ -181,7 +181,7 @@ namespace BeaverBuddies.DesyncDetecter
         {
             if (!EventIO.Config.Debug) return;
 
-            var levels = __instance._soilMoistureSimulator.MoistureLevels;
+            var levels = __instance._soilMoistureSimulator._moistureLevels;
             int hash = 13;
             foreach (var level in levels)
             {

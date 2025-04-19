@@ -646,15 +646,15 @@ namespace BeaverBuddies
             // the end of this tick, to ensure an update follows immediately.
             if (ShouldCompleteFullTick)
             {
-                return __instance._nextTickedBucketIndex != 0;
+                return __instance._nextBucketIndex != 0;
             }
             return numberOfBucketsToTick > 0;
         }
 
         public static bool IsAtStartOfTick(TickableBucketService __instance)
         {
-            return __instance._nextTickedBucketIndex == 0 &&
-                !__instance._tickedSingletons;
+            // For Update 7, index is 0 for singleton ticking
+            return __instance._nextBucketIndex == 0;
         }
 
         private bool TickReplayServiceOrNextBucket(TickableBucketService __instance)
@@ -678,7 +678,7 @@ namespace BeaverBuddies
                 HasTickedReplayService = false;
             }
             __instance.TickNextBucket();
-            NextBucket = __instance._nextTickedBucketIndex;
+            NextBucket = __instance._nextBucketIndex;
             return false;
         }
 
@@ -694,7 +694,8 @@ namespace BeaverBuddies
             // Forces 1 tick per update
             if (numberOfBucketsToTick != 0)
             {
-                numberOfBucketsToTick = __instance.NumberOfBuckets + 1;
+                // Don't need to add one anymore; singletons are included
+                numberOfBucketsToTick = __instance.NumberOfBuckets;
             }
 #endif
 
@@ -717,7 +718,7 @@ namespace BeaverBuddies
 
     [ManualMethodOverwrite]
     /*
-        7/20/2024
+        4/19/2025
         // Also check TickNextBucket - we rework everything
 		while (numberOfBucketsToTick-- > 0)
 		{
