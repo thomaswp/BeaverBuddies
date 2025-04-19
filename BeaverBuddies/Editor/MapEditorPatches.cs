@@ -111,7 +111,7 @@ namespace BeaverBuddies.Editor
     [ManualMethodOverwrite]
     /*
      * 04/19/2025
-	private void DeleteOtherStartingLocations(StartingLocation remainingStartingLocation)
+	private void DeleteOtherStartingLocations(StartingLocation remainingStartingLocationSpec)
 	{
 		foreach (StartingLocation item in (from startingLocation in _entityComponentRegistry.GetEnabled<StartingLocationSpec>()
 			where startingLocation != remainingStartingLocationSpec
@@ -124,9 +124,9 @@ namespace BeaverBuddies.Editor
     [HarmonyPatch(typeof(StartingLocationService), nameof(StartingLocationService.DeleteOtherStartingLocations))]
     public class StartingLocationServiceDeleteOtherStartingLocationsPatcher
     {
-        public static bool Prefix(StartingLocationService __instance, StartingLocationSpec remainingStartingLocation)
+        public static bool Prefix(StartingLocationService __instance, StartingLocationSpec remainingStartingLocationSpec)
         {
-            var player = remainingStartingLocation.GetComponentFast<StartingLocationPlayer>();
+            var player = remainingStartingLocationSpec.GetComponentFast<StartingLocationPlayer>();
             if (!player)
             {
                 return true;
