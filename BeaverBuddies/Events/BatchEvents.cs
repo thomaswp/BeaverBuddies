@@ -235,7 +235,7 @@ namespace BeaverBuddies.Events
     {
         public DistrictDistributionSetting DistrictSetting { get; private set; }
 
-        public GoodDistributionSettingWithDistrict(GoodSpecification goodSpecification, DistrictDistributionSetting districtSetting) : base(goodSpecification)
+        public GoodDistributionSettingWithDistrict(GoodSpec goodSpec, DistrictDistributionSetting districtSetting) : base(goodSpec)
         {
             this.DistrictSetting = districtSetting;
         }

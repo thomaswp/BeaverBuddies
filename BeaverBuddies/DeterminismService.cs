@@ -504,7 +504,7 @@ namespace BeaverBuddies
 
     // TODO: Many of the following are no longer necessary, since we
     // use NonTickRandomNumberGenerator, above, with many classes.
-    [HarmonyPatch(typeof(InputService), nameof(InputService.Update))]
+    [HarmonyPatch(typeof(InputService), nameof(InputService.UpdateSingleton))]
     public class InputPatcher
     {
         //private static readonly Random random = new Random();
@@ -680,22 +680,11 @@ namespace BeaverBuddies
         }
     }
 
+    // This was removed when the method was removed: may need to revisit
     // Sometimes tool descriptions need an instance of the object they describe to describe it
     // and when it activates this can use randomness (e.g. WateredNaturalResource), which should
     // be considered UI randomness, since this object never gets in the game.
-    [HarmonyPatch(typeof(DescriptionPanel), nameof(DescriptionPanel.SetDescription))]
-    public class DescriptionPanelSetDescriptionPatcher
-    {
-        static void Prefix()
-        {
-            DeterminismService.SetNonGamePatcherActive(typeof(DescriptionPanelSetDescriptionPatcher), true);
-        }
-
-        static void Postfix()
-        {
-            DeterminismService.SetNonGamePatcherActive(typeof(DescriptionPanelSetDescriptionPatcher), false);
-        }
-    }
+    //[HarmonyPatch(typeof(DescriptionPanel), nameof(DescriptionPanel.SetDescription))]
 
     // Disable analytics while this mod is enabled, since Unity's Analytics
     // package seems to cause a bunch of desyncs, and I'm not confident

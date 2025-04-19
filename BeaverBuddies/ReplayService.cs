@@ -150,7 +150,7 @@ namespace BeaverBuddies
             TreeCuttingArea treeCuttingArea,
             EntityRegistry entityRegistry,
             EntityService entityService,
-            RecipeSpecificationService recipeSpecificationService,
+            RecipeSpecService recipeSpecificationService,
             DemolishableSelectionTool demolishableSelectionTool,
             DemolishableUnselectionTool demolishableUnselectionTool,
             BuildingUnlockingService buildingUnlockingService,
@@ -410,7 +410,6 @@ namespace BeaverBuddies
             DesyncDetecterService.StartTick(ticksSinceLoad);
 
             IsLoaded = true;
-
         }
 
         // TODO: Find a better callback way of waiting until initial game

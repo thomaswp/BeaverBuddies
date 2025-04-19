@@ -76,7 +76,7 @@ namespace BeaverBuddies.Events
             return component?.GetComponentFast<EntityComponent>()?.EntityId.ToString();
         }
 
-        protected Building GetBuilding(IReplayContext context, string buildingName)
+        protected BuildingSpec GetBuilding(IReplayContext context, string buildingName)
         {
             var result = context.GetSingleton<BuildingService>().GetBuildingPrefab(buildingName);
             if (result == null)
@@ -88,7 +88,7 @@ namespace BeaverBuddies.Events
 
         public static string GetBuildingName(BaseComponent component)
         {
-            return component.GetComponentFast<Prefab>()?.PrefabName;
+            return component.GetComponentFast<PrefabSpec>()?.PrefabName;
         }
 
         public static ReplayService GetReplayServiceIfReady()

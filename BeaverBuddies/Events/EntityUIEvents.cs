@@ -97,10 +97,10 @@ namespace BeaverBuddies.Events
     {
         protected override void SetValue(IReplayContext context, Manufactory prioritizer, string itemID)
         {
-            RecipeSpecification recipe = null;
+            RecipeSpec recipe = null;
             if (itemID != null)
             {
-                recipe = context.GetSingleton<RecipeSpecificationService>()?.GetRecipe(itemID);
+                recipe = context.GetSingleton<RecipeSpecService>()?.GetRecipe(itemID);
                 if (recipe == null)
                 {
                     Plugin.LogWarning($"Could not find recipe for id: {itemID}");
@@ -119,7 +119,7 @@ namespace BeaverBuddies.Events
     [HarmonyPatch(typeof(Manufactory), nameof(Manufactory.SetRecipe))]
     class ManufactorySetRecipePatcher
     {
-        static bool Prefix(Manufactory __instance, RecipeSpecification selectedRecipe)
+        static bool Prefix(Manufactory __instance, RecipeSpec selectedRecipe)
         {
             return ReplayEvent.DoEntityPrefix(__instance, entityID =>
             {
@@ -161,11 +161,11 @@ namespace BeaverBuddies.Events
     [HarmonyPatch(typeof(PlantablePrioritizer), nameof(PlantablePrioritizer.PrioritizePlantable))]
     class PlantablePrioritizerPatcher
     {
-        static bool Prefix(PlantablePrioritizer __instance, Plantable plantable)
+        static bool Prefix(PlantablePrioritizer __instance, PlantableSpec plantableSpec)
         {
             return ReplayEvent.DoEntityPrefix(__instance, entityID =>
             {
-                var id = plantable?.PrefabName;
+                var id = plantableSpec?.PrefabName;
 
                 return new PlantablePrioritizedEvent()
                 {
