@@ -858,7 +858,7 @@ namespace BeaverBuddies.Events
 
     [ManualMethodOverwrite]
     /*
-        7/20/2024
+        04/19/2025
 		UnlockableWorkerType botUnlockableWorkerType = GetBotUnlockableWorkerType();
 		_workplaceUnlockingDialogService.TryToUnlockWorkerType(botUnlockableWorkerType, SetBotWorkerType);
      */

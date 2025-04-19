@@ -10,6 +10,7 @@ using Bindito.Core.Internal;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Reflection;
 using System.Threading;
 using Timberborn.Analytics;
@@ -896,7 +897,8 @@ namespace BeaverBuddies
 
     [ManualMethodOverwrite]
     /*
-public TimeOfDay FluidTimeOfDay => CalculateTimeOfDay(FluidSecondsPassedToday);
+    04/19/2025
+    public TimeOfDay FluidTimeOfDay => _secondsPassedToday + _secondsPassedThisTick;
      */
     [HarmonyPatch(typeof(DayNightCycle), nameof(DayNightCycle.FluidSecondsPassedToday), MethodType.Getter)]
     public class DayNightCycleFluidSecondsPassedTodayPatcher
@@ -995,17 +997,17 @@ public TimeOfDay FluidTimeOfDay => CalculateTimeOfDay(FluidSecondsPassedToday);
 #if NO_PARALLEL
     [ManualMethodOverwrite]
     /*
-9/2/202024
-_parallelTickStartTimestamp = Stopwatch.GetTimestamp();
-ImmutableArray<IParallelTickableSingleton>.Enumerator enumerator = _parallelTickableSingletons.GetEnumerator();
-while (enumerator.MoveNext())
-{
-	IParallelTickableSingleton parallelTickable = enumerator.Current;
-	_parallelizerContext.Run(delegate
-	{
-		parallelTickable.ParallelTick();
-	});
-}
+        04/19/2025
+        _parallelTickStartTimestamp = Stopwatch.GetTimestamp();
+        ImmutableArray<IParallelTickableSingleton>.Enumerator enumerator = _parallelTickableSingletons.GetEnumerator();
+        while (enumerator.MoveNext())
+        {
+	        IParallelTickableSingleton parallelTickable = enumerator.Current;
+	        _parallelizerContext.Run(delegate
+	        {
+		        parallelTickable.ParallelTick();
+	        });
+        }
      */
     [HarmonyPatch(typeof(TickableSingletonService), nameof(TickableSingletonService.StartParallelTick))]
     class TickableSingletonServiceStartParallelTickPatcher

@@ -110,11 +110,11 @@ namespace BeaverBuddies.Editor
 
     [ManualMethodOverwrite]
     /*
-     * 11/9/2024
+     * 04/19/2025
 	private void DeleteOtherStartingLocations(StartingLocation remainingStartingLocation)
 	{
-		foreach (StartingLocation item in (from startingLocation in _entityComponentRegistry.GetEnabled<StartingLocation>()
-			where startingLocation != remainingStartingLocation
+		foreach (StartingLocation item in (from startingLocation in _entityComponentRegistry.GetEnabled<StartingLocationSpec>()
+			where startingLocation != remainingStartingLocationSpec
 			select startingLocation).ToList())
 		{
 			_entityService.Delete(item);
@@ -145,7 +145,7 @@ namespace BeaverBuddies.Editor
 
     [ManualMethodOverwrite]
     /*
-     * 11/9/2024
+     * 04/19/2025
 	List<StartingLocation> list = _entityComponentRegistry.GetEnabled<StartingLocation>().ToList();
 	if (list.IsEmpty())
 	{

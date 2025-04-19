@@ -32,7 +32,7 @@ namespace BeaverBuddies.Connect
 
         [ManualMethodOverwrite]
         /*
-         * 08/2024
+         * 04/19/2025
         if (_saveList.TryGetSelectedSave(out var selectedSave))
         {
             if (_gameSaveRepository.SaveExists(selectedSave.SaveReference))
@@ -69,16 +69,16 @@ namespace BeaverBuddies.Connect
 
         [ManualMethodOverwrite]
         /*
-9/14/2024
-if (index >= _gameLoadValidators.Length)
-{
-	_gameSceneLoader.StartSaveGame(saveReference);
-	return;
-}
-_gameLoadValidators[index].ValidateSave(saveReference, delegate
-{
-	CheckNextValidator(saveReference, index + 1);
-});
+        04/19/2025 ValidatingGameLoader.CheckNextValidator
+        if (index >= _gameLoadValidators.Length)
+        {
+	        _gameSceneLoader.StartSaveGame(saveReference);
+	        return;
+        }
+        _gameLoadValidators[index].ValidateSave(saveReference, delegate
+        {
+	        CheckNextValidator(saveReference, index + 1);
+        });
          */
         private static void CheckNextValidator(ValidatingGameLoader loader, SaveReference saveReference, int index)
         {
