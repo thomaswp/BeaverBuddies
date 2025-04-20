@@ -57,7 +57,7 @@ namespace BeaverBuddies.Events
     {
         protected override void SetValue(IReplayContext context, GatherablePrioritizer prioritizer, string prefabName)
         {
-            Gatherable gatherable = null;
+            GatherableSpec gatherable = null;
             if (itemID != null)
             {
                 gatherable = prioritizer.GetGatherable(prefabName);
@@ -79,11 +79,11 @@ namespace BeaverBuddies.Events
     [HarmonyPatch(typeof(GatherablePrioritizer), nameof(GatherablePrioritizer.PrioritizeGatherable))]
     class GatherablePrioritizerPatcher
     {
-        static bool Prefix(GatherablePrioritizer __instance, Gatherable gatherable)
+        static bool Prefix(GatherablePrioritizer __instance, GatherableSpec gatherableSpec)
         {
             return ReplayEvent.DoEntityPrefix(__instance, entityID =>
             {
-                var name = gatherable?.GetComponentFast<Prefab>()?.PrefabName;
+                var name = gatherableSpec?.GetComponentFast<PrefabSpec>()?.PrefabName;
                 return new GatheringPrioritizedEvent()
                 {
                     entityID = entityID,
@@ -97,10 +97,10 @@ namespace BeaverBuddies.Events
     {
         protected override void SetValue(IReplayContext context, Manufactory prioritizer, string itemID)
         {
-            RecipeSpecification recipe = null;
+            RecipeSpec recipe = null;
             if (itemID != null)
             {
-                recipe = context.GetSingleton<RecipeSpecificationService>()?.GetRecipe(itemID);
+                recipe = context.GetSingleton<RecipeSpecService>()?.GetRecipe(itemID);
                 if (recipe == null)
                 {
                     Plugin.LogWarning($"Could not find recipe for id: {itemID}");
@@ -119,7 +119,7 @@ namespace BeaverBuddies.Events
     [HarmonyPatch(typeof(Manufactory), nameof(Manufactory.SetRecipe))]
     class ManufactorySetRecipePatcher
     {
-        static bool Prefix(Manufactory __instance, RecipeSpecification selectedRecipe)
+        static bool Prefix(Manufactory __instance, RecipeSpec selectedRecipe)
         {
             return ReplayEvent.DoEntityPrefix(__instance, entityID =>
             {
@@ -137,7 +137,7 @@ namespace BeaverBuddies.Events
     {
         protected override void SetValue(IReplayContext context, PlantablePrioritizer prioritizer, string itemID)
         {
-            Plantable plantable = null;
+            PlantableSpec plantable = null;
             if (itemID != null)
             {
                 var planterBuilding = prioritizer.GetComponentFast<PlanterBuilding>();
@@ -161,11 +161,11 @@ namespace BeaverBuddies.Events
     [HarmonyPatch(typeof(PlantablePrioritizer), nameof(PlantablePrioritizer.PrioritizePlantable))]
     class PlantablePrioritizerPatcher
     {
-        static bool Prefix(PlantablePrioritizer __instance, Plantable plantable)
+        static bool Prefix(PlantablePrioritizer __instance, PlantableSpec plantableSpec)
         {
             return ReplayEvent.DoEntityPrefix(__instance, entityID =>
             {
-                var id = plantable?.PrefabName;
+                var id = plantableSpec?.PrefabName;
 
                 return new PlantablePrioritizedEvent()
                 {
@@ -439,7 +439,7 @@ namespace BeaverBuddies.Events
         public static bool DoPrefix(Workplace __instance, bool increased)
         {
             // Ignore if we're already at max/min workers
-            if (increased && __instance.DesiredWorkers >= __instance._workplaceSpecification.MaxWorkers) return true;
+            if (increased && __instance.DesiredWorkers >= __instance._workplaceSpec.MaxWorkers) return true;
             if (!increased && __instance.DesiredWorkers <= 1) return true;
 
             return DoEntityPrefix(__instance, entityID =>
@@ -858,7 +858,7 @@ namespace BeaverBuddies.Events
 
     [ManualMethodOverwrite]
     /*
-        7/20/2024
+        04/19/2025
 		UnlockableWorkerType botUnlockableWorkerType = GetBotUnlockableWorkerType();
 		_workplaceUnlockingDialogService.TryToUnlockWorkerType(botUnlockableWorkerType, SetBotWorkerType);
      */

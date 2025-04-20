@@ -15,7 +15,7 @@ namespace BeaverBuddies.MultiStart
             public TemplateModule Get()
             {
                 TemplateModule.Builder builder = new TemplateModule.Builder();
-                builder.AddDecorator<StartingLocation, StartingLocationPlayer>();
+                builder.AddDecorator<StartingLocationSpec, StartingLocationPlayer>();
                 return builder.Build();
             }
         }

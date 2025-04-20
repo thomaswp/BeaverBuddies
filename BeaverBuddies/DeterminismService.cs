@@ -10,6 +10,7 @@ using Bindito.Core.Internal;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Reflection;
 using System.Threading;
 using Timberborn.Analytics;
@@ -460,7 +461,8 @@ namespace BeaverBuddies
             typeof(StockpileGoodPileVisualizer),
             typeof(TerrainBlockRandomizer),
             typeof(ObservatoryAnimator),
-            typeof(WaterInputPipeSegmentFactory),
+            // Seems to no longer use random...
+            //typeof(WaterInputPipeSegmentFactory),
         };
 
         // Currently unused - could be used for warnings on items we don't
@@ -504,7 +506,7 @@ namespace BeaverBuddies
 
     // TODO: Many of the following are no longer necessary, since we
     // use NonTickRandomNumberGenerator, above, with many classes.
-    [HarmonyPatch(typeof(InputService), nameof(InputService.Update))]
+    [HarmonyPatch(typeof(InputService), nameof(InputService.UpdateSingleton))]
     public class InputPatcher
     {
         //private static readonly Random random = new Random();
@@ -680,22 +682,11 @@ namespace BeaverBuddies
         }
     }
 
+    // This was removed when the method was removed: may need to revisit
     // Sometimes tool descriptions need an instance of the object they describe to describe it
     // and when it activates this can use randomness (e.g. WateredNaturalResource), which should
     // be considered UI randomness, since this object never gets in the game.
-    [HarmonyPatch(typeof(DescriptionPanel), nameof(DescriptionPanel.SetDescription))]
-    public class DescriptionPanelSetDescriptionPatcher
-    {
-        static void Prefix()
-        {
-            DeterminismService.SetNonGamePatcherActive(typeof(DescriptionPanelSetDescriptionPatcher), true);
-        }
-
-        static void Postfix()
-        {
-            DeterminismService.SetNonGamePatcherActive(typeof(DescriptionPanelSetDescriptionPatcher), false);
-        }
-    }
+    //[HarmonyPatch(typeof(DescriptionPanel), nameof(DescriptionPanel.SetDescription))]
 
     // Disable analytics while this mod is enabled, since Unity's Analytics
     // package seems to cause a bunch of desyncs, and I'm not confident
@@ -906,7 +897,8 @@ namespace BeaverBuddies
 
     [ManualMethodOverwrite]
     /*
-public TimeOfDay FluidTimeOfDay => CalculateTimeOfDay(FluidSecondsPassedToday);
+    04/19/2025
+    public TimeOfDay FluidTimeOfDay => _secondsPassedToday + _secondsPassedThisTick;
      */
     [HarmonyPatch(typeof(DayNightCycle), nameof(DayNightCycle.FluidSecondsPassedToday), MethodType.Getter)]
     public class DayNightCycleFluidSecondsPassedTodayPatcher
@@ -1005,17 +997,17 @@ public TimeOfDay FluidTimeOfDay => CalculateTimeOfDay(FluidSecondsPassedToday);
 #if NO_PARALLEL
     [ManualMethodOverwrite]
     /*
-9/2/202024
-_parallelTickStartTimestamp = Stopwatch.GetTimestamp();
-ImmutableArray<IParallelTickableSingleton>.Enumerator enumerator = _parallelTickableSingletons.GetEnumerator();
-while (enumerator.MoveNext())
-{
-	IParallelTickableSingleton parallelTickable = enumerator.Current;
-	_parallelizerContext.Run(delegate
-	{
-		parallelTickable.ParallelTick();
-	});
-}
+        04/19/2025
+        _parallelTickStartTimestamp = Stopwatch.GetTimestamp();
+        ImmutableArray<IParallelTickableSingleton>.Enumerator enumerator = _parallelTickableSingletons.GetEnumerator();
+        while (enumerator.MoveNext())
+        {
+	        IParallelTickableSingleton parallelTickable = enumerator.Current;
+	        _parallelizerContext.Run(delegate
+	        {
+		        parallelTickable.ParallelTick();
+	        });
+        }
      */
     [HarmonyPatch(typeof(TickableSingletonService), nameof(TickableSingletonService.StartParallelTick))]
     class TickableSingletonServiceStartParallelTickPatcher

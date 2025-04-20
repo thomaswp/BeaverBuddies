@@ -29,11 +29,11 @@ namespace BeaverBuddies.Editor
 
         public static void Postfix(MapEditorButtons __instance, ref IEnumerable<BottomBarElement> __result)
         {
-            ToolGroupSpecification toolGroupSpecification = __instance._toolGroupSpecificationService.GetToolGroupSpecification(MapEditorButtons.MapEditorToolGroup);
-            IEnumerable<PlaceableBlockObject> blockObjectsFromGroup = __instance._blockObjectToolGroupSpecificationService.GetBlockObjectsFromGroup(toolGroupSpecification);
+            ToolGroupSpec toolGroupSpecification = __instance._toolGroupSpecService.GetToolGroupSpecs(MapEditorButtons.MapEditorToolGroup);
+            IEnumerable<PlaceableBlockObjectSpec> blockObjectsFromGroup = __instance._blockObjectToolGroupSpecService.GetBlockObjectsFromGroup(toolGroupSpecification);
             Plugin.Log("Buttons:");
-            PlaceableBlockObject startingLocation = null;
-            foreach (PlaceableBlockObject item in blockObjectsFromGroup)
+            PlaceableBlockObjectSpec startingLocation = null;
+            foreach (PlaceableBlockObjectSpec item in blockObjectsFromGroup)
             {
                 if (item.name == "StartingLocation")
                 {
@@ -51,7 +51,7 @@ namespace BeaverBuddies.Editor
 
             List<BottomBarElement> newResult = new List<BottomBarElement>(__result);
 
-            List<PlaceableBlockObject> startingLocations = new List<PlaceableBlockObject>();
+            List<PlaceableBlockObjectSpec> startingLocations = new List<PlaceableBlockObjectSpec>();
             Sprite baseSprite = __instance._blockObjectToolButtonFactory.GetToolImage(startingLocation);
             for (int i = 0; i < StartingLocationPlayer.MAX_PLAYERS; i++)
             {
@@ -65,13 +65,13 @@ namespace BeaverBuddies.Editor
                 // loaded from a path, given in the LabeledEntitySpec
             }
 
-            ToolGroupSpecification spec = new ToolGroupSpecification(
-                null,
-                0,
-                startingLocation.GetComponentFast<LabeledEntitySpec>()._displayNameLocKey, // TODO: Find loc key, or add it
-                baseSprite,
-                false
-            );
+            ToolGroupSpec spec = new ToolGroupSpec() {
+                Id = null,
+                Order = 0,
+                NameLocKey = startingLocation.GetComponentFast<LabeledEntitySpec>()._displayNameLocKey, // TODO: Find loc key, or add it
+                Icon = baseSprite,
+                FallbackGroup = false
+            };
             var startingLocsToolGroup = __instance._blockObjectToolGroupFactory.Create(spec, startingLocations);
 
             // TODO: Find it in the original list somehow
@@ -110,11 +110,11 @@ namespace BeaverBuddies.Editor
 
     [ManualMethodOverwrite]
     /*
-     * 11/9/2024
-	private void DeleteOtherStartingLocations(StartingLocation remainingStartingLocation)
+     * 04/19/2025
+	private void DeleteOtherStartingLocations(StartingLocation remainingStartingLocationSpec)
 	{
-		foreach (StartingLocation item in (from startingLocation in _entityComponentRegistry.GetEnabled<StartingLocation>()
-			where startingLocation != remainingStartingLocation
+		foreach (StartingLocation item in (from startingLocation in _entityComponentRegistry.GetEnabled<StartingLocationSpec>()
+			where startingLocation != remainingStartingLocationSpec
 			select startingLocation).ToList())
 		{
 			_entityService.Delete(item);
@@ -124,9 +124,9 @@ namespace BeaverBuddies.Editor
     [HarmonyPatch(typeof(StartingLocationService), nameof(StartingLocationService.DeleteOtherStartingLocations))]
     public class StartingLocationServiceDeleteOtherStartingLocationsPatcher
     {
-        public static bool Prefix(StartingLocationService __instance, StartingLocation remainingStartingLocation)
+        public static bool Prefix(StartingLocationService __instance, StartingLocationSpec remainingStartingLocationSpec)
         {
-            var player = remainingStartingLocation.GetComponentFast<StartingLocationPlayer>();
+            var player = remainingStartingLocationSpec.GetComponentFast<StartingLocationPlayer>();
             if (!player)
             {
                 return true;
@@ -145,7 +145,7 @@ namespace BeaverBuddies.Editor
 
     [ManualMethodOverwrite]
     /*
-     * 11/9/2024
+     * 04/19/2025
 	List<StartingLocation> list = _entityComponentRegistry.GetEnabled<StartingLocation>().ToList();
 	if (list.IsEmpty())
 	{
@@ -160,9 +160,9 @@ namespace BeaverBuddies.Editor
     [HarmonyPatch(typeof(StartingLocationService), nameof(StartingLocationService.GetStartingLocation))]
     public class StartingLocationServiceGetStartingLocationPatcher
     {
-        public static bool Prefix(StartingLocationService __instance, ref StartingLocation __result)
+        public static bool Prefix(StartingLocationService __instance, ref StartingLocationSpec __result)
         {
-            List<StartingLocation> list = __instance._entityComponentRegistry.GetEnabled<StartingLocation>().ToList();
+            List<StartingLocationSpec> list = __instance._entityComponentRegistry.GetEnabled<StartingLocationSpec>().ToList();
             if (list.Count <= 1)
             {
                 return true;
@@ -188,12 +188,12 @@ namespace BeaverBuddies.Editor
         }
     }
 
-    [HarmonyPatch(typeof(MapMetadataSerializer), nameof(MapMetadataSerializer.GetMapMetadataObjectSave))]
-    public class MapMetadataSerializerGetMapMetadataObjectSavePatcher
+    [HarmonyPatch(typeof(MapMetadataSerializer), nameof(MapMetadataSerializer.GetMapMetadataSerializedObject))]
+    public class MapMetadataSerializerGetMapMetadataSerializedObjectPatcher
     {
         public static readonly string MaxPlayersKey = "MaxPlayers";
 
-        public static void Postfix(MapMetadata mapMetadata, ref ObjectSave __result)
+        public static void Postfix(MapMetadata mapMetadata, ref SerializedObject __result)
         {
             if (mapMetadata is MultiplayerMapMetadata)
             {
@@ -205,12 +205,12 @@ namespace BeaverBuddies.Editor
     [HarmonyPatch(typeof(MapMetadataSerializer), nameof(MapMetadataSerializer.Deserialize))]
     public class MapMetadataSerializerDeserializePatcher
     {
-        public static void Postfix(ObjectSave objectSave, ref MapMetadata __result)
+        public static void Postfix(SerializedObject serializedObject, ref MapMetadata __result)
         {
-            string key = MapMetadataSerializerGetMapMetadataObjectSavePatcher.MaxPlayersKey;
-            if (objectSave.Has(key))
+            string key = MapMetadataSerializerGetMapMetadataSerializedObjectPatcher.MaxPlayersKey;
+            if (serializedObject.Has(key))
             {
-                __result = new MultiplayerMapMetadata(__result, objectSave.Get<int>(key));
+                __result = new MultiplayerMapMetadata(__result, serializedObject.Get<int>(key));
             }
         }
     }

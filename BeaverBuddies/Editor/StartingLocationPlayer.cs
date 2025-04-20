@@ -4,6 +4,7 @@ using Timberborn.Coordinates;
 using Timberborn.EntitySystem;
 using Timberborn.Persistence;
 using Timberborn.StartingLocationSystem;
+using Timberborn.WorldPersistence;
 using UnityEngine;
 
 namespace BeaverBuddies.Editor
@@ -49,15 +50,18 @@ namespace BeaverBuddies.Editor
 
         public void Load(IEntityLoader entityLoader)
         {
-            if (entityLoader.HasComponent(StartingLocationPlayerKey))
+            if (entityLoader.TryGetComponent(StartingLocationPlayerKey, out IObjectLoader objectLoader))
             {
-                int? index = entityLoader.GetComponent(StartingLocationPlayerKey).GetValueOrNullable(PlayerIndexKey);
-                if (index == null)
+                int index = 0;
+                if (objectLoader.Has(PlayerIndexKey))
+                {
+                    index = objectLoader.Get(PlayerIndexKey);
+                }
+                else
                 {
                     Plugin.LogError("PlayerIndex is null; setting to 0");
                 }
-                PlayerIndex = index ?? 0;
-                return;
+                PlayerIndex = index;
             }
         }
     }

@@ -31,7 +31,7 @@
   <!-- NuGet -->
   <ItemGroup>
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2" PrivateAssets="all" /> 
-    <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="9.0.0" />
   </ItemGroup> 
 
   <!-- OutSide Project -->

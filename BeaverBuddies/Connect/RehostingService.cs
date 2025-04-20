@@ -57,7 +57,7 @@ namespace BeaverBuddies.Connect
                     // Run on next frame because the GameSaver doesn't release its
                     // handle on the save stream until the method finishes executing
                     // i.e. after the callback has run.
-                    _gameSaver.StartCoroutine(RunOnNextFrameCoroutine(() =>
+                    _settlementNameService._sceneLoader._coroutineStarter.StartCoroutine(RunOnNextFrameCoroutine(() =>
                     {
                         originalCallback(saveReference);
                     }));
@@ -68,7 +68,7 @@ namespace BeaverBuddies.Connect
             SaveReference saveReference = new SaveReference(settlementName, saveName);
             try
             {
-                _gameSaver.InstantSaveSkippingNameValidation(saveReference, () =>
+                _gameSaver.SaveInstantlySkippingNameValidation(saveReference, () =>
                 {
                     callback(saveReference);
                 });

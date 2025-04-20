@@ -235,7 +235,7 @@ namespace BeaverBuddies.Events
     {
         public DistrictDistributionSetting DistrictSetting { get; private set; }
 
-        public GoodDistributionSettingWithDistrict(GoodSpecification goodSpecification, DistrictDistributionSetting districtSetting) : base(goodSpecification)
+        public GoodDistributionSettingWithDistrict(GoodSpec goodSpec, DistrictDistributionSetting districtSetting) : base(goodSpec)
         {
             this.DistrictSetting = districtSetting;
         }
@@ -247,7 +247,7 @@ namespace BeaverBuddies.Events
         static void Prefix(DistrictDistributionSetting __instance, ref GoodDistributionSetting goodDistributionSetting)
         {
             // Replace the goodDistributionSetting with a new one that has a reference to the district
-            var newSetting = new GoodDistributionSettingWithDistrict(goodDistributionSetting._goodSpecification, __instance);
+            var newSetting = new GoodDistributionSettingWithDistrict(goodDistributionSetting._goodSpec, __instance);
             newSetting.ExportThreshold = goodDistributionSetting.ExportThreshold;
             newSetting.ImportOption = goodDistributionSetting.ImportOption;
             newSetting.LastImportTimestamp = goodDistributionSetting.LastImportTimestamp;
@@ -339,7 +339,7 @@ namespace BeaverBuddies.Events
         static bool Prefix(GoodDistributionSetting __instance)
         {
             var exportThreshold = 0f;
-            var importOption = ((!__instance._goodSpecification.ForceImport) ? ImportOption.Auto : ImportOption.Forced);
+            var importOption = ((!__instance._goodSpec.ForceImport) ? ImportOption.Auto : ImportOption.Forced);
             if (__instance.ImportOption == importOption && __instance.ExportThreshold == exportThreshold) return true;
             return GoodDistributionSettingChangedEvent.DoPrefix(__instance, exportThreshold, importOption, false);
         }

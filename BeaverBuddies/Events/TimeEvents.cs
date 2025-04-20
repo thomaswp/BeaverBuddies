@@ -32,7 +32,7 @@ namespace BeaverBuddies.Events
 
     [ManualMethodOverwrite]
     /*
-        7/20/2024
+        04/19/2025
 		if (!_isLocked)
 		{
 			Time.timeScale = ScaleSpeed(speed);
@@ -88,7 +88,7 @@ namespace BeaverBuddies.Events
     // of whether we freeze, since it's always happening at a delay.
     [ManualMethodOverwrite]
     /*
-        7/20/2024
+        04/19/2025
     	if (!_isLocked)
 		{
 			_speedBefore = CurrentSpeed;
@@ -122,7 +122,7 @@ namespace BeaverBuddies.Events
 
     [ManualMethodOverwrite]
     /*
-     	7/20/2024
+     	04/19/2025
         if (_isLocked)
 		{
 			_isLocked = false;
