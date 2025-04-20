@@ -461,8 +461,7 @@ namespace BeaverBuddies
             typeof(StockpileGoodPileVisualizer),
             typeof(TerrainBlockRandomizer),
             typeof(ObservatoryAnimator),
-            // Seems to no longer use random...
-            //typeof(WaterInputPipeSegmentFactory),
+            typeof(WaterInputPipeSegmentCreator),
         };
 
         // Currently unused - could be used for warnings on items we don't
@@ -736,6 +735,7 @@ namespace BeaverBuddies
         static bool Prefix(GameSaver __instance, QueuedSave queuedSave)
         {
             if (IsSaving || EventIO.IsNull) return true;
+            DesyncDetecterService.Trace("Saving game", false);
             TickingService ts = GetSingleton<TickingService>();
             if (ts == null) return true;
             ts.FinishFullTickAndThen(() =>

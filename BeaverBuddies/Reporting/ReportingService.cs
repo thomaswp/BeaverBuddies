@@ -43,7 +43,7 @@ namespace BeaverBuddies.Reporting
             return $"{TimberNetBase.GetHashCode(bytes):X8}";
         }
 
-        public async Task<bool> PostDesync(string eventID, string desyncTrace, string role, string mapName, byte[] mapBytes)
+        public async Task<bool> PostDesync(string eventID, string desyncTrace, string role, string mapName, string versionInfo, byte[] mapBytes)
         {
             mapName = GetStringHash(mapName);
 
@@ -53,6 +53,7 @@ namespace BeaverBuddies.Reporting
             fields["Role"] = role;
             fields["IsCrash"] = false;
             fields["DesyncTrace"] = desyncTrace;
+            fields["VersionInfo"] = versionInfo;
 
 
             Plugin.Log(EventIO.Get()?.ToString());

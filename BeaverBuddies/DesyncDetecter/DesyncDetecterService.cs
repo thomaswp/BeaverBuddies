@@ -46,7 +46,7 @@ namespace BeaverBuddies.DesyncDetecter
 
         public override void Replay(IReplayContext context)
         {
-            context.GetSingleton<ReplayService>().SetServerMapName(mapName);
+            // context.GetSingleton<ReplayService>().SetServerMapName(mapName);
         }
 
     }
@@ -119,14 +119,18 @@ namespace BeaverBuddies.DesyncDetecter
             }
         }
 
-        public static void Trace(string message)
+        public static void Trace(string message, bool warnIfNotDebug = true)
         {
             if (!EventIO.Config.Debug)
             {
                 // We warn here because these debug messages are often called many
                 // times per frame and do string manipulation, so we don't want to
                 // create the debug string at all if we don't need to.
-                Plugin.LogWarning("DesyncDetectorService.Trace called not in debug mode");
+                // If a message is simple and costless it can override this warning.
+                if (warnIfNotDebug)
+                {
+                    Plugin.LogWarning("DesyncDetectorService.Trace called not in debug mode");
+                }
                 //Plugin.LogStackTrace();
                 return;
             }
@@ -237,7 +241,7 @@ namespace BeaverBuddies.DesyncDetecter
             return false;
         }
 
-        private static void PrintTracesAt(StringBuilder sb, List<Trace> traces, int startIndex, int maxToPrint = 3)
+        private static void PrintTracesAt(StringBuilder sb, List<Trace> traces, int startIndex, int maxToPrint = 10)
         {
             if (startIndex >= traces.Count)
             {

@@ -97,14 +97,16 @@ namespace BeaverBuddies.Events
                     }
                 };
 
+                string versionInfo = $"Timberborn: {GameVersions.CurrentVersion}; BeaverBuddies: {Plugin.Version}";
+
                 if (!rehostingService.SaveRehostFile(saveReference =>
                 {
                     // TODO: Is there any way to include the log data too?
                     byte[] mapBytes = ServerHostingUtils.GetMapBtyes(repository, saveReference);
-                    reportingService.PostDesync(desyncID, desyncTrace, ioType, mapName, mapBytes).ContinueWith(onPost);
+                    reportingService.PostDesync(desyncID, desyncTrace, ioType, mapName, versionInfo, mapBytes).ContinueWith(onPost);
                 }, true))
                 {
-                    _ = reportingService.PostDesync(desyncID, desyncTrace, ioType, mapName, null).ContinueWith(onPost);
+                    _ = reportingService.PostDesync(desyncID, desyncTrace, ioType, mapName, versionInfo, null).ContinueWith(onPost);
                 };
                 
             };

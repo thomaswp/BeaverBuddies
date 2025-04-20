@@ -38,6 +38,7 @@ using BeaverBuddies.Reporting;
 using Timberborn.GameSaveRepositorySystem;
 using Timberborn.SettlementNameSystem;
 using Timberborn.Workshops;
+using Timberborn.GameWonderCompletion;
 
 namespace BeaverBuddies
 {
@@ -133,7 +134,7 @@ namespace BeaverBuddies
 
         public static bool IsReplayingEvents { get; private set; } = false;
 
-        public string ServerMapName { get; private set; } = null;
+        public string ServerMapName => GetSingleton<MapNameService>().Name;
 
         public void Reset()
         {
@@ -169,7 +170,7 @@ namespace BeaverBuddies
             RehostingService rehostingService,
             ReportingService reportingService,
             GameSaveRepository gameSaveRepository,
-            SettlementNameService settlementNameService
+            MapNameService mapNameService
         )
         {
             //_tickWathcerService = AddSingleton(tickWathcerService);
@@ -198,7 +199,7 @@ namespace BeaverBuddies
             AddSingleton(rehostingService);
             AddSingleton(reportingService);
             AddSingleton(gameSaveRepository);
-            AddSingleton(settlementNameService);
+            AddSingleton(mapNameService);
 
             AddSingleton(this);
 
@@ -227,17 +228,18 @@ namespace BeaverBuddies
             // Send the map name to clients
             if (io != null && io.ShouldSendHeartbeat)
             {
-                RecordEvent(new SendMapNameEvent()
-                { 
-                    mapName = GetSingleton<SettlementNameService>().SettlementName
-                });
+                // I don't think this is needed - should be saved in the game file
+                //RecordEvent(new SendMapNameEvent()
+                //{
+                //    mapName = GetSingleton<MapNameService>().Name
+                //});
             }
         }
 
-        public void SetServerMapName(string serverMapName)
-        {
-            this.ServerMapName = serverMapName;
-        }
+        //public void SetServerMapName(string serverMapName)
+        //{
+        //    this.ServerMapName = serverMapName;
+        //}
 
         private T AddSingleton<T>(T singleton)
         {
