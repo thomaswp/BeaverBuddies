@@ -735,7 +735,6 @@ namespace BeaverBuddies
         static bool Prefix(GameSaver __instance, QueuedSave queuedSave)
         {
             if (IsSaving || EventIO.IsNull) return true;
-            DesyncDetecterService.Trace("Saving game", false);
             TickingService ts = GetSingleton<TickingService>();
             if (ts == null) return true;
             ts.FinishFullTickAndThen(() =>
@@ -1050,6 +1049,4 @@ namespace BeaverBuddies
             return false;
         }
     }
-
-
 }

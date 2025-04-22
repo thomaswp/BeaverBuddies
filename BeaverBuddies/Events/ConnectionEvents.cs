@@ -97,8 +97,9 @@ namespace BeaverBuddies.Events
                     }
                 };
 
-                string versionInfo = $"Timberborn: {GameVersions.CurrentVersion}; BeaverBuddies: {Plugin.Version}";
+                string versionInfo = $"BeaverBuddies: {Plugin.Version}; Timberborn: {GameVersions.CurrentVersion}";
 
+                // TODO: Get consent to share data!!
                 if (!rehostingService.SaveRehostFile(saveReference =>
                 {
                     // TODO: Is there any way to include the log data too?
