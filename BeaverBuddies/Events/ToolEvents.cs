@@ -12,6 +12,7 @@ using Timberborn.EntitySystem;
 using Timberborn.Forestry;
 using Timberborn.PlantingUI;
 using Timberborn.ScienceSystem;
+using Timberborn.SingletonSystem;
 using Timberborn.ToolSystem;
 using Timberborn.WorkSystemUI;
 using UnityEngine;
@@ -328,9 +329,8 @@ namespace BeaverBuddies.Events
                 if (toolBuilding == building)
                 {
                     Plugin.Log("Unlocking tool for building: " + buildingName);
-                    // TODO: Need to test - I think this is equivalent to clearing the lock
-                    // but not sure it'll update the UI
                     blockObjectTool.Locker = null;
+                    toolButton.OnToolUnlocked(new ToolUnlockedEvent(tool));
                 }
             }
         }
