@@ -39,6 +39,7 @@ using Timberborn.GameSaveRepositorySystem;
 using Timberborn.SettlementNameSystem;
 using Timberborn.Workshops;
 using Timberborn.GameWonderCompletion;
+using Timberborn.Autosaving;
 
 namespace BeaverBuddies
 {
@@ -170,7 +171,8 @@ namespace BeaverBuddies
             RehostingService rehostingService,
             ReportingService reportingService,
             GameSaveRepository gameSaveRepository,
-            MapNameService mapNameService
+            MapNameService mapNameService,
+            Autosaver autosaver
         )
         {
             //_tickWathcerService = AddSingleton(tickWathcerService);
@@ -200,6 +202,7 @@ namespace BeaverBuddies
             AddSingleton(reportingService);
             AddSingleton(gameSaveRepository);
             AddSingleton(mapNameService);
+            AddSingleton(autosaver);
 
             AddSingleton(this);
 

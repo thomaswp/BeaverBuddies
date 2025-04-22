@@ -17,6 +17,8 @@ using Timberborn.ExplosionsUI;
 using Timberborn.Fields;
 using Timberborn.Gathering;
 using Timberborn.Goods;
+using Timberborn.Hauling;
+using Timberborn.HaulingUI;
 using Timberborn.InventorySystem;
 using Timberborn.Planting;
 using Timberborn.PrefabSystem;
@@ -890,6 +892,45 @@ namespace BeaverBuddies.Events
 
             // Always override
             return false;
+        }
+    }
+
+    [Serializable]
+    class HaulPrioritizablePrioritizedEvent : ReplayEvent
+    {
+        public string entityID;
+        public bool prioritized;
+
+        public override void Replay(IReplayContext context)
+        {
+            var prioritizer = GetComponent<HaulPrioritizable>(context, entityID);
+            if (!prioritizer) return;
+            prioritizer.Prioritized = prioritized;
+            // Probably can't update the UI an any reasonable way, but I'm guessing
+            // the other players won't have the relevant UI open at the same time.
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting haul priority for {entityID} to: {prioritized}";
+        }
+    }
+
+
+    [HarmonyPatch(typeof(HaulPrioritizable), nameof(HaulPrioritizable.Prioritized), MethodType.Setter)]
+    class HaulPrioritizablePrioritizedPatcher
+    {
+        public static bool Prefix(HaulPrioritizable __instance, bool value)
+        {
+            if (value == __instance.Prioritized) return true;
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new HaulPrioritizablePrioritizedEvent()
+                {
+                    entityID = entityID,
+                    prioritized = value,
+                };
+            });
         }
     }
 }
