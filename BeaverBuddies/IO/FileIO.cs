@@ -89,7 +89,7 @@ namespace BeaverBuddies.IO
     public class RecordToFileService : IPostLoadableSingleton
     {
         private string fileName;
-        public RecordToFileService(SceneLoader sceneLoader)
+        public RecordToFileService(ISceneLoader sceneLoader)
         {
             var saveRef = sceneLoader.GetSceneParameters<GameSceneParameters>()?.SaveReference;
             if (saveRef != null)
