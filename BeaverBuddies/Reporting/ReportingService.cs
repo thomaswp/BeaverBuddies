@@ -81,7 +81,7 @@ namespace BeaverBuddies.Reporting
             fields["EventID"] = eventID;
             fields["Role"] = role;
             fields["IsCrash"] = false;
-            fields["DesyncTrace"] = desyncTrace;
+            fields["DesyncTrace"] = ShortenTrace(desyncTrace);
             fields["VersionInfo"] = versionInfo;
 
 
