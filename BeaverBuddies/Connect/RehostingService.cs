@@ -12,6 +12,7 @@ using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.GameSaveRuntimeSystemUI;
 using Timberborn.InputSystem;
 using Timberborn.SaveSystem;
+using Timberborn.SceneLoading;
 using Timberborn.SettlementNameSystem;
 using Timberborn.SingletonSystem;
 using Timberborn.TickSystem;
@@ -57,7 +58,7 @@ namespace BeaverBuddies.Connect
                     // Run on next frame because the GameSaver doesn't release its
                     // handle on the save stream until the method finishes executing
                     // i.e. after the callback has run.
-                    _settlementNameService._sceneLoader._coroutineStarter.StartCoroutine(RunOnNextFrameCoroutine(() =>
+                    ((SceneLoader)_settlementNameService._sceneLoader)._coroutineStarter.StartCoroutine(RunOnNextFrameCoroutine(() =>
                     {
                         originalCallback(saveReference);
                     }));
