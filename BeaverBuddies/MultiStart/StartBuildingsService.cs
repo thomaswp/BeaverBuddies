@@ -11,12 +11,12 @@ namespace BeaverBuddies.MultiStart
     public class StartBuildingsService : RegisteredSingleton
     {
 
-        private readonly SceneLoader _sceneLoader;
+        private readonly ISceneLoader _sceneLoader;
 
         public List<BuildingSpec> StartingBuildings { get; private set; } = new List<BuildingSpec>();
         public bool IsMultiStart => StartingBuildings.Count > 1;
 
-        public StartBuildingsService(SceneLoader sceneLoader)
+        public StartBuildingsService(ISceneLoader sceneLoader)
         {
             _sceneLoader = sceneLoader;
         }

@@ -12,6 +12,7 @@ using HarmonyLib;
 using System.Diagnostics;
 using System.Reflection;
 using Timberborn.ModManagerScene;
+using Timberborn.SceneLoading;
 using Timberborn.StartingLocationSystem;
 using Timberborn.TemplateSystem;
 using Timberborn.TutorialSystemUI;
