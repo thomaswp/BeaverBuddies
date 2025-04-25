@@ -959,15 +959,15 @@ namespace BeaverBuddies.Events
     [HarmonyPatch(typeof(Forester), nameof(Forester.SetReplantDeadTrees))]
     class ForesterSetReplantDeadTreesPatcher
     {
-        public static bool Prefix(Forester __instance, bool shouldReplant)
+        public static bool Prefix(Forester __instance, bool replantDeadTrees)
         {
-            if (__instance.ReplantDeadTrees == shouldReplant) return true;
+            if (__instance.ReplantDeadTrees == replantDeadTrees) return true;
             return ReplayEvent.DoEntityPrefix(__instance, entityID =>
             {
                 return new ToggleForresterReplantDeadTreesEvent()
                 {
                     entityID = entityID,
-                    shouldReplant = shouldReplant,
+                    shouldReplant = replantDeadTrees,
                 };
             });
         }
