@@ -260,9 +260,21 @@ namespace BeaverBuddies.DesyncDetecter
             }
         }
 
-        private static void LogTraces(StringBuilder sb, int index)
+        private static void LogTraces(StringBuilder sb, int index, int maxToPrint = 5)
         {
-            traces[index].ForEach(t => LogTrace(sb, t));
+            List<Trace> tickTraces = traces[index];
+            int startIndex = 0;
+            // This is shared history and without stack traces, so we don't really need much of it
+            // This is particularly important for pre-Tick-0 which has a LOT of traces
+            if (tickTraces.Count > maxToPrint)
+            {
+                startIndex = tickTraces.Count - maxToPrint;
+                LogTrace(sb, "(more traces...)", null);
+            }
+            for (int i = startIndex; i < tickTraces.Count; i++)
+            {
+                LogTrace(sb, tickTraces[i]);
+            }
             sb.AppendLine("----------------------------------");
         }
 

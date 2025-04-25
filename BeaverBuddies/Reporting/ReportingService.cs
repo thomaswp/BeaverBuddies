@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
@@ -24,6 +25,7 @@ namespace BeaverBuddies.Reporting
     {
         const string CREATE_URL = "https://api.airtable.com/v0/appdIpScGqlZ5FX3r/Errors";
         const string UPLOAD_URL = "https://content.airtable.com/v0/appdIpScGqlZ5FX3r/{0}/Data/uploadAttachment";
+        const int MAX_AIRTABLE_CHARACTERS = 9900; // Airtable max characters for a single field is 10000
 
         private string accessToken;
 
@@ -41,6 +43,33 @@ namespace BeaverBuddies.Reporting
             }
             var bytes = Encoding.UTF8.GetBytes(str);
             return $"{TimberNetBase.GetHashCode(bytes):X8}";
+        }
+
+        static string Compress(string text)
+        {
+            byte[] inputBytes = Encoding.UTF8.GetBytes(text);
+
+            using (var output = new MemoryStream())
+            {
+                using (var gzip = new GZipStream(output, CompressionLevel.Optimal))
+                {
+                    gzip.Write(inputBytes, 0, inputBytes.Length);
+                }
+
+                return Convert.ToBase64String(output.ToArray());
+            }
+        }
+
+
+        static string ShortenTrace(string trace)
+        {
+            if (trace.Length <= MAX_AIRTABLE_CHARACTERS) return trace;
+
+            string compressed = Compress(trace);
+            if (compressed.Length <= MAX_AIRTABLE_CHARACTERS) return compressed;
+
+            // If we can't compress it, just take the first n characters
+            return trace.Substring(0, MAX_AIRTABLE_CHARACTERS);
         }
 
         public async Task<bool> PostDesync(string eventID, string desyncTrace, string role, string mapName, string versionInfo, byte[] mapBytes)
