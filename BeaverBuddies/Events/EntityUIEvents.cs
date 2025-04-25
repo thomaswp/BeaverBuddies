@@ -29,10 +29,12 @@ using Timberborn.RecoveredGoodSystemUI;
 using Timberborn.StockpilePrioritySystem;
 using Timberborn.StockpilePriorityUISystem;
 using Timberborn.WaterBuildings;
+using Timberborn.WaterBuildingsUI;
 using Timberborn.WorkerTypesUI;
 using Timberborn.Workshops;
 using Timberborn.WorkSystem;
 using Timberborn.WorkSystemUI;
+using UnityEngine.UIElements;
 
 namespace BeaverBuddies.Events
 {
@@ -968,6 +970,292 @@ namespace BeaverBuddies.Events
                     shouldReplant = shouldReplant,
                 };
             });
+        }
+    }
+
+    public enum SluiceToggleType
+    {
+        AboveContamination,
+        BelowContamination,
+        Synchronization,
+    }
+
+    [Serializable]
+    class SluicePlainToggleUpdatedEvent : ReplayEvent
+    {
+        public string entityID;
+        public bool value;
+        public SluiceToggleType toggleType;
+
+        public override void Replay(IReplayContext context)
+        {
+            var sluice = GetComponent<Sluice>(context, entityID);
+            if (!sluice) return;
+            var sluiceState = sluice._sluiceState;
+            if (toggleType == SluiceToggleType.AboveContamination)
+            {
+                if (value)
+                {
+                    sluiceState.EnableAutoCloseOnAbove();
+                }
+                else
+                {
+                    sluiceState.DisableAutoCloseOnAbove();
+                }
+            }
+            else if (toggleType == SluiceToggleType.BelowContamination)
+            {
+                if (value)
+                {
+                    sluiceState.EnableAutoCloseOnBelow();
+                }
+                else
+                {
+                    sluiceState.DisableAutoCloseOnBelow();
+                }
+            }
+            else if (toggleType == SluiceToggleType.Synchronization)
+            {
+                sluiceState.ToggleSynchronization(value);
+                // This won't update the Fragment's UI like it's supposed to
+                // (I don't think we can get a reference here easily),
+                // but it should update if the user tries to slide the slider,
+                // and I don't think it affects game logic.
+            }
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting sluice {entityID} {toggleType} toggle to: {value}";
+        }
+
+        public static bool DoPrefix(Sluice __instance, bool value, SluiceToggleType toggleType)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new SluicePlainToggleUpdatedEvent()
+                {
+                    entityID = entityID,
+                    value = value,
+                    toggleType = toggleType,
+                };
+            });
+        }
+    }
+
+    // Patch SluiceFragment.OnAboveContaminationToggleChanged and OnBelowContaminationToggleChanged
+    [HarmonyPatch(typeof(SluiceFragment), nameof(SluiceFragment.OnAboveContaminationToggleChanged))]
+    class SluiceFragmentOnAboveContaminationToggleChangedPatcher
+    {
+        public static bool Prefix(SluiceFragment __instance, ChangeEvent<bool> evt)
+        {
+            return SluicePlainToggleUpdatedEvent.DoPrefix(
+                __instance._sluice, evt.newValue, SluiceToggleType.AboveContamination);
+        }
+    }
+
+    [HarmonyPatch(typeof(SluiceFragment), nameof(SluiceFragment.OnBelowContaminationToggleChanged))]
+    class SluiceFragmentOnBelowContaminationToggleChangedPatcher
+    {
+        public static bool Prefix(SluiceFragment __instance, ChangeEvent<bool> evt)
+        {
+            return SluicePlainToggleUpdatedEvent.DoPrefix(
+                __instance._sluice, evt.newValue, SluiceToggleType.BelowContamination);
+        }
+    }
+
+    [HarmonyPatch(typeof(SluiceFragment), nameof(SluiceFragment.ToggleSynchronization))]
+    class SluiceFragmentToggleSynchronizationChangedPatcher
+    {
+        public static bool Prefix(SluiceFragment __instance, ChangeEvent<bool> evt)
+        {
+            return SluicePlainToggleUpdatedEvent.DoPrefix(
+                __instance._sluice, evt.newValue, SluiceToggleType.Synchronization);
+        }
+    }
+
+    public enum SluiceLimitSliderType
+    {
+        Outflow,
+        AboveContamination,
+        BelowContamination,
+    }
+
+    [Serializable]
+    class SluiceSliderUpdatedEvent : ReplayEvent
+    {
+        string entityID;
+        public SluiceLimitSliderType sliderType;
+        public float value;
+
+        public override void Replay(IReplayContext context)
+        {
+            var sluice = GetComponent<Sluice>(context, entityID);
+            if (!sluice) return;
+            var sluiceState = sluice._sluiceState;
+            switch (sliderType)
+            {
+                case SluiceLimitSliderType.Outflow:
+                    sluiceState.SetOutflowLimit(value);
+                    break;
+                case SluiceLimitSliderType.AboveContamination:
+                    sluiceState.SetAboveContaminationLimit(value);
+                    break;
+                case SluiceLimitSliderType.BelowContamination:
+                    sluiceState.SetBelowContaminationLimit(value);
+                    break;
+            }
+        }
+
+        public override string ToActionString()
+        {
+            string type = sliderType.ToString();
+            return $"Setting sluice {entityID} {type} limit to: {value}";
+        }
+
+        public static bool DoPrefix(SluiceState __instance, SluiceLimitSliderType sliderType, float value)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new SluiceSliderUpdatedEvent()
+                {
+                    entityID = entityID,
+                    sliderType = sliderType,
+                    value = value,
+                };
+            });
+        }
+    }
+
+    /* 
+     * Note: We override the SluiceState methods instead of the SluiceFragment methods
+     * only for contaminatoin limits, because these methods seem to only be called form the
+     * UI, which contains some additional logic we don't want to have to manually override.
+     * This is not the case for the Outflow, which is called on SluiceState.Tick(), so we
+     * have to override SluiceFragment.ChangeFlow() instead, and duplicate that logic.
+     */
+
+    [HarmonyPatch(typeof(SluiceState), nameof(SluiceState.SetBelowContaminationLimit))]
+    class SluiceStateSetBelowContaminationLimitPatcher
+    {
+        public static bool Prefix(SluiceState __instance, float contaminationLimit)
+        {
+            return SluiceSliderUpdatedEvent.DoPrefix(
+                __instance, SluiceLimitSliderType.BelowContamination, contaminationLimit
+            );
+        }
+    }
+
+    [HarmonyPatch(typeof(SluiceState), nameof(SluiceState.SetAboveContaminationLimit))]
+    class SluiceStateSetAboveContaminationLimitPatcher
+    {
+        public static bool Prefix(SluiceState __instance, float contaminationLimit)
+        {
+            return SluiceSliderUpdatedEvent.DoPrefix(
+                __instance, SluiceLimitSliderType.AboveContamination, contaminationLimit
+            );
+        }
+    }
+
+    [ManualMethodOverwrite]
+    /*
+     * 04/25/2025
+	float num = UpdateWaterLevelSliderValue(newHeight);
+	if (WaterLevelSliderValue != num)
+	{
+		_sluiceState.SetOutflowLimit(num - (float)Range);
+	}
+    */
+    [HarmonyPatch(typeof(SluiceFragment), nameof(SluiceFragment.ChangeFlow))]
+    class SluiceFragmentChangeFlowPatcher
+    {
+        public static bool Prefix(SluiceFragment __instance, float newHeight)
+        {
+            // Note that UpdateWaterLevelSliderValue does modify the slider value, so this
+            // is UI logic we need to keep updated if the method changes.
+            float num = __instance.UpdateWaterLevelSliderValue(newHeight);
+            if (__instance.WaterLevelSliderValue == num) return true;
+            return SluiceSliderUpdatedEvent.DoPrefix(
+                // Note: it's num - Range, not num
+                __instance._sluice._sluiceState, SluiceLimitSliderType.Outflow, num - (float)__instance.Range
+            );
+        }
+    }
+
+    public enum SluiceMode
+    {
+        Auto,
+        Open,
+        Closed
+    }
+
+    [Serializable]
+    class SluiceModeUpdatedEvent : ReplayEvent
+    {
+        public string entityID;
+        public SluiceMode mode;
+
+        public override void Replay(IReplayContext context)
+        {
+            var sluice = GetComponent<Sluice>(context, entityID);
+            if (!sluice) return;
+            var sluiceState = sluice._sluiceState;
+            switch (mode)
+            {
+                case SluiceMode.Auto:
+                    sluiceState.SetAuto();
+                    break;
+                case SluiceMode.Open:
+                    sluiceState.Open();
+                    break;
+                case SluiceMode.Closed:
+                    sluiceState.Close();
+                    break;
+            }
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting sluice {entityID} mode to: {mode}";
+        }
+
+        public static bool DoPrefix(SluiceState __instance, SluiceMode mode)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new SluiceModeUpdatedEvent()
+                {
+                    entityID = entityID,
+                    mode = mode,
+                };
+            });
+        }
+    }
+
+    [HarmonyPatch(typeof(SluiceState), nameof(SluiceState.SetAuto))]
+    class SluiceStateSetAutoPatcher
+    {
+        public static bool Prefix(SluiceState __instance)
+        {
+            return SluiceModeUpdatedEvent.DoPrefix(__instance, SluiceMode.Auto);
+        }
+    }
+
+    [HarmonyPatch(typeof(SluiceState), nameof(SluiceState.Open))]
+    class SluiceStateOpenPatcher
+    {
+        public static bool Prefix(SluiceState __instance)
+        {
+            return SluiceModeUpdatedEvent.DoPrefix(__instance, SluiceMode.Open);
+        }
+    }
+
+    [HarmonyPatch(typeof(SluiceState), nameof(SluiceState.Close))]
+    class SluiceStateClosePatcher
+    {
+        public static bool Prefix(SluiceState __instance)
+        {
+            return SluiceModeUpdatedEvent.DoPrefix(__instance, SluiceMode.Closed);
         }
     }
 
