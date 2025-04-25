@@ -15,6 +15,7 @@ using Timberborn.EntitySystem;
 using Timberborn.Explosions;
 using Timberborn.ExplosionsUI;
 using Timberborn.Fields;
+using Timberborn.Forestry;
 using Timberborn.Gathering;
 using Timberborn.Goods;
 using Timberborn.Hauling;
@@ -933,4 +934,41 @@ namespace BeaverBuddies.Events
             });
         }
     }
+
+    [Serializable]
+    class ToggleForresterReplantDeadTreesEvent : ReplayEvent
+    {
+        public string entityID;
+        public bool shouldReplant;
+
+        public override void Replay(IReplayContext context)
+        {
+            var forester = GetComponent<Forester>(context, entityID);
+            if (!forester) return;
+            forester.ReplantDeadTrees = shouldReplant;
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting replant dead trees for Forrester {entityID} to: {shouldReplant}";
+        }
+    }
+
+    [HarmonyPatch(typeof(Forester), nameof(Forester.SetReplantDeadTrees))]
+    class ForesterSetReplantDeadTreesPatcher
+    {
+        public static bool Prefix(Forester __instance, bool shouldReplant)
+        {
+            if (__instance.ReplantDeadTrees == shouldReplant) return true;
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new ToggleForresterReplantDeadTreesEvent()
+                {
+                    entityID = entityID,
+                    shouldReplant = shouldReplant,
+                };
+            });
+        }
+    }
+
 }
