@@ -44,6 +44,7 @@ using Timberborn.WorkshopsEffects;
 using TimberNet;
 using Unity.Services.Analytics;
 using UnityEngine;
+using UnityEngine.UIElements;
 using static BeaverBuddies.SingletonManager;
 using static Timberborn.GameSaveRuntimeSystem.GameSaver;
 
@@ -1046,6 +1047,37 @@ namespace BeaverBuddies
         {
             if (EventIO.IsNull) return true;
             if (doBaseUpdate) return true;
+            return false;
+        }
+    }
+
+    [ManualMethodOverwrite]
+    /* 04/25/2025
+		if (byteIndex > 3)
+		{
+			throw new ArgumentException("byteIndex must be between 0 and 3.");
+		}
+		return (byte)(HashCode.Combine(_guid, _salt) >> byteIndex * 8);
+     */
+    [HarmonyPatch(typeof(FakeRandomNumberGenerator), nameof(FakeRandomNumberGenerator.Byte))]
+    class FakeRandomNumberGeneratorBytePatcher
+    {
+        static bool Prefix(FakeRandomNumberGenerator __instance, int byteIndex, ref byte __result)
+        {
+            if (EventIO.IsNull) return true;
+            if (byteIndex > 3)
+            {
+                throw new ArgumentException("byteIndex must be between 0 and 3.");
+            }
+            // Make the random number deterministic rather than based on HashCode, which isn't
+            byte[] bytes = __instance._guid.ToByteArray();
+            int hash = 17;
+            foreach (byte b in bytes)
+            {
+                hash = hash * 31 + b;
+            }
+            hash = hash * 31 + __instance._salt;
+            __result = (byte)(hash >> (byteIndex * 8));
             return false;
         }
     }

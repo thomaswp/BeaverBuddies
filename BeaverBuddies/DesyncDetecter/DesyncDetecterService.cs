@@ -222,7 +222,8 @@ namespace BeaverBuddies.DesyncDetecter
             sb.AppendLine($"========== Shared History for Desynced Tick {tick} ==========");
             for (int i = 0; i < errorIndex; i++)
             {
-                LogTrace(sb, myTraces[i], true);
+                // Only log the stack trace for the last 5 traces
+                LogTrace(sb, myTraces[i], i > errorIndex - 5);
             }
             sb.AppendLine("========== Desynced Trace ==========");
 
