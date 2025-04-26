@@ -1055,7 +1055,16 @@ namespace BeaverBuddies.Events
         }
     }
 
-    // Patch SluiceFragment.OnAboveContaminationToggleChanged and OnBelowContaminationToggleChanged
+    [HarmonyPatch(typeof(SluiceFragment), nameof(SluiceFragment.OnWaterLevelToggleChanged))]
+    class SluiceFragmentOnWaterLevelToggleChangedPatcher
+    {
+        public static bool Prefix(SluiceFragment __instance, ChangeEvent<bool> evt)
+        {
+            return SluicePlainToggleUpdatedEvent.DoPrefix(
+                __instance._sluice, evt.newValue, SluiceToggleType.WaterLevel);
+        }
+    }
+
     [HarmonyPatch(typeof(SluiceFragment), nameof(SluiceFragment.OnAboveContaminationToggleChanged))]
     class SluiceFragmentOnAboveContaminationToggleChangedPatcher
     {
