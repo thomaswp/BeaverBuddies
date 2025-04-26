@@ -1001,7 +1001,7 @@ namespace BeaverBuddies.Events
                 }
                 else
                 {
-                    sluiceState.DisableAutoCloseOnOutflow);
+                    sluiceState.DisableAutoCloseOnOutflow();
                 }
             } 
             else if (toggleType == SluiceToggleType.AboveContamination)
