@@ -25,7 +25,7 @@ namespace BeaverBuddies.Reporting
     {
         const string CREATE_URL = "https://api.airtable.com/v0/appdIpScGqlZ5FX3r/Errors";
         const string UPLOAD_URL = "https://content.airtable.com/v0/appdIpScGqlZ5FX3r/{0}/Data/uploadAttachment";
-        const int MAX_AIRTABLE_CHARACTERS = 99000; // Airtable max characters for a single field is 100000
+        const int MAX_AIRTABLE_CHARACTERS = 100000 - 1000; // Airtable max characters for a single field is 100000
 
         private string accessToken;
 

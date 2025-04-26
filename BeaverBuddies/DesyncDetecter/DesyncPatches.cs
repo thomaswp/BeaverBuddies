@@ -15,6 +15,8 @@ using Timberborn.SoilMoistureSystem;
 using BeaverBuddies.IO;
 using Timberborn.WaterSystem;
 using Timberborn.TickSystem;
+using Timberborn.NaturalResourcesModelSystem;
+using Timberborn.ReservableSystem;
 
 namespace BeaverBuddies.DesyncDetecter
 {
@@ -131,21 +133,54 @@ namespace BeaverBuddies.DesyncDetecter
         {
             if (!EventIO.Config.Debug) return;
             string entityID = __instance.GetComponentFast<EntityComponent>().EntityId.ToString();
+            string destinationString = GetDestinationString(destination);
+            DesyncDetecterService.Trace($"{entityID} going to: {destinationString}");
+        }
+
+        public static string GetDestinationString(IDestination destination)
+        {
+            string destinationString = null;
             if (destination is PositionDestination)
             {
-                DesyncDetecterService.Trace($"{entityID} going to: " +
-                    $"{((PositionDestination)destination)?.Destination}");
+                destinationString = ((PositionDestination)destination)?.Destination.ToString();
             }
             else if (destination is AccessibleDestination)
             {
                 var accessible = ((AccessibleDestination)destination).Accessible;
                 // Manually check since MonoBehavior doesn't support null conditional operator
-                if (accessible == null) return;
-                DesyncDetecterService.Trace($"{entityID} going to: " +
-                    $"{accessible?.GameObjectFast?.name}");
+                if (accessible != null) destinationString = accessible?.GameObjectFast?.name;
             }
+            if (destinationString == null) destinationString = destination?.GetType().Name;
+            return destinationString;
         }
     }
+
+    // In theory this is deterministic based on the model's GUID, so it shouldn't diverge
+    [HarmonyPatch(typeof(NaturalResourceModelRandomizer), nameof(NaturalResourceModelRandomizer.RandomizeDiameterScale))]
+    public class NaturalResourceModelRandomizerPatcher
+    {
+        public static void Postfix(NaturalResourceModelRandomizer __instance)
+        {
+            if (!EventIO.Config.Debug) return;
+            var id = __instance.GetComponentFast<EntityComponent>().EntityId;
+            DesyncDetecterService.Trace($"NaturalResourceModelRandomizer {id} randomizing diameter scale to {__instance.DiameterScale}");
+        }
+    }
+
+    [HarmonyPatch(typeof(WalkToReservableExecutor), nameof(WalkToReservableExecutor.Launch))]
+    public class WalkToReservableExecutorPatcher
+    {
+        public static void Prefix(WalkToReservableExecutor __instance, ReservableReacher reservableReacher)
+        {
+            if (!EventIO.Config.Debug) return;
+            var id = __instance.GetComponentFast<EntityComponent>().EntityId;
+            DesyncDetecterService.Trace(
+                $"WalkToReservableExecutor for {id} launching to " +
+                $"{reservableReacher.GetType().Name} -> " +
+                $"{WalkerFindPathPatcher.GetDestinationString(reservableReacher.Destination)}");
+        }
+    }
+
 
     [HarmonyPatch(typeof(WateredNaturalResource), nameof(WateredNaturalResource.StartDryingOut))]
     public class WateredNaturalResourceStartDryingOutPatcher
