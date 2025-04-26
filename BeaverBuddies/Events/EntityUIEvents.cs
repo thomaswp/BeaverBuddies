@@ -975,6 +975,7 @@ namespace BeaverBuddies.Events
 
     public enum SluiceToggleType
     {
+        WaterLevel,
         AboveContamination,
         BelowContamination,
         Synchronization,
@@ -992,7 +993,18 @@ namespace BeaverBuddies.Events
             var sluice = GetComponent<Sluice>(context, entityID);
             if (!sluice) return;
             var sluiceState = sluice._sluiceState;
-            if (toggleType == SluiceToggleType.AboveContamination)
+            if (toggleType == SluiceToggleType.WaterLevel)
+            { 
+                if (value)
+                {
+                    sluiceState.EnableAutoCloseOnOutflow();
+                }
+                else
+                {
+                    sluiceState.DisableAutoCloseOnOutflow);
+                }
+            } 
+            else if (toggleType == SluiceToggleType.AboveContamination)
             {
                 if (value)
                 {
@@ -1084,7 +1096,7 @@ namespace BeaverBuddies.Events
     [Serializable]
     class SluiceSliderUpdatedEvent : ReplayEvent
     {
-        string entityID;
+        public string entityID;
         public SluiceLimitSliderType sliderType;
         public float value;
 
