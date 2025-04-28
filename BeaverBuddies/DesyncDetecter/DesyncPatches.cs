@@ -215,6 +215,14 @@ namespace BeaverBuddies.DesyncDetecter
         public static void Postfix(SoilMoistureMap __instance)
         {
             if (!EventIO.Config.Debug) return;
+            // During saves, this gets called early, but it just syncs the
+            // saveable Map with the already computed values, so when it's called
+            // again during the next Tick's Singleton update (at the start of the frame)
+            // it should *generally* not cause issues. In theory it could if a ReplayEvent
+            // was replayed before the Singletons were ticked, or if another Singleton used
+            // the values, but I'm guessing that doesn't happen... One solution if it does:
+            // Just always update the moisture levels at the end of the tick.
+            if (GameSaverSavePatcher.IsSaving) return;
 
             var levels = __instance._soilMoistureSimulator._moistureLevels;
             int hash = 13;

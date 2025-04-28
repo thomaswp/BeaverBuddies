@@ -22,18 +22,24 @@ namespace BeaverBuddies.Events
         }
     }
 
-    [HarmonyPatch(typeof(Autosaver), nameof(Autosaver.Save))]
-    class AutosaverSavePatcher
-    {
-        public static bool Prefix(bool instant)
-        {
-            if (instant) return true;
-            // The Client should never autosave, so skip
-            if (EventIO.Get() is ClientEventIO) return false;
-            return ReplayEvent.DoPrefix(() =>
-            {
-                return new AutosaveEvent();
-            });
-        }
-    }
+    // The issue isn't with autosaves specifically - it's with
+    // saving... I think there's a good chance it doesn't actually
+    // change the game state but it does add a spurious trace, causing
+    // desyncs only because Debug=True. Will disable the trace during saving
+    // and see if further desyncs happen.
+
+    //[HarmonyPatch(typeof(Autosaver), nameof(Autosaver.Save))]
+    //class AutosaverSavePatcher
+    //{
+    //    public static bool Prefix(bool instant)
+    //    {
+    //        if (instant) return true;
+    //        // The Client should never autosave, so skip
+    //        if (EventIO.Get() is ClientEventIO) return false;
+    //        return ReplayEvent.DoPrefix(() =>
+    //        {
+    //            return new AutosaveEvent();
+    //        });
+    //    }
+    //}
 }
