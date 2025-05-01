@@ -47,6 +47,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using static BeaverBuddies.SingletonManager;
 using static Timberborn.GameSaveRuntimeSystem.GameSaver;
+using static UnityEngine.UIElements.VisualNodePropertyRegistry;
 
 namespace BeaverBuddies
 {
@@ -1052,33 +1053,35 @@ namespace BeaverBuddies
     }
 
     [ManualMethodOverwrite]
-    /* 04/25/2025
-		if (byteIndex > 3)
-		{
-			throw new ArgumentException("byteIndex must be between 0 and 3.");
-		}
-		return (byte)(HashCode.Combine(_guid, _salt) >> byteIndex * 8);
+    /* 04/30/2025
+        _hashCode = HashCode.Combine(_guid, _salt);
      */
-    [HarmonyPatch(typeof(FakeRandomNumberGenerator), nameof(FakeRandomNumberGenerator.Byte))]
-    class FakeRandomNumberGeneratorBytePatcher
+    [HarmonyPatch(typeof(FakeRandomNumberGenerator), MethodType.Constructor)]
+    class FakeRandomNumberGeneratorConstructorPatcher
     {
-        static bool Prefix(FakeRandomNumberGenerator __instance, int byteIndex, ref byte __result)
+        static void Postfix(FakeRandomNumberGenerator __instance, Guid guid, int salt)
         {
-            if (EventIO.IsNull) return true;
-            if (byteIndex > 3)
-            {
-                throw new ArgumentException("byteIndex must be between 0 and 3.");
-            }
-            // Make the random number deterministic rather than based on HashCode, which isn't
-            byte[] bytes = __instance._guid.ToByteArray();
+            if (EventIO.IsNull) return;
+
+            // We manually calculate the hash code because HashCode.Combine is not deterministic
+            byte[] bytes = guid.ToByteArray();
             int hash = 17;
             foreach (byte b in bytes)
             {
                 hash = hash * 31 + b;
             }
-            hash = hash * 31 + __instance._salt;
-            __result = (byte)(hash >> (byteIndex * 8));
-            return false;
+            hash = hash * 31 + salt;
+
+            // Use reflection to set hashCode to hash, since it's readonly
+            var hashCodeField = typeof(FakeRandomNumberGenerator).GetField("_hashCode", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (hashCodeField != null)
+            {
+                hashCodeField.SetValue(__instance, hash);
+            }
+            else
+            {
+                Plugin.LogError("Failed to set _hashCode field in FakeRandomNumberGenerator.");
+            }
         }
     }
 }

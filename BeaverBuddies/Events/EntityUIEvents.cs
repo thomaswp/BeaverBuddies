@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Timberborn.BaseComponentSystem;
 using Timberborn.BeaversUI;
@@ -34,6 +35,8 @@ using Timberborn.WorkerTypesUI;
 using Timberborn.Workshops;
 using Timberborn.WorkSystem;
 using Timberborn.WorkSystemUI;
+using Timberborn.ZiplineSystem;
+using Timberborn.ZiplineSystemUI;
 using UnityEngine.UIElements;
 
 namespace BeaverBuddies.Events
@@ -1280,4 +1283,72 @@ namespace BeaverBuddies.Events
         }
     }
 
+    [Serializable]
+    class ZiplineConnectionChangedEvent : ReplayEvent
+    {
+        public string currentTowerEntityID;
+        public string otherTowerEntityID;
+        public bool add;
+
+        public override void Replay(IReplayContext context)
+        {
+            var currentTower = GetComponent<ZiplineTower>(context, currentTowerEntityID);
+            var otherTower = GetComponent<ZiplineTower>(context, otherTowerEntityID);
+            if (!currentTower || !otherTower) return;
+            ZiplineConnectionService ziplineConnectionService = context.GetSingleton<ZiplineConnectionService>();
+            if (add)
+            {
+                if (!ziplineConnectionService.CanBeConnected(currentTower, otherTower))
+                {
+                    Plugin.LogError($"Tried to connect {currentTowerEntityID} to {otherTowerEntityID}, but it was not possible");
+                    return;
+                }
+                ziplineConnectionService.Connect(currentTower, otherTower);
+            }
+            else
+            {
+                ziplineConnectionService.Disconnect(currentTower, otherTower);
+            }
+        }
+
+        public override string ToActionString()
+        {
+            string verb = add ? "Connecting" : "Disconnecting";
+            return $"{verb} zipline connection from {currentTowerEntityID} to {otherTowerEntityID}";
+        }
+    }
+
+    [HarmonyPatch(typeof(ZiplineConnectionAddingTool), nameof(ZiplineConnectionAddingTool.Connect))]
+    class ZiplineConnectionAddingToolConnectPatcher
+    {
+        public static bool Prefix(ZiplineConnectionAddingTool __instance, ZiplineTower ziplineTower)
+        {
+            return ReplayEvent.DoPrefix(() =>
+            {
+                return new ZiplineConnectionChangedEvent()
+                {
+                    currentTowerEntityID = ReplayEvent.GetEntityID(__instance._currentZiplineTower),
+                    otherTowerEntityID = ReplayEvent.GetEntityID(ziplineTower),
+                    add = true,
+                };
+            });
+        }
+    }
+    
+    [HarmonyPatch(typeof(ZiplineConnectionButtonFactory), nameof(ZiplineConnectionButtonFactory.RemoveConnection))]
+    class ZiplineConnectionButtonFactoryRemoveConnectionPatcher
+    {
+        public static bool Prefix(ZiplineTower owner, ZiplineTower otherZiplineTower)
+        {
+            return ReplayEvent.DoPrefix(() =>
+            {
+                return new ZiplineConnectionChangedEvent()
+                {
+                    currentTowerEntityID = ReplayEvent.GetEntityID(owner),
+                    otherTowerEntityID = ReplayEvent.GetEntityID(otherZiplineTower),
+                    add = false,
+                };
+            });
+        }
+    }
 }
