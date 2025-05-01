@@ -1056,8 +1056,9 @@ namespace BeaverBuddies
     /* 04/30/2025
         _hashCode = HashCode.Combine(_guid, _salt);
      */
-    [HarmonyPatch(typeof(FakeRandomNumberGenerator), MethodType.Constructor)]
-    class FakeRandomNumberGeneratorConstructorPatcher
+    [HarmonyPatch(typeof(FakeRandomNumberGenerator))]
+    [HarmonyPatch(MethodType.Constructor, [typeof(Guid), typeof(int)])]
+    public class FakeRandomNumberGeneratorConstructorPatcher
     {
         static void Postfix(FakeRandomNumberGenerator __instance, Guid guid, int salt)
         {
