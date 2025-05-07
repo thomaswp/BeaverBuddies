@@ -29,18 +29,11 @@ namespace BeaverBuddies.Reporting
 
         private string accessToken;
 
+        public bool HasAccessToken => !string.IsNullOrEmpty(accessToken);
+
         public ReportingService()
         {
             accessToken = GetEmbeddedResource("BeaverBuddies.pat.properties");
-            if (accessToken == null)
-            {
-                Plugin.Log("Access token not found. Online reporting is disabled.");
-            } else
-            {
-                Plugin.Log("Access token found. Online reporting is enabled.");
-                Plugin.Log("Access token: " + accessToken);
-            }
-            
         }
 
         public static string GetStringHash(string str)
@@ -82,9 +75,8 @@ namespace BeaverBuddies.Reporting
 
         public async Task<bool> PostDesync(string eventID, string desyncTrace, string role, string mapName, string versionInfo, byte[] mapBytes)
         {
-            if (accessToken == null)
+            if (!HasAccessToken)
             {
-                // Skipping online reporting as access token is not available
                 return false;
             }
             mapName = GetStringHash(mapName);

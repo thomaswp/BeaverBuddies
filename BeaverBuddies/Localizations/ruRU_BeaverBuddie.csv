@@ -19,3 +19,7 @@ BeaverBuddies.Editor.StartingLocation2,"Начальная локация - Иг
 BeaverBuddies.Editor.StartingLocation3,"Начальная локация - Игрок 3",""
 BeaverBuddies.Editor.StartingLocation4,"Начальная локация - Игрок 4",""
 BeaverBuddies.NewGame.MaxStartingLocations,"Максимальное количество начальных локаций",""
+BeaverBuddies.ClientDesynced.ReportSuccess,"Успешно!",""
+BeaverBuddies.ClientDesynced.ReportFailed,"Не удалось :(",""
+BeaverBuddies.ClientDesynced.ConsentAgreement,"Да, я согласен",""
+BeaverBuddies.ClientDesynced.TracingEnabled,"Включено",""
