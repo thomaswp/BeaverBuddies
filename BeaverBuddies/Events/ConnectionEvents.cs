@@ -83,7 +83,7 @@ namespace BeaverBuddies.Events
                     // Save the consent to the config
                     EventIO.Config.ReportingConsent = true;
                     context.GetSingleton<ConfigIOService>().SaveConfigToFile();
-                }, "BeaverBuddies.ClientDesynced.ConsentAgreement")
+                }, _loc.T("BeaverBuddies.ClientDesynced.ConsentAgreement"))
                 .SetDefaultCancelButton()
                 .Show();
         }
@@ -156,13 +156,17 @@ namespace BeaverBuddies.Events
             };
             Action bugReportAction = () =>
             {
-                infoButton?.SetEnabled(false);
                 if (EventIO.Config.Debug)
                 {
-                    ConfirmConsent(context, () => PostDesync(context, infoCallback));
+                    ConfirmConsent(context, () =>
+                    {
+                        infoButton?.SetEnabled(false);
+                        PostDesync(context, infoCallback);
+                    });
                 }
                 else
                 {
+                    infoButton?.SetEnabled(false);
                     TurnOnTracing(infoCallback);
                 }
             };
@@ -187,21 +191,22 @@ namespace BeaverBuddies.Events
 
 
             string reconnectText = isHost ? _loc.T("BeaverBuddies.ClientDesynced.SaveAndRehostButton") : _loc.T("BeaverBuddies.ClientDesynced.WaitForRehostButton");
+            string reconnectMessage = _loc.T("BeaverBuddies.ClientDesynced.Message");
             string bugReportMessageKey;
             if (EventIO.Config.Debug)
             {
-                bugReportMessageKey = "BeaverBuddies.ClientDesynced.BugReportButton";
+                bugReportMessageKey = "BeaverBuddies.ClientDesynced.PostBugReportButton";
             }
             else
             {
-                reconnectText += "\n\n" + _loc.T("BeaverBuddies.ClientDesynced.NeedToEnableTracing");
+                reconnectMessage += "\n\n" + _loc.T("BeaverBuddies.ClientDesynced.NeedToEnableTracing");
                 bugReportMessageKey = "BeaverBuddies.ClientDesynced.EnableTracing";
             }
 
 
 
-            DialogBox box = shower.Create().SetLocalizedMessage("BeaverBuddies.ClientDesynced.Message")
-                .SetInfoButton(bugReportAction, bugReportMessageKey)
+            DialogBox box = shower.Create().SetMessage(reconnectMessage)
+                .SetInfoButton(bugReportAction, _loc.T(bugReportMessageKey))
                 .SetConfirmButton(reconnectAction, reconnectText)
                 .SetDefaultCancelButton()
                 .Show();
