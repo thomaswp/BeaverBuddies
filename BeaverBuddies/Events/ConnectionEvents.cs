@@ -131,9 +131,8 @@ namespace BeaverBuddies.Events
 
         private void TurnOnTracing(Action<string> callback)
         {
-            // TODO: Need to make it temp so it doesn't get saved to config
-            // Or just have more robust config system
-            EventIO.Config.TemporarilyDebug = true;
+            // May want to make this easier to permenantly enable/disable somewhere...
+            ReplayConfig.TemporarilyDebug = true;
             callback("BeaverBuddies.ClientDesynced.TracingEnabled");
         }
 
@@ -152,7 +151,7 @@ namespace BeaverBuddies.Events
             {
                 if (infoButton != null)
                 {
-                    infoButton.text = message;
+                    infoButton.text = _loc.T(message);
                 }
             };
             Action bugReportAction = () =>
@@ -185,9 +184,24 @@ namespace BeaverBuddies.Events
                     ?.ConnectOrShowFailureMessage();
                 }
             };
+
+
             string reconnectText = isHost ? _loc.T("BeaverBuddies.ClientDesynced.SaveAndRehostButton") : _loc.T("BeaverBuddies.ClientDesynced.WaitForRehostButton");
+            string bugReportMessageKey;
+            if (EventIO.Config.Debug)
+            {
+                bugReportMessageKey = "BeaverBuddies.ClientDesynced.BugReportButton";
+            }
+            else
+            {
+                reconnectText += "\n\n" + _loc.T("BeaverBuddies.ClientDesynced.NeedToEnableTracing");
+                bugReportMessageKey = "BeaverBuddies.ClientDesynced.EnableTracing";
+            }
+
+
+
             DialogBox box = shower.Create().SetLocalizedMessage("BeaverBuddies.ClientDesynced.Message")
-                .SetInfoButton(bugReportAction, _loc.T("BeaverBuddies.ClientDesynced.PostBugReportButton"))
+                .SetInfoButton(bugReportAction, bugReportMessageKey)
                 .SetConfirmButton(reconnectAction, reconnectText)
                 .SetDefaultCancelButton()
                 .Show();

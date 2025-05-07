@@ -24,8 +24,7 @@ namespace BeaverBuddies
         public bool Verbose = true;
         public bool FirstTimer = true;
 
-        [JsonIgnore]
-        public bool TemporarilyDebug = false;
+        public static bool TemporarilyDebug = false;
         public bool AlwaysDebug = false;
 
         [JsonIgnore]

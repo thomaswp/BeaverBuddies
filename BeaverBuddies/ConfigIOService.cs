@@ -34,7 +34,7 @@ namespace BeaverBuddies
         {
             if (!LoadConfigFromFile())
             {
-                // If there's not config file, create a new one
+                // If there's no config file, create a new one
                 SaveConfigToFile();
             }
         }
