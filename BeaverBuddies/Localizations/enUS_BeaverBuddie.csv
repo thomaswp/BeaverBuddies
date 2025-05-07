@@ -19,3 +19,23 @@ BeaverBuddies.Editor.StartingLocation2,"Starting Location - Player 2",""
 BeaverBuddies.Editor.StartingLocation3,"Starting Location - Player 3",""
 BeaverBuddies.Editor.StartingLocation4,"Starting Location - Player 4",""
 BeaverBuddies.NewGame.MaxStartingLocations,"Max Starting Locations",""
+BeaverBuddies.ClientDesynced.ReportSuccess,"Success!",""
+BeaverBuddies.ClientDesynced.ReportFailed,"Failed :(",""
+BeaverBuddies.ClientDesynced.ConsentAgreement,"Yes, I agree",""
+BeaverBuddies.ClientDesynced.TracingEnabled,"Enabled",""
+BeaverBuddies.ClientDesynced.ConsentMessage,"Consent to Share Usage Data
+
+By choosing to share your data, you agree to send certain information from your gameplay session to the developers of this mod. This may include:
+
+- Log Data: Information automatically collected during your gameplay session, such as game events and user interactions.
+- Save File: Your current game save file.
+
+We strive to maintain your privacy by keeping this data largely anonymous. However, because the data is collected as-is, it may inadvertently include details that could identify you (such as file paths or usernames). The developers will not attempt to identify you using this information.
+
+Your Choices:
+- If you agree, this data will be sent securely to the developers and used to improve the mod.
+- If you do not agree, no data will be sent, and your gameplay will continue without any changes.
+
+By proceeding, you confirm that you are at least the legal age of digital consent in your country of residence.
+
+Do you agree to share your data with the developers of this mod?"

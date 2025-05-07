@@ -29,10 +29,11 @@ namespace BeaverBuddies.Reporting
 
         private string accessToken;
 
+        public bool HasAccessToken => !string.IsNullOrEmpty(accessToken);
+
         public ReportingService()
         {
             accessToken = GetEmbeddedResource("BeaverBuddies.pat.properties");
-            Plugin.Log(accessToken);
         }
 
         public static string GetStringHash(string str)
@@ -74,6 +75,10 @@ namespace BeaverBuddies.Reporting
 
         public async Task<bool> PostDesync(string eventID, string desyncTrace, string role, string mapName, string versionInfo, byte[] mapBytes)
         {
+            if (!HasAccessToken)
+            {
+                return false;
+            }
             mapName = GetStringHash(mapName);
 
             JObject fields = new JObject();

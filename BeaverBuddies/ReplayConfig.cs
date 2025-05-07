@@ -7,7 +7,6 @@ namespace BeaverBuddies
 {
     public enum NetMode { Manual, AutoconnectClient, Record, Replay, None }
 
-    // TODO: Save/load
     public class ReplayConfig
     {
         public const string MODE_NONE = "none";
@@ -24,7 +23,15 @@ namespace BeaverBuddies
         public int Port { get; set; } = 25565;
         public bool Verbose = true;
         public bool FirstTimer = true;
-        public bool Debug = false;
+
+        [JsonIgnore]
+        public bool TemporarilyDebug = false;
+        public bool AlwaysDebug = false;
+
+        [JsonIgnore]
+        public bool Debug => AlwaysDebug || TemporarilyDebug;
+
+        public bool ReportingConsent = false;
 
         public NetMode GetNetMode()
         {

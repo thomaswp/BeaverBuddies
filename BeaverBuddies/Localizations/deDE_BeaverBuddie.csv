@@ -19,3 +19,8 @@ BeaverBuddies.Editor.StartingLocation2,"Startposition - Spieler 2",""
 BeaverBuddies.Editor.StartingLocation3,"Startposition - Spieler 3",""
 BeaverBuddies.Editor.StartingLocation4,"Startposition - Spieler 4",""
 BeaverBuddies.NewGame.MaxStartingLocations,"Maximale Startpositionen",""
+BeaverBuddies.ClientDesynced.ReportSuccess,"Erfolg!",""
+BeaverBuddies.ClientDesynced.ReportFailed,"Fehlgeschlagen :(",""
+BeaverBuddies.ClientDesynced.ConsentAgreement,"Ja, ich stimme zu",""
+BeaverBuddies.ClientDesynced.TracingEnabled,"Aktiviert",""
+

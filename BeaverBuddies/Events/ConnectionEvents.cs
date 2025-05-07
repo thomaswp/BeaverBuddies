@@ -66,34 +66,50 @@ namespace BeaverBuddies.Events
         public string desyncID;
         public string desyncTrace;
 
-        public override void Replay(IReplayContext context)
+        private void ConfirmConsent(IReplayContext context, Action confirmCallback)
+        {
+            // If they've already consented, just skip the dialog
+            if (EventIO.Config.ReportingConsent)
+            {
+                confirmCallback();
+                return;
+            }
+            var shower = context.GetSingleton<DialogBoxShower>();
+            ILoc _loc = shower._loc;
+            shower.Create()
+                .SetLocalizedMessage("BeaverBuddies.ClientDesynced.ConsentMessage")
+                .SetConfirmButton(() =>
+                {
+                    // Save the consent to the config
+                    EventIO.Config.ReportingConsent = true;
+                    context.GetSingleton<ConfigIOService>().SaveConfigToFile();
+                }, "BeaverBuddies.ClientDesynced.ConsentAgreement")
+                .SetDefaultCancelButton()
+                .Show();
+        }
+
+        private void PostDesync(IReplayContext context, Action<string> callback)
         {
             ReplayService replayService = context.GetSingleton<ReplayService>();
-            replayService.SetTargetSpeed(0);
             ReportingService reportingService = context.GetSingleton<ReportingService>();
             RehostingService rehostingService = context.GetSingleton<RehostingService>();
             GameSaveRepository repository = context.GetSingleton<GameSaveRepository>();
             var shower = context.GetSingleton<DialogBoxShower>();
             ILoc _loc = shower._loc;
-            var urlOpener = context.GetSingleton<UrlOpener>();
             string ioType = EventIO.Get()?.GetType().Name;
             string mapName = replayService.ServerMapName;
-            Button infoButton = null;
             Action bugReportAction = () =>
             {
-                infoButton?.SetEnabled(false);
                 Action<Task<bool>> onPost = (success) =>
                 {
-                    if (infoButton == null) return;
+                    // TODO: loc!
                     if (success.Result)
                     {
-                        // TODO: loc
-                        infoButton.text = "Success!";
+                        callback("BeaverBuddies.ClientDesynced.ReportSuccess");
                     }
                     else
                     {
-                        // TODO: loc
-                        infoButton.text = "Report Failed :(";
+                        callback("BeaverBuddies.ClientDesynced.ReportFailed");
                     }
                 };
 
@@ -109,7 +125,47 @@ namespace BeaverBuddies.Events
                 {
                     _ = reportingService.PostDesync(desyncID, desyncTrace, ioType, mapName, versionInfo, null).ContinueWith(onPost);
                 };
-                
+
+            };
+        }
+
+        private void TurnOnTracing(Action<string> callback)
+        {
+            // TODO: Need to make it temp so it doesn't get saved to config
+            // Or just have more robust config system
+            EventIO.Config.TemporarilyDebug = true;
+            callback("BeaverBuddies.ClientDesynced.TracingEnabled");
+        }
+
+        public override void Replay(IReplayContext context)
+        {
+            ReplayService replayService = context.GetSingleton<ReplayService>();
+            replayService.SetTargetSpeed(0);
+            ReportingService reportingService = context.GetSingleton<ReportingService>();
+            RehostingService rehostingService = context.GetSingleton<RehostingService>();
+            GameSaveRepository repository = context.GetSingleton<GameSaveRepository>();
+            var shower = context.GetSingleton<DialogBoxShower>();
+            ILoc _loc = shower._loc;
+            Button infoButton = null;
+
+            Action<string> infoCallback = (message) =>
+            {
+                if (infoButton != null)
+                {
+                    infoButton.text = message;
+                }
+            };
+            Action bugReportAction = () =>
+            {
+                infoButton?.SetEnabled(false);
+                if (EventIO.Config.Debug)
+                {
+                    ConfirmConsent(context, () => PostDesync(context, infoCallback));
+                }
+                else
+                {
+                    TurnOnTracing(infoCallback);
+                }
             };
             bool isHost = EventIO.Get() is ServerEventIO;
             Action reconnectAction = () =>
@@ -129,7 +185,6 @@ namespace BeaverBuddies.Events
                     ?.ConnectOrShowFailureMessage();
                 }
             };
-            // TODO: If Debug isn't on then ask to turn it on
             string reconnectText = isHost ? _loc.T("BeaverBuddies.ClientDesynced.SaveAndRehostButton") : _loc.T("BeaverBuddies.ClientDesynced.WaitForRehostButton");
             DialogBox box = shower.Create().SetLocalizedMessage("BeaverBuddies.ClientDesynced.Message")
                 .SetInfoButton(bugReportAction, _loc.T("BeaverBuddies.ClientDesynced.PostBugReportButton"))

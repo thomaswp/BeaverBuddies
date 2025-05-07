@@ -19,3 +19,7 @@ BeaverBuddies.Editor.StartingLocation2,"ตำแหน่งเริ่มต�
 BeaverBuddies.Editor.StartingLocation3,"ตำแหน่งเริ่มต้น - ผู้เล่น 3",""
 BeaverBuddies.Editor.StartingLocation4,"ตำแหน่งเริ่มต้น - ผู้เล่น 4",""
 BeaverBuddies.NewGame.MaxStartingLocations,"ตำแหน่งเริ่มต้นสูงสุด",""
+BeaverBuddies.ClientDesynced.ReportSuccess,"สำเร็จ!",""
+BeaverBuddies.ClientDesynced.ReportFailed,"ล้มเหลว :(",""
+BeaverBuddies.ClientDesynced.ConsentAgreement,"ใช่ ฉันยอมรับ",""
+BeaverBuddies.ClientDesynced.TracingEnabled,"เปิดใช้งาน",""
