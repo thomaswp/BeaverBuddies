@@ -23,3 +23,21 @@ BeaverBuddies.ClientDesynced.ReportSuccess,"Successo!",""
 BeaverBuddies.ClientDesynced.ReportFailed,"Fallito :(",""
 BeaverBuddies.ClientDesynced.ConsentAgreement,"Sì, accetto",""
 BeaverBuddies.ClientDesynced.TracingEnabled,"Abilitato",""
+BeaverBuddies.ClientDesynced.EnableTracing,"Abilita registrazione",""
+BeaverBuddies.ClientDesynced.NeedToEnableTracing,"Per segnalare questa desincronizzazione, *tutti i giocatori* devono prima abilitare una registrazione più dettagliata premendo 'Abilita registrazione' qui sotto. Se si verifica un'altra desincronizzazione, potrai quindi inviare un rapporto di bug dettagliato e automatizzato. La modalità di registrazione può causare un po' di ritardo, ma sarà attiva solo fino al riavvio del gioco.",""
+BeaverBuddies.ClientDesynced.ConsentMessage,"Consenso alla condivisione dei dati di utilizzo
+
+Scegliendo di condividere i tuoi dati, accetti di inviare le seguenti informazioni dalla tua sessione di gioco agli sviluppatori di questa mod:
+
+- Dati di registro: informazioni raccolte automaticamente durante la tua sessione di gioco, come eventi di gioco e interazioni dell'utente.
+- File di salvataggio: il tuo file di salvataggio del gioco corrente.
+
+Ci impegniamo a proteggere la tua privacy mantenendo questi dati per lo più anonimi. Tuttavia, poiché i dati vengono raccolti così come sono, potrebbero includere involontariamente dettagli che potrebbero identificarti (come percorsi di file o nomi utente). Gli sviluppatori non tenteranno di identificarti utilizzando queste informazioni.
+
+Le tue scelte:
+- Se accetti, questi dati saranno inviati in modo sicuro agli sviluppatori e utilizzati per migliorare la mod.
+- Se non accetti, nessun dato sarà inviato e il tuo gioco continuerà senza modifiche.
+
+Procedendo, confermi di avere almeno l'età legale per il consenso digitale nel tuo paese di residenza.
+
+Accetti di condividere i tuoi dati con gli sviluppatori di questa mod?",""

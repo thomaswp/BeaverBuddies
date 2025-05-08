@@ -23,3 +23,21 @@ BeaverBuddies.ClientDesynced.ReportSuccess,"成功！",""
 BeaverBuddies.ClientDesynced.ReportFailed,"失敗 :(",""
 BeaverBuddies.ClientDesynced.ConsentAgreement,"是的，我同意",""
 BeaverBuddies.ClientDesynced.TracingEnabled,"已啟用",""
+BeaverBuddies.ClientDesynced.EnableTracing,"啟用日誌記錄",""
+BeaverBuddies.ClientDesynced.NeedToEnableTracing,"若要回報此不同步，*所有玩家* 必須先按下下方的「啟用日誌記錄」，以啟用更詳細的日誌記錄。如果再次發生不同步，您將能提交詳細的自動化錯誤報告。日誌模式可能會造成一些延遲，但僅在您重新啟動遊戲之前有效。",""
+BeaverBuddies.ClientDesynced.ConsentMessage,"同意分享使用資料
+
+選擇分享您的資料即表示您同意將以下來自您的遊戲會話的資訊傳送給此模組的開發者：
+
+- 日誌數據：在您的遊戲會話期間自動收集的資訊，例如遊戲事件和使用者互動。
+- 存檔檔案：您目前的遊戲存檔檔案。
+
+我們致力於保護您的隱私，盡量保持這些數據的匿名性。然而，因為數據是按原樣收集的，它可能會無意中包含能識別您的詳細資訊（如檔案路徑或使用者名稱）。開發者不會嘗試使用這些資訊識別您。
+
+您的選擇：
+- 如果您同意，這些資料將安全地發送給開發者並用於改進模組。
+- 如果您不同意，不會傳送任何資料，您的遊戲將繼續不受影響。
+
+繼續表示您確認已達到您所在國家/地區的數位同意法定年齡。
+
+您是否同意將您的資料分享給此模組的開發者？",""

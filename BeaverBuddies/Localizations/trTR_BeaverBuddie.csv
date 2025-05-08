@@ -23,3 +23,21 @@ BeaverBuddies.ClientDesynced.ReportSuccess,"Başarılı!",""
 BeaverBuddies.ClientDesynced.ReportFailed,"Başarısız :(",""
 BeaverBuddies.ClientDesynced.ConsentAgreement,"Evet, kabul ediyorum",""
 BeaverBuddies.ClientDesynced.TracingEnabled,"Etkin",""
+BeaverBuddies.ClientDesynced.EnableTracing,"Günlük Kaydını Etkinleştir",""
+BeaverBuddies.ClientDesynced.NeedToEnableTracing,"Bu senkronizasyon hatasını bildirmek için, *tüm oyuncuların* aşağıdaki 'Günlük Kaydını Etkinleştir' düğmesine basarak daha ayrıntılı günlük kaydını etkinleştirmesi gerekir. Başka bir senkronizasyon hatası oluşursa, ayrıntılı ve otomatik bir hata raporu gönderebilirsiniz. Günlük modu biraz gecikmeye neden olabilir, ancak yalnızca oyunu yeniden başlatana kadar etkin olacaktır.",""
+BeaverBuddies.ClientDesynced.ConsentMessage,"Kullanım Verilerini Paylaşma Onayı
+
+Verilerinizi paylaşmayı seçerek, bu modun geliştiricilerine oyun oturumunuzdan aşağıdaki bilgileri göndermeyi kabul edersiniz:
+
+- Günlük Verileri: Oyun oturumunuz sırasında otomatik olarak toplanan bilgiler, oyun olayları ve kullanıcı etkileşimleri gibi.
+- Kayıt Dosyası: Mevcut oyun kayıt dosyanız.
+
+Bu verileri büyük ölçüde anonim tutarak gizliliğinizi korumaya çalışıyoruz. Ancak, veriler olduğu gibi toplandığından, sizi tanımlayabilecek ayrıntılar (dosya yolları veya kullanıcı adları gibi) içerebilir. Geliştiriciler bu bilgileri kullanarak kimliğinizi belirlemeye çalışmaz.
+
+Seçenekleriniz:
+- Kabul ederseniz, bu veriler güvenli bir şekilde geliştiricilere gönderilir ve modun iyileştirilmesi için kullanılır.
+- Kabul etmezseniz, hiçbir veri gönderilmez ve oyununuz herhangi bir değişiklik olmadan devam eder.
+
+Devam ederek, yaşadığınız ülkede dijital onay yaşı sınırına ulaştığınızı onaylıyorsunuz.
+
+Bu modun geliştiricileriyle verilerinizi paylaşmayı kabul ediyor musunuz?",""

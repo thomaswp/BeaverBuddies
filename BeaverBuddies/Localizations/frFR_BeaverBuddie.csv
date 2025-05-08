@@ -23,3 +23,21 @@ BeaverBuddies.ClientDesynced.ReportSuccess,"Succès!",""
 BeaverBuddies.ClientDesynced.ReportFailed,"Échec :(",""
 BeaverBuddies.ClientDesynced.ConsentAgreement,"Oui, j'accepte",""
 BeaverBuddies.ClientDesynced.TracingEnabled,"Activé",""
+BeaverBuddies.ClientDesynced.EnableTracing,"Activer la journalisation",""
+BeaverBuddies.ClientDesynced.NeedToEnableTracing,"Pour signaler cette désynchronisation, *tous les joueurs* doivent d'abord activer une journalisation plus détaillée en appuyant sur 'Activer la journalisation' ci-dessous. Si une autre désynchronisation se produit, vous pourrez alors envoyer un rapport de bug détaillé et automatisé. Le mode de journalisation peut provoquer un certain décalage, mais il ne sera actif que jusqu'au redémarrage du jeu.",""
+BeaverBuddies.ClientDesynced.ConsentMessage,"Consentement pour partager les données d'utilisation
+
+En choisissant de partager vos données, vous acceptez d'envoyer les informations suivantes de votre session de jeu aux développeurs de ce mod :
+
+- Données de journal : Informations collectées automatiquement pendant votre session de jeu, telles que les événements du jeu et les interactions de l'utilisateur.
+- Fichier de sauvegarde : Votre fichier de sauvegarde actuel du jeu.
+
+Nous nous efforçons de préserver votre vie privée en gardant ces données largement anonymes. Cependant, comme les données sont collectées telles quelles, elles peuvent inclure involontairement des détails pouvant vous identifier (comme des chemins de fichiers ou des noms d'utilisateur). Les développeurs ne tenteront pas de vous identifier à l'aide de ces informations.
+
+Vos choix :
+- Si vous acceptez, ces données seront envoyées en toute sécurité aux développeurs et utilisées pour améliorer le mod.
+- Si vous n'acceptez pas, aucune donnée ne sera envoyée et votre jeu continuera sans aucun changement.
+
+En poursuivant, vous confirmez que vous avez au moins l'âge légal de consentement numérique dans votre pays de résidence.
+
+Acceptez-vous de partager vos données avec les développeurs de ce mod ?",""

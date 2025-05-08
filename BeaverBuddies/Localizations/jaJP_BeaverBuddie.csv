@@ -23,3 +23,21 @@ BeaverBuddies.ClientDesynced.ReportSuccess,"成功！",""
 BeaverBuddies.ClientDesynced.ReportFailed,"失敗 :(",""
 BeaverBuddies.ClientDesynced.ConsentAgreement,"はい、同意します",""
 BeaverBuddies.ClientDesynced.TracingEnabled,"有効",""
+BeaverBuddies.ClientDesynced.EnableTracing,"ログ記録を有効にする",""
+BeaverBuddies.ClientDesynced.NeedToEnableTracing,"この同期ズレを報告するには、*全プレイヤー* が下の「ログ記録を有効にする」を押して、詳細なログ記録を有効にする必要があります。別の同期ズレが発生した場合、詳細で自動化されたバグレポートを投稿できます。ログ記録モードは一時的にラグを引き起こす可能性がありますが、ゲームを再起動するまでのみ有効です。",""
+BeaverBuddies.ClientDesynced.ConsentMessage,"使用データ共有の同意
+
+データを共有することを選択することで、プレイセッション中の以下の情報をこのModの開発者に送信することに同意します：
+
+- ログデータ：プレイセッション中に自動的に収集される情報（ゲームイベントやユーザー操作など）。
+- セーブファイル：現在のゲームのセーブファイル。
+
+これらのデータは主に匿名で保持されるよう努めていますが、データはそのまま収集されるため、ファイルパスやユーザー名など、あなたを識別できる情報が含まれる可能性があります。開発者はこの情報を使ってあなたを特定しようとはしません。
+
+選択肢：
+- 同意する場合、これらのデータは安全に開発者に送信され、Modの改善に使用されます。
+- 同意しない場合、データは送信されず、ゲームは変更なく続行されます。
+
+続行することで、居住国でのデジタル同意年齢に達していることを確認します。
+
+このModの開発者とデータを共有することに同意しますか？",""
