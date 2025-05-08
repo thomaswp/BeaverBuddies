@@ -114,7 +114,6 @@ namespace BeaverBuddies.Events
 
             if (!rehostingService.SaveRehostFile(saveReference =>
             {
-                // TODO: Is there any way to include the log data too?
                 byte[] mapBytes = ServerHostingUtils.GetMapBtyes(repository, saveReference);
                 reportingService.PostDesync(desyncID, desyncTrace, ioType, mapName, versionInfo, mapBytes).ContinueWith(onPost);
             }, true))
@@ -199,9 +198,13 @@ namespace BeaverBuddies.Events
 
 
 
-            DialogBox box = shower.Create().SetMessage(reconnectMessage)
-                .SetInfoButton(bugReportAction, _loc.T(bugReportMessageKey))
-                .SetConfirmButton(reconnectAction, reconnectText)
+            var builder = shower.Create().SetMessage(reconnectMessage);
+            if (reportingService.HasAccessToken)
+            {
+                // Only show the bug report button if we have the ability to post it
+                builder.SetInfoButton(bugReportAction, _loc.T(bugReportMessageKey));
+            }
+            DialogBox box = builder.SetConfirmButton(reconnectAction, reconnectText)
                 .SetDefaultCancelButton()
                 .Show();
             infoButton = box.GetPanel().Q<Button>("InfoButton");

@@ -34,6 +34,10 @@ namespace BeaverBuddies.Reporting
         public ReportingService()
         {
             accessToken = GetEmbeddedResource("BeaverBuddies.pat.properties");
+            if (!HasAccessToken)
+            {
+                Plugin.LogWarning("No access token found. Reporting will be disabled.");
+            }
         }
 
         public static string GetStringHash(string str)
