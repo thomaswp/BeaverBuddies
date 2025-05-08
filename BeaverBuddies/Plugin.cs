@@ -126,6 +126,8 @@ namespace BeaverBuddies
 
             Harmony harmony = new Harmony(ID);
             harmony.PatchAll();
+
+            Log(UnityEngine.Application.consoleLogPath);
         }
 
         public static string GetWithDate(string message)

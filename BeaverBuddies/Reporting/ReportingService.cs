@@ -81,14 +81,25 @@ namespace BeaverBuddies.Reporting
             }
             mapName = GetStringHash(mapName);
 
+            string logs = null;
+            try
+            {
+                logs = File.ReadAllText(UnityEngine.Application.consoleLogPath);
+                logs = ShortenTrace(logs);
+            }
+            catch (Exception e)
+            {
+                Plugin.LogError($"Unable to read logs: {e}");
+            }
+
             JObject fields = new JObject();
             fields["SaveID"] = mapName;
             fields["EventID"] = eventID;
             fields["Role"] = role;
             fields["IsCrash"] = false;
             fields["DesyncTrace"] = ShortenTrace(desyncTrace);
+            fields["Logs"] = logs;
             fields["VersionInfo"] = versionInfo;
-
 
             Plugin.Log(EventIO.Get()?.ToString());
             
