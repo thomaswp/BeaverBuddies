@@ -98,34 +98,28 @@ namespace BeaverBuddies.Events
             ILoc _loc = shower._loc;
             string ioType = EventIO.Get()?.GetType().Name;
             string mapName = replayService.ServerMapName;
-            Action bugReportAction = () =>
+            Action<Task<bool>> onPost = (success) =>
             {
-                Action<Task<bool>> onPost = (success) =>
+                if (success.Result)
                 {
-                    // TODO: loc!
-                    if (success.Result)
-                    {
-                        callback("BeaverBuddies.ClientDesynced.ReportSuccess");
-                    }
-                    else
-                    {
-                        callback("BeaverBuddies.ClientDesynced.ReportFailed");
-                    }
-                };
-
-                string versionInfo = $"BeaverBuddies: {Plugin.Version}; Timberborn: {GameVersions.CurrentVersion}";
-
-                // TODO: Get consent to share data!!
-                if (!rehostingService.SaveRehostFile(saveReference =>
+                    callback("BeaverBuddies.ClientDesynced.ReportSuccess");
+                }
+                else
                 {
-                    // TODO: Is there any way to include the log data too?
-                    byte[] mapBytes = ServerHostingUtils.GetMapBtyes(repository, saveReference);
-                    reportingService.PostDesync(desyncID, desyncTrace, ioType, mapName, versionInfo, mapBytes).ContinueWith(onPost);
-                }, true))
-                {
-                    _ = reportingService.PostDesync(desyncID, desyncTrace, ioType, mapName, versionInfo, null).ContinueWith(onPost);
-                };
+                    callback("BeaverBuddies.ClientDesynced.ReportFailed");
+                }
+            };
 
+            string versionInfo = $"BeaverBuddies: {Plugin.Version}; Timberborn: {GameVersions.CurrentVersion}";
+
+            if (!rehostingService.SaveRehostFile(saveReference =>
+            {
+                // TODO: Is there any way to include the log data too?
+                byte[] mapBytes = ServerHostingUtils.GetMapBtyes(repository, saveReference);
+                reportingService.PostDesync(desyncID, desyncTrace, ioType, mapName, versionInfo, mapBytes).ContinueWith(onPost);
+            }, true))
+            {
+                _ = reportingService.PostDesync(desyncID, desyncTrace, ioType, mapName, versionInfo, null).ContinueWith(onPost);
             };
         }
 
