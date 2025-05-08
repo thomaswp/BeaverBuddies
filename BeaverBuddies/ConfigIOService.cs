@@ -63,7 +63,7 @@ namespace BeaverBuddies
         {
             if (configPath != null) return configPath;
 
-            var mod = _modRepository.Mods.Where(mod => mod.Manifest.Id == Plugin.ID).FirstOrDefault();
+            var mod = _modRepository.Mods.Where(mod => mod.Manifest.Id == Plugin.ID && mod.Manifest.Version.Full == Plugin.Version && ModdedState.IsModded && mod.IsEnabled).FirstOrDefault();
             if (mod == null)
             {
                 Plugin.LogWarning("Cannot find mod from repository!");
