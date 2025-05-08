@@ -24,10 +24,10 @@ BeaverBuddies.ClientDesynced.ReportFailed,"Failed :(",""
 BeaverBuddies.ClientDesynced.ConsentAgreement,"Yes, I agree",""
 BeaverBuddies.ClientDesynced.TracingEnabled,"Enabled",""
 BeaverBuddies.ClientDesynced.EnableTracing,"Enable Logging",""
-BeaverBuddies.ClientDesynced.NeedToEnableTracing,"In order to report this desync, you must first enable more detailed logging. Logging mode may cause some lag, but it will only be active until you restart the game. If another desync occurs, you will be able to post a detailed automated bug report.",""
+BeaverBuddies.ClientDesynced.NeedToEnableTracing,"In order to report this desync, *all players* must first enable more detailed logging. If another desync occurs, you will be able to post a detailed automated bug report. Logging mode may cause some lag, but it will only be active until you restart the game. ",""
 BeaverBuddies.ClientDesynced.ConsentMessage,"Consent to Share Usage Data
 
-By choosing to share your data, you agree to send certain information from your gameplay session to the developers of this mod. This may include:
+By choosing to share your data, you agree to send the following information from your gameplay session to the developers of this mod:
 
 - Log Data: Information automatically collected during your gameplay session, such as game events and user interactions.
 - Save File: Your current game save file.

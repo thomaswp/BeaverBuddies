@@ -77,6 +77,24 @@ namespace BeaverBuddies.Reporting
             return trace.Substring(0, MAX_AIRTABLE_CHARACTERS);
         }
 
+        private static string ReadLog()
+        {
+            try
+            {
+                using (var stream = new FileStream(UnityEngine.Application.consoleLogPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (var reader = new StreamReader(stream))
+                {
+                    string fileContent = reader.ReadToEnd();
+                    return fileContent;
+                }
+            }
+            catch (IOException ex)
+            {
+                Plugin.LogError($"Error reading file: {ex.Message}");
+            }
+            return null;
+        }
+
         public async Task<bool> PostDesync(string eventID, string desyncTrace, string role, string mapName, string versionInfo, byte[] mapBytes)
         {
             if (!HasAccessToken)
@@ -85,16 +103,8 @@ namespace BeaverBuddies.Reporting
             }
             mapName = GetStringHash(mapName);
 
-            string logs = null;
-            try
-            {
-                logs = File.ReadAllText(UnityEngine.Application.consoleLogPath);
-                logs = ShortenTrace(logs);
-            }
-            catch (Exception e)
-            {
-                Plugin.LogError($"Unable to read logs: {e}");
-            }
+            string logs = ReadLog();
+            if (logs != null) logs = ShortenTrace(logs);
 
             JObject fields = new JObject();
             fields["SaveID"] = mapName;
