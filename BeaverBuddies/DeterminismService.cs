@@ -611,21 +611,6 @@ namespace BeaverBuddies
         }
     }
 
-    // TODO: Timberborn.GameLibs is out of date. This should come from the WorkshopEffets namespace
-    // [HarmonyPatch(typeof(ObservatoryAnimator), nameof(ObservatoryAnimator.GenerateRandomAngles))]
-    // public class ObservatoryAnimatorGenerateRandomAnglesPatcher
-    // {
-    //     static void Prefix()
-    //     {
-    //         DeterminismController.SetNonGamePatcherActive(typeof(ObservatoryAnimatorGenerateRandomAnglesPatcher), true);
-    //     }
-
-    //     static void Postfix()
-    //     {
-    //         DeterminismController.SetNonGamePatcherActive(typeof(ObservatoryAnimatorGenerateRandomAnglesPatcher), false);
-    //     }
-    // }
-
     [HarmonyPatch(typeof(LoopingSoundPlayer), nameof(LoopingSoundPlayer.PlayLooping))]
     public class LoopingSoundPlayerPatcher
     {
@@ -727,8 +712,6 @@ namespace BeaverBuddies
         }
     }
 
-    // TODO: Double check that this still works - the arguments have
-    // changed and now it gets saved on LateUpdate as a queueing process
     [HarmonyPatch(typeof(GameSaver), nameof(GameSaver.Save), typeof(QueuedSave))]
     public class GameSaverSavePatcher
     {

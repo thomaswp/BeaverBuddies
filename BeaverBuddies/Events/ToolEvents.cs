@@ -250,8 +250,6 @@ namespace BeaverBuddies.Events
 
         public override void Replay(IReplayContext context)
         {
-            // TODO: Looks like this doesn't work until the receiver
-            // has at least opened the tool tray. Need to test more.
             var treeService = context.GetSingleton<TreeCuttingArea>();
             if (wasAdded)
             {
@@ -270,8 +268,6 @@ namespace BeaverBuddies.Events
         }
     }
 
-    // TODO: These events seem to only replay successfully if the
-    // tool is open...
     [HarmonyPatch(typeof(TreeCuttingArea), nameof(TreeCuttingArea.AddCoordinates))]
     class TreeCuttingAreaAddedPatcher
     {
