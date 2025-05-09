@@ -18,4 +18,10 @@ Features
  
 Want to learn more? Have an issue to report?
 
-Check out the [url=https://github.com/thomaswp/BeaverBuddies/wiki]documentation[/url] with answer to common questions.  [url=https://github.com/thomaswp/BeaverBuddies/issues]Report any bugs you find here[/url].
+Check out the [url=https://github.com/thomaswp/BeaverBuddies/wiki]documentation[/url] with answer to common questions.  
+
+To report a desync:
+1) When the desync alert pops up, enable detailed logging and rehost/reconnect.
+2) If it happens again, use the "Post Bug Report" option to automatically upload a detailed report that will help us fix your issue!
+
+If you encounter a crash or other issue that requires more information, [url=https://github.com/thomaswp/BeaverBuddies/issues]report bugs you find here[/url].
