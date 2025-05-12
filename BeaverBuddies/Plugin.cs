@@ -104,7 +104,7 @@ namespace BeaverBuddies
     [HarmonyPatch]
     public class Plugin : IModStarter
     {
-        public static readonly string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        public static readonly string Version = Assembly.GetExecutingAssembly().GetName().Version.Major + "." + Assembly.GetExecutingAssembly().GetName().Version.Minor + "." + Assembly.GetExecutingAssembly().GetName().Version.MajorRevision;
         public const string Name = "BeaverBuddies";
         public const string ID = "beaverbuddies";
 
