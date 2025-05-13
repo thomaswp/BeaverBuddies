@@ -2,6 +2,8 @@
 using BeaverBuddies.Util;
 using System;
 using System.IO;
+using System.Net.Sockets;
+using System.Net;
 using Timberborn.CoreUI;
 using Timberborn.GameSaveRepositorySystem;
 using Timberborn.GameSceneLoading;
@@ -51,13 +53,42 @@ namespace BeaverBuddies.Connect
         public bool TryToConnect(string address)
         {
             Plugin.Log("Connecting client");
-            client = ClientEventIO.Create(address, EventIO.Config.Port, LoadMap, (error) =>
+            Plugin.Log("Try to resolve address: " + address);
+
+            try
             {
-                ShowError("BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError", error);
-            });
-            if (client == null) return false;
-            EventIO.Set(client);
-            return true;
+                // Parse address and port
+                var (hostAddress, port) = ParseAddressAndPort(address);
+
+                // Set port if provided
+                if (port.HasValue)
+                {
+                    EventIO.Config.Port = port.Value;
+                }
+
+                // Resolve the address if it's a hostname
+                hostAddress = ResolveHostnameIfNecessary(hostAddress);
+
+                // Attempt to create the client
+                client = ClientEventIO.Create(hostAddress, EventIO.Config.Port, LoadMap, error =>
+                {
+                    ShowError("BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError", error);
+                });
+
+                if (client == null)
+                {
+                    Plugin.Log("Client creation failed.");
+                    return false;
+                }
+
+                EventIO.Set(client);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ShowError("BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError", ex.Message);
+                return false;
+            }
         }
 
         public void ConnectOrShowFailureMessage()
@@ -116,6 +147,42 @@ namespace BeaverBuddies.Connect
             if (client == null) return;
             //Plugin.Log("Updating client!");
             client.Update();
+        }
+
+        private (string, int?) ParseAddressAndPort(string address)
+        {
+            // If address contains a port, split and parse it
+            if (address.Contains(":"))
+            {
+                var tokens = address.Split(':');
+                if (tokens.Length == 2 && int.TryParse(tokens[1], out int port))
+                {
+                    return (tokens[0], port);
+                }
+                else
+                {
+                    throw new FormatException("Invalid address format. Could not parse port.");
+                }
+            }
+            return (address, null);
+        }
+
+        private string ResolveHostnameIfNecessary(string address)
+        {
+            // If it's not an IP address, resolve the hostname
+            if (!IPAddress.TryParse(address, out _))
+            {
+                IPHostEntry hostEntry = Dns.GetHostEntry(address);
+                if (hostEntry.AddressList.Length > 0)
+                {
+                    return hostEntry.AddressList[0].ToString();
+                }
+                else
+                {
+                    throw new Exception("Hostname could not be resolved to an IP address.");
+                }
+            }
+            return address; // If already an IP, return as-is
         }
     }
 }
