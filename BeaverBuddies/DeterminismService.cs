@@ -933,7 +933,10 @@ namespace BeaverBuddies
                 try
                 {
                     MovementAnimator anim = entityComponent.GetComponentFast<MovementAnimator>();
-                    if (anim != null && anim.didAwake)
+                    CharacterRotator rotator = entityComponent.GetComponentFast<CharacterRotator>();
+                    // The CharacterRotator seems to sometimes not be initialized when this is caused, and
+                    // therefore something is null, likely _animatedPathFollower.
+                    if (anim != null && rotator != null && rotator.didAwake && rotator._animatedPathFollower != null)
                     {
                         anim.UpdateTransform(0);
                     }
