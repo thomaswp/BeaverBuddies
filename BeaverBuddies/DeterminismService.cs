@@ -930,7 +930,18 @@ namespace BeaverBuddies
                     PositionHash = TimberNetBase.CombineHash(PositionHash, targetPos.GetHashCode());
                 }
                 // Make sure it updates the model's position as well
-                entityComponent.GetComponentFast<MovementAnimator>()?.UpdateTransform(0);
+                try
+                {
+                    MovementAnimator anim = entityComponent.GetComponentFast<MovementAnimator>();
+                    if (anim != null && anim.didAwake)
+                    {
+                        anim.UpdateTransform(0);
+                    }
+                } catch (Exception e)
+                {
+                    Plugin.LogError($"Failed to update transform of {entityComponent?.name}");
+                    Plugin.LogError(e.StackTrace.ToString());
+                }
 
                 // Update entity positions before the tick
                 //var animator = entity._entityComponent.GetComponentFast<MovementAnimator>();
