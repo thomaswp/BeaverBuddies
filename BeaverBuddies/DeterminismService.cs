@@ -1048,38 +1048,4 @@ namespace BeaverBuddies
             return false;
         }
     }
-
-    [ManualMethodOverwrite]
-    /* 04/30/2025
-        _hashCode = HashCode.Combine(_guid, _salt);
-     */
-    [HarmonyPatch(typeof(FakeRandomNumberGenerator))]
-    [HarmonyPatch(MethodType.Constructor, [typeof(Guid), typeof(int)])]
-    public class FakeRandomNumberGeneratorConstructorPatcher
-    {
-        static void Postfix(FakeRandomNumberGenerator __instance, Guid guid, int salt)
-        {
-            if (EventIO.IsNull) return;
-
-            // We manually calculate the hash code because HashCode.Combine is not deterministic
-            byte[] bytes = guid.ToByteArray();
-            int hash = 17;
-            foreach (byte b in bytes)
-            {
-                hash = hash * 31 + b;
-            }
-            hash = hash * 31 + salt;
-
-            // Use reflection to set hashCode to hash, since it's readonly
-            var hashCodeField = typeof(FakeRandomNumberGenerator).GetField("_hashCode", BindingFlags.NonPublic | BindingFlags.Instance);
-            if (hashCodeField != null)
-            {
-                hashCodeField.SetValue(__instance, hash);
-            }
-            else
-            {
-                Plugin.LogError("Failed to set _hashCode field in FakeRandomNumberGenerator.");
-            }
-        }
-    }
 }
