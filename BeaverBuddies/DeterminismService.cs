@@ -930,7 +930,21 @@ namespace BeaverBuddies
                     PositionHash = TimberNetBase.CombineHash(PositionHash, targetPos.GetHashCode());
                 }
                 // Make sure it updates the model's position as well
-                entityComponent.GetComponentFast<MovementAnimator>()?.UpdateTransform(0);
+                try
+                {
+                    MovementAnimator anim = entityComponent.GetComponentFast<MovementAnimator>();
+                    CharacterRotator rotator = entityComponent.GetComponentFast<CharacterRotator>();
+                    // The CharacterRotator seems to sometimes not be initialized when this is caused, and
+                    // therefore something is null, likely _animatedPathFollower.
+                    if (anim != null && rotator != null && rotator.didAwake && rotator._animatedPathFollower != null)
+                    {
+                        anim.UpdateTransform(0);
+                    }
+                } catch (Exception e)
+                {
+                    Plugin.LogError($"Failed to update transform of {entityComponent?.name}");
+                    Plugin.LogError(e.StackTrace.ToString());
+                }
 
                 // Update entity positions before the tick
                 //var animator = entity._entityComponent.GetComponentFast<MovementAnimator>();
@@ -1032,40 +1046,6 @@ namespace BeaverBuddies
             if (EventIO.IsNull) return true;
             if (doBaseUpdate) return true;
             return false;
-        }
-    }
-
-    [ManualMethodOverwrite]
-    /* 04/30/2025
-        _hashCode = HashCode.Combine(_guid, _salt);
-     */
-    [HarmonyPatch(typeof(FakeRandomNumberGenerator))]
-    [HarmonyPatch(MethodType.Constructor, [typeof(Guid), typeof(int)])]
-    public class FakeRandomNumberGeneratorConstructorPatcher
-    {
-        static void Postfix(FakeRandomNumberGenerator __instance, Guid guid, int salt)
-        {
-            if (EventIO.IsNull) return;
-
-            // We manually calculate the hash code because HashCode.Combine is not deterministic
-            byte[] bytes = guid.ToByteArray();
-            int hash = 17;
-            foreach (byte b in bytes)
-            {
-                hash = hash * 31 + b;
-            }
-            hash = hash * 31 + salt;
-
-            // Use reflection to set hashCode to hash, since it's readonly
-            var hashCodeField = typeof(FakeRandomNumberGenerator).GetField("_hashCode", BindingFlags.NonPublic | BindingFlags.Instance);
-            if (hashCodeField != null)
-            {
-                hashCodeField.SetValue(__instance, hash);
-            }
-            else
-            {
-                Plugin.LogError("Failed to set _hashCode field in FakeRandomNumberGenerator.");
-            }
         }
     }
 }

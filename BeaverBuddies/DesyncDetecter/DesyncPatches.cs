@@ -250,7 +250,7 @@ namespace BeaverBuddies.DesyncDetecter
             DesyncDetecterService.Trace($"Updating water map columns with hash {hash:X8}");
             
             hash = 13;
-            var counts = __instance._columnCount;
+            var counts = __instance._columnCounts;
             foreach (byte count in counts)
             {
                 hash = (hash * 7) + count;
@@ -258,7 +258,7 @@ namespace BeaverBuddies.DesyncDetecter
             DesyncDetecterService.Trace($"Updating water map column counts with hash {hash:X8}");
         }
 
-        private static int GetHashCode(WaterColumn waterColumn)
+        private static int GetHashCode(ReadOnlyWaterColumn waterColumn)
         {
             int hash = 13;
             hash = (hash * 7) + BitConverter.SingleToInt32Bits(waterColumn.Ceiling);
