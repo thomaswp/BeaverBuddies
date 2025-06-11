@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace BeaverBuddies.IO
 {
-    // TODO: With TimberBorn's current architecture, we cannot feasibly
+    // With TimberBorn's current architecture, we cannot feasibly
     // support joining after the game has started. This is because a number
     // of variables are randomly initialized during load (e.g. tree lifespans)
     // rather than serialized, since they aren't that important. As a result, the

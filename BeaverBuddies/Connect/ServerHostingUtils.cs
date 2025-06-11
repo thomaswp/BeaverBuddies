@@ -19,6 +19,8 @@ using System.Collections;
 using Steamworks;
 using BeaverBuddies.Steam;
 using TimberNet;
+using UnityEngine;
+using Timberborn.SceneLoading;
 
 namespace BeaverBuddies.Connect
 {
@@ -38,7 +40,7 @@ namespace BeaverBuddies.Connect
 
         [ManualMethodOverwrite]
         /*
-         * 08/2024
+         * 04/19/2025
         if (_saveList.TryGetSelectedSave(out var selectedSave))
         {
             if (_gameSaveRepository.SaveExists(selectedSave.SaveReference))
@@ -75,16 +77,16 @@ namespace BeaverBuddies.Connect
 
         [ManualMethodOverwrite]
         /*
-9/14/2024
-if (index >= _gameLoadValidators.Length)
-{
-	_gameSceneLoader.StartSaveGame(saveReference);
-	return;
-}
-_gameLoadValidators[index].ValidateSave(saveReference, delegate
-{
-	CheckNextValidator(saveReference, index + 1);
-});
+        04/19/2025 ValidatingGameLoader.CheckNextValidator
+        if (index >= _gameLoadValidators.Length)
+        {
+	        _gameSceneLoader.StartSaveGame(saveReference);
+	        return;
+        }
+        _gameLoadValidators[index].ValidateSave(saveReference, delegate
+        {
+	        CheckNextValidator(saveReference, index + 1);
+        });
          */
         private static void CheckNextValidator(ValidatingGameLoader loader, DialogBoxShower shower, SaveReference saveReference, int index)
         {
@@ -119,10 +121,8 @@ _gameLoadValidators[index].ValidateSave(saveReference, delegate
             }
         }
 
-        private static void LoadAndHost(ValidatingGameLoader loader, DialogBoxShower shower, SaveReference saveReference)
+        public static byte[] GetMapBtyes(GameSaveRepository repository, SaveReference saveReference)
         {
-            var sceneLoader = loader._gameSceneLoader;
-            var repository = sceneLoader._gameSaveRepository;
             var inputStream = repository.OpenSaveWithoutLogging(saveReference);
             byte[] data;
             using (var memoryStream = new MemoryStream())
@@ -131,14 +131,27 @@ _gameLoadValidators[index].ValidateSave(saveReference, delegate
                 data = memoryStream.ToArray();
             }
             inputStream.Close();
+            return data;
+        }
+
+        public static MonoBehaviour GetMonoBehaviour(ISceneLoader loader)
+        {
+            return ((SceneLoader)loader)._coroutineStarter._monoBehaviour;
+        }
+
+        public static void LoadAndHost(ValidatingGameLoader loader, DialogBoxShower shower, SaveReference saveReference)
+        {
+            var sceneLoader = loader._gameSceneLoader;
+            var repository = sceneLoader._gameSaveRepository;
+            byte[] data = GetMapBtyes(repository, saveReference);
             Plugin.Log($"Reading map with length {data.Length}");
 
             ServerEventIO io = new ServerEventIO();
             EventIO.Set(io);
             io.Start(data);
 
-            var behavior = sceneLoader._sceneLoader;
-            UnityEngine.Coroutine coroutine = null;
+            var behavior = GetMonoBehaviour(sceneLoader._sceneLoader);
+            Coroutine coroutine = null;
 
             var socketListener = io.SocketListener;
             SteamListener steamListener = socketListener as SteamListener;

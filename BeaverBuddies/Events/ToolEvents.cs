@@ -12,6 +12,7 @@ using Timberborn.EntitySystem;
 using Timberborn.Forestry;
 using Timberborn.PlantingUI;
 using Timberborn.ScienceSystem;
+using Timberborn.SingletonSystem;
 using Timberborn.ToolSystem;
 using Timberborn.WorkSystemUI;
 using UnityEngine;
@@ -31,11 +32,11 @@ namespace BeaverBuddies.Events
         public override void Replay(IReplayContext context)
         {
             var buildingPrefab = GetBuilding(context, prefabName);
-            var blockObject = buildingPrefab.GetComponentFast<BlockObject>();
-            var placer = context.GetSingleton<BlockObjectPlacerService>().GetMatchingPlacer(blockObject);
+            var blockObjectSpec = buildingPrefab.GetComponentFast<BlockObjectSpec>();
+            var placer = context.GetSingleton<BlockObjectPlacerService>().GetMatchingPlacer(blockObjectSpec);
             Placement placement = new Placement(coordinates, orientation, 
                 isFlipped ? FlipMode.Flipped : FlipMode.Unflipped);
-            placer.Place(blockObject, placement);
+            placer.Place(blockObjectSpec, placement);
         }
 
         public override string ToActionString()
@@ -86,10 +87,10 @@ namespace BeaverBuddies.Events
         }
     }
 
-    [HarmonyPatch(typeof(BlockObjectDeletionTool<Building>), nameof(BlockObjectDeletionTool<Building>.DeleteBlockObjects))]
+    [HarmonyPatch(typeof(BlockObjectDeletionTool<BuildingSpec>), nameof(BlockObjectDeletionTool<BuildingSpec>.DeleteBlockObjects))]
     class BuildingDeconstructionPatcher
     {
-        static bool Prefix(BlockObjectDeletionTool<Building> __instance)
+        static bool Prefix(BlockObjectDeletionTool<BuildingSpec> __instance)
         {
             bool result = ReplayEvent.DoPrefix(() =>
             {
@@ -249,8 +250,6 @@ namespace BeaverBuddies.Events
 
         public override void Replay(IReplayContext context)
         {
-            // TODO: Looks like this doesn't work until the receiver
-            // has at least opened the tool tray. Need to test more.
             var treeService = context.GetSingleton<TreeCuttingArea>();
             if (wasAdded)
             {
@@ -269,8 +268,6 @@ namespace BeaverBuddies.Events
         }
     }
 
-    // TODO: These events seem to only replay successfully if the
-    // tool is open...
     [HarmonyPatch(typeof(TreeCuttingArea), nameof(TreeCuttingArea.AddCoordinates))]
     class TreeCuttingAreaAddedPatcher
     {
@@ -324,13 +321,12 @@ namespace BeaverBuddies.Events
                 {
                     continue;
                 }
-                Building toolBuilding = blockObjectTool.Prefab.GetComponentFast<Building>();
+                BuildingSpec toolBuilding = blockObjectTool.Prefab.GetComponentFast<BuildingSpec>();
                 if (toolBuilding == building)
                 {
                     Plugin.Log("Unlocking tool for building: " + buildingName);
-                    // TODO: Need to test - I think this is equivalent to clearing the lock
-                    // but not sure it'll update the UI
                     blockObjectTool.Locker = null;
+                    toolButton.OnToolUnlocked(new ToolUnlockedEvent(tool));
                 }
             }
         }
@@ -344,7 +340,7 @@ namespace BeaverBuddies.Events
     [HarmonyPatch(typeof(BuildingUnlockingService), nameof(BuildingUnlockingService.Unlock))]
     class BuildingUnlockingServiceUnlockPatcher
     {
-        static bool Prefix(Building building)
+        static bool Prefix(BuildingSpec buildingSpec)
         {
             //Plugin.LogWarning("science again!");
             //Plugin.LogStackTrace();
@@ -352,7 +348,7 @@ namespace BeaverBuddies.Events
             {
                 return new BuildingUnlockedEvent()
                 {
-                    buildingName = building.name,
+                    buildingName = buildingSpec.name,
                 };
             });
         }

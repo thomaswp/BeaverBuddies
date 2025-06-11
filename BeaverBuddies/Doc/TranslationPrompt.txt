@@ -1,0 +1,10 @@
+Here is a localization CSV snippet for enUS:
+
+BeaverBuddies.Editor.StartingLocation1,"Starting Location - Player 1",""
+BeaverBuddies.Editor.StartingLocation2,"Starting Location - Player 2",""
+BeaverBuddies.Editor.StartingLocation3,"Starting Location - Player 3",""
+BeaverBuddies.Editor.StartingLocation4,"Starting Location - Player 4",""
+BeaverBuddies.NewGame.MaxStartingLocations,"Max Starting Locations",""
+
+The second column is the translated string. Please produce similar snippets for the following: 
+deDE, esES, frFR, itIT, jaJP, koKR, plPL, ptBR, ruRU, thTH, trTR, ukUA, zhCN, zhTW

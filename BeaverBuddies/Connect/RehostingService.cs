@@ -14,6 +14,7 @@ using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.GameSaveRuntimeSystemUI;
 using Timberborn.InputSystem;
 using Timberborn.SaveSystem;
+using Timberborn.SceneLoading;
 using Timberborn.SettlementNameSystem;
 using Timberborn.SingletonSystem;
 using Timberborn.TickSystem;
@@ -52,22 +53,31 @@ namespace BeaverBuddies.Connect
         // that Autosaver uses, both here and in general when a client joins to avoid
         // saving when it could corrupt things. Hopefully the save would fail if
         // there's a real issue, rather than corrupting, but I don't know...
-        public bool RehostGame()
+        public bool SaveRehostFile(Action<SaveReference> callback, bool waitUntilAccessible)
         {
+            if (waitUntilAccessible)
+            {
+                Action<SaveReference> originalCallback = callback;
+                callback = saveReference =>
+                {
+                    // Run on next frame because the GameSaver doesn't release its
+                    // handle on the save stream until the method finishes executing
+                    // i.e. after the callback has run.
+                    var mono = ServerHostingUtils.GetMonoBehaviour(_settlementNameService._sceneLoader);
+                    TimeoutUtils.RunAfterFrames(mono, () =>
+                    {
+                        originalCallback(saveReference);
+                    });
+                };
+            }
             string settlementName = _settlementNameService.SettlementName;
             string saveName = _autosaveNameService.Timestamp().Replace(",", "") + " Rehost";
             SaveReference saveReference = new SaveReference(settlementName, saveName);
             try
             {
-                _gameSaver.InstantSaveSkippingNameValidation(saveReference, () => 
+                _gameSaver.SaveInstantlySkippingNameValidation(saveReference, () =>
                 {
-                    // Run on next frame because the GameSaver doesn't release its
-                    // handle on the save stream until the method finishes executing
-                    // i.e. after the callback has run.
-                    TimeoutUtils.RunAfterFrames(_gameSaver, () =>
-                    {
-                        ServerHostingUtils.LoadIfSaveValidAndHost(_validatingGameLoader, _dialogBoxShower, saveReference);
-                    });
+                    callback(saveReference);
                 });
             }
             catch (GameSaverException ex)
@@ -75,12 +85,23 @@ namespace BeaverBuddies.Connect
                 Plugin.LogError($"Error occured while saving: {ex.InnerException}");
                 _gameSaveRepository.DeleteSaveSafely(saveReference);
                 return false;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Plugin.LogError($"Failed to rehost: {ex}");
                 return false;
             }
             return true;
+        }
+
+        public bool RehostGame()
+        {
+            return SaveRehostFile(LoadGame, true);
+        }
+
+        public void LoadGame(SaveReference saveReference)
+        {
+            ServerHostingUtils.LoadIfSaveValidAndHost(_validatingGameLoader, _dialogBoxShower, saveReference);
         }
     }
 }

@@ -6,6 +6,7 @@
 TestV6/Assets
 BeaverBuddies/env.props
 BeaverBuddies/temp
+BeaverBuddies/pat.properties
 
 # User-specific files
 *.rsuser

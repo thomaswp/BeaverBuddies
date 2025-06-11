@@ -63,10 +63,6 @@ namespace BeaverBuddies.Connect
 
         private bool TryToConnect(ISocketStream socket)
         {
-            // Clean up our current co-op state before connecting,
-            // so we don't, for example, end up ticking the client before
-            // it's actually loaded.
-            SingletonManager.Reset();
             Plugin.Log("Connecting client");
             client = ClientEventIO.Create(socket, LoadMap, (error) =>
             {
@@ -109,6 +105,11 @@ namespace BeaverBuddies.Connect
 
         private void LoadMap(byte[] mapBytes)
         {
+            // Clean up our current co-op state before loading,
+            // so we don't, for example, end up ticking the client before
+            // it's actually loaded.
+            SingletonManager.Reset();
+
             Plugin.Log("Loading map");
             //string saveName = Guid.NewGuid().ToString();
             string saveName = TimberNetBase.GetHashCode(mapBytes).ToString("X8");
@@ -125,7 +126,6 @@ namespace BeaverBuddies.Connect
 
         public void UpdateSingleton()
         {
-            //EventIO.Get()?.Update(); // TODO: Remove!!
             if (client == null) return;
             //Plugin.Log("Updating client!");
             client.Update();

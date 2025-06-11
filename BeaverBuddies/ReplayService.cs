@@ -34,6 +34,13 @@ using BeaverBuddies.DesyncDetecter;
 using Timberborn.WebNavigation;
 using System.Collections.Immutable;
 using BeaverBuddies.IO;
+using BeaverBuddies.Reporting;
+using Timberborn.GameSaveRepositorySystem;
+using Timberborn.SettlementNameSystem;
+using Timberborn.Workshops;
+using Timberborn.GameWonderCompletion;
+using Timberborn.Autosaving;
+using Timberborn.ZiplineSystem;
 
 namespace BeaverBuddies
 {
@@ -129,6 +136,8 @@ namespace BeaverBuddies
 
         public static bool IsReplayingEvents { get; private set; } = false;
 
+        public string ServerMapName => GetSingleton<MapNameService>().Name;
+
         public void Reset()
         {
             Plugin.Log("Resetting Replay Service...");
@@ -150,7 +159,7 @@ namespace BeaverBuddies
             TreeCuttingArea treeCuttingArea,
             EntityRegistry entityRegistry,
             EntityService entityService,
-            RecipeSpecificationService recipeSpecificationService,
+            RecipeSpecService recipeSpecificationService,
             DemolishableSelectionTool demolishableSelectionTool,
             DemolishableUnselectionTool demolishableUnselectionTool,
             BuildingUnlockingService buildingUnlockingService,
@@ -160,7 +169,12 @@ namespace BeaverBuddies
             IOptionsBox optionsBox,
             DialogBoxShower dialogBoxShower,
             UrlOpener urlOpener,
-            RehostingService rehostingService
+            RehostingService rehostingService,
+            ReportingService reportingService,
+            GameSaveRepository gameSaveRepository,
+            MapNameService mapNameService,
+            Autosaver autosaver,
+            ZiplineConnectionService ziplineConnectionService
         )
         {
             //_tickWathcerService = AddSingleton(tickWathcerService);
@@ -187,6 +201,11 @@ namespace BeaverBuddies
             AddSingleton(dialogBoxShower);
             AddSingleton(urlOpener);
             AddSingleton(rehostingService);
+            AddSingleton(reportingService);
+            AddSingleton(gameSaveRepository);
+            AddSingleton(mapNameService);
+            AddSingleton(autosaver);
+            AddSingleton(ziplineConnectionService);
 
             AddSingleton(this);
 
@@ -211,7 +230,22 @@ namespace BeaverBuddies
         {
             Plugin.Log("PostLoad");
             _determinismService.UnityThread = Thread.CurrentThread;
+
+            // Send the map name to clients
+            if (io != null && io.ShouldSendHeartbeat)
+            {
+                // I don't think this is needed - should be saved in the game file
+                //RecordEvent(new SendMapNameEvent()
+                //{
+                //    mapName = GetSingleton<MapNameService>().Name
+                //});
+            }
         }
+
+        //public void SetServerMapName(string serverMapName)
+        //{
+        //    this.ServerMapName = serverMapName;
+        //}
 
         private T AddSingleton<T>(T singleton)
         {
@@ -336,7 +370,11 @@ namespace BeaverBuddies
         {
             if (IsDesynced) return;
 
-            ClientDesyncedEvent e = new ClientDesyncedEvent();
+            ClientDesyncedEvent e = new ClientDesyncedEvent()
+            {
+                desyncID = DesyncDetecterService.GetLastDesyncID(),
+                desyncTrace = DesyncDetecterService.GetLastDesyncTrace(),
+            };
             // Set IsDesynced to true so event play instead of sending
             // to the host, allowing the Client to continue play.
             IsDesynced = true;
@@ -410,7 +448,6 @@ namespace BeaverBuddies
             DesyncDetecterService.StartTick(ticksSinceLoad);
 
             IsLoaded = true;
-
         }
 
         // TODO: Find a better callback way of waiting until initial game
@@ -646,15 +683,15 @@ namespace BeaverBuddies
             // the end of this tick, to ensure an update follows immediately.
             if (ShouldCompleteFullTick)
             {
-                return __instance._nextTickedBucketIndex != 0;
+                return __instance._nextBucketIndex != 0;
             }
             return numberOfBucketsToTick > 0;
         }
 
         public static bool IsAtStartOfTick(TickableBucketService __instance)
         {
-            return __instance._nextTickedBucketIndex == 0 &&
-                !__instance._tickedSingletons;
+            // For Update 7, index is 0 for singleton ticking
+            return __instance._nextBucketIndex == 0;
         }
 
         private bool TickReplayServiceOrNextBucket(TickableBucketService __instance)
@@ -678,7 +715,7 @@ namespace BeaverBuddies
                 HasTickedReplayService = false;
             }
             __instance.TickNextBucket();
-            NextBucket = __instance._nextTickedBucketIndex;
+            NextBucket = __instance._nextBucketIndex;
             return false;
         }
 
@@ -694,7 +731,8 @@ namespace BeaverBuddies
             // Forces 1 tick per update
             if (numberOfBucketsToTick != 0)
             {
-                numberOfBucketsToTick = __instance.NumberOfBuckets + 1;
+                // Don't need to add one anymore; singletons are included
+                numberOfBucketsToTick = __instance.NumberOfBuckets;
             }
 #endif
 
@@ -717,7 +755,7 @@ namespace BeaverBuddies
 
     [ManualMethodOverwrite]
     /*
-        7/20/2024
+        4/19/2025
         // Also check TickNextBucket - we rework everything
 		while (numberOfBucketsToTick-- > 0)
 		{

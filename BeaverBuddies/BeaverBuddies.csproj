@@ -15,7 +15,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>BeaverBuddies</AssemblyName>
     <Description>TimberModTest</Description>
-    <Version>1.2.6</Version>
+    <Version>1.4.2</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
@@ -31,9 +31,9 @@
 
   <!-- NuGet -->
   <ItemGroup>
-    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2" PrivateAssets="all" />
-    <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
-  </ItemGroup>
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2" PrivateAssets="all" /> 
+    <PackageReference Include="System.Collections.Immutable" Version="9.0.0" />
+  </ItemGroup> 
 
   <!-- OutSide Project -->
   <ItemGroup>
@@ -58,10 +58,22 @@
     <Reference Include="$(BeaverBuddiesManagedPath)Unity.Services.Analytics.dll" Publicize="true" Private="false" />
   </ItemGroup>
 
+  <!-- Check and log if pat.properties is added as an embedded resource -->
+  <Target Name="CheckPatProperties" BeforeTargets="BeforeBuild">
+    <Message Importance="high" Text="pat.properties was found and added as an embedded resource..." Condition="Exists('pat.properties')" />
+    <Message Importance="high" Text="pat.properties was NOT found. Please ensure the file exists if required." Condition="!Exists('pat.properties')" />
+  </Target>
+  <ItemGroup>
+    <None Remove="pat.properties" />
+    <EmbeddedResource Include="pat.properties" Condition="Exists('pat.properties')" />
+  </ItemGroup>
+
   <!-- Add files to Output folder -->
   <ItemGroup>
     <None Update="manifest.json" CopyToOutputDirectory="PreserveNewest" />
-    <None Update="thumbnail.jpg" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="thumbnail.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="workshop_data.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -93,8 +105,6 @@
     <Copy SourceFiles="@(LocalizationFileToCopy)" DestinationFolder="$(BeaverBuddiesModsPath)\Localizations" SkipUnchangedFiles="true" />
     <!-- Copy files stored in the temp folder back to the Mods directory -->
     <Copy SourceFiles="$(TempDir)ReplayConfig.json" DestinationFolder="$(BeaverBuddiesModsPath)" Condition="Exists('$(TempDir)ReplayConfig.json')" />
-
-    <!-- <Copy SourceFiles="$(NuGetPackagesDir)steamworks.net\2024.8.0\lib\netstandard2.1\Steamworks.NET.dll" DestinationFolder="$(BeaverBuddiesModsPath)" /> -->
   </Target>
 
 </Project>

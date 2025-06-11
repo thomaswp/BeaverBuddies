@@ -15,7 +15,6 @@ class Program
     {
         ConcurrentQueueWithWaitTests.Test();
 
-        return;
         string folderPath = @"C:\Program Files (x86)\Steam\steamapps\common\Timberborn\Timberborn_Data\Managed";
         HashSet<string> methodNames = new HashSet<string>(new string[] {
             "First",

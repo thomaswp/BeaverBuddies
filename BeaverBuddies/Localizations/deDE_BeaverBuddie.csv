@@ -14,3 +14,30 @@ BeaverBuddies.ClientDesynced.FailedToRehostMessage,"Fehler beim erneuten Hosten.
 BeaverBuddies.ClientDesynced.SaveAndRehostButton,"Speichern und erneut hosten","Save and Rehost"
 BeaverBuddies.ClientDesynced.WaitForRehostButton,"Erneut verbinden (auf erneutes Hosten warten)","Reconnect (wait for Rehost)"
 BeaverBuddies.ClientDesynced.PostBugReportButton,"Fehlerbericht senden","Post Bug Report"
+BeaverBuddies.Editor.StartingLocation1,"Startposition - Spieler 1",""
+BeaverBuddies.Editor.StartingLocation2,"Startposition - Spieler 2",""
+BeaverBuddies.Editor.StartingLocation3,"Startposition - Spieler 3",""
+BeaverBuddies.Editor.StartingLocation4,"Startposition - Spieler 4",""
+BeaverBuddies.NewGame.MaxStartingLocations,"Maximale Startpositionen",""
+BeaverBuddies.ClientDesynced.ReportSuccess,"Erfolg!",""
+BeaverBuddies.ClientDesynced.ReportFailed,"Fehlgeschlagen :(",""
+BeaverBuddies.ClientDesynced.ConsentAgreement,"Ja, ich stimme zu",""
+BeaverBuddies.ClientDesynced.TracingEnabled,"Aktiviert",""
+BeaverBuddies.ClientDesynced.EnableTracing,"Protokollierung aktivieren",""
+BeaverBuddies.ClientDesynced.NeedToEnableTracing,"Um diese Desynchronisation zu melden, müssen *alle Spieler* zunächst eine detailliertere Protokollierung aktivieren, indem sie unten auf 'Protokollierung aktivieren' klicken. Wenn dann eine weitere Desynchronisation auftritt, können Sie einen detaillierten, automatisierten Fehlerbericht senden. Der Protokollierungsmodus kann zu etwas Verzögerung führen, ist jedoch nur bis zum Neustart des Spiels aktiv.",""
+BeaverBuddies.ClientDesynced.ConsentMessage,"Zustimmung zur Weitergabe von Nutzungsdaten
+
+Indem Sie sich entscheiden, Ihre Daten zu teilen, stimmen Sie zu, die folgenden Informationen aus Ihrer Spielsitzung an die Entwickler dieses Mods zu senden:
+
+- Protokolldaten: Informationen, die während Ihrer Spielsitzung automatisch gesammelt werden, wie Spielereignisse und Benutzerinteraktionen.
+- Speicherdatei: Ihre aktuelle Spielstanddatei.
+
+Wir bemühen uns, Ihre Privatsphäre zu wahren, indem wir diese Daten weitgehend anonym halten. Da die Daten jedoch im Ist-Zustand gesammelt werden, können sie unbeabsichtigt Details enthalten, die Sie identifizieren könnten (wie Dateipfade oder Benutzernamen). Die Entwickler werden nicht versuchen, Sie anhand dieser Informationen zu identifizieren.
+
+Ihre Optionen:
+- Wenn Sie zustimmen, werden diese Daten sicher an die Entwickler gesendet und zur Verbesserung des Mods verwendet.
+- Wenn Sie nicht zustimmen, werden keine Daten gesendet, und Ihr Spiel wird ohne Änderungen fortgesetzt.
+
+Indem Sie fortfahren, bestätigen Sie, dass Sie mindestens das gesetzliche digitale Zustimmungsalter in Ihrem Wohnsitzland erreicht haben.
+
+Stimmen Sie zu, Ihre Daten mit den Entwicklern dieses Mods zu teilen?",""

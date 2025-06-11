@@ -10,6 +10,7 @@ using Bindito.Core.Internal;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Reflection;
 using System.Threading;
 using Timberborn.Analytics;
@@ -43,8 +44,10 @@ using Timberborn.WorkshopsEffects;
 using TimberNet;
 using Unity.Services.Analytics;
 using UnityEngine;
+using UnityEngine.UIElements;
 using static BeaverBuddies.SingletonManager;
 using static Timberborn.GameSaveRuntimeSystem.GameSaver;
+using static UnityEngine.UIElements.VisualNodePropertyRegistry;
 
 namespace BeaverBuddies
 {
@@ -460,7 +463,7 @@ namespace BeaverBuddies
             typeof(StockpileGoodPileVisualizer),
             typeof(TerrainBlockRandomizer),
             typeof(ObservatoryAnimator),
-            typeof(WaterInputPipeSegmentFactory),
+            typeof(WaterInputPipeSegmentCreator),
         };
 
         // Currently unused - could be used for warnings on items we don't
@@ -504,7 +507,7 @@ namespace BeaverBuddies
 
     // TODO: Many of the following are no longer necessary, since we
     // use NonTickRandomNumberGenerator, above, with many classes.
-    [HarmonyPatch(typeof(InputService), nameof(InputService.Update))]
+    [HarmonyPatch(typeof(InputService), nameof(InputService.UpdateSingleton))]
     public class InputPatcher
     {
         //private static readonly Random random = new Random();
@@ -608,21 +611,6 @@ namespace BeaverBuddies
         }
     }
 
-    // TODO: Timberborn.GameLibs is out of date. This should come from the WorkshopEffets namespace
-    // [HarmonyPatch(typeof(ObservatoryAnimator), nameof(ObservatoryAnimator.GenerateRandomAngles))]
-    // public class ObservatoryAnimatorGenerateRandomAnglesPatcher
-    // {
-    //     static void Prefix()
-    //     {
-    //         DeterminismController.SetNonGamePatcherActive(typeof(ObservatoryAnimatorGenerateRandomAnglesPatcher), true);
-    //     }
-
-    //     static void Postfix()
-    //     {
-    //         DeterminismController.SetNonGamePatcherActive(typeof(ObservatoryAnimatorGenerateRandomAnglesPatcher), false);
-    //     }
-    // }
-
     [HarmonyPatch(typeof(LoopingSoundPlayer), nameof(LoopingSoundPlayer.PlayLooping))]
     public class LoopingSoundPlayerPatcher
     {
@@ -680,22 +668,11 @@ namespace BeaverBuddies
         }
     }
 
+    // This was removed when the method was removed: may need to revisit
     // Sometimes tool descriptions need an instance of the object they describe to describe it
     // and when it activates this can use randomness (e.g. WateredNaturalResource), which should
     // be considered UI randomness, since this object never gets in the game.
-    [HarmonyPatch(typeof(DescriptionPanel), nameof(DescriptionPanel.SetDescription))]
-    public class DescriptionPanelSetDescriptionPatcher
-    {
-        static void Prefix()
-        {
-            DeterminismService.SetNonGamePatcherActive(typeof(DescriptionPanelSetDescriptionPatcher), true);
-        }
-
-        static void Postfix()
-        {
-            DeterminismService.SetNonGamePatcherActive(typeof(DescriptionPanelSetDescriptionPatcher), false);
-        }
-    }
+    //[HarmonyPatch(typeof(DescriptionPanel), nameof(DescriptionPanel.SetDescription))]
 
     // Disable analytics while this mod is enabled, since Unity's Analytics
     // package seems to cause a bunch of desyncs, and I'm not confident
@@ -735,8 +712,6 @@ namespace BeaverBuddies
         }
     }
 
-    // TODO: Double check that this still works - the arguments have
-    // changed and now it gets saved on LateUpdate as a queueing process
     [HarmonyPatch(typeof(GameSaver), nameof(GameSaver.Save), typeof(QueuedSave))]
     public class GameSaverSavePatcher
     {
@@ -906,7 +881,8 @@ namespace BeaverBuddies
 
     [ManualMethodOverwrite]
     /*
-public TimeOfDay FluidTimeOfDay => CalculateTimeOfDay(FluidSecondsPassedToday);
+    04/19/2025
+    public TimeOfDay FluidTimeOfDay => _secondsPassedToday + _secondsPassedThisTick;
      */
     [HarmonyPatch(typeof(DayNightCycle), nameof(DayNightCycle.FluidSecondsPassedToday), MethodType.Getter)]
     public class DayNightCycleFluidSecondsPassedTodayPatcher
@@ -954,7 +930,21 @@ public TimeOfDay FluidTimeOfDay => CalculateTimeOfDay(FluidSecondsPassedToday);
                     PositionHash = TimberNetBase.CombineHash(PositionHash, targetPos.GetHashCode());
                 }
                 // Make sure it updates the model's position as well
-                entityComponent.GetComponentFast<MovementAnimator>()?.UpdateTransform(0);
+                try
+                {
+                    MovementAnimator anim = entityComponent.GetComponentFast<MovementAnimator>();
+                    CharacterRotator rotator = entityComponent.GetComponentFast<CharacterRotator>();
+                    // The CharacterRotator seems to sometimes not be initialized when this is caused, and
+                    // therefore something is null, likely _animatedPathFollower.
+                    if (anim != null && rotator != null && rotator.didAwake && rotator._animatedPathFollower != null)
+                    {
+                        anim.UpdateTransform(0);
+                    }
+                } catch (Exception e)
+                {
+                    Plugin.LogError($"Failed to update transform of {entityComponent?.name}");
+                    Plugin.LogError(e.StackTrace.ToString());
+                }
 
                 // Update entity positions before the tick
                 //var animator = entity._entityComponent.GetComponentFast<MovementAnimator>();
@@ -1005,17 +995,17 @@ public TimeOfDay FluidTimeOfDay => CalculateTimeOfDay(FluidSecondsPassedToday);
 #if NO_PARALLEL
     [ManualMethodOverwrite]
     /*
-9/2/202024
-_parallelTickStartTimestamp = Stopwatch.GetTimestamp();
-ImmutableArray<IParallelTickableSingleton>.Enumerator enumerator = _parallelTickableSingletons.GetEnumerator();
-while (enumerator.MoveNext())
-{
-	IParallelTickableSingleton parallelTickable = enumerator.Current;
-	_parallelizerContext.Run(delegate
-	{
-		parallelTickable.ParallelTick();
-	});
-}
+        04/19/2025
+        _parallelTickStartTimestamp = Stopwatch.GetTimestamp();
+        ImmutableArray<IParallelTickableSingleton>.Enumerator enumerator = _parallelTickableSingletons.GetEnumerator();
+        while (enumerator.MoveNext())
+        {
+	        IParallelTickableSingleton parallelTickable = enumerator.Current;
+	        _parallelizerContext.Run(delegate
+	        {
+		        parallelTickable.ParallelTick();
+	        });
+        }
      */
     [HarmonyPatch(typeof(TickableSingletonService), nameof(TickableSingletonService.StartParallelTick))]
     class TickableSingletonServiceStartParallelTickPatcher
@@ -1058,6 +1048,4 @@ while (enumerator.MoveNext())
             return false;
         }
     }
-
-
 }

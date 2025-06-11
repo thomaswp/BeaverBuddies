@@ -1,11 +1,17 @@
 ﻿using BeaverBuddies.Connect;
 using BeaverBuddies.IO;
+using BeaverBuddies.Reporting;
 using BeaverBuddies.Util;
 using System;
+using System.Threading.Tasks;
 using Timberborn.CoreUI;
+using Timberborn.GameSaveRepositorySystem;
+using Timberborn.GameSaveRepositorySystemUI;
+using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.Localization;
 using Timberborn.Versioning;
 using Timberborn.WebNavigation;
+using UnityEngine.UIElements;
 
 namespace BeaverBuddies.Events
 {
@@ -14,14 +20,16 @@ namespace BeaverBuddies.Events
     {
         public string serverModVersion;
         public string serverGameVersion;
+        //public string mapName;
         public bool isDebugMode;
 
         public override void Replay(IReplayContext context)
         {
+            //context.GetSingleton<ReplayService>().SetServerMapName(mapName);
             string warningMessage = null;
-            if (serverGameVersion != Versions.CurrentGameVersion.ToString())
+            if (serverGameVersion != GameVersions.CurrentVersion.ToString())
             {
-                warningMessage = $"Warning! Server Timberborn version ({serverGameVersion}) does not match client Timberborn version ({Versions.CurrentGameVersion}).\n" +
+                warningMessage = $"Warning! Server Timberborn version ({serverGameVersion}) does not match client Timberborn version ({GameVersions.CurrentVersion}).\n" +
                     $"Please ensure that you are running the same version of the game.";
             } else if (serverModVersion != Plugin.Version)
             {
@@ -29,6 +37,8 @@ namespace BeaverBuddies.Events
                     $"Please ensure that you are running the same version of the {Plugin.ID} mod.";
             } else if (isDebugMode != EventIO.Config.Debug)
             {
+                // TODO: Should debug mode just come from the server?
+                // Could be a bit tricky, since it must come before load
                 warningMessage = $"Warning! Server debug mode ({isDebugMode}) does not match client debug mode ({EventIO.Config.Debug}).\n" +
                     $"Please update your config files to be in or not in debug mode.";
             }
@@ -44,8 +54,9 @@ namespace BeaverBuddies.Events
             InitializeClientEvent message = new InitializeClientEvent()
             {
                 serverModVersion = Plugin.Version,
-                serverGameVersion = Versions.CurrentGameVersion.ToString(),
+                serverGameVersion = GameVersions.CurrentVersion.ToString(),
                 isDebugMode = EventIO.Config.Debug,
+                //mapName = mapName,
             };
             return message;
         }
@@ -54,18 +65,108 @@ namespace BeaverBuddies.Events
     [Serializable]
     public class ClientDesyncedEvent : ReplayEvent
     {
-        public override void Replay(IReplayContext context)
+        public string desyncID;
+        public string desyncTrace;
+
+        private void ConfirmConsent(IReplayContext context, Action confirmCallback)
         {
-            context.GetSingleton<ReplayService>().SetTargetSpeed(0);
+            // If they've already consented, just skip the dialog
+            if (EventIO.Config.ReportingConsent)
+            {
+                confirmCallback();
+                return;
+            }
             var shower = context.GetSingleton<DialogBoxShower>();
             ILoc _loc = shower._loc;
-            var urlOpener = context.GetSingleton<UrlOpener>();
+            shower.Create()
+                .SetLocalizedMessage("BeaverBuddies.ClientDesynced.ConsentMessage")
+                .SetConfirmButton(() =>
+                {
+                    // Save the consent to the config
+                    EventIO.Config.ReportingConsent = true;
+                    context.GetSingleton<ConfigIOService>().SaveConfigToFile();
+                    confirmCallback();
+                }, _loc.T("BeaverBuddies.ClientDesynced.ConsentAgreement"))
+                .SetDefaultCancelButton()
+                .Show();
+        }
+
+        private void PostDesync(IReplayContext context, Action<string> callback)
+        {
+            ReplayService replayService = context.GetSingleton<ReplayService>();
+            ReportingService reportingService = context.GetSingleton<ReportingService>();
+            RehostingService rehostingService = context.GetSingleton<RehostingService>();
+            GameSaveRepository repository = context.GetSingleton<GameSaveRepository>();
+            var shower = context.GetSingleton<DialogBoxShower>();
+            ILoc _loc = shower._loc;
+            string ioType = EventIO.Get()?.GetType().Name;
+            string mapName = replayService.ServerMapName;
+            Action<Task<bool>> onPost = (success) =>
+            {
+                if (success.Result)
+                {
+                    callback("BeaverBuddies.ClientDesynced.ReportSuccess");
+                }
+                else
+                {
+                    callback("BeaverBuddies.ClientDesynced.ReportFailed");
+                }
+            };
+
+            string versionInfo = $"BeaverBuddies: {Plugin.Version}; Timberborn: {GameVersions.CurrentVersion}";
+
+            if (!rehostingService.SaveRehostFile(saveReference =>
+            {
+                byte[] mapBytes = ServerHostingUtils.GetMapBtyes(repository, saveReference);
+                reportingService.PostDesync(desyncID, desyncTrace, ioType, mapName, versionInfo, mapBytes).ContinueWith(onPost);
+            }, true))
+            {
+                _ = reportingService.PostDesync(desyncID, desyncTrace, ioType, mapName, versionInfo, null).ContinueWith(onPost);
+            };
+        }
+
+        private void TurnOnTracing(Action<string> callback)
+        {
+            // May want to make this easier to permenantly enable/disable somewhere...
+            ReplayConfig.TemporarilyDebug = true;
+            callback("BeaverBuddies.ClientDesynced.TracingEnabled");
+        }
+
+        public override void Replay(IReplayContext context)
+        {
+            ReplayService replayService = context.GetSingleton<ReplayService>();
+            replayService.SetTargetSpeed(0);
+            ReportingService reportingService = context.GetSingleton<ReportingService>();
+            RehostingService rehostingService = context.GetSingleton<RehostingService>();
+            GameSaveRepository repository = context.GetSingleton<GameSaveRepository>();
+            var shower = context.GetSingleton<DialogBoxShower>();
+            ILoc _loc = shower._loc;
+            Button infoButton = null;
+
+            Action<string> infoCallback = (message) =>
+            {
+                if (infoButton != null)
+                {
+                    infoButton.text = _loc.T(message);
+                }
+            };
             Action bugReportAction = () =>
             {
-                urlOpener.OpenUrl(LinkHelper.BugReportURL);
+                if (EventIO.Config.Debug)
+                {
+                    ConfirmConsent(context, () =>
+                    {
+                        infoButton?.SetEnabled(false);
+                        PostDesync(context, infoCallback);
+                    });
+                }
+                else
+                {
+                    infoButton?.SetEnabled(false);
+                    TurnOnTracing(infoCallback);
+                }
             };
             bool isHost = EventIO.Get() is ServerEventIO;
-            RehostingService rehostingService = context.GetSingleton<RehostingService>();
             Action reconnectAction = () =>
             {
                 if (isHost)
@@ -83,12 +184,33 @@ namespace BeaverBuddies.Events
                     ?.ConnectOrShowFailureMessage();
                 }
             };
+
+
             string reconnectText = isHost ? _loc.T("BeaverBuddies.ClientDesynced.SaveAndRehostButton") : _loc.T("BeaverBuddies.ClientDesynced.WaitForRehostButton");
-            shower.Create().SetLocalizedMessage("BeaverBuddies.ClientDesynced.Message")
-                .SetInfoButton(bugReportAction, _loc.T("BeaverBuddies.ClientDesynced.PostBugReportButton"))
-                .SetConfirmButton(reconnectAction, reconnectText)
+            string reconnectMessage = _loc.T("BeaverBuddies.ClientDesynced.Message");
+            string bugReportMessageKey;
+            if (EventIO.Config.Debug)
+            {
+                bugReportMessageKey = "BeaverBuddies.ClientDesynced.PostBugReportButton";
+            }
+            else
+            {
+                reconnectMessage += "\n\n" + _loc.T("BeaverBuddies.ClientDesynced.NeedToEnableTracing");
+                bugReportMessageKey = "BeaverBuddies.ClientDesynced.EnableTracing";
+            }
+
+
+
+            var builder = shower.Create().SetMessage(reconnectMessage);
+            if (reportingService.HasAccessToken)
+            {
+                // Only show the bug report button if we have the ability to post it
+                builder.SetInfoButton(bugReportAction, _loc.T(bugReportMessageKey));
+            }
+            DialogBox box = builder.SetConfirmButton(reconnectAction, reconnectText)
                 .SetDefaultCancelButton()
                 .Show();
+            infoButton = box.GetPanel().Q<Button>("InfoButton");
         }
     }
 }

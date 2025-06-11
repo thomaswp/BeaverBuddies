@@ -1,9 +1,11 @@
 ﻿using BeaverBuddies.Events;
 using BeaverBuddies.IO;
+using BeaverBuddies.Reporting;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Timberborn.Common;
 
@@ -35,6 +37,17 @@ namespace BeaverBuddies.DesyncDetecter
                 replayService.HandleDesync();
             }
         }
+    }
+
+    [Serializable]
+    public class SendMapNameEvent : ReplayEvent
+    {
+        public string mapName;
+
+        public override void Replay(IReplayContext context)
+        {
+            // context.GetSingleton<ReplayService>().SetServerMapName(mapName);
+        }
 
     }
 
@@ -46,6 +59,8 @@ namespace BeaverBuddies.DesyncDetecter
 
         private static readonly int maxTraceTicks = 10;
 
+        private static string lastDesyncTrace = null;
+
         DesyncDetecterService()
         {
             Reset();
@@ -54,6 +69,7 @@ namespace BeaverBuddies.DesyncDetecter
         public void Reset()
         {
             currentTick = -1;
+            lastDesyncTrace = null;
             traces.Clear();
             traces.Add(new List<Trace>());
             if (EventIO.Config.Debug)
@@ -103,14 +119,18 @@ namespace BeaverBuddies.DesyncDetecter
             }
         }
 
-        public static void Trace(string message)
+        public static void Trace(string message, bool warnIfNotDebug = true)
         {
             if (!EventIO.Config.Debug)
             {
                 // We warn here because these debug messages are often called many
                 // times per frame and do string manipulation, so we don't want to
                 // create the debug string at all if we don't need to.
-                Plugin.LogWarning("DesyncDetectorService.Trace called not in debug mode");
+                // If a message is simple and costless it can override this warning.
+                if (warnIfNotDebug)
+                {
+                    Plugin.LogWarning("DesyncDetectorService.Trace called not in debug mode");
+                }
                 //Plugin.LogStackTrace();
                 return;
             }
@@ -121,6 +141,16 @@ namespace BeaverBuddies.DesyncDetecter
                 message = message,
                 stackTrace = new StackTrace().ToString(),
             });
+        }
+
+        public static string GetLastDesyncTrace()
+        {
+            return lastDesyncTrace;
+        }
+
+        public static string GetLastDesyncID()
+        {
+            return ReportingService.GetStringHash(lastDesyncTrace);
         }
 
         public static bool VerifyTraces(int tick, List<Trace> otherTraces)
@@ -181,68 +211,87 @@ namespace BeaverBuddies.DesyncDetecter
                 return true;
             }
 
-            Plugin.LogError($"Desync detected for tick {tick}!");
-            Plugin.Log("========== Trace history ==========");
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine($"Desync detected for tick {tick}!");
+            sb.AppendLine("========== Trace history ==========");
             for (int i = 0; i < index; i++)
             {
-                LogTraces(i);
+                LogTraces(sb, i);
             }
-            Plugin.Log($"========== Shared History for Desynced Tick {tick} ==========");
+            sb.AppendLine($"========== Shared History for Desynced Tick {tick} ==========");
             for (int i = 0; i < errorIndex; i++)
             {
-                LogTrace(myTraces[i], true);
+                // Only log the stack trace for the last 5 traces
+                LogTrace(sb, myTraces[i], i > errorIndex - 5);
             }
-            Plugin.Log("========== Desynced Trace ==========");
+            sb.AppendLine("========== Desynced Trace ==========");
 
-            Plugin.Log("---------- My Trace ----------");
-            PrintTracesAt(myTraces, errorIndex);
+            sb.AppendLine("---------- My Trace ----------");
+            PrintTracesAt(sb, myTraces, errorIndex);
 
-            Plugin.Log("---------- Other Trace ----------");
-            PrintTracesAt(otherTraces, errorIndex);
+            sb.AppendLine("---------- Other Trace ----------");
+            PrintTracesAt(sb, otherTraces, errorIndex);
 
-            Plugin.Log("========== Desynced Log End ==========");
+            sb.AppendLine("========== Desynced Log End ==========");
+
+            if (lastDesyncTrace == null) lastDesyncTrace = "";
+            lastDesyncTrace += sb.ToString();
+            Plugin.LogError(lastDesyncTrace);
 
             return false;
         }
 
-        private static void PrintTracesAt(List<Trace> traces, int startIndex, int maxToPrint = 3)
+        private static void PrintTracesAt(StringBuilder sb, List<Trace> traces, int startIndex, int maxToPrint = 10)
         {
             if (startIndex >= traces.Count)
             {
-                Plugin.Log("No trace (index out of bounds)");
+                sb.AppendLine("No trace (index out of bounds)");
                 return;
             }
             int count = 0;
             for (int i = startIndex; i < traces.Count; i++)
             {
-                LogTrace(traces[i], true);
+                LogTrace(sb, traces[i], true);
                 if (++count > maxToPrint)
                 {
-                    Plugin.Log("... (more traces)");
+                    sb.AppendLine("... (more traces)");
                     break;
                 }
             }
         }
 
-        private static void LogTraces(int index)
+        private static void LogTraces(StringBuilder sb, int index, int maxToPrint = 5)
         {
-            traces[index].ForEach(t => LogTrace(t));
-            Plugin.Log("----------------------------------");
+            List<Trace> tickTraces = traces[index];
+            int startIndex = 0;
+            // This is shared history and without stack traces, so we don't really need much of it
+            // This is particularly important for pre-Tick-0 which has a LOT of traces
+            if (tickTraces.Count > maxToPrint)
+            {
+                startIndex = tickTraces.Count - maxToPrint;
+                LogTrace(sb, "(more traces...)", null);
+            }
+            for (int i = startIndex; i < tickTraces.Count; i++)
+            {
+                LogTrace(sb, tickTraces[i]);
+            }
+            sb.AppendLine("----------------------------------");
         }
 
-        private static void LogTrace(Trace trace, bool withStack = false)
+        private static void LogTrace(StringBuilder sb, Trace trace, bool withStack = false)
         {
             string stack = withStack ? trace.stackTrace.ToString() : null;
-            LogTrace(trace.message, stack);
+            LogTrace(sb, trace.message, stack);
         }
 
-        private static void LogTrace(string message, string stack)
+        private static void LogTrace(StringBuilder sb, string message, string stack)
         {
-            Plugin.Log(message);
+            sb.AppendLine(message);
             if (stack != null)
             {
-                Plugin.Log(stack);
-                Plugin.Log("--------------");
+                sb.AppendLine(stack);
+                sb.AppendLine("--------------");
             }
         }
     }

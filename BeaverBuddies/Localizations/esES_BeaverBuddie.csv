@@ -14,3 +14,30 @@ BeaverBuddies.ClientDesynced.FailedToRehostMessage,"No se pudo reanfitrionar. Gu
 BeaverBuddies.ClientDesynced.SaveAndRehostButton,"Guardar y Reanfitrionar","Save and Rehost"
 BeaverBuddies.ClientDesynced.WaitForRehostButton,"Reconectar (esperar para reanfitrionar)","Reconnect (wait for Rehost)"
 BeaverBuddies.ClientDesynced.PostBugReportButton,"Enviar informe de error","Post Bug Report"
+BeaverBuddies.Editor.StartingLocation1,"Ubicación de inicio - Jugador 1",""
+BeaverBuddies.Editor.StartingLocation2,"Ubicación de inicio - Jugador 2",""
+BeaverBuddies.Editor.StartingLocation3,"Ubicación de inicio - Jugador 3",""
+BeaverBuddies.Editor.StartingLocation4,"Ubicación de inicio - Jugador 4",""
+BeaverBuddies.NewGame.MaxStartingLocations,"Máximo de ubicaciones de inicio",""
+BeaverBuddies.ClientDesynced.ReportSuccess,"¡Éxito!",""
+BeaverBuddies.ClientDesynced.ReportFailed,"Fallido :(",""
+BeaverBuddies.ClientDesynced.ConsentAgreement,"Sí, estoy de acuerdo",""
+BeaverBuddies.ClientDesynced.TracingEnabled,"Habilitado",""
+BeaverBuddies.ClientDesynced.EnableTracing,"Habilitar registro",""
+BeaverBuddies.ClientDesynced.NeedToEnableTracing,"Para informar de esta desincronización, *todos los jugadores* deben habilitar primero un registro más detallado presionando 'Habilitar registro' a continuación. Si ocurre otra desincronización, entonces podrá enviar un informe de error detallado y automatizado. El modo de registro puede causar algo de retraso, pero solo estará activo hasta que reinicie el juego.",""
+BeaverBuddies.ClientDesynced.ConsentMessage,"Consentimiento para compartir datos de uso
+
+Al optar por compartir sus datos, acepta enviar la siguiente información de su sesión de juego a los desarrolladores de este mod:
+
+- Datos de registro: Información recopilada automáticamente durante su sesión de juego, como eventos del juego e interacciones del usuario.
+- Archivo de guardado: Su archivo de guardado actual del juego.
+
+Nos esforzamos por mantener su privacidad manteniendo estos datos en gran medida anónimos. Sin embargo, debido a que los datos se recopilan tal como están, pueden incluir inadvertidamente detalles que podrían identificarle (como rutas de archivos o nombres de usuario). Los desarrolladores no intentarán identificarle utilizando esta información.
+
+Sus opciones:
+- Si está de acuerdo, estos datos se enviarán de forma segura a los desarrolladores y se utilizarán para mejorar el mod.
+- Si no está de acuerdo, no se enviarán datos y su juego continuará sin cambios.
+
+Al continuar, confirma que tiene al menos la edad legal de consentimiento digital en su país de residencia.
+
+¿Está de acuerdo en compartir sus datos con los desarrolladores de este mod?",""

@@ -1,19 +1,29 @@
 ﻿using BeaverBuddies.Connect;
 using BeaverBuddies.DesyncDetecter;
 using BeaverBuddies.Steam;
+using BeaverBuddies.Editor;
 using BeaverBuddies.Fixes;
 using BeaverBuddies.IO;
+using BeaverBuddies.MultiStart;
+using BeaverBuddies.Reporting;
+using BeaverBuddies.Util;
 using BeaverBuddies.Util.Logging;
 using Bindito.Core;
 using HarmonyLib;
 using System.Diagnostics;
+using System.Reflection;
 using Timberborn.ModManagerScene;
+using Timberborn.SceneLoading;
+using Timberborn.StartingLocationSystem;
+using Timberborn.TemplateSystem;
+using Timberborn.TutorialSystemUI;
 
 namespace BeaverBuddies
 {
     [Context("Game")]
     public class ReplayConfigurator : IConfigurator
     {
+
         public void Configure(IContainerDefinition containerDefinition)
         {
             if (EventIO.Config.GetNetMode() == NetMode.None) return;
@@ -30,6 +40,9 @@ namespace BeaverBuddies
             containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
             containerDefinition.Bind<ConfigIOService>().AsSingleton();
             containerDefinition.Bind<SteamOverlayConnectionService>().AsSingleton();
+            containerDefinition.Bind<RegisteredLocalizationService>().AsSingleton();
+
+            MultiStartConfigurator.Configure(containerDefinition);
 
             // EventIO gets set before load, so if it's null, this is a regular
             // game, so don't initialize these services.
@@ -44,6 +57,7 @@ namespace BeaverBuddies
             containerDefinition.Bind<DeterminismService>().AsSingleton();
             containerDefinition.Bind<TickReplacerService>().AsSingleton();
             containerDefinition.Bind<RehostingService>().AsSingleton();
+            containerDefinition.Bind<ReportingService>().AsSingleton();
             containerDefinition.Bind<LateTickableBuffer>().AsSingleton();
 
             if (EventIO.Config.Debug)
@@ -72,6 +86,10 @@ namespace BeaverBuddies
             containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
             containerDefinition.Bind<FirstTimerService>().AsSingleton();
             containerDefinition.Bind<ConfigIOService>().AsSingleton();
+            containerDefinition.Bind<RegisteredLocalizationService>().AsSingleton();
+            containerDefinition.Bind<MultiplayerMapMetadataService>().AsSingleton();
+
+            //new ReportingService().PostDesync("test").ContinueWith(result => Plugin.Log($"Posted: {result.Result}"));
             containerDefinition.Bind<SteamOverlayConnectionService>().AsSingleton();
 
             //ReflectionUtils.PrintChildClasses(typeof(MonoBehaviour), 
@@ -89,9 +107,7 @@ namespace BeaverBuddies
     [HarmonyPatch]
     public class Plugin : IModStarter
     {
-
-        // TODO: Need to manually keep this updated now
-        public const string Version = "1.2.6";
+        public static readonly string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         public const string Name = "BeaverBuddies";
         public const string ID = "beaverbuddies";
 
@@ -107,12 +123,14 @@ namespace BeaverBuddies
 
             EventIO.Config = config;
             
-            Log($"{Name} is loaded!");
+            Log($"{Name} v{Version} is loaded!");
 
             if (config.GetNetMode() == NetMode.None) return;
 
             Harmony harmony = new Harmony(ID);
             harmony.PatchAll();
+
+            Log(UnityEngine.Application.consoleLogPath);
         }
 
         public static string GetWithDate(string message)

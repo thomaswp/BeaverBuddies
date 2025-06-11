@@ -18,38 +18,6 @@ namespace BeaverBuddies
         {
             _gameSaver = gameSaver;
         }
-
-        public void LogStateCheck(int ticksSinceLoad, bool write = false)
-        {
-            // TODO: This doesn't work yet.
-            // There is definitely a timestamp in the save, which is part of
-            // the issue. Need to test by saving to a file and unzipping/comparing.
-            // There may also be tiny amounts of nondeterminism somewhere
-            // (possibly harmless, and possibly problematic).
-            // And it may be there are small rounding errors on things like seconds.
-            MemoryStream ms = new MemoryStream();
-            IsSavingDeterministically = true;
-            _gameSaver.Save(ms);
-            IsSavingDeterministically = false;
-            byte[] bytes = ms.ToArray();
-            int hash = TimberNetBase.GetHashCode(bytes);
-            Plugin.Log($"State Check [T{ticksSinceLoad}]: {hash.ToString("X8")}");
-
-            if (write)
-            {
-                File.WriteAllBytes(ticksSinceLoad + ".save", bytes);
-            }
-        }
-    }
-
-
-    [HarmonyPatch(typeof(CameraComponent), nameof(CameraComponent.Save))]
-    static class CameraComponentSavePatcher
-    {
-        static bool Prefix()
-        {
-            return !GameSaveHelper.IsSavingDeterministically;
-        }
     }
 
     [HarmonyPatch(typeof(DateSalter), nameof(DateSalter.Save))]
