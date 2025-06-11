@@ -190,6 +190,7 @@ namespace BeaverBuddies.Connect
                 boxCreator.SetInfoButton(() =>
                 {
                     steamListener.ShowInviteFriendsPanel();
+                    // TODO: loc
                 }, "Invite Friends");
             }
 

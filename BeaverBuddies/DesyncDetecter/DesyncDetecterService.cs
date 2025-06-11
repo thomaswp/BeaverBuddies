@@ -39,18 +39,6 @@ namespace BeaverBuddies.DesyncDetecter
         }
     }
 
-    [Serializable]
-    public class SendMapNameEvent : ReplayEvent
-    {
-        public string mapName;
-
-        public override void Replay(IReplayContext context)
-        {
-            // context.GetSingleton<ReplayService>().SetServerMapName(mapName);
-        }
-
-    }
-
     public class DesyncDetecterService : RegisteredSingleton, IResettableSingleton
     {
         private static int currentTick;

@@ -101,6 +101,8 @@ namespace TimberNet
         {
             int tick = GetTick(message);
             int index = script.FindIndex(m => GetTick(m) > tick);
+            Log($"Inserting message at index {index}");
+
             if (index == -1)
                 script.Add(message);
             else
@@ -238,6 +240,7 @@ namespace TimberNet
                 byte[] buffer = client.ReadUntilComplete(messageLength);
 
                 string message = Encoding.UTF8.GetString(buffer);
+                Log($"Queuing message of length {messageLength} bytes");
                 receivedEventQueue.Enqueue(message);
                 messageCount++;
             }
