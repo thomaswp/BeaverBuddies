@@ -293,6 +293,7 @@ namespace BeaverBuddies
         private List<ReplayEvent> ReadEventsFromIO(int tick)
         {
             List<ReplayEvent> eventsToReplay = io.ReadEvents(tick);
+            Plugin.Log($"Read {eventsToReplay.Count} events from IO at tick {tick}");
             // Spread grouped events into a flat list because we need to
             // replay each individually (since we only record them if successful).
             eventsToReplay = eventsToReplay

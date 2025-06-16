@@ -73,8 +73,9 @@ namespace TimberNet
 
         protected void Log(string message, int ticks, int hash)
         {
-
-            logQueue.Enqueue($"T{ticks.ToString("D4")} [{hash.ToString("X8")}] : {message}");
+            // Should be threadsafe
+            OnLog?.Invoke($"T{ticks.ToString("D4")} [{hash.ToString("X8")}] : {message}");
+            //logQueue.Enqueue($"T{ticks.ToString("D4")} [{hash.ToString("X8")}] : {message}");
         }
 
         public virtual void Start()
