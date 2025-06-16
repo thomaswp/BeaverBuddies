@@ -43,9 +43,6 @@ namespace BeaverBuddies.Steam
                 // TODO: Make configurable
                 bool joinable = SteamMatchmaking.SetLobbyJoinable(LobbyID, true);
                 Plugin.Log($"Lobby created with ID: {LobbyID} is joinable={joinable}");
-
-                // TODO: Maybe?
-                //SteamFriends.ActivateGameOverlayInviteDialog(LobbyID);
             }
             else
             {

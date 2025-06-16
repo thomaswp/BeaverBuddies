@@ -6,6 +6,8 @@ using BeaverBuddies.Events;
 using BeaverBuddies.Steam;
 using System.Net.Sockets;
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace BeaverBuddies.IO
 {
@@ -39,11 +41,14 @@ namespace BeaverBuddies.IO
         {
             try
             {
-                // TODO: Menu / Config
-                SocketListener = new MultiSocketListener(
-                    new TCPListenerWrapper(EventIO.Config.Port),
-                    new SteamListener()
-                );
+                List<ISocketListener> listeners = [
+                    new TCPListenerWrapper(EventIO.Config.Port)
+                ];
+                if (SteamOverlayConnectionService.IsSteamEnabled)
+                {
+                    listeners.Add(new SteamListener());
+                }
+                SocketListener = new MultiSocketListener(listeners.ToArray());
                 if (SocketListener is MultiSocketListener)
                 {
                     foreach (ISocketListener child in ((MultiSocketListener)SocketListener).Listeners)

@@ -23,6 +23,7 @@ namespace BeaverBuddies.Steam
         private DialogBoxShower _dialogBoxShower;
 
         private static List<IDisposable> callbacks = new List<IDisposable>();
+        public static bool IsSteamEnabled { get; private set; } = false;
 
         public SteamOverlayConnectionService(
             SteamManager steamManager,
@@ -45,6 +46,8 @@ namespace BeaverBuddies.Steam
             {
                 if (_steamManager.Initialized)
                 {
+                    IsSteamEnabled = true;
+
                     foreach (var callback in callbacks)
                     {
                         callback.Dispose();
