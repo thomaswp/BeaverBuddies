@@ -177,8 +177,7 @@ namespace TimberNet
         protected void SendEvent(ISocketStream client, JObject message)
         {
             Log($"Sending: {GetType(message)} for tick {GetTick(message)}");
-            string json = message.ToString(Newtonsoft.Json.Formatting.None);
-            byte[] buffer = Encoding.UTF8.GetBytes(json);
+            byte[] buffer = MessageToBuffer(message);
 
             try
             {
@@ -241,11 +240,27 @@ namespace TimberNet
                 // TODO: How should this fail and not hang if map stops sending?
                 byte[] buffer = client.ReadUntilComplete(messageLength);
 
-                string message = Encoding.UTF8.GetString(buffer);
+                string message = BufferToStringMessage(buffer);
                 Log($"Queuing message of length {messageLength} bytes");
                 receivedEventQueue.Enqueue(message);
                 messageCount++;
             }
+        }
+
+        protected byte[] MessageToBuffer(JObject message)
+        {
+            string json = message.ToString(Newtonsoft.Json.Formatting.None);
+            return MessageToBuffer(json);
+        }
+
+        protected byte[] MessageToBuffer(string message)
+        {
+            return CompressionUtils.Compress(message);
+        }
+
+        protected string BufferToStringMessage(byte[] buffer)
+        {
+            return CompressionUtils.Decompress(buffer);
         }
 
         private void ReadErrorMessage(ISocketStream stream)
@@ -253,7 +268,7 @@ namespace TimberNet
             if (TryReadLength(stream, out int length))
             {
                 byte[] bytes = stream.ReadUntilComplete(length);
-                string message = Encoding.UTF8.GetString(bytes);
+                string message = BufferToStringMessage(bytes);
                 if (OnError != null)
                 {
                     OnError(message);

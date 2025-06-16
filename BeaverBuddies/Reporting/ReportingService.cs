@@ -50,27 +50,16 @@ namespace BeaverBuddies.Reporting
             return $"{TimberNetBase.GetHashCode(bytes):X8}";
         }
 
-        static string Compress(string text)
+        public static string CompressToBase64(string text)
         {
-            byte[] inputBytes = Encoding.UTF8.GetBytes(text);
-
-            using (var output = new MemoryStream())
-            {
-                using (var gzip = new GZipStream(output, CompressionLevel.Optimal))
-                {
-                    gzip.Write(inputBytes, 0, inputBytes.Length);
-                }
-
-                return Convert.ToBase64String(output.ToArray());
-            }
+            return Convert.ToBase64String(CompressionUtils.Compress(text));
         }
-
 
         static string ShortenTrace(string trace)
         {
             if (trace.Length <= MAX_AIRTABLE_CHARACTERS) return trace;
 
-            string compressed = Compress(trace);
+            string compressed = CompressToBase64(trace);
             if (compressed.Length <= MAX_AIRTABLE_CHARACTERS) return compressed;
 
             // If we can't compress it, just take the first n characters

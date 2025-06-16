@@ -147,7 +147,7 @@ namespace TimberNet
         private void SendErrorMessage(ISocketStream client)
         {
             SendLength(client, 0);
-            byte[] bytes = Encoding.UTF8.GetBytes(errorMessage);
+            byte[] bytes = MessageToBuffer(errorMessage!);
             SendLength(client, bytes.Length);
             // TODO: Not sure this makes sense for Steam
             client.Write(bytes, 0, bytes.Length);

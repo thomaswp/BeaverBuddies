@@ -8,6 +8,7 @@ using System.Text;
 using Timberborn.CoreUI;
 using Timberborn.SingletonSystem;
 using Timberborn.SteamStoreSystem;
+using TimberNet;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -118,8 +119,8 @@ namespace BeaverBuddies.Steam
                 if (SteamNetworking.ReadP2PPacket(buffer, messageSize, out bytesRead, out remoteSteamID))
                 {
                     // Process the received data
-                    UnityEngine.Debug.Log("Received message from: " + remoteSteamID);
-                    UnityEngine.Debug.Log("Data: " + System.Text.Encoding.UTF8.GetString(buffer));
+                    Debug.Log("Received message from: " + remoteSteamID);
+                    Debug.Log("Data: " + CompressionUtils.Decompress(buffer));
                 }
             }
         }

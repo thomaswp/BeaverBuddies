@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
+using TimberNet;
 
 namespace BeaverBuddies.Steam
 {
@@ -41,7 +42,7 @@ namespace BeaverBuddies.Steam
                         Plugin.Log("Length: " + BitConverter.ToInt32(buffer, 0));
                     } else if (buffer.Length < 1000)
                     {
-                        Plugin.Log("Data: " + Encoding.UTF8.GetString(buffer));
+                        Plugin.Log("Data: " + CompressionUtils.Decompress(buffer));
                     }
 
                     if (sockets.ContainsKey(remoteSteamID))
