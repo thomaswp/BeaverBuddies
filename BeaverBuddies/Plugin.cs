@@ -40,7 +40,8 @@ namespace BeaverBuddies
             containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
             containerDefinition.Bind<ConfigIOService>().AsSingleton();
             containerDefinition.Bind<SteamOverlayConnectionService>().AsSingleton();
-            containerDefinition.Bind<RegisteredLocalizationService>().AsSingleton();
+            containerDefinition.Bind<RegisteredLocalizationService>().AsSingleton(); 
+            containerDefinition.Bind<Settings>().AsSingleton();
 
             MultiStartConfigurator.Configure(containerDefinition);
 
@@ -88,6 +89,7 @@ namespace BeaverBuddies
             containerDefinition.Bind<ConfigIOService>().AsSingleton();
             containerDefinition.Bind<RegisteredLocalizationService>().AsSingleton();
             containerDefinition.Bind<MultiplayerMapMetadataService>().AsSingleton();
+            containerDefinition.Bind<Settings>().AsSingleton();
 
             //new ReportingService().PostDesync("test").ContinueWith(result => Plugin.Log($"Posted: {result.Result}"));
             containerDefinition.Bind<SteamOverlayConnectionService>().AsSingleton();

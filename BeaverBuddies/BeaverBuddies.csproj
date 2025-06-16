@@ -56,6 +56,42 @@
     <Compile Remove="Fixes\TestingStrategies_Scrap.cs" />
     <None Include="Fixes\TestingStrategies_Scrap.cs" />
     <Reference Include="$(BeaverBuddiesManagedPath)Unity.Services.Analytics.dll" Publicize="true" Private="false" />
+    <Reference Include="ModSettings.ColorPicker">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\workshop\content\1062090\3283831040\version-0.7\Scripts\ModSettings.ColorPicker.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ModSettings.Common">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\workshop\content\1062090\3283831040\version-0.7\Scripts\ModSettings.Common.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ModSettings.CommonUI">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\workshop\content\1062090\3283831040\version-0.7\Scripts\ModSettings.CommonUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ModSettings.Core">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\workshop\content\1062090\3283831040\version-0.7\Scripts\ModSettings.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ModSettings.CoreUI">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\workshop\content\1062090\3283831040\version-0.7\Scripts\ModSettings.CoreUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ModSettings.GameUI">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\workshop\content\1062090\3283831040\version-0.7\Scripts\ModSettings.GameUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ModSettings.MainMenuUI">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\workshop\content\1062090\3283831040\version-0.7\Scripts\ModSettings.MainMenuUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ModSettings.MapEditorUI">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\workshop\content\1062090\3283831040\version-0.7\Scripts\ModSettings.MapEditorUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ModSettings.ModManager">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\workshop\content\1062090\3283831040\version-0.7\Scripts\ModSettings.ModManager.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
 
   <!-- Check and log if pat.properties is added as an embedded resource -->
