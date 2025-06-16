@@ -36,7 +36,10 @@ namespace BeaverBuddies.Steam
                 {
                     // Process the received data
                     Plugin.Log($"Received {messageSize} bytes from: {remoteSteamID}");
-                    if (buffer.Length < 1000)
+                    if (buffer.Length == 4)
+                    {
+                        Plugin.Log("Length: " + BitConverter.ToInt32(buffer, 0));
+                    } else if (buffer.Length < 1000)
                     {
                         Plugin.Log("Data: " + Encoding.UTF8.GetString(buffer));
                     }

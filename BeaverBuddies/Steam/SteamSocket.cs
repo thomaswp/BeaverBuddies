@@ -64,6 +64,12 @@ namespace BeaverBuddies.Steam
             Array.Copy(result, readOffset, buffer, offset, bytesToCopy);
             if (result.Length > bytesToCopy)
             {
+                // TODO: This will fail we ever receive a packet that
+                // spans multiple messages. I don't think that can happen right
+                // now unless things get jumbled, but we should definitely save the rest
+                // of result (right now it gets discarded) and read from that first if
+                // it exists.
+                Plugin.LogWarning($"SteamSocket read {bytesToCopy} bytes, but {result.Length - bytesToCopy} bytes were left over. This is probably a bug!");
                 readOffset = bytesToCopy;
             }
             Plugin.Log($"SteamSocket receiving {bytesToCopy} bytes");
