@@ -36,14 +36,15 @@ namespace BeaverBuddies.Steam
                 if (SteamNetworking.ReadP2PPacket(buffer, messageSize, out bytesRead, out remoteSteamID))
                 {
                     // Process the received data
-                    Plugin.Log($"Received {messageSize} bytes from: {remoteSteamID}");
-                    if (buffer.Length == 4)
-                    {
-                        Plugin.Log("Length: " + BitConverter.ToInt32(buffer, 0));
-                    } else if (buffer.Length < 1000)
-                    {
-                        Plugin.Log("Data: " + CompressionUtils.Decompress(buffer));
-                    }
+                    //Plugin.Log($"Received {messageSize} bytes from: {remoteSteamID}");
+                    //if (buffer.Length == 4)
+                    //{
+                    //    // This isn't being read correctly - likely an Endian issue
+                    //    Plugin.Log("Length: " + BitConverter.ToInt32(buffer, 0));
+                    //} else if (buffer.Length < 1000)
+                    //{
+                    //    Plugin.Log("Data: " + CompressionUtils.Decompress(buffer));
+                    //}
 
                     if (sockets.ContainsKey(remoteSteamID))
                     {

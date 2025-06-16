@@ -102,7 +102,6 @@ namespace TimberNet
         {
             int tick = GetTick(message);
             int index = script.FindIndex(m => GetTick(m) > tick);
-            Log($"Inserting message at index {index}");
 
             if (index == -1)
                 script.Add(message);
@@ -236,12 +235,12 @@ namespace TimberNet
                     break;
                 }
 
-                Log($"Starting to read {messageLength} bytes");
+                //Log($"Starting to read {messageLength} bytes");
                 // TODO: How should this fail and not hang if map stops sending?
                 byte[] buffer = client.ReadUntilComplete(messageLength);
 
                 string message = BufferToStringMessage(buffer);
-                Log($"Queuing message of length {messageLength} bytes");
+                //Log($"Queuing message of length {messageLength} bytes");
                 receivedEventQueue.Enqueue(message);
                 messageCount++;
             }

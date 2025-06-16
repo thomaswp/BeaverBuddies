@@ -72,7 +72,7 @@ namespace BeaverBuddies.Steam
                 Plugin.LogWarning($"SteamSocket read {bytesToCopy} bytes, but {result.Length - bytesToCopy} bytes were left over. This is probably a bug!");
                 readOffset = bytesToCopy;
             }
-            Plugin.Log($"SteamSocket receiving {bytesToCopy} bytes");
+            //Plugin.Log($"SteamSocket receiving {bytesToCopy} bytes");
 
             return bytesToCopy;
         }

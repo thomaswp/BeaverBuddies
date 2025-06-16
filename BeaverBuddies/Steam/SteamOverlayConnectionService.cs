@@ -105,26 +105,6 @@ namespace BeaverBuddies.Steam
             Plugin.Log($"Invited to lobby {param.m_ulSteamIDLobby} by {invitingUser}");
         }
 
-        private void ReceiveMessages()
-        {
-            uint messageSize;
-            // Check if there are packets available
-            while (SteamNetworking.IsP2PPacketAvailable(out messageSize))
-            {
-                byte[] buffer = new byte[messageSize];
-                uint bytesRead;
-                CSteamID remoteSteamID;
-
-                // Read the incoming packet
-                if (SteamNetworking.ReadP2PPacket(buffer, messageSize, out bytesRead, out remoteSteamID))
-                {
-                    // Process the received data
-                    Debug.Log("Received message from: " + remoteSteamID);
-                    Debug.Log("Data: " + CompressionUtils.Decompress(buffer));
-                }
-            }
-        }
-
         private void OnP2PSessionRequest(P2PSessionRequest_t callback)
         {
             CSteamID clientId = callback.m_steamIDRemote;
@@ -133,14 +113,6 @@ namespace BeaverBuddies.Steam
 
         private void OnLobbyEntered(LobbyEnter_t callback)
         {
-            //int memberCount = SteamMatchmaking.GetNumLobbyMembers(new CSteamID(callback.m_ulSteamIDLobby));
-            //for (int i = 0; i < memberCount; i++)
-            //{
-            //    CSteamID memberId = SteamMatchmaking.GetLobbyMemberByIndex(new CSteamID(callback.m_ulSteamIDLobby), i);
-            //    string name = SteamFriends.GetFriendPersonaName(memberId);
-            //    UnityEngine.Debug.Log("Lobby member: " + name);
-            //}
-
             var owner = SteamMatchmaking.GetLobbyOwner(new CSteamID(callback.m_ulSteamIDLobby));
             if (owner != SteamUser.GetSteamID())
             {
