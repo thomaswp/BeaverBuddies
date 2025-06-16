@@ -237,6 +237,7 @@ namespace TimberNet
                     break;
                 }
 
+                Log($"Starting to read {messageLength} bytes");
                 // TODO: How should this fail and not hang if map stops sending?
                 byte[] buffer = client.ReadUntilComplete(messageLength);
 
