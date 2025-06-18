@@ -32,26 +32,20 @@ namespace BeaverBuddies.Connect
 
     public class ClientConnectionUI : RegisteredSingleton
     {
-        private DialogBoxShower _dialogBoxShower;
         private InputBoxShower _inputBoxShower;
         private ClientConnectionService _clientConnectionService;
-        private ConfigIOService _configIOService;
         private ILoc _loc;
         private Settings _settings;
 
         ClientConnectionUI(
-            DialogBoxShower dialogBoxShower, 
             InputBoxShower inputBoxShower, 
             ClientConnectionService clientConnectionService,
-            ConfigIOService configIOService,
             ILoc loc,
             Settings settings
         ) 
         {
-            _dialogBoxShower = dialogBoxShower;
             _inputBoxShower = inputBoxShower;
             _clientConnectionService = clientConnectionService;
-            _configIOService = configIOService;
             _loc = loc;
             _settings = settings;
         }
