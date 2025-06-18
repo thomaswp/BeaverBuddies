@@ -57,18 +57,14 @@ namespace BeaverBuddies.Steam
             if ((callback.m_rgfChatMemberStateChange & (uint)EChatMemberStateChange.k_EChatMemberStateChangeEntered) != 0)
             {
                 CSteamID userJoined = new CSteamID(callback.m_ulSteamIDUserChanged);
-                string name = SteamFriends.GetFriendPersonaName(userJoined);
-                // TODO: Remove for privacy
-                Plugin.Log("User " + name + " has joined the lobby.");
+                
+                // Don't include in release
+                //string name = SteamFriends.GetFriendPersonaName(userJoined);
+                //Plugin.Log("User " + name + " has joined the lobby.");
 
                 var socket = new SteamSocket(userJoined, true);
                 steamPacketListener.RegisterSocket(socket);
                 joiningUsers.Enqueue(socket);
-
-                //SteamNetworking.CreateP2PConnectionSocket(memberId, 0, )
-                //string message = "Hello, beaver buddy!";
-                //byte[] data = Encoding.UTF8.GetBytes(message);
-                //SteamNetworking.SendP2PPacket(userJoined, data, (uint)data.Length, EP2PSend.k_EP2PSendReliable);
             }
         }
 
@@ -83,18 +79,12 @@ namespace BeaverBuddies.Steam
 
         public void Stop()
         {
-            Plugin.Log("Stopping listener...");
+            Plugin.Log("Stopping SteamListener...");
             SteamMatchmaking.LeaveLobby(LobbyID);
             foreach (IDisposable callback in callbacks)
             {
                 callback.Dispose();
             }
-        }
-
-        // TODO: Need this to be called
-        public void Update()
-        {
-            
         }
 
         public void ShowInviteFriendsPanel()

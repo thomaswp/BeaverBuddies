@@ -29,7 +29,6 @@ namespace BeaverBuddies.Steam
                 byte[] buffer = new byte[messageSize];
                 uint bytesRead;
 
-                // TODO: Make sure this is for us
                 CSteamID remoteSteamID;
 
                 // Read the incoming packet

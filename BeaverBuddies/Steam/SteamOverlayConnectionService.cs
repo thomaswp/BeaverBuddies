@@ -57,9 +57,6 @@ namespace BeaverBuddies.Steam
                     Plugin.Log(name);
                     done = true;
 
-                    // TODO: Find a way to remove these callbacks and
-                    // re-handle them when the MainMenu is reloaded...
-
                     //Callback<LobbyCreated_t>.Create(OnLobbyCreated);
                     //Callback<LobbyInvite_t>.Create(OnLobbyInvite);
                     //Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);

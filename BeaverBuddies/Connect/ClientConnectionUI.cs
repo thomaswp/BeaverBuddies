@@ -60,7 +60,6 @@ namespace BeaverBuddies.Connect
         {
             Button button = ButtonInserter.DuplicateOrGetButton(__result, "LoadGameButton", "JoinButton", button =>
             {
-                // TODO: Change text to direct connect (non-steam)
                 button.text = _loc.T("BeaverBuddies.Menu.JoinCoopGame");
                 button.clicked += () => ShowBox();
             });

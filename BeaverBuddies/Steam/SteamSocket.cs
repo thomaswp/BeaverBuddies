@@ -85,8 +85,7 @@ namespace BeaverBuddies.Steam
                 Array.Copy(buffer, offset, newBuffer, 0, count);
                 buffer = newBuffer;
             }
-            // TODO: Remove for privacy!
-            Plugin.Log($"SteamSocket sending {count} bytes to {Name}");
+            Plugin.Log($"SteamSocket sending {count} bytes");
             SteamNetworking.SendP2PPacket(friendID, buffer, (uint)count, EP2PSend.k_EP2PSendReliable);
         }
 
