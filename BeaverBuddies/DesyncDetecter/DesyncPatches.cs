@@ -27,7 +27,7 @@ namespace BeaverBuddies.DesyncDetecter
         private static int lastCount;
         public static void Prefix(NaturalResourceReproducer __instance, Reproducible reproducible)
         {
-            if (!EventIO.Config.Debug) return;
+            if (!Settings.Debug) return;
             if (!ReplayService.IsLoaded) return;
             var key = ReproducibleKey.Create(reproducible);
             lastCount = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0;
@@ -36,7 +36,7 @@ namespace BeaverBuddies.DesyncDetecter
 
         public static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
         {
-            if (!EventIO.Config.Debug) return;
+            if (!Settings.Debug) return;
             if (!ReplayService.IsLoaded) return;
             var key = ReproducibleKey.Create(reproducible);
             int count = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0;
@@ -50,7 +50,7 @@ namespace BeaverBuddies.DesyncDetecter
         private static int lastCount;
         static void Prefix(NaturalResourceReproducer __instance, Reproducible reproducible)
         {
-            if (!EventIO.Config.Debug) return;
+            if (!Settings.Debug) return;
             if (!ReplayService.IsLoaded) return;
             var key = ReproducibleKey.Create(reproducible);
             lastCount = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0; if (!ReplayService.IsLoaded) return;
@@ -59,7 +59,7 @@ namespace BeaverBuddies.DesyncDetecter
 
         static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
         {
-            if (!EventIO.Config.Debug) return;
+            if (!Settings.Debug) return;
             if (!ReplayService.IsLoaded) return;
             var key = ReproducibleKey.Create(reproducible);
             int count = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0;
@@ -103,7 +103,7 @@ namespace BeaverBuddies.DesyncDetecter
     {
         public static void Postfix(SpawnValidationService __instance, bool __result, Vector3Int coordinates, BlockObjectSpec blockObjectSpec, string resourcePrefabName)
         {
-            if (!EventIO.Config.Debug) return;
+            if (!Settings.Debug) return;
             DesyncDetecterService.Trace($"Trying to spawn {resourcePrefabName} at {coordinates}: {__result}\n" +
                 $"IsSuitableTerrain: {__instance.IsSuitableTerrain(coordinates)}\n" +
                 $"SpotIsValid: {__instance.SpotIsValid(coordinates, resourcePrefabName)}\n" +
@@ -116,7 +116,7 @@ namespace BeaverBuddies.DesyncDetecter
     {
         public static void Prefix(NaturalResourceReproducer __instance)
         {
-            if (!EventIO.Config.Debug) return;
+            if (!Settings.Debug) return;
             foreach (var (reproducibleKey, coordinates) in __instance._newResources)
             {
                 DesyncDetecterService.Trace($"Spawning: {reproducibleKey.Id}, {coordinates}");
@@ -131,7 +131,7 @@ namespace BeaverBuddies.DesyncDetecter
 
         public static void Prefix(Walker __instance, IDestination destination)
         {
-            if (!EventIO.Config.Debug) return;
+            if (!Settings.Debug) return;
             string entityID = __instance.GetComponentFast<EntityComponent>().EntityId.ToString();
             string destinationString = GetDestinationString(destination);
             DesyncDetecterService.Trace($"{entityID} going to: {destinationString}");
@@ -161,7 +161,7 @@ namespace BeaverBuddies.DesyncDetecter
     {
         public static void Postfix(NaturalResourceModelRandomizer __instance)
         {
-            if (!EventIO.Config.Debug) return;
+            if (!Settings.Debug) return;
             var id = __instance.GetComponentFast<EntityComponent>().EntityId;
             DesyncDetecterService.Trace($"NaturalResourceModelRandomizer {id} randomizing diameter scale to {__instance.DiameterScale}");
         }
@@ -172,7 +172,7 @@ namespace BeaverBuddies.DesyncDetecter
     {
         public static void Prefix(WalkToReservableExecutor __instance, ReservableReacher reservableReacher)
         {
-            if (!EventIO.Config.Debug) return;
+            if (!Settings.Debug) return;
             var id = __instance.GetComponentFast<EntityComponent>().EntityId;
             DesyncDetecterService.Trace(
                 $"WalkToReservableExecutor for {id} launching to " +
@@ -187,7 +187,7 @@ namespace BeaverBuddies.DesyncDetecter
     {
         public static void Prefix(WateredNaturalResource __instance)
         {
-            if (!EventIO.Config.Debug) return;
+            if (!Settings.Debug) return;
             var id = __instance.GetComponentFast<EntityComponent>().EntityId;
             var isDead = __instance._livingNaturalResource.IsDead;
             var time = ((TimeTrigger)__instance._timeTrigger)._delayLeftInDays;
@@ -204,7 +204,7 @@ namespace BeaverBuddies.DesyncDetecter
     //{
     //    public static void Prefix(Vector2Int coordinates, int index, float newLevel)
     //    {
-    //        if (!EventIO.Config.Debug) return;
+    //        if (!Settings.Debug) return;
     //        DesyncDetecterService.Trace($"Setting moisture level for {coordinates} to {newLevel}");
     //    }
     //}
@@ -214,7 +214,7 @@ namespace BeaverBuddies.DesyncDetecter
     {
         public static void Postfix(SoilMoistureMap __instance)
         {
-            if (!EventIO.Config.Debug) return;
+            if (!Settings.Debug) return;
             // During saves, this gets called early, but it just syncs the
             // saveable Map with the already computed values, so when it's called
             // again during the next Tick's Singleton update (at the start of the frame)
@@ -239,7 +239,7 @@ namespace BeaverBuddies.DesyncDetecter
     {
         public static void Postfix(ThreadSafeWaterMap __instance)
         {
-            if (!EventIO.Config.Debug) return;
+            if (!Settings.Debug) return;
 
             var columns = __instance._waterColumns;
             int hash = 13;
@@ -277,7 +277,7 @@ namespace BeaverBuddies.DesyncDetecter
         static void Postfix(TickableEntityBucket __instance, TickableEntity tickableEntity)
         {
             if (!ReplayService.IsLoaded) return;
-            if (EventIO.Config.Debug)
+            if (Settings.Debug)
             {
                 int index = __instance._tickableEntities.Values.IndexOf(tickableEntity);
                 DesyncDetecterService.Trace($"Adding: {tickableEntity.EntityId} at index {index}");

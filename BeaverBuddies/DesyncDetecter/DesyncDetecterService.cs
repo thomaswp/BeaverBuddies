@@ -60,7 +60,7 @@ namespace BeaverBuddies.DesyncDetecter
             lastDesyncTrace = null;
             traces.Clear();
             traces.Add(new List<Trace>());
-            if (EventIO.Config.Debug)
+            if (Settings.Debug)
             {
                 Trace("Start Preload");
             }
@@ -85,7 +85,7 @@ namespace BeaverBuddies.DesyncDetecter
 
         public static void StartTick(int tick)
         {
-            if (!EventIO.Config.Debug)
+            if (!Settings.Debug)
             {
                 return;
             }
@@ -109,7 +109,7 @@ namespace BeaverBuddies.DesyncDetecter
 
         public static void Trace(string message, bool warnIfNotDebug = true)
         {
-            if (!EventIO.Config.Debug)
+            if (!Settings.Debug)
             {
                 // We warn here because these debug messages are often called many
                 // times per frame and do string manipulation, so we don't want to
@@ -143,7 +143,7 @@ namespace BeaverBuddies.DesyncDetecter
 
         public static bool VerifyTraces(int tick, List<Trace> otherTraces)
         {
-            if (!EventIO.Config.Debug)
+            if (!Settings.Debug)
             {
                 Plugin.LogWarning("DesyncDetectorService.VerifyTraces called not in debug mode");
                 //Plugin.LogStackTrace();

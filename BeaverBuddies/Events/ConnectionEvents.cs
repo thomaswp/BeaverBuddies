@@ -35,11 +35,11 @@ namespace BeaverBuddies.Events
             {
                 warningMessage = $"Warning! Server mod version ({serverModVersion}) does not match client mod version ({Plugin.Version}).\n" +
                     $"Please ensure that you are running the same version of the {Plugin.ID} mod.";
-            } else if (isDebugMode != EventIO.Config.Debug)
+            } else if (isDebugMode != Settings.Debug)
             {
                 // TODO: Should debug mode just come from the server?
                 // Could be a bit tricky, since it must come before load
-                warningMessage = $"Warning! Server debug mode ({isDebugMode}) does not match client debug mode ({EventIO.Config.Debug}).\n" +
+                warningMessage = $"Warning! Server debug mode ({isDebugMode}) does not match client debug mode ({Settings.Debug}).\n" +
                     $"Please update your config files to be in or not in debug mode.";
             }
             if (warningMessage != null)
@@ -55,7 +55,7 @@ namespace BeaverBuddies.Events
             {
                 serverModVersion = Plugin.Version,
                 serverGameVersion = GameVersions.CurrentVersion.ToString(),
-                isDebugMode = EventIO.Config.Debug,
+                isDebugMode = Settings.Debug,
                 //mapName = mapName,
             };
             return message;
@@ -70,8 +70,10 @@ namespace BeaverBuddies.Events
 
         private void ConfirmConsent(IReplayContext context, Action confirmCallback)
         {
+            Settings settings = context.GetSingleton<Settings>();
+
             // If they've already consented, just skip the dialog
-            if (EventIO.Config.ReportingConsent)
+            if (settings.ReportingConsent.Value)
             {
                 confirmCallback();
                 return;
@@ -83,8 +85,7 @@ namespace BeaverBuddies.Events
                 .SetConfirmButton(() =>
                 {
                     // Save the consent to the config
-                    EventIO.Config.ReportingConsent = true;
-                    context.GetSingleton<ConfigIOService>().SaveConfigToFile();
+                    settings.ReportingConsent.SetValue(true);
                     confirmCallback();
                 }, _loc.T("BeaverBuddies.ClientDesynced.ConsentAgreement"))
                 .SetDefaultCancelButton()
@@ -127,8 +128,7 @@ namespace BeaverBuddies.Events
 
         private void TurnOnTracing(Action<string> callback)
         {
-            // May want to make this easier to permenantly enable/disable somewhere...
-            ReplayConfig.TemporarilyDebug = true;
+            Settings.TemporarilyDebug = true;
             callback("BeaverBuddies.ClientDesynced.TracingEnabled");
         }
 
@@ -152,7 +152,7 @@ namespace BeaverBuddies.Events
             };
             Action bugReportAction = () =>
             {
-                if (EventIO.Config.Debug)
+                if (Settings.Debug)
                 {
                     ConfirmConsent(context, () =>
                     {
@@ -189,7 +189,7 @@ namespace BeaverBuddies.Events
             string reconnectText = isHost ? _loc.T("BeaverBuddies.ClientDesynced.SaveAndRehostButton") : _loc.T("BeaverBuddies.ClientDesynced.WaitForRehostButton");
             string reconnectMessage = _loc.T("BeaverBuddies.ClientDesynced.Message");
             string bugReportMessageKey;
-            if (EventIO.Config.Debug)
+            if (Settings.Debug)
             {
                 bugReportMessageKey = "BeaverBuddies.ClientDesynced.PostBugReportButton";
             }

@@ -26,8 +26,6 @@ namespace BeaverBuddies
 
         public void Configure(IContainerDefinition containerDefinition)
         {
-            if (EventIO.Config.GetNetMode() == NetMode.None) return;
-
             // Reset everything before loading singletons
             SingletonManager.Reset();
 
@@ -38,7 +36,6 @@ namespace BeaverBuddies
             // playing co-op right now).
             containerDefinition.Bind<ClientConnectionService>().AsSingleton();
             containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
-            containerDefinition.Bind<ConfigIOService>().AsSingleton();
             containerDefinition.Bind<SteamOverlayConnectionService>().AsSingleton();
             containerDefinition.Bind<RegisteredLocalizationService>().AsSingleton(); 
             containerDefinition.Bind<Settings>().AsSingleton();
@@ -52,7 +49,6 @@ namespace BeaverBuddies
             Plugin.Log("Registering Co-op services");
             //containerDefinition.Bind<ServerConnectionService>().AsSingleton();
             containerDefinition.Bind<ReplayService>().AsSingleton();
-            containerDefinition.Bind<RecordToFileService>().AsSingleton();
             containerDefinition.Bind<TickProgressService>().AsSingleton();
             containerDefinition.Bind<TickingService>().AsSingleton();
             containerDefinition.Bind<DeterminismService>().AsSingleton();
@@ -60,12 +56,9 @@ namespace BeaverBuddies
             containerDefinition.Bind<RehostingService>().AsSingleton();
             containerDefinition.Bind<ReportingService>().AsSingleton();
             containerDefinition.Bind<LateTickableBuffer>().AsSingleton();
-
-            if (EventIO.Config.Debug)
-            {
-                Plugin.Log("Debug Mode Active; registering DesyncDetecterService");
-                containerDefinition.Bind<DesyncDetecterService>().AsSingleton();
-            }
+            // We can safely add this regardless of whether tracing is enabled
+            // because it will only trace if the config is set to do so.
+            containerDefinition.Bind<DesyncDetecterService>().AsSingleton();
 
         }
     }
@@ -75,8 +68,6 @@ namespace BeaverBuddies
     {
         public void Configure(IContainerDefinition containerDefinition)
         {
-            if (EventIO.Config.GetNetMode() == NetMode.None) return;
-
             // This will be called if the player exits to the main menu,
             // so it's best to reset everything.
             SingletonManager.Reset();
@@ -118,16 +109,8 @@ namespace BeaverBuddies
         public void StartMod()
         {
             logger = new UnityLogger();
-
-            // Create a default config temporarily
-            // Will be loaded later by ConfigIOService
-            ReplayConfig config = new ReplayConfig();
-
-            EventIO.Config = config;
             
             Log($"{Name} v{Version} is loaded!");
-
-            if (config.GetNetMode() == NetMode.None) return;
 
             Harmony harmony = new Harmony(ID);
             harmony.PatchAll();
@@ -142,7 +125,7 @@ namespace BeaverBuddies
 
         public static void Log(string message)
         {
-            if (!EventIO.Config.Verbose) return;
+            if (!Settings.VerboseLogging) return;
             logger.LogInfo(GetWithDate(message));
         }
 

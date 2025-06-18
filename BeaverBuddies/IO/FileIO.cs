@@ -106,10 +106,8 @@ namespace BeaverBuddies.IO
 
         public void PostLoad()
         {
-            if (EventIO.Config.GetNetMode() != NetMode.Record) return;
             Plugin.Log("Recording to file");
             EventIO.Set(new FileWriteIO("Replays/" + fileName));
-
         }
     }
 

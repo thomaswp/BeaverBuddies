@@ -37,13 +37,15 @@ namespace BeaverBuddies.Connect
         private ClientConnectionService _clientConnectionService;
         private ConfigIOService _configIOService;
         private ILoc _loc;
+        private Settings _settings;
 
         ClientConnectionUI(
             DialogBoxShower dialogBoxShower, 
             InputBoxShower inputBoxShower, 
             ClientConnectionService clientConnectionService,
             ConfigIOService configIOService,
-            ILoc loc
+            ILoc loc,
+            Settings settings
         ) 
         {
             _dialogBoxShower = dialogBoxShower;
@@ -51,6 +53,7 @@ namespace BeaverBuddies.Connect
             _clientConnectionService = clientConnectionService;
             _configIOService = configIOService;
             _loc = loc;
+            _settings = settings;
         }
 
         public void AddJoinButton(VisualElement __result)
@@ -70,11 +73,10 @@ namespace BeaverBuddies.Connect
                 .SetLocalizedMessage(_loc.T("BeaverBuddies.JoinCoopGame.EnterIp"))
                 .SetConfirmButton(ip =>
                 {
-                    EventIO.Config.ClientConnectionAddress = ip;
-                    _configIOService.SaveConfigToFile();
+                    _settings.ClientConnectionAddress.SetValue(ip);
                     _clientConnectionService.ConnectOrShowFailureMessage(ip);
                 });
-            builder._input.value = EventIO.Config.ClientConnectionAddress;
+            builder._input.value = _settings.ClientConnectionAddress.Value;
             builder.Show();
         }
     }

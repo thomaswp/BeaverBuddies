@@ -42,7 +42,7 @@ namespace BeaverBuddies.IO
             try
             {
                 List<ISocketListener> listeners = [
-                    new TCPListenerWrapper(EventIO.Config.Port)
+                    new TCPListenerWrapper(Settings.Port)
                 ];
                 if (SteamOverlayConnectionService.IsSteamEnabled)
                 {

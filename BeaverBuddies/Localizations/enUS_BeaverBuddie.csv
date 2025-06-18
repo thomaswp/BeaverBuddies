@@ -41,3 +41,16 @@ Your Choices:
 By proceeding, you confirm that you are at least the legal age of digital consent in your country of residence.
 
 Do you agree to share your data with the developers of this mod?"
+BeaverBuddies.Settings.ClientConnectionAddress,"Client Connection Address",""
+BeaverBuddies.Settings.ClientConnectionAddress.Tooltip,"Default IP address used when connecting to a Host.",""
+BeaverBuddies.Settings.Port,"Port",""
+BeaverBuddies.Settings.Port.Tooltip,"Port used when hosting or joining a game. This should match a forwaded port for the host.",""
+BeaverBuddies.Settings.SilenceLogging,"Silence Logging",""
+BeaverBuddies.Settings.SilenceLogging.Tooltip,"Prevent this mod from logging to the player log file (except warnings and errors).
+This setting is indended for developers.",""
+BeaverBuddies.Settings.ShowFirstTimerMessage,"Show First Timer Message",""
+BeaverBuddies.Settings.AlwaysTrace,"Always Use Detailed Logging",""
+BeaverBuddies.Settings.AlwaysTrace.Tooltip,"When enabled, the game will always use detailed logging, which enables you to submit desync reports on the first occurrence without manually enabling detailed logging.
+Note that all players must have the setting enabled. 
+This setting will cause some lag and is not recommended for most players.",""
+BeaverBuddies.Settings.ReportingConsent,"Consent to Reporting",""

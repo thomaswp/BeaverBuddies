@@ -193,7 +193,7 @@ namespace BeaverBuddies
                 // So we want to use gameplay random.
                 if (!ReplayService.IsLoaded)
                 {
-                    if (EventIO.Config.Debug)
+                    if (Settings.Debug)
                     {
                         DesyncDetecterService.Trace($"Load RNG; s0 before: {UnityEngine.Random.state.s0:X8}");
                     }
@@ -218,7 +218,7 @@ namespace BeaverBuddies
                 if (IsTicking)
                 {
                     var entity = TickableEntityTickPatcher.currentlyTickingEntity;
-                    if (EventIO.Config.Debug)
+                    if (Settings.Debug)
                     {
                         DesyncDetecterService.Trace($"Tick RNG; " +
                         $"s0 before: {UnityEngine.Random.state.s0:X8}; " +
@@ -786,7 +786,7 @@ namespace BeaverBuddies
             {
                 // Only trace this Guid if it would use Unity random, and that would
                 // use the Game RNG.
-                if (EventIO.Config.Debug && !DeterminismService.ShouldUseNonGameRNG())
+                if (Settings.Debug && !DeterminismService.ShouldUseNonGameRNG())
                 {
                     DesyncDetecterService.Trace($"Generating new GUID: {__result}");
                 }

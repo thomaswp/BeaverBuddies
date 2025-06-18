@@ -174,7 +174,8 @@ namespace BeaverBuddies
             GameSaveRepository gameSaveRepository,
             MapNameService mapNameService,
             Autosaver autosaver,
-            ZiplineConnectionService ziplineConnectionService
+            ZiplineConnectionService ziplineConnectionService,
+            Settings settings
         )
         {
             //_tickWathcerService = AddSingleton(tickWathcerService);
@@ -206,6 +207,7 @@ namespace BeaverBuddies
             AddSingleton(mapNameService);
             AddSingleton(autosaver);
             AddSingleton(ziplineConnectionService);
+            AddSingleton(settings);
 
             AddSingleton(this);
 
@@ -335,7 +337,7 @@ namespace BeaverBuddies
                 // random state, make sure we're in the same state.
                 // Skip if we're in Debug mode, since we'll get more details
                 // if we look at the full trace.
-                if (!EventIO.Config.Debug && replayEvent.randomS0Before != null)
+                if (!Settings.Debug && replayEvent.randomS0Before != null)
                 {
                     int s0 = UnityEngine.Random.state.s0;
                     int randomS0Before = (int)replayEvent.randomS0Before;
@@ -524,7 +526,7 @@ namespace BeaverBuddies
         {
             if (!CanAct) return;
 
-            if (EventIO.Config.Debug && io.ShouldSendHeartbeat)
+            if (Settings.Debug && io.ShouldSendHeartbeat)
             {
                 // Before incrementing the tick (which creates a new blank trace),
                 // capture any unsent traces and send them.

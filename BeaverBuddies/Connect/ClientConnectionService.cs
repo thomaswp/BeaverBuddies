@@ -15,40 +15,28 @@ using TimberNet;
 
 namespace BeaverBuddies.Connect
 {
-    public class ClientConnectionService : IUpdatableSingleton, IPostLoadableSingleton
+    public class ClientConnectionService : IUpdatableSingleton
     {
-        // Static here makes sense since it should really only
-        // every happen once
-        private static bool hasAutoloaded = false;
-
-        public const string LOCALHOST = "127.0.0.1";
-
         private GameSceneLoader _gameSceneLoader;
         private GameSaveRepository _gameSaveRepository;
         private DialogBoxShower _dialogBoxShower;
         private UrlOpener _urlOpener;
         private ClientEventIO client;
+        private Settings _settings;
 
         public ClientConnectionService(
             GameSceneLoader gameSceneLoader,
             GameSaveRepository gameSaveRepository,
             DialogBoxShower dialogBoxShower,
-            UrlOpener urlOpener
+            UrlOpener urlOpener,
+            Settings settings
         )
         {
             _gameSceneLoader = gameSceneLoader;
             _gameSaveRepository = gameSaveRepository;
             _dialogBoxShower = dialogBoxShower;
             _urlOpener = urlOpener;
-        }
-
-        public void PostLoad()
-        {
-            if (!hasAutoloaded && EventIO.Config.GetNetMode() == NetMode.AutoconnectClient)
-            {
-                hasAutoloaded = true;
-                ConnectOrShowFailureMessage(EventIO.Config.ClientConnectionAddress);
-            }
+            _settings = settings;
         }
 
         public bool TryToConnect(CSteamID friendID)
@@ -58,7 +46,7 @@ namespace BeaverBuddies.Connect
 
         public bool TryToConnect(string address)
         {
-            return TryToConnect(new TCPClientWrapper(address, EventIO.Config.Port));
+            return TryToConnect(new TCPClientWrapper(address, _settings.DefaultPort.Value));
         }
 
         private bool TryToConnect(ISocketStream socket)
@@ -75,7 +63,7 @@ namespace BeaverBuddies.Connect
 
         public void ConnectOrShowFailureMessage()
         {
-            ConnectOrShowFailureMessage(EventIO.Config.ClientConnectionAddress);
+            ConnectOrShowFailureMessage(_settings.ClientConnectionAddress.Value);
         }
 
         public void ConnectOrShowFailureMessage(string address)
