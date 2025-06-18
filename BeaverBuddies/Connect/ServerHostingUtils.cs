@@ -21,6 +21,7 @@ using BeaverBuddies.Steam;
 using TimberNet;
 using UnityEngine;
 using Timberborn.SceneLoading;
+using Timberborn.Common;
 
 namespace BeaverBuddies.Connect
 {
@@ -160,6 +161,7 @@ namespace BeaverBuddies.Connect
             }
             Plugin.Log($"Steam listener: {steamListener}");
 
+            var loc = shower._loc;
             var boxCreator = shower.Create()
                 .SetMessage("")
                 .SetConfirmButton(() =>
@@ -174,7 +176,7 @@ namespace BeaverBuddies.Connect
                     DeterminismService.InitGameStartState(data);
 
                     sceneLoader.StartSaveGame(saveReference);
-                }, "BeaverBuddies.Host.StartGame")
+                }, loc.T("BeaverBuddies.Host.StartGame"))
                 .SetCancelButton(() =>
                 {
                     if (coroutine != null)
@@ -188,8 +190,9 @@ namespace BeaverBuddies.Connect
                 boxCreator.SetInfoButton(() =>
                 {
                     steamListener.ShowInviteFriendsPanel();
-                }, "BeaverBuddies.Host.InviteFriends");
+                }, loc.T("BeaverBuddies.Host.InviteFriends"));
             }
+            boxCreator.SetDefaultCancelButton(loc.T(CommonLocKeys.CancelKey));
 
             DialogBox box = boxCreator.Show();
             coroutine = behavior.StartCoroutine(UpdateDialogBox(box, io, shower._loc));

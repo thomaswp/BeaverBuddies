@@ -57,10 +57,12 @@ BeaverBuddies.Settings.ReportingConsent,"Consent to Reporting",""
 BeaverBuddies.Settings.EnableSteamConnection,"Enable Steam Networking",""
 BeaverBuddies.Settings.EnableSteamConnection.Tooltip,"Allows players to join your games via Steam's peer-to-peer networking.
 Players will still be able to join via port forwarding.
-Note: This feature may not work if your network does not support peer-to-peer connections. Additionally, peer-to-peer connections may be slower than direct connections.",""
+Note: This feature may not work if your network does not support peer-to-peer connections.
+Additionally, peer-to-peer connections may be slower than direct connections.",""
 BeaverBuddies.Settings.FriendsCanJoinSteamGame,"Allow Friends to Join Directly via Steam",""
 BeaverBuddies.Settings.FriendsCanJoinSteamGame.Tooltip,"When enabled, your friends can join your game directly via Steam without you inviting them.",""
-BeaverBuddies.Host.ConnectedClients, "Wait for clients to connect...\nCurrently connected clients:",""
-BeaverBuddies.Host.DirectConnectClient, "Direct Connect Client",""
-BeaverBuddies.Host.StartGame, "Start Game",""
-BeaverBuddies.Host.InviteFriends, "Invite Friends",""
+BeaverBuddies.Host.ConnectedClients,"Wait for clients to connect...
+Currently connected clients:",""
+BeaverBuddies.Host.DirectConnectClient,"Direct Connect Client",""
+BeaverBuddies.Host.StartGame,"Start Game",""
+BeaverBuddies.Host.InviteFriends,"Invite Friends",""
