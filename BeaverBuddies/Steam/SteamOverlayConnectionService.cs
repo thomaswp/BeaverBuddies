@@ -135,6 +135,7 @@ namespace BeaverBuddies.Steam
             {
                 // Lobby created successfully
                 CSteamID lobbyId = new CSteamID(callback.m_ulSteamIDLobby);
+                // TODO: Not sure that invitations work if it's not joinable...
                 bool joinable = SteamMatchmaking.SetLobbyJoinable(lobbyId, true);
                 Debug.Log($"Lobby created with ID: {lobbyId} is joinable={joinable}");
 
