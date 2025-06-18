@@ -44,7 +44,7 @@ namespace BeaverBuddies.IO
                 List<ISocketListener> listeners = [
                     new TCPListenerWrapper(Settings.Port)
                 ];
-                if (SteamOverlayConnectionService.IsSteamEnabled)
+                if (SteamOverlayConnectionService.IsSteamEnabled && Settings.EnableSteam)
                 {
                     listeners.Add(new SteamListener());
                 }

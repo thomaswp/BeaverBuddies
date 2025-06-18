@@ -6,7 +6,7 @@ using Timberborn.SettingsSystem;
 
 namespace BeaverBuddies
 {
-    // TODO: Localization!
+    // TODO: Localization translations!
     public class Settings : ModSettingsOwner
     {
         public ModSetting<string> ClientConnectionAddress { get; } =
@@ -36,6 +36,25 @@ namespace BeaverBuddies
                 "BeaverBuddies.Settings.ReportingConsent"
             ).SetLocalizedTooltip("BeaverBuddies.ClientDesynced.ConsentMessage")
         );
+
+        // ---- Steam Settings ----
+
+        public ModSetting<bool> EnableSteamConnection { get; } =
+            new(true,
+            ModSettingDescriptor.CreateLocalized(
+                "BeaverBuddies.Settings.EnableSteamConnection"
+            ).SetLocalizedTooltip("BeaverBuddies.Settings.EnableSteamConnection.Tooltip")
+        );
+
+        public ModSetting<bool> FriendsCanJoinSteamGame { get; } =
+            new(true,
+            ModSettingDescriptor.CreateLocalized(
+                "BeaverBuddies.Settings.FriendsCanJoinSteamGame"
+            ).SetLocalizedTooltip("BeaverBuddies.Settings.FriendsCanJoinSteamGame.Tooltip")
+        );
+
+        // ---- Developer Settings ----
+
         public ModSetting<bool> AlwaysTrace { get; } =
             new(false,
             ModSettingDescriptor.CreateLocalized(
@@ -67,6 +86,8 @@ namespace BeaverBuddies
 
         public static bool VerboseLogging => !(instance?.SilenceLogging.Value == true);
         public static int Port => instance?.DefaultPort.Value ?? 25565;
+        public static bool EnableSteam => instance?.EnableSteamConnection.Value ?? true;
+        public static bool LobbyJoinable => instance?.FriendsCanJoinSteamGame.Value ?? true;
 
         public Settings(ISettings settings,
                         ModSettingsOwnerRegistry modSettingsOwnerRegistry,

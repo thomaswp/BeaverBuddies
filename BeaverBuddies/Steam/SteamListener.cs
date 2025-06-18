@@ -40,8 +40,8 @@ namespace BeaverBuddies.Steam
             {
                 // Lobby created successfully
                 LobbyID = new CSteamID(callback.m_ulSteamIDLobby);
-                // TODO: Make configurable
-                bool joinable = SteamMatchmaking.SetLobbyJoinable(LobbyID, true);
+                
+                bool joinable = SteamMatchmaking.SetLobbyJoinable(LobbyID, Settings.LobbyJoinable);
                 Plugin.Log($"Lobby created with ID: {LobbyID} is joinable={joinable}");
             }
             else

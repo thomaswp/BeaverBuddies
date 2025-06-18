@@ -103,9 +103,8 @@ namespace BeaverBuddies.Connect
 
         private static IEnumerator UpdateDialogBox(DialogBox box, ServerEventIO io, ILoc loc)
         {
-            // TODO: Localization!
             var label = box._root.Q<Label>("Message");
-            string baseMessage = loc.T("Wait for clients to connect...\nCurrently connected clients:");
+            string baseMessage = loc.T("BeaverBuddies.Host.ConnectedClients");
             while (true)
             {
                 List<string> clients = io.NetBase.GetConnectedClients();
@@ -113,7 +112,7 @@ namespace BeaverBuddies.Connect
                 int nonLocalID = 1;
                 foreach (string client in clients)
                 {
-                    string name = client ?? $"{loc.T("Direct Connect Client")} ({nonLocalID++})";
+                    string name = client ?? $"{loc.T("BeaverBuddies.Host.DirectConnectClient")} ({nonLocalID++})";
                     content += $"\n* {name}";
                 }
                 label.text = content;
@@ -175,8 +174,7 @@ namespace BeaverBuddies.Connect
                     DeterminismService.InitGameStartState(data);
 
                     sceneLoader.StartSaveGame(saveReference);
-                    // TODO: loc
-                }, "Start Game")
+                }, "BeaverBuddies.Host.StartGame")
                 .SetCancelButton(() =>
                 {
                     if (coroutine != null)
@@ -190,8 +188,7 @@ namespace BeaverBuddies.Connect
                 boxCreator.SetInfoButton(() =>
                 {
                     steamListener.ShowInviteFriendsPanel();
-                    // TODO: loc
-                }, "Invite Friends");
+                }, "BeaverBuddies.Host.InviteFriends");
             }
 
             DialogBox box = boxCreator.Show();
