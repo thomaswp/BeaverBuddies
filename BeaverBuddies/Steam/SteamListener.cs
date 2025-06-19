@@ -30,7 +30,7 @@ namespace BeaverBuddies.Steam
             Plugin.Log("SteamListener started...");
             callbacks.Add(Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate));
             callbacks.Add(Callback<LobbyCreated_t>.Create(OnLobbyCreated));
-            SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 4);
+            SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 8);
         }
 
         private void OnLobbyCreated(LobbyCreated_t callback)
@@ -40,9 +40,10 @@ namespace BeaverBuddies.Steam
             {
                 // Lobby created successfully
                 LobbyID = new CSteamID(callback.m_ulSteamIDLobby);
-                
-                bool joinable = SteamMatchmaking.SetLobbyJoinable(LobbyID, Settings.LobbyJoinable);
-                Plugin.Log($"Lobby created with ID: {LobbyID} is joinable={joinable}");
+                // Friend only is the default; invisible means invite-only.
+                var type = Settings.LobbyJoinable ? ELobbyType.k_ELobbyTypeFriendsOnly : ELobbyType.k_ELobbyTypeInvisible;
+                SteamMatchmaking.SetLobbyType(LobbyID, type);
+                Plugin.Log($"Lobby created with ID: {LobbyID} is joinable={Settings.LobbyJoinable}");
             }
             else
             {

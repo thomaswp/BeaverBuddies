@@ -20,22 +20,17 @@ namespace BeaverBuddies.Steam
     {
         private SteamManager _steamManager;
         private ClientConnectionService _clientConnectionService;
-        private DialogBoxShower _dialogBoxShower;
 
         private static List<IDisposable> callbacks = new List<IDisposable>();
         public static bool IsSteamEnabled { get; private set; } = false;
 
         public SteamOverlayConnectionService(
             SteamManager steamManager,
-            ClientConnectionService clientConnectionService,
-            DialogBoxShower dialogBoxShower
-            ) 
+            ClientConnectionService clientConnectionService
+            )
         {
             _steamManager = steamManager;
             _clientConnectionService = clientConnectionService;
-            _dialogBoxShower = dialogBoxShower;
-            //GameObject obj = new GameObject("SteamManagerHost");
-            //obj.AddComponent<SteamManager>();
         }
 
         bool done = false;
@@ -118,13 +113,7 @@ namespace BeaverBuddies.Steam
             {
                 Plugin.Log("Joining another's lobby...");
                 bool success = _clientConnectionService.TryToConnect(owner);
-
-                // TOOD: loc
-                _dialogBoxShower.Create()
-                    .SetLocalizedMessage(success ? 
-                    "Joined! Receiving map..." : 
-                    "Failed to join lobby.")
-                    .Show();
+                _clientConnectionService.ShowConnectionMessage(success);
             }
         }
 

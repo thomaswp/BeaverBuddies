@@ -73,6 +73,20 @@ namespace BeaverBuddies.Connect
             ShowError("BeaverBuddies.JoinCoopGame.ConnectionFailedMessage");
         }
 
+        public void ShowConnectionMessage(bool success)
+        {
+            if (success)
+            {
+                _dialogBoxShower.Create()
+                    .SetLocalizedMessage("BeaverBuddies.JoinCoopGame.ConnectionFailedMessage")
+                    .Show();
+            }
+            else
+            {
+                ShowError("BeaverBuddies.JoinCoopGame.ConnectionFailedMessage");
+            }
+        }
+
         private void ShowError(string message, string error = null)
         {
 
