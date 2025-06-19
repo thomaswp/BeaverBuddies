@@ -6,7 +6,6 @@ using Timberborn.SettingsSystem;
 
 namespace BeaverBuddies
 {
-    // TODO: Localization translations!
     public class Settings : ModSettingsOwner
     {
         public ModSetting<string> ClientConnectionAddress { get; } =

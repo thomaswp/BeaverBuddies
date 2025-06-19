@@ -41,3 +41,29 @@ BeaverBuddies.ClientDesynced.ConsentMessage,"Згода на поширення 
 Продовжуючи, ви підтверджуєте, що досягли віку цифрової згоди у своїй країні проживання.
 
 Чи згодні ви ділитися своїми даними з розробниками цього моду?",""
+BeaverBuddies.Settings.ClientConnectionAddress,"Адреса підключення клієнта",""
+BeaverBuddies.Settings.ClientConnectionAddress.Tooltip,"IP‑адреса за замовчуванням для підключення до хоста.",""
+BeaverBuddies.Settings.Port,"Порт",""
+BeaverBuddies.Settings.Port.Tooltip,"Порт, що використовується під час хостингу або приєднання до гри. Має відповідати перенаправленому порту хоста.",""
+BeaverBuddies.Settings.SilenceLogging,"Вимкнути логування",""
+BeaverBuddies.Settings.SilenceLogging.Tooltip,"Запобігає запису цього моду до журналу гравця (окрім попереджень і помилок).
+Ця опція призначена для розробників.",""
+BeaverBuddies.Settings.ShowFirstTimerMessage,"Показувати повідомлення для новачків",""
+BeaverBuddies.Settings.AlwaysTrace,"Завжди детальне логування",""
+BeaverBuddies.Settings.AlwaysTrace.Tooltip,"Якщо ввімкнено, гра завжди використовуватиме детальний журнал, що дозволяє надсилати звіти про десинхронізацію з першого випадку без ручного увімкнення.
+Усі гравці повинні мати цю опцію активованою.
+Це може спричинити невеликий лаг і не рекомендується для більшості гравців.",""
+BeaverBuddies.Settings.ReportingConsent,"Згода на звітування",""
+BeaverBuddies.Settings.EnableSteamConnection,"Увімкнути Steam‑підключення",""
+BeaverBuddies.Settings.EnableSteamConnection.Tooltip,"Дозволяє гравцям підключатися до вашої гри через peer‑to‑peer мережу Steam.
+Гравці також зможуть підключатися через перенаправлення портів.
+Примітка: ця функція може не працювати, якщо ваша мережа не підтримує P2P.
+Крім того, P2P‑з’єднання можуть бути повільнішими за прямі.",""
+BeaverBuddies.Settings.FriendsCanJoinSteamGame,"Дозволити друзям підключатись через Steam",""
+BeaverBuddies.Settings.FriendsCanJoinSteamGame.Tooltip,"Якщо ввімкнено, ваші друзі зможуть підключитись без запрошення через Steam.",""
+BeaverBuddies.Host.ConnectedClients,"Очікування клієнтів…
+Наразі підключено клієнтів:",""
+BeaverBuddies.Host.DirectConnectClient,"Клієнт прямого підключення",""
+BeaverBuddies.Host.StartGame,"Почати гру",""
+BeaverBuddies.Host.InviteFriends,"Запросити друзів",""
+BeaverBuddies.JoinCoopGame.Success,"Підключено! Отримання карти…",""

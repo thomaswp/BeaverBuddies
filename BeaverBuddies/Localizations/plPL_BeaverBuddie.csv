@@ -41,3 +41,29 @@ Twoje wybory:
 Kontynuując, potwierdzasz, że masz co najmniej ustawowy wiek zgody cyfrowej w swoim kraju zamieszkania.
 
 Czy zgadzasz się na udostępnienie swoich danych twórcom tego moda?",""
+BeaverBuddies.Settings.ClientConnectionAddress,"Adres połączenia klienta",""
+BeaverBuddies.Settings.ClientConnectionAddress.Tooltip,"Domyślny adres IP używany przy łączeniu z hostem.",""
+BeaverBuddies.Settings.Port,"Port",""
+BeaverBuddies.Settings.Port.Tooltip,"Port używany przy hostowaniu lub dołączaniu do gry. Powinien odpowiadać przekierowanemu portowi na hoście.",""
+BeaverBuddies.Settings.SilenceLogging,"Wycisz logi",""
+BeaverBuddies.Settings.SilenceLogging.Tooltip,"Zapobiega zapisywaniu przez tego moda do pliku log gracza (oprócz ostrzeżeń i błędów).
+To ustawienie jest przeznaczone dla deweloperów.",""
+BeaverBuddies.Settings.ShowFirstTimerMessage,"Pokaż wiadomość dla nowicjusza",""
+BeaverBuddies.Settings.AlwaysTrace,"Zawsze używaj szczegółowego logowania",""
+BeaverBuddies.Settings.AlwaysTrace.Tooltip,"Po włączeniu gra zawsze używa szczegółowego logowania, co pozwala wysyłać raporty o desynchronizacji już przy pierwszym wystąpieniu bez ręcznego włączania.
+Wszyscy gracze muszą mieć tę opcję aktywną.
+To ustawienie może powodować niewielkie lagi i nie jest zalecane dla większości graczy.",""
+BeaverBuddies.Settings.ReportingConsent,"Zgoda na raportowanie",""
+BeaverBuddies.Settings.EnableSteamConnection,"Włącz połączenie Steam",""
+BeaverBuddies.Settings.EnableSteamConnection.Tooltip,"Pozwala graczom dołączać do twojej gry za pomocą sieci peer‑to‑peer Steam.
+Gracze mogą również dołączyć przez przekierowanie portu.
+Uwaga: ta funkcja może nie działać, jeśli twoja sieć nie obsługuje P2P.
+Ponadto połączenia P2P mogą być wolniejsze niż bezpośrednie.",""
+BeaverBuddies.Settings.FriendsCanJoinSteamGame,"Pozwól znajomym na dołączenie przez Steam",""
+BeaverBuddies.Settings.FriendsCanJoinSteamGame.Tooltip,"Po włączeniu twoi znajomi mogą dołączyć do twojej gry bez zaproszenia, korzystając ze Steam.",""
+BeaverBuddies.Host.ConnectedClients,"Oczekiwanie na klientów…
+Obecnie połączeni klienci:",""
+BeaverBuddies.Host.DirectConnectClient,"Klient połączenia bezpośredniego",""
+BeaverBuddies.Host.StartGame,"Rozpocznij grę",""
+BeaverBuddies.Host.InviteFriends,"Zaproś znajomych",""
+BeaverBuddies.JoinCoopGame.Success,"Dołączono! Odbieranie mapy…",""

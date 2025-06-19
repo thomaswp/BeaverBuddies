@@ -41,3 +41,29 @@ Sus opciones:
 Al continuar, confirma que tiene al menos la edad legal de consentimiento digital en su país de residencia.
 
 ¿Está de acuerdo en compartir sus datos con los desarrolladores de este mod?",""
+BeaverBuddies.Settings.ClientConnectionAddress,"Dirección de conexión del cliente",""
+BeaverBuddies.Settings.ClientConnectionAddress.Tooltip,"Dirección IP predeterminada usada al conectarse a un Host.",""
+BeaverBuddies.Settings.Port,"Puerto",""
+BeaverBuddies.Settings.Port.Tooltip,"Puerto usado al alojar o unirse a un juego. Debe coincidir con el puerto reenviado del host.",""
+BeaverBuddies.Settings.SilenceLogging,"Silenciar registros",""
+BeaverBuddies.Settings.SilenceLogging.Tooltip,"Evita que este mod escriba en el archivo de registro del jugador (excepto advertencias y errores).
+Esta opción está pensada para desarrolladores.",""
+BeaverBuddies.Settings.ShowFirstTimerMessage,"Mostrar mensaje de primer usuario",""
+BeaverBuddies.Settings.AlwaysTrace,"Usar registro detallado siempre",""
+BeaverBuddies.Settings.AlwaysTrace.Tooltip,"Si está activado, el juego siempre usará registro detallado, lo que permite enviar informes de desincronización en la primera ocasión sin activarlo manualmente.
+Ten en cuenta que todos los jugadores deben tenerlo activado.
+Esta opción puede causar algo de lag y no se recomienda para la mayoría de los jugadores.",""
+BeaverBuddies.Settings.ReportingConsent,"Consentimiento para informes",""
+BeaverBuddies.Settings.EnableSteamConnection,"Habilitar conexión por Steam",""
+BeaverBuddies.Settings.EnableSteamConnection.Tooltip,"Permite que los jugadores se unan a tu juego mediante la red peer‑to‑peer de Steam.
+Los jugadores seguirán pudiendo unirse mediante reenvío de puertos.
+Nota: esta función puede no funcionar si tu red no soporta conexiones P2P.
+Además, las conexiones P2P pueden ser más lentas que las directas.",""
+BeaverBuddies.Settings.FriendsCanJoinSteamGame,"Permitir que amigos se unan directamente vía Steam",""
+BeaverBuddies.Settings.FriendsCanJoinSteamGame.Tooltip,"Si está activado, tus amigos pueden unirse directamente a tu juego mediante Steam sin que los invites.",""
+BeaverBuddies.Host.ConnectedClients,"Esperando clientes…
+Clientes actualmente conectados:",""
+BeaverBuddies.Host.DirectConnectClient,"Cliente de conexión directa",""
+BeaverBuddies.Host.StartGame,"Iniciar juego",""
+BeaverBuddies.Host.InviteFriends,"Invitar amigos",""
+BeaverBuddies.JoinCoopGame.Success,"¡Conectado! Recibiendo mapa…",""

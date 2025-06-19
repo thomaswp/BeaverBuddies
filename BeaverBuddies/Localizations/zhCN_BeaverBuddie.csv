@@ -41,3 +41,29 @@ BeaverBuddies.ClientDesynced.ConsentMessage,"同意共享使用数据
 继续表示您确认已达到您所在国家/地区的数字同意法定年龄。
 
 您是否同意与本模组的开发者共享您的数据？",""
+BeaverBuddies.Settings.ClientConnectionAddress,"客户端连接地址",""
+BeaverBuddies.Settings.ClientConnectionAddress.Tooltip,"连接到主机时使用的默认 IP 地址。",""
+BeaverBuddies.Settings.Port,"端口",""
+BeaverBuddies.Settings.Port.Tooltip,"托管或加入游戏时使用的端口。应与主机转发的端口一致。",""
+BeaverBuddies.Settings.SilenceLogging,"静默日志",""
+BeaverBuddies.Settings.SilenceLogging.Tooltip,"防止此模组记录玩家日志文件（警告和错误除外）。
+此设置仅供开发者使用。",""
+BeaverBuddies.Settings.ShowFirstTimerMessage,"显示新手信息",""
+BeaverBuddies.Settings.AlwaysTrace,"始终使用详细日志",""
+BeaverBuddies.Settings.AlwaysTrace.Tooltip,"启用后，游戏将始终使用详细日志，让你在第一次发生 desync 时无需手动开启即可提交报告。
+注意，所有玩家都需启用此设置。
+此设置可能导致一些延迟，不推荐绝大多数玩家使用。",""
+BeaverBuddies.Settings.ReportingConsent,"报告同意",""
+BeaverBuddies.Settings.EnableSteamConnection,"启用 Steam 网络连接",""
+BeaverBuddies.Settings.EnableSteamConnection.Tooltip,"允许玩家通过 Steam 的 P2P 网络加入你的游戏。
+玩家仍可通过端口转发加入。
+注意：若你的网络不支持 P2P，该功能可能无法使用。
+此外，P2P 连接可能比直接连接慢。",""
+BeaverBuddies.Settings.FriendsCanJoinSteamGame,"允许好友通过 Steam 直接加入",""
+BeaverBuddies.Settings.FriendsCanJoinSteamGame.Tooltip,"启用后，你的好友可以通过 Steam 直接加入游戏，无需邀请。",""
+BeaverBuddies.Host.ConnectedClients,"等待客户端连接…
+当前已连接客户端：",""
+BeaverBuddies.Host.DirectConnectClient,"直接连接客户端",""
+BeaverBuddies.Host.StartGame,"开始游戏",""
+BeaverBuddies.Host.InviteFriends,"邀请好友",""
+BeaverBuddies.JoinCoopGame.Success,"已加入！正在接收地图…",""
