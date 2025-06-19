@@ -43,7 +43,9 @@ namespace BeaverBuddies.Steam
 
         public Task ConnectAsync()
         {
-            // TODO: Check if we're already successfully connected
+            // This is the client joining, and this only gets called when
+            // we've already joined the lobby. It automatically closes
+            // the prior client (I think).
             Connected = true;
             Plugin.Log("SteamSocket requested to connect!");
             return Task.CompletedTask;

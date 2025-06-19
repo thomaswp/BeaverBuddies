@@ -78,7 +78,7 @@ namespace BeaverBuddies.Connect
             if (success)
             {
                 _dialogBoxShower.Create()
-                    .SetLocalizedMessage("BeaverBuddies.JoinCoopGame.ConnectionFailedMessage")
+                    .SetLocalizedMessage("BeaverBuddies.JoinCoopGame.Success")
                     .Show();
             }
             else
