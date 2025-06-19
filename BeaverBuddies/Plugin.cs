@@ -1,22 +1,25 @@
 ﻿using BeaverBuddies.Connect;
 using BeaverBuddies.DesyncDetecter;
-using BeaverBuddies.Steam;
 using BeaverBuddies.Editor;
 using BeaverBuddies.Fixes;
 using BeaverBuddies.IO;
 using BeaverBuddies.MultiStart;
 using BeaverBuddies.Reporting;
+using BeaverBuddies.Steam;
 using BeaverBuddies.Util;
 using BeaverBuddies.Util.Logging;
 using Bindito.Core;
 using HarmonyLib;
 using System.Diagnostics;
 using System.Reflection;
+using Timberborn.EntityPanelSystem;
+using Timberborn.GameDistrictsUI;
 using Timberborn.ModManagerScene;
 using Timberborn.SceneLoading;
 using Timberborn.StartingLocationSystem;
 using Timberborn.TemplateSystem;
 using Timberborn.TutorialSystemUI;
+using Timberborn.WondersUI;
 
 namespace BeaverBuddies
 {
@@ -94,6 +97,7 @@ namespace BeaverBuddies
             //ReflectionUtils.PrintChildClasses(typeof(IParallelTickableSingleton));
             //ReflectionUtils.FindStaticFields();
             //ReflectionUtils.FindHashSetFields();
+            //ReflectionUtils.PrintChildClasses(typeof(IEntityPanelFragment));
         }
     }
 

@@ -31,6 +31,8 @@ using Timberborn.StockpilePrioritySystem;
 using Timberborn.StockpilePriorityUISystem;
 using Timberborn.WaterBuildings;
 using Timberborn.WaterBuildingsUI;
+using Timberborn.Wonders;
+using Timberborn.WondersUI;
 using Timberborn.WorkerTypesUI;
 using Timberborn.Workshops;
 using Timberborn.WorkSystem;
@@ -1347,6 +1349,37 @@ namespace BeaverBuddies.Events
                     currentTowerEntityID = ReplayEvent.GetEntityID(owner),
                     otherTowerEntityID = ReplayEvent.GetEntityID(otherZiplineTower),
                     add = false,
+                };
+            });
+        }
+    }
+
+    [Serializable]
+    class WonderActivatedEvent : ReplayEvent
+    {
+        public string entityID;
+
+        public override void Replay(IReplayContext context)
+        {
+            GetComponent<Wonder>(context, entityID)?.Activate();
+        }
+
+        public override string ToActionString()
+        {
+            return $"Activating wonder {entityID}";
+        }
+    }
+
+    [HarmonyPatch(typeof(WonderFragment), nameof(WonderFragment.ActivateWonder))]
+    class WonderFragmentActivateWonderPatcher
+    {
+        public static bool Prefix(WonderFragment __instance, ClickEvent evt)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance._wonder, entityID =>
+            {
+                return new WonderActivatedEvent()
+                {
+                    entityID = entityID,
                 };
             });
         }
