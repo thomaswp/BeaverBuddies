@@ -2,12 +2,20 @@
 // update, rather than amortizing ticks over multiple.
 //#define ONE_TICK_PER_UPDATE
 
+using BeaverBuddies.Connect;
+using BeaverBuddies.DesyncDetecter;
+using BeaverBuddies.Events;
+using BeaverBuddies.IO;
+using BeaverBuddies.Reporting;
 using HarmonyLib;
+using MonoMod.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
+using Timberborn.Autosaving;
 using Timberborn.BaseComponentSystem;
 using Timberborn.BlockObjectTools;
 using Timberborn.Buildings;
@@ -15,32 +23,25 @@ using Timberborn.CoreUI;
 using Timberborn.DemolishingUI;
 using Timberborn.EntitySystem;
 using Timberborn.Forestry;
+using Timberborn.GameSaveRepositorySystem;
 using Timberborn.GameSaveRuntimeSystem;
+using Timberborn.GameWonderCompletion;
 using Timberborn.Goods;
 using Timberborn.Options;
 using Timberborn.PlantingUI;
 using Timberborn.ScienceSystem;
+using Timberborn.SettlementNameSystem;
 using Timberborn.SingletonSystem;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
+using Timberborn.WebNavigation;
+using Timberborn.Workshops;
 using Timberborn.WorkSystem;
 using Timberborn.WorkSystemUI;
-using BeaverBuddies.Events;
-using static Timberborn.TickSystem.TickableSingletonService;
-using static BeaverBuddies.SingletonManager;
-using BeaverBuddies.Connect;
-using static UnityEngine.ParticleSystem.PlaybackState;
-using BeaverBuddies.DesyncDetecter;
-using Timberborn.WebNavigation;
-using System.Collections.Immutable;
-using BeaverBuddies.IO;
-using BeaverBuddies.Reporting;
-using Timberborn.GameSaveRepositorySystem;
-using Timberborn.SettlementNameSystem;
-using Timberborn.Workshops;
-using Timberborn.GameWonderCompletion;
-using Timberborn.Autosaving;
 using Timberborn.ZiplineSystem;
+using static BeaverBuddies.SingletonManager;
+using static Timberborn.TickSystem.TickableSingletonService;
+using static UnityEngine.ParticleSystem.PlaybackState;
 
 namespace BeaverBuddies
 {
@@ -215,10 +216,6 @@ namespace BeaverBuddies
 
             gameSaveHelper = new GameSaveHelper(gameSaver);
 
-            //io = new FileWriteIO("test.json");
-            //io = new FileReadIO("planting.json");
-            //io = new FileReadIO("trees.json");
-
             _tickingService.replayService = this;
         }
 
@@ -233,25 +230,15 @@ namespace BeaverBuddies
             Plugin.Log("PostLoad");
             _determinismService.UnityThread = Thread.CurrentThread;
 
-            // Send the map name to clients
-            if (io != null && io.ShouldSendHeartbeat)
+            foreach (var item in ((SingletonRepository)_singletonRepository)._singletonListener.Collect())
             {
-                // I don't think this is needed - should be saved in the game file
-                //RecordEvent(new SendMapNameEvent()
-                //{
-                //    mapName = GetSingleton<MapNameService>().Name
-                //});
+                Plugin.Log(item.GetType().ToString());
             }
         }
 
-        //public void SetServerMapName(string serverMapName)
-        //{
-        //    this.ServerMapName = serverMapName;
-        //}
-
         private T AddSingleton<T>(T singleton)
         {
-            this.singletons.Add(singleton);
+            singletons.Add(singleton);
             return singleton;
         }
 
@@ -262,8 +249,11 @@ namespace BeaverBuddies
                 if (singleton is T)
                     return (T)singleton;
             }
-            // TODO: This doesn't seem to work
-            return _singletonRepository.GetSingletons<T>().FirstOrDefault();
+            // This doesn't work for some singletons, like GetSingletons<T>(),
+            // so we still have to add them manually.
+            var result = _singletonRepository.GetSingletons<T>().FirstOrDefault();
+            Plugin.Log($"Searching for unregistered singleton {typeof(T)}; found = {result == null}");
+            return result;
         }
 
         public void RecordEvent(ReplayEvent replayEvent)

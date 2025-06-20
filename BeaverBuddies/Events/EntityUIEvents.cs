@@ -9,6 +9,7 @@ using Timberborn.BuilderPrioritySystem;
 using Timberborn.BuildingsBlocking;
 using Timberborn.BuildingsUI;
 using Timberborn.Characters;
+using Timberborn.CoreUI;
 using Timberborn.Demolishing;
 using Timberborn.DemolishingUI;
 using Timberborn.Emptying;
@@ -18,6 +19,8 @@ using Timberborn.ExplosionsUI;
 using Timberborn.Fields;
 using Timberborn.Forestry;
 using Timberborn.GameDistrictsUI;
+using Timberborn.GameSaveRepositorySystem;
+using Timberborn.GameStartup;
 using Timberborn.Gathering;
 using Timberborn.Goods;
 using Timberborn.Hauling;
@@ -28,6 +31,8 @@ using Timberborn.PrefabSystem;
 using Timberborn.PrioritySystem;
 using Timberborn.RecoveredGoodSystem;
 using Timberborn.RecoveredGoodSystemUI;
+using Timberborn.SettlementNameSystemUI;
+using Timberborn.SingletonSystem;
 using Timberborn.StockpilePrioritySystem;
 using Timberborn.StockpilePriorityUISystem;
 using Timberborn.WaterBuildings;
@@ -55,7 +60,7 @@ namespace BeaverBuddies.Events
         {
             if (entityID == null) return;
 
-            
+
             var selector = GetComponent<Selector>(context, entityID);
             if (selector == null) return;
             SetValue(context, selector, itemID);
@@ -412,7 +417,7 @@ namespace BeaverBuddies.Events
                 .DoPrefix(__instance, priority, () => new ConstructionPriorityChangedEvent());
         }
     }
-    
+
     class WorkplacePriorityChangedEvent : PriorityChangedEvent<WorkplacePriority>
     {
     }
@@ -1000,7 +1005,7 @@ namespace BeaverBuddies.Events
             if (!sluice) return;
             var sluiceState = sluice._sluiceState;
             if (toggleType == SluiceToggleType.WaterLevel)
-            { 
+            {
                 if (value)
                 {
                     sluiceState.EnableAutoCloseOnOutflow();
@@ -1009,7 +1014,7 @@ namespace BeaverBuddies.Events
                 {
                     sluiceState.DisableAutoCloseOnOutflow();
                 }
-            } 
+            }
             else if (toggleType == SluiceToggleType.AboveContamination)
             {
                 if (value)
@@ -1337,7 +1342,7 @@ namespace BeaverBuddies.Events
             });
         }
     }
-    
+
     [HarmonyPatch(typeof(ZiplineConnectionButtonFactory), nameof(ZiplineConnectionButtonFactory.RemoveConnection))]
     class ZiplineConnectionButtonFactoryRemoveConnectionPatcher
     {
@@ -1389,11 +1394,12 @@ namespace BeaverBuddies.Events
     [Serializable]
     class DefaultWorkerTypeChangedEvent : ReplayEvent
     {
+        public string entityID;
         public string workerType;
 
         public override void Replay(IReplayContext context)
         {
-            context.GetSingleton<DistrictDefaultWorkerType>()?.SetWorkerType(workerType);
+            GetComponent<DistrictDefaultWorkerType>(context, entityID)?.SetWorkerType(workerType);
         }
 
         public override string ToActionString()
@@ -1431,4 +1437,68 @@ namespace BeaverBuddies.Events
             });
         }
     }
+
+    [Serializable]
+    class SettlementNameChangedUIEvent : ReplayEvent
+    {
+        public string entityID;
+        public string settlementName;
+
+        public override void Replay(IReplayContext context)
+        {
+            //context.GetSingleton<EventBus>()?.Post(new SettlementNameChangedEvent(settlementName));
+            GetComponent<DistrictCenterEntityBadge>(context, entityID)?.SetEntityName(settlementName);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting settlment {entityID} name to {settlementName}";
+        }
+    }
+
+    [HarmonyPatch(typeof(DistrictCenterEntityBadge), nameof(DistrictCenterEntityBadge.SetEntityName))]
+    class DistrictCenterEntityBadgeSetEntityNamePatcher
+    {
+        public static bool Prefix(DistrictCenterEntityBadge __instance, string entityName)
+        {
+            Plugin.Log("Renaming!");
+            Plugin.LogStackTrace();
+            return ReplayEvent.DoPrefix(() =>
+            {
+                return new SettlementNameChangedUIEvent()
+                {
+                    settlementName = entityName,
+                };
+            });
+        }
+    }
+
+    //[HarmonyPatch(typeof(SettlementNameBox))]
+    //[HarmonyPatch([
+    //    typeof(PanelStack), typeof(GameSaveRepository), typeof(DialogBoxShower),
+    //    typeof(Action<string>), typeof(VisualElement), typeof(string)
+    //])]
+    //class SettlementNameBoxConstructorPatcher
+    //{
+    //    public static bool Prefix(SettlementNameBox __instance, PanelStack panelStack, GameSaveRepository gameSaveRepository,
+    //        DialogBoxShower dialogBoxShower, ref Action<string> onNameSet, VisualElement parent, string initialName)
+    //    {
+    //        var oldOnNameSet = onNameSet;
+    //        onNameSet = (name) =>
+    //        {
+    //            if (ReplayEvent.DoPrefix(() =>
+    //            {
+    //                return new DefaultWorkerTypeChangedEvent()
+    //                {
+    //                    workerType = name,
+    //                };
+    //            }))
+    //            {
+    //                // If we did not record the event, we call the original method
+    //                oldOnNameSet(name);
+    //            }
+    //        };
+    //        return true;
+    //    }
+    //}
 }

@@ -9,6 +9,7 @@ using BeaverBuddies.Steam;
 using BeaverBuddies.Util;
 using BeaverBuddies.Util.Logging;
 using Bindito.Core;
+using Bindito.Core.Internal;
 using HarmonyLib;
 using System.Diagnostics;
 using System.Reflection;

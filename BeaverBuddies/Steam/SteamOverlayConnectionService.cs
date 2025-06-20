@@ -48,8 +48,6 @@ namespace BeaverBuddies.Steam
                         callback.Dispose();
                     }
 
-                    string name = SteamFriends.GetPersonaName();
-                    Plugin.Log(name);
                     done = true;
 
                     //Callback<LobbyCreated_t>.Create(OnLobbyCreated);
