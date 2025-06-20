@@ -17,6 +17,7 @@ using Timberborn.Explosions;
 using Timberborn.ExplosionsUI;
 using Timberborn.Fields;
 using Timberborn.Forestry;
+using Timberborn.GameDistrictsUI;
 using Timberborn.Gathering;
 using Timberborn.Goods;
 using Timberborn.Hauling;
@@ -1380,6 +1381,52 @@ namespace BeaverBuddies.Events
                 return new WonderActivatedEvent()
                 {
                     entityID = entityID,
+                };
+            });
+        }
+    }
+
+    [Serializable]
+    class DefaultWorkerTypeChangedEvent : ReplayEvent
+    {
+        public string workerType;
+
+        public override void Replay(IReplayContext context)
+        {
+            context.GetSingleton<DistrictDefaultWorkerType>()?.SetWorkerType(workerType);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting default worker type to {workerType}";
+        }
+    }
+
+    [HarmonyPatch(typeof(DistrictCenterFragment), nameof(DistrictCenterFragment.SetBeaverWorkerType))]
+    class DistrictCenterFragmentSetBeaverWorkerTypePatcher
+    {
+        public static bool Prefix()
+        {
+            return ReplayEvent.DoPrefix(() =>
+            {
+                return new DefaultWorkerTypeChangedEvent()
+                {
+                    workerType = WorkerTypeHelper.BeaverWorkerType,
+                };
+            });
+        }
+    }
+
+    [HarmonyPatch(typeof(DistrictCenterFragment), nameof(DistrictCenterFragment.SetBotWorkerType))]
+    class DistrictCenterFragmentSetBotWorkerTypePatcher
+    {
+        public static bool Prefix()
+        {
+            return ReplayEvent.DoPrefix(() =>
+            {
+                return new DefaultWorkerTypeChangedEvent()
+                {
+                    workerType = WorkerTypeHelper.BotWorkerType,
                 };
             });
         }
