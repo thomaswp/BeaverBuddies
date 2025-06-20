@@ -59,10 +59,10 @@ namespace BeaverBuddies.Events
             return entity;
         }
 
-        protected T GetComponent<T>(IReplayContext context, string entityID) where T : BaseComponent
+        protected T GetComponent<T>(IReplayContext context, string entityID)
         {
             var entity = GetEntityComponent(context, entityID);
-            if (entity == null) return null;
+            if (entity == null) return default;
             var component = entity.GetComponentFast<T>();
             if (component == null)
             {

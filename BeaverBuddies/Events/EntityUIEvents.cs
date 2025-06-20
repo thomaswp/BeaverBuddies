@@ -13,6 +13,7 @@ using Timberborn.CoreUI;
 using Timberborn.Demolishing;
 using Timberborn.DemolishingUI;
 using Timberborn.Emptying;
+using Timberborn.EntityPanelSystem;
 using Timberborn.EntitySystem;
 using Timberborn.Explosions;
 using Timberborn.ExplosionsUI;
@@ -45,6 +46,7 @@ using Timberborn.WorkSystem;
 using Timberborn.WorkSystemUI;
 using Timberborn.ZiplineSystem;
 using Timberborn.ZiplineSystemUI;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace BeaverBuddies.Events
@@ -767,16 +769,14 @@ namespace BeaverBuddies.Events
     }
 
     [Serializable]
-    class BeaverRenamedEvent : ReplayEvent
+    class EntityRenamedEvent : ReplayEvent
     {
         public string entityID;
         public string newName;
 
         public override void Replay(IReplayContext context)
         {
-            var character = GetComponent<Character>(context, entityID);
-            if (character == null) return;
-            character.FirstName = newName;
+            GetComponent<IModifiableEntityBadge>(context, entityID)?.SetEntityName(newName);
         }
 
         public override string ToActionString()
@@ -785,18 +785,32 @@ namespace BeaverBuddies.Events
         }
     }
 
-    // TODO: Need to make it work for all Characters, not just beavers
-    [HarmonyPatch(typeof(BeaverEntityBadge), nameof(BeaverEntityBadge.SetEntityName))]
-    class BeaverEntityBadgePatcher
+    [HarmonyPatch(typeof(EntityPanel), nameof(EntityPanel.SetEntityName))]
+    [ManualMethodOverwrite]
+    /**
+     *  6/20/2025
+		if ((bool)_shownEntity && !string.IsNullOrWhiteSpace(newName))
+		{
+			_entityBadgeService.SetEntityName(_shownEntity, newName.Trim());
+		}
+     */
+    class EntityPanelSetEntityNamePatcher
     {
-        static bool Prefix(BeaverEntityBadge __instance, string entityName)
+        static bool Prefix(EntityPanel __instance, string newName)
         {
-            return ReplayEvent.DoEntityPrefix(__instance._character, entityID =>
+            // If the name / change is invalid, we don't record it and use the default behavior.
+            // We capture the UI hook, rather than EntityBadgeService, in case the latter is use
+            // in game logic.
+            if (!((bool)__instance._shownEntity && !string.IsNullOrWhiteSpace(newName)))
             {
-                return new BeaverRenamedEvent()
+                return true;
+            }
+            return ReplayEvent.DoEntityPrefix(__instance._shownEntity, entityID =>
+            {
+                return new EntityRenamedEvent()
                 {
                     entityID = entityID,
-                    newName = entityName,
+                    newName = newName,
                 };
             });
         }
@@ -1406,99 +1420,52 @@ namespace BeaverBuddies.Events
         {
             return $"Setting default worker type to {workerType}";
         }
+
+        public static bool DoPrefix(DistrictCenterFragment __instance, string workerType)
+        {
+            return DoEntityPrefix(__instance._districtCenter, (entityID) =>
+            {
+                return new DefaultWorkerTypeChangedEvent()
+                {
+                    entityID = entityID,
+                    workerType = workerType,
+                };
+            });
+        }
     }
 
     [HarmonyPatch(typeof(DistrictCenterFragment), nameof(DistrictCenterFragment.SetBeaverWorkerType))]
     class DistrictCenterFragmentSetBeaverWorkerTypePatcher
     {
-        public static bool Prefix()
+        public static bool Prefix(DistrictCenterFragment __instance)
         {
-            return ReplayEvent.DoPrefix(() =>
-            {
-                return new DefaultWorkerTypeChangedEvent()
-                {
-                    workerType = WorkerTypeHelper.BeaverWorkerType,
-                };
-            });
+            return DefaultWorkerTypeChangedEvent.DoPrefix(__instance, WorkerTypeHelper.BeaverWorkerType);
         }
     }
 
     [HarmonyPatch(typeof(DistrictCenterFragment), nameof(DistrictCenterFragment.SetBotWorkerType))]
     class DistrictCenterFragmentSetBotWorkerTypePatcher
     {
-        public static bool Prefix()
+        public static bool Prefix(DistrictCenterFragment __instance)
         {
-            return ReplayEvent.DoPrefix(() =>
-            {
-                return new DefaultWorkerTypeChangedEvent()
-                {
-                    workerType = WorkerTypeHelper.BotWorkerType,
-                };
-            });
+            return DefaultWorkerTypeChangedEvent.DoPrefix(__instance, WorkerTypeHelper.BotWorkerType);
         }
     }
 
-    [Serializable]
-    class SettlementNameChangedUIEvent : ReplayEvent
-    {
-        public string entityID;
-        public string settlementName;
-
-        public override void Replay(IReplayContext context)
-        {
-            //context.GetSingleton<EventBus>()?.Post(new SettlementNameChangedEvent(settlementName));
-            GetComponent<DistrictCenterEntityBadge>(context, entityID)?.SetEntityName(settlementName);
-        }
-
-        public override string ToActionString()
-        {
-            return $"Setting settlment {entityID} name to {settlementName}";
-        }
-    }
-
-    [HarmonyPatch(typeof(DistrictCenterEntityBadge), nameof(DistrictCenterEntityBadge.SetEntityName))]
-    class DistrictCenterEntityBadgeSetEntityNamePatcher
-    {
-        public static bool Prefix(DistrictCenterEntityBadge __instance, string entityName)
-        {
-            Plugin.Log("Renaming!");
-            Plugin.LogStackTrace();
-            return ReplayEvent.DoPrefix(() =>
-            {
-                return new SettlementNameChangedUIEvent()
-                {
-                    settlementName = entityName,
-                };
-            });
-        }
-    }
-
-    //[HarmonyPatch(typeof(SettlementNameBox))]
-    //[HarmonyPatch([
-    //    typeof(PanelStack), typeof(GameSaveRepository), typeof(DialogBoxShower),
-    //    typeof(Action<string>), typeof(VisualElement), typeof(string)
-    //])]
-    //class SettlementNameBoxConstructorPatcher
+    //[Serializable]
+    //class SettlementNameChangedUIEvent : ReplayEvent
     //{
-    //    public static bool Prefix(SettlementNameBox __instance, PanelStack panelStack, GameSaveRepository gameSaveRepository,
-    //        DialogBoxShower dialogBoxShower, ref Action<string> onNameSet, VisualElement parent, string initialName)
+    //    public string entityID;
+    //    public string settlementName;
+
+    //    public override void Replay(IReplayContext context)
     //    {
-    //        var oldOnNameSet = onNameSet;
-    //        onNameSet = (name) =>
-    //        {
-    //            if (ReplayEvent.DoPrefix(() =>
-    //            {
-    //                return new DefaultWorkerTypeChangedEvent()
-    //                {
-    //                    workerType = name,
-    //                };
-    //            }))
-    //            {
-    //                // If we did not record the event, we call the original method
-    //                oldOnNameSet(name);
-    //            }
-    //        };
-    //        return true;
+    //        GetComponent<DistrictCenterEntityBadge>(context, entityID)?.SetEntityName(settlementName);
+    //    }
+
+    //    public override string ToActionString()
+    //    {
+    //        return $"Setting settlment {entityID} name to {settlementName}";
     //    }
     //}
 }
