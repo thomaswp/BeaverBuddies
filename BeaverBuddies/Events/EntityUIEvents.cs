@@ -38,6 +38,8 @@ using Timberborn.StockpilePrioritySystem;
 using Timberborn.StockpilePriorityUISystem;
 using Timberborn.WaterBuildings;
 using Timberborn.WaterBuildingsUI;
+using Timberborn.WaterSourceSystem;
+using Timberborn.WaterSourceSystemUI;
 using Timberborn.Wonders;
 using Timberborn.WondersUI;
 using Timberborn.WorkerTypesUI;
@@ -1418,7 +1420,7 @@ namespace BeaverBuddies.Events
 
         public override string ToActionString()
         {
-            return $"Setting default worker type to {workerType}";
+            return $"Setting default worker type for {entityID} to {workerType}";
         }
 
         public static bool DoPrefix(DistrictCenterFragment __instance, string workerType)
@@ -1452,20 +1454,63 @@ namespace BeaverBuddies.Events
         }
     }
 
-    //[Serializable]
-    //class SettlementNameChangedUIEvent : ReplayEvent
-    //{
-    //    public string entityID;
-    //    public string settlementName;
+    [Serializable]
+    class WaterSourceRegulatorStateChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public bool isOpen;
 
-    //    public override void Replay(IReplayContext context)
-    //    {
-    //        GetComponent<DistrictCenterEntityBadge>(context, entityID)?.SetEntityName(settlementName);
-    //    }
+        public override void Replay(IReplayContext context)
+        {
+            var regulator = GetComponent<WaterSourceRegulator>(context, entityID);
+            if (regulator == null) return;
+            if (isOpen)
+            {
+                regulator.Open();
+            }
+            else
+            {
+                regulator.Close();
+            }
+        }
 
-    //    public override string ToActionString()
-    //    {
-    //        return $"Setting settlment {entityID} name to {settlementName}";
-    //    }
-    //}
+        public override string ToActionString()
+        {
+            string verb = isOpen ? "Opening" : "Closing";
+            return $"{verb} water regulator {entityID}";
+        }
+
+        public static bool DoPrefix(WaterSourceRegulator __instance, bool isOpen)
+        {
+            return DoEntityPrefix(__instance, (entityID) =>
+            {
+                return new WaterSourceRegulatorStateChangedEvent()
+                {
+                    entityID = entityID,
+                    isOpen = isOpen,
+                };
+            });
+        }
+    }
+
+    // I can't find anywhere these methods are called outside of the UI, so it
+    // seems safe to patch them directly.
+    // The UI event itself is a bit ugly to patch.
+    [HarmonyPatch(typeof(WaterSourceRegulator), nameof(WaterSourceRegulator.Open))]
+    class WaterSourceRegulatorOpenPatcher
+    {
+        public static bool Prefix(WaterSourceRegulator __instance)
+        {
+            return WaterSourceRegulatorStateChangedEvent.DoPrefix(__instance, true);
+        }
+    }
+
+    [HarmonyPatch(typeof(WaterSourceRegulator), nameof(WaterSourceRegulator.Close))]
+    class WaterSourceRegulatorClosePatcher
+    {
+        public static bool Prefix(WaterSourceRegulator __instance)
+        {
+            return WaterSourceRegulatorStateChangedEvent.DoPrefix(__instance, false);
+        }
+    }
 }
