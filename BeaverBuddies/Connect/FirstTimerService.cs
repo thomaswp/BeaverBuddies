@@ -15,9 +15,7 @@ namespace BeaverBuddies.Connect
     {
         private DialogBoxShower _dialogBoxShower;
         private UrlOpener _urlOpener;
-        private ConfigIOService _configIOService;
         private Settings _settings;
-        private SingletonListener listener;
 
         internal FirstTimerService(
             DialogBoxShower dialogBoxShower,
@@ -29,21 +27,12 @@ namespace BeaverBuddies.Connect
         {
             _dialogBoxShower = dialogBoxShower;
             _urlOpener = urlOpener;
-            _configIOService = configIOService;
             _settings = settings;
-            listener = singletonListener;
         }
 
         // TODO: Ideally, wait to show until after OK is clicked.
         public void PostLoad()
         {
-            foreach (var item in listener.Collect())
-            {
-                Plugin.Log(item.GetType().ToString());
-            }
-            var me = listener.Collect().OfType<FirstTimerService>().FirstOrDefault();
-            Plugin.Log(this == me ? "Success!" : $"Me is {me}");
-
             if (!_settings.ShowFirstTimerMessage.Value)
             {
                 return;
