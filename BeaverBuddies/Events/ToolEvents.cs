@@ -45,7 +45,21 @@ namespace BeaverBuddies.Events
         }
     }
 
-
+    /* TODO: The problem with this patch is that BuildingPlacer.Place is
+     * only called if the building has already been determined to be valid.
+     * This is done, as far as I can tell, by a combination of:
+     * - AreaPicker.PickBlockObjectArea, which calls GetBlocks, which may pass only a subset of
+     *   the buildable placements to back to the ActionCallback.
+     * - BlockObjectTool.Place (which calls PreviewPlacer.GetBuildableCoordinates), which relies
+     *   on the Placements that are actively being previewed.
+     * In other words, what you see in the preview is literaly what you get when you place a building.
+     * This is unfortunate because it means there's no single, easy function that can check whether
+     * a building placement is valid.
+     * - One option is to pass the Rays and recalculate everything at event time (as if the user
+     *   had just clicked). This might not be too hard.
+     * - Another option is to try to reverse-engineer the preview and filtering logic...
+     *   which would be potentially easy to do but very hard to verify.
+     */
     [HarmonyPatch(typeof(BuildingPlacer), nameof(BuildingPlacer.Place))]
     class PlacePatcher
     {
