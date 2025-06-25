@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using Timberborn.BlockObjectTools;
 using Timberborn.BlockSystem;
@@ -11,8 +12,10 @@ using Timberborn.DemolishingUI;
 using Timberborn.EntitySystem;
 using Timberborn.Forestry;
 using Timberborn.PlantingUI;
+using Timberborn.RootProviders;
 using Timberborn.ScienceSystem;
 using Timberborn.SingletonSystem;
+using Timberborn.TemplateSystem;
 using Timberborn.ToolSystem;
 using Timberborn.WorkSystemUI;
 using UnityEngine;
@@ -36,7 +39,28 @@ namespace BeaverBuddies.Events
             var placer = context.GetSingleton<BlockObjectPlacerService>().GetMatchingPlacer(blockObjectSpec);
             Placement placement = new Placement(coordinates, orientation, 
                 isFlipped ? FlipMode.Flipped : FlipMode.Unflipped);
+            if (!IsPlacementValid(context, placement, buildingPrefab))
+            {
+                Plugin.LogWarning($"Invalid placement for {prefabName} at {coordinates}");
+                return;
+            }
             placer.Place(blockObjectSpec, placement);
+        }
+
+        private static bool IsPlacementValid(IReplayContext context, Placement placement, BuildingSpec prefab)
+        {
+            var templateInstantiator = context.GetSingleton<TemplateInstantiator>();
+            var roots = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
+            GameObject gameObject = templateInstantiator.Instantiate(prefab.GameObjectFast, roots.First().transform);
+            gameObject.SetActive(value: false);
+            var blockObject = gameObject.GetComponent<BlockObject>();
+            blockObject.MarkAsPreviewAndInitialize();
+            blockObject.Reposition(placement);
+            bool isValid = blockObject.IsValid();
+
+            // Destroy or recycle the game object... may need a service for this.
+
+            return isValid;
         }
 
         public override string ToActionString()
