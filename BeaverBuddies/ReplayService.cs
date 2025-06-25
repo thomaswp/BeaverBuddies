@@ -32,6 +32,7 @@ using Timberborn.PlantingUI;
 using Timberborn.ScienceSystem;
 using Timberborn.SettlementNameSystem;
 using Timberborn.SingletonSystem;
+using Timberborn.TemplateSystem;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
 using Timberborn.WebNavigation;
@@ -176,7 +177,8 @@ namespace BeaverBuddies
             MapNameService mapNameService,
             Autosaver autosaver,
             ZiplineConnectionService ziplineConnectionService,
-            Settings settings
+            Settings settings,
+            TemplateInstantiator templateInstantiator
         )
         {
             //_tickWathcerService = AddSingleton(tickWathcerService);
@@ -209,6 +211,7 @@ namespace BeaverBuddies
             AddSingleton(autosaver);
             AddSingleton(ziplineConnectionService);
             AddSingleton(settings);
+            AddSingleton(templateInstantiator);
 
             AddSingleton(this);
 
@@ -252,7 +255,7 @@ namespace BeaverBuddies
             // This doesn't work for some singletons, like GetSingletons<T>(),
             // so we still have to add them manually.
             var result = _singletonRepository.GetSingletons<T>().FirstOrDefault();
-            Plugin.Log($"Searching for unregistered singleton {typeof(T)}; found = {result == null}");
+            Plugin.Log($"Searching for unregistered singleton {typeof(T)}; found = {result != null}");
             return result;
         }
 
