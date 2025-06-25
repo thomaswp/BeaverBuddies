@@ -232,11 +232,6 @@ namespace BeaverBuddies
         {
             Plugin.Log("PostLoad");
             _determinismService.UnityThread = Thread.CurrentThread;
-
-            foreach (var item in ((SingletonRepository)_singletonRepository)._singletonListener.Collect())
-            {
-                Plugin.Log(item.GetType().ToString());
-            }
         }
 
         private T AddSingleton<T>(T singleton)
