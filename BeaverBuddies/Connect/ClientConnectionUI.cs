@@ -3,6 +3,8 @@ using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Reflection;
 using System.Text;
 using Timberborn.CoreUI;
 using Timberborn.Localization;
@@ -64,6 +66,12 @@ namespace BeaverBuddies.Connect
 
         private void ShowBox()
         {
+            FieldInfo characterLimitField = typeof(InputBoxShower).GetField("CharacterLimit", BindingFlags.Static | BindingFlags.NonPublic);
+            if (characterLimitField != null)
+            {
+                characterLimitField.SetValue(null, 100); 
+            }
+
             ILoc _loc = _inputBoxShower._loc;
             var builder = _inputBoxShower.Create()
                 .SetLocalizedMessage(_loc.T("BeaverBuddies.JoinCoopGame.EnterIp"))
@@ -73,7 +81,15 @@ namespace BeaverBuddies.Connect
                     _configIOService.SaveConfigToFile();
                     _clientConnectionService.ConnectOrShowFailureMessage(ip);
                 });
-            builder._input.value = EventIO.Config.ClientConnectionAddress;
+
+            FieldInfo inputFieldInfo = typeof(InputBoxShower.Builder).GetField("_input", BindingFlags.Instance | BindingFlags.NonPublic);
+            TextField inputField = inputFieldInfo?.GetValue(builder) as TextField;
+            if (inputField != null)
+            {
+                inputField.maxLength = 100;
+                inputField.value = EventIO.Config.ClientConnectionAddress; 
+            }
+
             builder.Show();
         }
     }
