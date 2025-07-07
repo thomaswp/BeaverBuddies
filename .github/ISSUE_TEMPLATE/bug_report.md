@@ -17,7 +17,7 @@ assignees: ''
 * This is important. It's almost impossible to reproduce errors without the save.
 
 [Optional] **Logs**: On both the server and client computer, do the following steps:
-1. Go to the BepInEx folder (inside your Timberborn folder), e.g. `C:\Users\[username]\AppData\LocalLow\Mechanistry\Timberborn`
+1. Go to the Timberborn local files folder (inside your Timberborn folder), e.g. `C:\Users\[username]\AppData\LocalLow\Mechanistry\Timberborn`
 2. Rename the Player.log file to server.txt (for server) and client.txt (for client).
 3. Upload these files to this issue.
 
