@@ -16,6 +16,14 @@ namespace BeaverBuddies.Steam
         private ConcurrentQueueWithWait<SteamSocket> joiningUsers = new ConcurrentQueueWithWait<SteamSocket>();
         private SteamPacketListener steamPacketListener;
 
+        public SteamListener()
+        {
+            if (!SteamOverlayConnectionService.IsSteamEnabled)
+            {
+                throw new Exception("SteamListener created when Steam is not enabled!");
+            }
+        }
+
         public void RegisterSteamPacketListener(SteamPacketListener steamPacketListener)
         {
             this.steamPacketListener = steamPacketListener;

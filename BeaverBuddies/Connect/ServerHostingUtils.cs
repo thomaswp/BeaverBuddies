@@ -16,7 +16,6 @@ using BeaverBuddies.IO;
 using BeaverBuddies.Util;
 using Timberborn.CoreUI;
 using System.Collections;
-using Steamworks;
 using BeaverBuddies.Steam;
 using TimberNet;
 using UnityEngine;
