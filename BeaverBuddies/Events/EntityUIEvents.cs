@@ -818,6 +818,29 @@ namespace BeaverBuddies.Events
         }
     }
 
+    [HarmonyPatch(typeof(Timberborn.CharactersUI.CharacterBatchControlRowItemFactory), nameof(Timberborn.CharactersUI.CharacterBatchControlRowItemFactory.SetEntityName))]
+    [ManualMethodOverwrite]
+    /**
+     * Mirror of EntityPanel.SetEntityName capture, routed through batch control row factory.
+     *  6/20/2025
+		if ((bool)_shownEntity && !string.IsNullOrWhiteSpace(newName))
+		{
+			_entityBadgeService.SetEntityName(_shownEntity, newName.Trim());
+		}
+     */
+    class CharacterBatchControlRowItemFactorySetEntityNamePatcher
+    {
+        static bool Prefix(Timberborn.CharactersUI.CharacterBatchControlRowItemFactory __instance, string newName, Timberborn.Characters.Character character)
+        {
+            if (!(character != null && !string.IsNullOrWhiteSpace(newName))) return true;
+            return ReplayEvent.DoEntityPrefix(character, entityID => new EntityRenamedEvent()
+            {
+                entityID = entityID,
+                newName = newName,
+            });
+        }
+    }
+
     class WorkerTypeUnlockedEvent : ReplayEvent
     {
         public UnlockableWorkerType workerType;
@@ -1175,7 +1198,7 @@ namespace BeaverBuddies.Events
         }
     }
 
-    /* 
+    /*
      * Note: We override the SluiceState methods instead of the SluiceFragment methods
      * only for contaminatoin limits, because these methods seem to only be called form the
      * UI, which contains some additional logic we don't want to have to manually override.
