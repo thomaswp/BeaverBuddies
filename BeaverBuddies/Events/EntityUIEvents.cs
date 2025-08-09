@@ -1307,6 +1307,90 @@ namespace BeaverBuddies.Events
         }
     }
 
+    enum WaterInputDepthAction
+    {
+        ToggleLimit,
+        IncreaseDepthLimit,
+        DecreaseDepthLimit,
+    }
+
+    [Serializable]
+    class WaterInputDepthActionEvent : ReplayEvent
+    {
+        public string entityID;
+        public WaterInputDepthAction action;
+
+        public override void Replay(IReplayContext context)
+        {
+            var waterinput = GetComponent<WaterInputCoordinates>(context, entityID);
+            switch (action)
+            {
+                case WaterInputDepthAction.ToggleLimit:
+                    waterinput.UseDepthLimit = !waterinput.UseDepthLimit;
+                    break;
+                case WaterInputDepthAction.IncreaseDepthLimit:
+                    waterinput.DepthLimit++;
+                    break;
+                case WaterInputDepthAction.DecreaseDepthLimit:
+                    waterinput.DepthLimit--;
+                    break;
+            }
+        }
+
+        public override string ToActionString()
+        {
+            return $"Water input {entityID} action={action}";
+        }
+    }
+
+    [HarmonyPatch(typeof(WaterInputDepthFragment), "ToggleDepthLimit")]
+    class WaterInputDepthFragmentToggleDepthLimitPatcher
+    {
+        static bool Prefix(WaterInputDepthFragment __instance)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance._waterInputCoordinates, entityID =>
+            {
+                return new WaterInputDepthActionEvent()
+                {
+                    entityID = entityID,
+                    action = WaterInputDepthAction.ToggleLimit,
+                };
+            });
+        }
+    }
+
+    [HarmonyPatch(typeof(WaterInputDepthFragment), "IncreaseDepth")]
+    class WaterInputDepthFragmentIncreaseDepthPatcher
+    {
+        static bool Prefix(WaterInputDepthFragment __instance)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance._waterInputCoordinates, entityID =>
+            {
+                return new WaterInputDepthActionEvent()
+                {
+                    entityID = entityID,
+                    action = WaterInputDepthAction.IncreaseDepthLimit,
+                };
+            });
+        }
+    }
+
+    [HarmonyPatch(typeof(WaterInputDepthFragment), "DecreaseDepth")]
+    class WaterInputDepthFragmentDecreaseDepthPatcher
+    {
+        static bool Prefix(WaterInputDepthFragment __instance)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance._waterInputCoordinates, entityID =>
+            {
+                return new WaterInputDepthActionEvent()
+                {
+                    entityID = entityID,
+                    action = WaterInputDepthAction.DecreaseDepthLimit,
+                };
+            });
+        }
+    }
+
     [Serializable]
     class ZiplineConnectionChangedEvent : ReplayEvent
     {
