@@ -9,14 +9,14 @@ namespace BeaverBuddies
     public class Settings : ModSettingsOwner
     {
         public ModSetting<string> ClientConnectionAddress { get; } =
-            new("127.0.0.1", 
+            new("127.0.0.1",
                 ModSettingDescriptor.CreateLocalized(
                     "BeaverBuddies.Settings.ClientConnectionAddress"
                 ).SetLocalizedTooltip("BeaverBuddies.Settings.ClientConnectionAddress.Tooltip")
             );
 
         public ModSetting<int> DefaultPort { get; } =
-            new(25565, 
+            new(25565,
                 ModSettingDescriptor.CreateLocalized(
                     "BeaverBuddies.Settings.Port"
                 ).SetLocalizedTooltip("BeaverBuddies.Settings.Port.Tooltip")
@@ -50,6 +50,15 @@ namespace BeaverBuddies
             ModSettingDescriptor.CreateLocalized(
                 "BeaverBuddies.Settings.FriendsCanJoinSteamGame"
             ).SetLocalizedTooltip("BeaverBuddies.Settings.FriendsCanJoinSteamGame.Tooltip")
+        );
+
+        // ---- Quality of Life Settings ----
+
+        public ModSetting<bool> ReducePauses { get; } =
+            new(false,
+            ModSettingDescriptor.CreateLocalized(
+                "BeaverBuddies.Settings.ReducePauses"
+            ).SetLocalizedTooltip("BeaverBuddies.Settings.ReducePauses.Tooltip")
         );
 
         // ---- Developer Settings ----
@@ -87,10 +96,11 @@ namespace BeaverBuddies
         public static int Port => instance?.DefaultPort.Value ?? 25565;
         public static bool EnableSteam => instance?.EnableSteamConnection.Value ?? true;
         public static bool LobbyJoinable => instance?.FriendsCanJoinSteamGame.Value ?? true;
+        public static bool ReducePausesEnabled => instance?.ReducePauses.Value ?? false;
 
         public Settings(ISettings settings,
                         ModSettingsOwnerRegistry modSettingsOwnerRegistry,
-                        ModRepository modRepository) : 
+                        ModRepository modRepository) :
             base(settings, modSettingsOwnerRegistry, modRepository)
         {
             instance = this;
