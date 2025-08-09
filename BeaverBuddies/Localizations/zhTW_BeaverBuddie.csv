@@ -61,6 +61,8 @@ BeaverBuddies.Settings.EnableSteamConnection.Tooltip,"允許玩家通過 Steam �
 此外，P2P 連接可能比直接連接慢。",""
 BeaverBuddies.Settings.FriendsCanJoinSteamGame,"允許好友透過 Steam 直接加入",""
 BeaverBuddies.Settings.FriendsCanJoinSteamGame.Tooltip,"啟用後，好友可以透過 Steam 無需邀請直接加入遊戲。",""
+BeaverBuddies.Settings.ReducePauses,"減少強制暫停的次數",""
+BeaverBuddies.Settings.ReducePauses.Tooltip,"啟用後，強制暫停（主選單、拆除等）的次數將大幅減少。為獲得最佳體驗，建議所有玩家使用相同設定。",""
 BeaverBuddies.Host.ConnectedClients,"等待客戶端連接…
 目前已連接客戶端：",""
 BeaverBuddies.Host.DirectConnectClient,"直接連接客戶端",""
