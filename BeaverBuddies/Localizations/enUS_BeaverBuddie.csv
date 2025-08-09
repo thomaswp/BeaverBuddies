@@ -51,7 +51,7 @@ This setting is indended for developers.",""
 BeaverBuddies.Settings.ShowFirstTimerMessage,"Show First Timer Message",""
 BeaverBuddies.Settings.AlwaysTrace,"Always Use Detailed Logging",""
 BeaverBuddies.Settings.AlwaysTrace.Tooltip,"When enabled, the game will always use detailed logging, which enables you to submit desync reports on the first occurrence without manually enabling detailed logging.
-Note that all players must have the setting enabled. 
+Note that all players must have the setting enabled.
 This setting will cause some lag and is not recommended for most players.",""
 BeaverBuddies.Settings.ReportingConsent,"Consent to Reporting",""
 BeaverBuddies.Settings.EnableSteamConnection,"Enable Steam Networking",""
@@ -61,6 +61,8 @@ Note: This feature may not work if your network does not support peer-to-peer co
 Additionally, peer-to-peer connections may be slower than direct connections.",""
 BeaverBuddies.Settings.FriendsCanJoinSteamGame,"Allow Friends to Join Directly via Steam",""
 BeaverBuddies.Settings.FriendsCanJoinSteamGame.Tooltip,"When enabled, your friends can join your game directly via Steam without you inviting them.",""
+BeaverBuddies.Settings.ReducePauses,"Reduce the number of forced pauses",""
+BeaverBuddies.Settings.ReducePauses.Tooltip,"If enabled, the number of forced pauses will be drastically reduced (main menu, deconstructions etc). For an optimal experience, all players should set it to the same",""
 BeaverBuddies.Host.ConnectedClients,"Wait for clients to connect...
 Currently connected clients:",""
 BeaverBuddies.Host.DirectConnectClient,"Direct Connect Client",""
