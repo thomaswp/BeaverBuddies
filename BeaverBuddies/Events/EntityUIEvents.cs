@@ -9,6 +9,7 @@ using Timberborn.BuilderPrioritySystem;
 using Timberborn.BuildingsBlocking;
 using Timberborn.BuildingsUI;
 using Timberborn.Characters;
+using Timberborn.CharactersUI;
 using Timberborn.CoreUI;
 using Timberborn.Demolishing;
 using Timberborn.DemolishingUI;
@@ -818,7 +819,7 @@ namespace BeaverBuddies.Events
         }
     }
 
-    [HarmonyPatch(typeof(Timberborn.CharactersUI.CharacterBatchControlRowItemFactory), nameof(Timberborn.CharactersUI.CharacterBatchControlRowItemFactory.SetEntityName))]
+    [HarmonyPatch(typeof(CharacterBatchControlRowItemFactory), nameof(CharacterBatchControlRowItemFactory.SetEntityName))]
     [ManualMethodOverwrite]
     /**
      * Mirror of EntityPanel.SetEntityName capture, routed through batch control row factory.
@@ -830,7 +831,7 @@ namespace BeaverBuddies.Events
      */
     class CharacterBatchControlRowItemFactorySetEntityNamePatcher
     {
-        static bool Prefix(Timberborn.CharactersUI.CharacterBatchControlRowItemFactory __instance, string newName, Timberborn.Characters.Character character)
+        static bool Prefix(CharacterBatchControlRowItemFactory __instance, string newName, Character character)
         {
             if (!(character != null && !string.IsNullOrWhiteSpace(newName))) return true;
             return ReplayEvent.DoEntityPrefix(character, entityID => new EntityRenamedEvent()
