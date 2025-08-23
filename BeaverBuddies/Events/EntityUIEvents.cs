@@ -1323,16 +1323,27 @@ namespace BeaverBuddies.Events
         public override void Replay(IReplayContext context)
         {
             var waterinput = GetComponent<WaterInputCoordinates>(context, entityID);
+            var waterInputSpec = GetComponent<WaterInputSpec>(context, entityID);
+            if (waterinput == null || waterInputSpec == null) return;
             switch (action)
             {
                 case WaterInputDepthAction.ToggleLimit:
-                    waterinput.UseDepthLimit = !waterinput.UseDepthLimit;
+                    if (waterinput.UseDepthLimit)
+                    {
+                        waterinput.DisableDepthLimit();
+                    }
+                    else
+                    {
+                        waterinput.SetDepthLimit(waterinput.Depth);
+                    }
                     break;
                 case WaterInputDepthAction.IncreaseDepthLimit:
-                    waterinput.DepthLimit++;
+                    int depthLimit = Math.Min(waterInputSpec.MaxDepth, waterinput.DepthLimit + 1);
+                    waterinput.SetDepthLimit(depthLimit);
                     break;
                 case WaterInputDepthAction.DecreaseDepthLimit:
-                    waterinput.DepthLimit--;
+                    depthLimit = Math.Max(0, waterinput.DepthLimit - 1);
+                    waterinput.SetDepthLimit(depthLimit);
                     break;
             }
         }
