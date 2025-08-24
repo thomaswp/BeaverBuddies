@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using Timberborn.Options;
 using Timberborn.OptionsGame;
 using Timberborn.TimeSystem;
-using Timberborn.UILayoutSystem;
-using static BeaverBuddies.SingletonManager;
+    using Timberborn.UILayoutSystem;
+    using static BeaverBuddies.SingletonManager;
 
 namespace BeaverBuddies.Events
 {
@@ -181,7 +181,10 @@ namespace BeaverBuddies.Events
         {
             // If the user wants to reduce pauses, don't create an event.
             // Let each player open their own menu independently.
-            if (Settings.ReducePausesEnabled) return true;
+
+            // I think it's too dangerous to open the menu outside of a synced pause.
+            // But if it's going to be an option it should be separate.
+            //if (Settings.ReducePausesEnabled) return true;s
             return ReplayEvent.DoPrefix(() => new ShowOptionsMenuEvent());
         }
     }
@@ -194,11 +197,7 @@ namespace BeaverBuddies.Events
     {
         public static bool Prefix()
         {
-            if (Settings.ReducePausesEnabled)
-            {
-                return false;
-            }
-            return true;
+            return !Settings.ReducePausesEnabled;
         }
     }
 }
