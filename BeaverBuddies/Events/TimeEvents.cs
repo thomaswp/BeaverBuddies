@@ -79,12 +79,6 @@ namespace BeaverBuddies.Events
         }
     }
 
-    // This is now configurable via Settings.ReducePausesEnable. If we don't freeze, it could
-    // definitely cause some possible invalid operations (e.g. deleting a building
-    // that's not there anymore), but in theory these errors get caught before
-    // sending to the server. In practice, though, there could be side-effects of
-    // and aborted event. For clients, I think this is always a possibility, regardless
-    // of whether we freeze, since it's always happening at a delay.
     [ManualMethodOverwrite]
     /*
         04/19/2025
@@ -190,8 +184,12 @@ namespace BeaverBuddies.Events
     }
 
     // OverlayPanelSpeedLocker is triggering ChangeAndLockSpeed via OnPanelShown
-    // We suppress its locking behavior entirely when ReducePauses is enabled to avoid unintended pauses
-    // for overlay/submenus.
+    // This is now configurable via Settings.ReducePausesEnable. If we don't freeze, it could
+    // definitely cause some possible invalid operations (e.g. deleting a building
+    // that's not there anymore), but in theory these errors get caught before
+    // sending to the server. In practice, though, there could be side-effects of
+    // and aborted event. For clients, I think this is always a possibility, regardless
+    // of whether we freeze, since it's always happening at a delay.
     [HarmonyPatch(typeof(OverlayPanelSpeedLocker), nameof(OverlayPanelSpeedLocker.OnPanelShown))]
     public class OverlayPanelSpeedLockerShowPatcher
     {
