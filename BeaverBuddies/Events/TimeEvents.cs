@@ -99,15 +99,8 @@ namespace BeaverBuddies.Events
     [HarmonyPatch(typeof(SpeedManager), nameof(SpeedManager.ChangeAndLockSpeed))]
     public class SpeedLockPatcher
     {
-        // When true, skip the next ChangeAndLockSpeed call (used by various UI events when ReducePauses is enabled)
-        public static bool SkipNextSpeedLock = false;
         static bool Prefix(SpeedManager __instance, float value)
         {
-            if (SkipNextSpeedLock)
-            {
-                SkipNextSpeedLock = false;
-                return false; // skip original; do not modify speed or lock
-            }
             // Clients should never freeze for dialogs. Main menu will be
             // handled separately.
             if (EventIO.Get()?.UserEventBehavior == UserEventBehavior.Send)
@@ -186,16 +179,9 @@ namespace BeaverBuddies.Events
     {
         static bool Prefix()
         {
-            // If the user wants to reduce pauses, don't create an event or pause the game.
+            // If the user wants to reduce pauses, don't create an event.
             // Let each player open their own menu independently.
-            if (Settings.ReducePausesEnabled)
-            {
-                // Signal that the next lock attempt should be skipped
-                SpeedLockPatcher.SkipNextSpeedLock = true;
-                return true;
-            }
-
-            // Otherwise, treat showing options as a synced event that pauses.
+            if (Settings.ReducePausesEnabled) return true;
             return ReplayEvent.DoPrefix(() => new ShowOptionsMenuEvent());
         }
     }
@@ -203,15 +189,13 @@ namespace BeaverBuddies.Events
     // OverlayPanelSpeedLocker is triggering ChangeAndLockSpeed via OnPanelShown
     // We suppress its locking behavior entirely when ReducePauses is enabled to avoid unintended pauses
     // for overlay/submenus.
-    [HarmonyPatch(typeof(OverlayPanelSpeedLocker), "OnPanelShown")]
+    [HarmonyPatch(typeof(OverlayPanelSpeedLocker), nameof(OverlayPanelSpeedLocker.OnPanelShown))]
     public class OverlayPanelSpeedLockerShowPatcher
     {
-        static bool Prefix()
+        public static bool Prefix()
         {
             if (Settings.ReducePausesEnabled)
             {
-                // Ensure that even if original would call ChangeAndLockSpeed, it gets skipped.
-                SpeedLockPatcher.SkipNextSpeedLock = true;
                 return false;
             }
             return true;
