@@ -1,28 +1,28 @@
-﻿using BeaverBuddies.Connect;
-using BeaverBuddies.IO;
+﻿#define IS_STEAM
+
+#if IS_STEAM
+using Timberborn.SteamStoreSystem;
+#endif
+
+using BeaverBuddies.Connect;
 using Steamworks;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using Timberborn.CoreUI;
 using Timberborn.SingletonSystem;
-using Timberborn.SteamStoreSystem;
-using TimberNet;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
-using UnityEngine.UIElements;
 
 namespace BeaverBuddies.Steam
 {
     class SteamOverlayConnectionService : IUpdatableSingleton
     {
+        public static bool IsSteamEnabled { get; private set; } = false;
+
+#if IS_STEAM
         private SteamManager _steamManager;
         private ClientConnectionService _clientConnectionService;
 
         private static List<IDisposable> callbacks = new List<IDisposable>();
-        public static bool IsSteamEnabled { get; private set; } = false;
 
         public SteamOverlayConnectionService(
             SteamManager steamManager,
@@ -114,5 +114,9 @@ namespace BeaverBuddies.Steam
                 _clientConnectionService.ShowConnectionMessage(success);
             }
         }
+#else
+        // Need to implement the interface
+        public void UpdateSingleton() { }
+#endif
     }
 }

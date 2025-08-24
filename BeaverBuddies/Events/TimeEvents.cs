@@ -92,15 +92,15 @@ namespace BeaverBuddies.Events
     	if (!_isLocked)
 		{
 			_speedBefore = CurrentSpeed;
-			ChangeSpeed(0f);
+			ChangeSpeed(value);
 			_isLocked = true;
 			_eventBus.Post(new SpeedLockChangedEvent(_isLocked));
 		}
      */
-    [HarmonyPatch(typeof(SpeedManager), nameof(SpeedManager.LockSpeed))]
+    [HarmonyPatch(typeof(SpeedManager), nameof(SpeedManager.ChangeAndLockSpeed))]
     public class SpeedLockPatcher
     {
-        static bool Prefix(SpeedManager __instance)
+        static bool Prefix(SpeedManager __instance, float value)
         {
             // Clients should never freeze for dialogs. Main menu will be
             // handled separately.
@@ -112,7 +112,7 @@ namespace BeaverBuddies.Events
             if (!__instance._isLocked)
             {
                 __instance._speedBefore = __instance.CurrentSpeed;
-                SpeedChangePatcher.SetSpeedSilently(__instance, 0f);
+                SpeedChangePatcher.SetSpeedSilently(__instance, value);
                 __instance._isLocked = true;
                 __instance._eventBus.Post(new SpeedLockChangedEvent(__instance._isLocked));
             }

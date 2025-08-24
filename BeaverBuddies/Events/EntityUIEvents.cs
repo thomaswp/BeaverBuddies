@@ -9,6 +9,7 @@ using Timberborn.BuilderPrioritySystem;
 using Timberborn.BuildingsBlocking;
 using Timberborn.BuildingsUI;
 using Timberborn.Characters;
+using Timberborn.CharactersUI;
 using Timberborn.CoreUI;
 using Timberborn.Demolishing;
 using Timberborn.DemolishingUI;
@@ -818,6 +819,29 @@ namespace BeaverBuddies.Events
         }
     }
 
+    [HarmonyPatch(typeof(CharacterBatchControlRowItemFactory), nameof(CharacterBatchControlRowItemFactory.SetEntityName))]
+    [ManualMethodOverwrite]
+    /**
+     * Mirror of EntityPanel.SetEntityName capture, routed through batch control row factory.
+     *  6/20/2025
+		if ((bool)_shownEntity && !string.IsNullOrWhiteSpace(newName))
+		{
+			_entityBadgeService.SetEntityName(_shownEntity, newName.Trim());
+		}
+     */
+    class CharacterBatchControlRowItemFactorySetEntityNamePatcher
+    {
+        static bool Prefix(CharacterBatchControlRowItemFactory __instance, string newName, Character character)
+        {
+            if (!(character != null && !string.IsNullOrWhiteSpace(newName))) return true;
+            return ReplayEvent.DoEntityPrefix(character, entityID => new EntityRenamedEvent()
+            {
+                entityID = entityID,
+                newName = newName,
+            });
+        }
+    }
+
     class WorkerTypeUnlockedEvent : ReplayEvent
     {
         public UnlockableWorkerType workerType;
@@ -1175,7 +1199,7 @@ namespace BeaverBuddies.Events
         }
     }
 
-    /* 
+    /*
      * Note: We override the SluiceState methods instead of the SluiceFragment methods
      * only for contaminatoin limits, because these methods seem to only be called form the
      * UI, which contains some additional logic we don't want to have to manually override.
@@ -1304,6 +1328,92 @@ namespace BeaverBuddies.Events
         public static bool Prefix(SluiceState __instance)
         {
             return SluiceModeUpdatedEvent.DoPrefix(__instance, SluiceMode.Closed);
+        }
+    }
+
+    enum WaterInputDepthAction
+    {
+        ToggleLimit,
+        IncreaseDepthLimit,
+        DecreaseDepthLimit,
+    }
+
+    [Serializable]
+    class WaterInputDepthActionEvent : ReplayEvent
+    {
+        public string entityID;
+        public WaterInputDepthAction action;
+
+        public override void Replay(IReplayContext context)
+        {
+            var waterinput = GetComponent<WaterInputCoordinates>(context, entityID);
+            var waterInputSpec = GetComponent<WaterInputSpec>(context, entityID);
+            if (waterinput == null || waterInputSpec == null) return;
+            switch (action)
+            {
+                case WaterInputDepthAction.ToggleLimit:
+                    if (waterinput.UseDepthLimit)
+                    {
+                        waterinput.DisableDepthLimit();
+                    }
+                    else
+                    {
+                        waterinput.SetDepthLimit(waterinput.Depth);
+                    }
+                    break;
+                case WaterInputDepthAction.IncreaseDepthLimit:
+                    int depthLimit = Math.Min(waterInputSpec.MaxDepth, waterinput.DepthLimit + 1);
+                    waterinput.SetDepthLimit(depthLimit);
+                    break;
+                case WaterInputDepthAction.DecreaseDepthLimit:
+                    depthLimit = Math.Max(0, waterinput.DepthLimit - 1);
+                    waterinput.SetDepthLimit(depthLimit);
+                    break;
+            }
+        }
+
+        public static bool DoPrefix(BaseComponent entityComponent, WaterInputDepthAction action)
+        {
+            return DoEntityPrefix(entityComponent, entityID =>
+            {
+                return new WaterInputDepthActionEvent()
+                {
+                    entityID = entityID,
+                    action = action,
+                };
+            });
+        }
+
+        public override string ToActionString()
+        {
+            return $"Water input {entityID} action={action}";
+        }
+    }
+
+    [HarmonyPatch(typeof(WaterInputDepthFragment), nameof(WaterInputDepthFragment.ToggleDepthLimit))]
+    class WaterInputDepthFragmentToggleDepthLimitPatcher
+    {
+        public static bool Prefix(WaterInputDepthFragment __instance)
+        {
+            return WaterInputDepthActionEvent.DoPrefix(__instance._waterInputCoordinates, WaterInputDepthAction.ToggleLimit);
+        }
+    }
+
+    [HarmonyPatch(typeof(WaterInputDepthFragment), nameof(WaterInputDepthFragment.IncreaseDepth))]
+    class WaterInputDepthFragmentIncreaseDepthPatcher
+    {
+        public static bool Prefix(WaterInputDepthFragment __instance)
+        {
+            return WaterInputDepthActionEvent.DoPrefix(__instance._waterInputCoordinates, WaterInputDepthAction.IncreaseDepthLimit);
+        }
+    }
+
+    [HarmonyPatch(typeof(WaterInputDepthFragment), nameof(WaterInputDepthFragment.DecreaseDepth))]
+    class WaterInputDepthFragmentDecreaseDepthPatcher
+    {
+        public static bool Prefix(WaterInputDepthFragment __instance)
+        {
+            return WaterInputDepthActionEvent.DoPrefix(__instance._waterInputCoordinates, WaterInputDepthAction.DecreaseDepthLimit);
         }
     }
 
