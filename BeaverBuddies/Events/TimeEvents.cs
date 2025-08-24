@@ -173,12 +173,13 @@ namespace BeaverBuddies.Events
     {
         static bool Prefix()
         {
-            // If the user wants to reduce pauses, don't create an event.
-            // Let each player open their own menu independently.
 
-            // I think it's too dangerous to open the menu outside of a synced pause.
-            // But if it's going to be an option it should be separate.
-            //if (Settings.ReducePausesEnabled) return true;s
+            // This would make options menu unsynced and non-pausing,
+            // but I think it's too dangerous to open the menu outside of a synced pause.
+            // If it's going to be an option it should be separate from skipping
+            // other less critical pauses.
+            //if (Settings.ReducePausesEnabled) return true;
+
             return ReplayEvent.DoPrefix(() => new ShowOptionsMenuEvent());
         }
     }
