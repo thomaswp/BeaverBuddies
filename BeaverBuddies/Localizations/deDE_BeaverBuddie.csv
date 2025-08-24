@@ -61,6 +61,8 @@ Hinweis: Diese Funktion funktioniert möglicherweise nicht, wenn dein Netzwerk P
 Außerdem können Peer‑to‑Peer‑Verbindungen langsamer sein als direkte Verbindungen.",""
 BeaverBuddies.Settings.FriendsCanJoinSteamGame,"Freunde direkt über Steam beitreten lassen",""
 BeaverBuddies.Settings.FriendsCanJoinSteamGame.Tooltip,"Wenn aktiviert, können deine Freunde direkt über Steam deinem Spiel beitreten, ohne dass du sie einladen musst.",""
+BeaverBuddies.Settings.ReducePauses,"Anzahl der erzwungenen Pausen reduzieren",""
+BeaverBuddies.Settings.ReducePauses.Tooltip,"Wenn aktiviert, wird die Anzahl erzwungener Pausen (Hauptmenü, Abriss usw.) drastisch reduziert. Für ein optimales Erlebnis sollten alle Spieler die gleiche Einstellung verwenden.",""
 BeaverBuddies.Host.ConnectedClients,"Warte auf Clients…
 Derzeit verbundene Clients:",""
 BeaverBuddies.Host.DirectConnectClient,"Direkt‑Connect‑Client",""

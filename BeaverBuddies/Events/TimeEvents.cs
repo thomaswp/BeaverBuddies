@@ -2,10 +2,10 @@
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Timberborn.Options;
 using Timberborn.OptionsGame;
 using Timberborn.TimeSystem;
+using Timberborn.UILayoutSystem;
 using static BeaverBuddies.SingletonManager;
 
 namespace BeaverBuddies.Events
@@ -79,8 +79,7 @@ namespace BeaverBuddies.Events
         }
     }
 
-    // TODO: It might be nice to make this configurable: whether the host
-    // should freeze the game for these pop-ups. If we don't freeze, it could
+    // This is now configurable via Settings.ReducePausesEnable. If we don't freeze, it could
     // definitely cause some possible invalid operations (e.g. deleting a building
     // that's not there anymore), but in theory these errors get caught before
     // sending to the server. In practice, though, there could be side-effects of
@@ -100,8 +99,15 @@ namespace BeaverBuddies.Events
     [HarmonyPatch(typeof(SpeedManager), nameof(SpeedManager.ChangeAndLockSpeed))]
     public class SpeedLockPatcher
     {
+        // When true, skip the next ChangeAndLockSpeed call (used by various UI events when ReducePauses is enabled)
+        public static bool SkipNextSpeedLock = false;
         static bool Prefix(SpeedManager __instance, float value)
         {
+            if (SkipNextSpeedLock)
+            {
+                SkipNextSpeedLock = false;
+                return false; // skip original; do not modify speed or lock
+            }
             // Clients should never freeze for dialogs. Main menu will be
             // handled separately.
             if (EventIO.Get()?.UserEventBehavior == UserEventBehavior.Send)
@@ -175,16 +181,40 @@ namespace BeaverBuddies.Events
     // However, only the host will be able to unpause, and only by manually
     // setting the game speed, since they won't process any events by clients
     // while they have a panel (including this one) up (I think...).
-    // TODO: Should allow client to bring up menu, even if they don't pause
     [HarmonyPatch(typeof(GameOptionsBox), nameof(GameOptionsBox.Show))]
     public class GameOptionsBoxShowPatcher
     {
         static bool Prefix()
         {
-            return ReplayEvent.DoPrefix(() =>
+            // If the user wants to reduce pauses, don't create an event or pause the game.
+            // Let each player open their own menu independently.
+            if (Settings.ReducePausesEnabled)
             {
-                return new ShowOptionsMenuEvent();
-            });
+                // Signal that the next lock attempt should be skipped
+                SpeedLockPatcher.SkipNextSpeedLock = true;
+                return true;
+            }
+
+            // Otherwise, treat showing options as a synced event that pauses.
+            return ReplayEvent.DoPrefix(() => new ShowOptionsMenuEvent());
+        }
+    }
+
+    // OverlayPanelSpeedLocker is triggering ChangeAndLockSpeed via OnPanelShown
+    // We suppress its locking behavior entirely when ReducePauses is enabled to avoid unintended pauses
+    // for overlay/submenus.
+    [HarmonyPatch(typeof(OverlayPanelSpeedLocker), "OnPanelShown")]
+    public class OverlayPanelSpeedLockerShowPatcher
+    {
+        static bool Prefix()
+        {
+            if (Settings.ReducePausesEnabled)
+            {
+                // Ensure that even if original would call ChangeAndLockSpeed, it gets skipped.
+                SpeedLockPatcher.SkipNextSpeedLock = true;
+                return false;
+            }
+            return true;
         }
     }
 }
