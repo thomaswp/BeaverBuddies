@@ -86,8 +86,27 @@ namespace BeaverBuddies.Steam
                 Array.Copy(buffer, offset, newBuffer, 0, count);
                 buffer = newBuffer;
             }
-            Plugin.Log($"SteamSocket sending {count} bytes");
-            SteamNetworking.SendP2PPacket(friendID, buffer, (uint)count, EP2PSend.k_EP2PSendReliable);
+
+            // Steam P2P has a packet size limit, so split large writes into chunks
+            // https://partner.steamgames.com/doc/api/ISteamNetworking#EP2PSend
+            const int STEAM_MAX_PACKET_SIZE = 900; // Conservative limit, actual max is 1200
+
+            for (int i = 0; i < count; i += STEAM_MAX_PACKET_SIZE)
+            {
+                int chunkSize = Math.Min(STEAM_MAX_PACKET_SIZE, count - i);
+                byte[] chunk = new byte[chunkSize];
+                Array.Copy(buffer, i, chunk, 0, chunkSize);
+                SteamNetworking.SendP2PPacket(friendID, chunk, (uint)chunkSize, EP2PSend.k_EP2PSendReliable);
+            }
+
+            if (count > STEAM_MAX_PACKET_SIZE)
+            {
+                Plugin.Log($"SteamSocket sent {count} bytes in {(count + STEAM_MAX_PACKET_SIZE - 1) / STEAM_MAX_PACKET_SIZE} chunks");
+            }
+            else
+            {
+                Plugin.Log($"SteamSocket sent {count} bytes");
+            }
         }
 
         public void ReceiveData(byte[] data)
