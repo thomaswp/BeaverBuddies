@@ -209,10 +209,10 @@ namespace BeaverBuddies.DesyncDetecter
     //    }
     //}
 
-    [HarmonyPatch(typeof(SoilMoistureMap), nameof(SoilMoistureMap.UpdateMoistureLevels))]
+    [HarmonyPatch(typeof(SoilMoistureService), nameof(SoilMoistureService.UpdateMoistureLevels))]
     public class SoilMoistureMapSetMoistureLevelPatcher
     {
-        public static void Postfix(SoilMoistureMap __instance)
+        public static void Postfix(SoilMoistureService __instance)
         {
             if (!Settings.Debug) return;
             // During saves, this gets called early, but it just syncs the
@@ -224,7 +224,7 @@ namespace BeaverBuddies.DesyncDetecter
             // Just always update the moisture levels at the end of the tick.
             if (GameSaverSavePatcher.IsSaving) return;
 
-            var levels = __instance._soilMoistureSimulator._moistureLevels;
+            var levels = __instance._soilMoistureSimulator.MoistureLevels;
             int hash = 13;
             foreach (var level in levels)
             {
@@ -234,14 +234,14 @@ namespace BeaverBuddies.DesyncDetecter
         }
     }
 
-    [HarmonyPatch(typeof(ThreadSafeWaterMap), nameof(ThreadSafeWaterMap.UpdateData))]
+    [HarmonyPatch(typeof(ThreadSafeWaterMap), nameof(ThreadSafeWaterMap.Update))]
     public class ThreadSafeWaterMapUpdateDataPatcher
     {
         public static void Postfix(ThreadSafeWaterMap __instance)
         {
             if (!Settings.Debug) return;
 
-            var columns = __instance._waterColumns;
+            var columns = __instance._threadSafeWaterColumns;
             int hash = 13;
             foreach (var level in columns)
             {
@@ -250,7 +250,7 @@ namespace BeaverBuddies.DesyncDetecter
             DesyncDetecterService.Trace($"Updating water map columns with hash {hash:X8}");
             
             hash = 13;
-            var counts = __instance._columnCounts;
+            var counts = __instance._threadSafeColumnCounts;
             foreach (byte count in counts)
             {
                 hash = (hash * 7) + count;
