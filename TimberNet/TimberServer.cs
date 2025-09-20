@@ -157,7 +157,6 @@ namespace TimberNet
             Task<byte[]> task = mapProvider();
             Log("Waiting for map...");
             byte[] mapBytes = await task;
-            Log($"Sending map with length {mapBytes.Length}");
 
             // TODO: This may happen a bit early - it seems possible for
             // events from a prior frame to get queued. Maybe just need to filter
@@ -166,6 +165,7 @@ namespace TimberNet
             // while the map is sending
             StartQueuing(client);
 
+            Log($"Sending map with length {mapBytes.Length}");
             SendDataWithLength(client, mapBytes);
 
             Log($"Sent map with length {mapBytes.Length} and Hash: {GetHashCode(mapBytes).ToString("X8")}");

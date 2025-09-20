@@ -18,7 +18,8 @@ namespace BeaverBuddies.Steam
 
         // Max size should be 1MB, so conservatively, we use 512KB
         // https://partner.steamgames.com/doc/api/ISteamNetworking#EP2PSend
-        public int MaxChunkSize => 512 * 1024; // 512 KB
+        //public int MaxChunkSize => 512 * 1024; // 512 KB
+        public int MaxChunkSize => 900; // From SamuZad
 
         public bool Connected { get; private set; }
 
@@ -84,12 +85,13 @@ namespace BeaverBuddies.Steam
 
         public void Write(byte[] buffer, int offset, int count)
         {
-            if (buffer.Length > MaxChunkSize)
+            if (count > MaxChunkSize)
             {
                 throw new IOException($"Attempted to write {buffer.Length} bytes, which exceeds the max chunk size of {MaxChunkSize} bytes.");
             }
             if (offset > 0)
             {
+                // Make a copy to avoid modifying the caller's buffer
                 byte[] newBuffer = new byte[count];
                 Array.Copy(buffer, offset, newBuffer, 0, count);
                 buffer = newBuffer;
