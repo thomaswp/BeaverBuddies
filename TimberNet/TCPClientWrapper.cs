@@ -13,6 +13,7 @@ namespace TimberNet
         private readonly TcpClient client;
 
         public int MaxChunkSize => 8192 * 4; // 32K
+        public int MaxBytesPerSecond => 1024 * 1024; // 1 MB/s
 
         public string? Name => null;
 

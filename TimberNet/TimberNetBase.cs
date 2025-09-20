@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 
 namespace TimberNet
 {
@@ -177,8 +178,14 @@ namespace TimberNet
         {
             SendLength(stream, data.Length);
             int chunkSize = stream.MaxChunkSize;
+            // How long to sleep between chunks (may be 0)
+            int sleepMS = stream.MaxChunkSize * 1000 / stream.MaxBytesPerSecond;
             for (int i = 0; i < data.Length; i += chunkSize)
             {
+                if (i != 0)
+                {
+                    Thread.Sleep(sleepMS);
+                }
                 int length = Math.Min(chunkSize, data.Length - i);
                 stream.Write(data, i, length);
             }

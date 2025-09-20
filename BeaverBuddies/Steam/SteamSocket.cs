@@ -15,11 +15,18 @@ namespace BeaverBuddies.Steam
 {
     public class SteamSocket : ISocketStream, ISteamPacketReceiver
     {
+        // Steam can only buffer 1MB at a time, so we need to
+        // leave time for that to clear out. Hopefully this is enough.
+        // 1 MB per 8 seconds
+        const int BYTES_PER_SECOND = 1024 * 1024 / 8;
+        // Note this doesn't affect the theoretical issue of multiple
+        // events being sent in a single packet - this could split them up
+        // but that's fine. So we just choose a moderate size.
+        const int MAX_CHUNK_SIZE = 1024 * 8; // 8KB
 
-        // Max size should be 1MB, so conservatively, we use 512KB
-        // https://partner.steamgames.com/doc/api/ISteamNetworking#EP2PSend
-        //public int MaxChunkSize => 512 * 1024; // 512 KB
-        public int MaxChunkSize => 900; // From SamuZad
+        public int MaxBytesPerSecond => BYTES_PER_SECOND;
+        public int MaxChunkSize => MAX_CHUNK_SIZE;
+
 
         public bool Connected { get; private set; }
 
@@ -71,9 +78,9 @@ namespace BeaverBuddies.Steam
             Array.Copy(result, readOffset, buffer, offset, bytesToCopy);
             if (result.Length > bytesToCopy)
             {
-                // This will fail we ever receive a packet that
-                // spans multiple messages. I don't think that can happen right
-                // now unless things get jumbled, but we should log a more useful
+                // This will fail we ever receive multiple messages in a single packet.
+                // I don't think that can happen right now unless Steam merges packets, which
+                // seems not to happen... but we should log a more useful
                 // warning. And right now the "readOffset" should always be 0.
                 Plugin.LogWarning($"SteamSocket read {bytesToCopy} bytes, but {result.Length - bytesToCopy} bytes were left over. This is probably a bug!");
                 readOffset = bytesToCopy;
