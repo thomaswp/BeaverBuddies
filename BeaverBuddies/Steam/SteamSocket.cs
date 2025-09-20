@@ -16,6 +16,10 @@ namespace BeaverBuddies.Steam
     public class SteamSocket : ISocketStream, ISteamPacketReceiver
     {
 
+        // Max size should be 1MB, so conservatively, we use 512KB
+        // https://partner.steamgames.com/doc/api/ISteamNetworking#EP2PSend
+        public int MaxChunkSize => 512 * 1024; // 512 KB
+
         public bool Connected { get; private set; }
 
         public string Name { get; private set; }
@@ -69,7 +73,7 @@ namespace BeaverBuddies.Steam
                 // This will fail we ever receive a packet that
                 // spans multiple messages. I don't think that can happen right
                 // now unless things get jumbled, but we should log a more useful
-                // warning. And right now  the "readOffset" should always be 0.
+                // warning. And right now the "readOffset" should always be 0.
                 Plugin.LogWarning($"SteamSocket read {bytesToCopy} bytes, but {result.Length - bytesToCopy} bytes were left over. This is probably a bug!");
                 readOffset = bytesToCopy;
             }
@@ -80,6 +84,10 @@ namespace BeaverBuddies.Steam
 
         public void Write(byte[] buffer, int offset, int count)
         {
+            if (buffer.Length > MaxChunkSize)
+            {
+                throw new IOException($"Attempted to write {buffer.Length} bytes, which exceeds the max chunk size of {MaxChunkSize} bytes.");
+            }
             if (offset > 0)
             {
                 byte[] newBuffer = new byte[count];

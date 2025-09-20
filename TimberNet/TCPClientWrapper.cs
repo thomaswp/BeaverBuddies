@@ -12,6 +12,8 @@ namespace TimberNet
         public readonly int port;
         private readonly TcpClient client;
 
+        public int MaxChunkSize => 8192 * 4; // 32K
+
         public string? Name => null;
 
         public TCPClientWrapper(string address, int port) 
@@ -29,6 +31,7 @@ namespace TimberNet
         }
 
         public bool Connected => client.Connected;
+
 
         public Task ConnectAsync()
         {
@@ -60,6 +63,10 @@ namespace TimberNet
 
         public void Write(byte[] buffer, int offset, int count)
         {
+            if (count > MaxChunkSize)
+            {
+                throw new ArgumentException($"Count {count} exceeds max chunk size {MaxChunkSize}");
+            }
             if (!client.Connected)
             {
                 throw new InvalidOperationException("Client is not connected");

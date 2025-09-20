@@ -148,9 +148,8 @@ namespace TimberNet
         {
             SendLength(client, 0);
             byte[] bytes = MessageToBuffer(errorMessage!);
-            SendLength(client, bytes.Length);
             // TODO: Not sure this makes sense for Steam
-            client.Write(bytes, 0, bytes.Length);
+            SendDataWithLength(client, bytes);
         }
 
         private async Task SendMap(ISocketStream client)
@@ -167,16 +166,7 @@ namespace TimberNet
             // while the map is sending
             StartQueuing(client);
 
-
-            SendLength(client, mapBytes.Length);
-            
-            // Send bytes in chunks
-            int chunkSize = MAX_BUFFER_SIZE;
-            for (int i = 0; i < mapBytes.Length; i += chunkSize)
-            {
-                int length = Math.Min(chunkSize, mapBytes.Length - i);
-                client.Write(mapBytes, i, length);
-            }
+            SendDataWithLength(client, mapBytes);
 
             Log($"Sent map with length {mapBytes.Length} and Hash: {GetHashCode(mapBytes).ToString("X8")}");
         }

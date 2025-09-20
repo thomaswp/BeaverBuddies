@@ -173,6 +173,17 @@ namespace TimberNet
             stream.Write(buffer, 0, buffer.Length);
         }
 
+        protected void SendDataWithLength(ISocketStream stream, byte[] data)
+        {
+            SendLength(stream, data.Length);
+            int chunkSize = stream.MaxChunkSize;
+            for (int i = 0; i < data.Length; i += chunkSize)
+            {
+                int length = Math.Min(chunkSize, data.Length - i);
+                stream.Write(data, i, length);
+            }
+        }
+
         protected void SendEvent(ISocketStream client, JObject message)
         {
             Log($"Sending: {GetType(message)} for tick {GetTick(message)}");
@@ -180,8 +191,7 @@ namespace TimberNet
 
             try
             {
-                SendLength(client, buffer.Length);
-                client.Write(buffer, 0, buffer.Length);
+                SendDataWithLength(client, buffer);
             } catch (Exception e)
             {
                 Log($"Error sending event: {e.Message}");

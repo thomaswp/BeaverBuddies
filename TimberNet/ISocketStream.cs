@@ -12,6 +12,8 @@ namespace TimberNet
 
         string? Name { get; }
 
+        int MaxChunkSize { get; }
+
         int Read(byte[] buffer, int offset, int count);
         void Write(byte[] buffer, int offset, int count);
         void Close();
