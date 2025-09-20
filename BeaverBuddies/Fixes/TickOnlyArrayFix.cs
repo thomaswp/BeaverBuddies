@@ -12,7 +12,7 @@ namespace BeaverBuddies.Fixes
     [HarmonyPatch(typeof(TickOnlyArrayService), nameof(TickOnlyArrayService.AllowEdit), MethodType.Getter)]
     class TickOnlyArrayServiceAllowEditPatch
     {
-        static bool Prefix(ref bool __result)
+        public static bool Prefix(ref bool __result)
         {
             // Allow edit access during save operations since saves only need read access
             // but the poorly designed API requires write permission for read operations
