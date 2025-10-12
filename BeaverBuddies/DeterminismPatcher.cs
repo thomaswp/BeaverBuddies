@@ -44,7 +44,7 @@ namespace BeaverBuddies
         {
             Dictionary<System.Type, string> nonGameRandomMethods = new Dictionary<System.Type, string>()
             {
-                { typeof(InputService), nameof(InputService.Update) },
+                //{ typeof(InputService), nameof(InputService.Update) },
                 { typeof(Sounds), nameof(Sounds.GetRandomSound) },
                 { typeof(SoundEmitter), nameof(SoundEmitter.Update) },
                 { typeof(DateSalter), nameof(DateSalter.GenerateRandomNumber) },

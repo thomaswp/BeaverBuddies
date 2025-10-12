@@ -19,7 +19,6 @@ using Timberborn.WaterSystem;
 namespace BeaverBuddies.Fixes
 {
 
-    // TODO: Remove - testing only
     [HarmonyPatch(typeof(TickableSingletonService), nameof(TickableSingletonService.StartParallelTick))]
     class TickableSingletonServiceStartParallelTickPatcher
     {

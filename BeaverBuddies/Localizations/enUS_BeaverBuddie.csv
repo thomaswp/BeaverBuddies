@@ -1,6 +1,6 @@
 ID,Text,Comment
 BeaverBuddies.Menu.JoinCoopGame,"Join co-op game","Join co-op game"
-BeaverBuddies.JoinCoopGame.EnterIp,"Enter the global IP address of the Host:","Enter the global IP address of the Host:"
+BeaverBuddies.JoinCoopGame.EnterIp,"Enter the global IP address or domain name of the Host:",""
 BeaverBuddies.FirstTimer.Message,"It looks like this is your first time using BeaverBuddies. We recommend taking a quick look through our guide to make sure you are set up to play. Would you like to do that now?","It looks like this is your first time using BeaverBuddies. We recommend taking a quick look through our guide to make sure you are set up to play. Would you like to do that now?"
 BeaverBuddies.Saving.HostCoopGame,"Host co-op game","Host co-op game"
 BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError,"Joining failed with error:
@@ -9,8 +9,61 @@ Would you like to open the troubleshooting guide?","Joining failed with error:
 {0}
 Would you like to open the troubleshooting guide?"
 BeaverBuddies.JoinCoopGame.ConnectionFailedMessage,"Failed to connect to Host. Would you like to open the troubleshooting guide?","Failed to connect to Host. Would you like to open the troubleshooting guide?"
-BeaverBuddies.ClientDesynced.Message,"A connected player desynced and cannot continue playing - sorry about that! The Host should hit Rehost and, AFTER that, the Client should Reconnect. You may need to restart the game if problems persist. Before reloading, would you like to file a bug report to help us fix this issue?","A connected player desynced and cannot continue playing - sorry about that! The Host should hit Rehost and, AFTER that, the Client should Reconnect. You may need to restart the game if problems persist. Before reloading, would you like to file a bug report to help us fix this issue?"
+BeaverBuddies.ClientDesynced.Message,"A connected player desynced and cannot continue playing - sorry about that! The Host should hit Rehost and, AFTER that, the Client should Reconnect. You may need to restart the game if problems persist. Before reloading, would you like to file a bug report to help us fix this issue?",""
 BeaverBuddies.ClientDesynced.FailedToRehostMessage,"Failed to Rehost. Manually save and Host again.","Failed to Rehost. Manually save and Host again."
 BeaverBuddies.ClientDesynced.SaveAndRehostButton,"Save and Rehost","Save and Rehost"
 BeaverBuddies.ClientDesynced.WaitForRehostButton,"Reconnect (wait for Rehost)","Reconnect (wait for Rehost)"
 BeaverBuddies.ClientDesynced.PostBugReportButton,"Post Bug Report","Post Bug Report"
+BeaverBuddies.Editor.StartingLocation1,"Starting Location - Player 1",""
+BeaverBuddies.Editor.StartingLocation2,"Starting Location - Player 2",""
+BeaverBuddies.Editor.StartingLocation3,"Starting Location - Player 3",""
+BeaverBuddies.Editor.StartingLocation4,"Starting Location - Player 4",""
+BeaverBuddies.NewGame.MaxStartingLocations,"Max Starting Locations",""
+BeaverBuddies.ClientDesynced.ReportSuccess,"Success!",""
+BeaverBuddies.ClientDesynced.ReportFailed,"Failed :(",""
+BeaverBuddies.ClientDesynced.ConsentAgreement,"Yes, I agree",""
+BeaverBuddies.ClientDesynced.TracingEnabled,"Enabled",""
+BeaverBuddies.ClientDesynced.EnableTracing,"Enable Logging",""
+BeaverBuddies.ClientDesynced.NeedToEnableTracing,"In order to report this desync, *all players* must first enable more detailed logging by pressing Enable Logging, below. If another desync occurs, you will then be able to post a detailed, automated bug report. Logging mode may cause some lag, but it will only be active until you restart the game.",""
+BeaverBuddies.ClientDesynced.ConsentMessage,"Consent to Share Usage Data
+
+By choosing to share your data, you agree to send the following information from your gameplay session to the developers of this mod:
+
+- Log Data: Information automatically collected during your gameplay session, such as game events and user interactions.
+- Save File: Your current game save file.
+
+We strive to maintain your privacy by keeping this data largely anonymous. However, because the data is collected as-is, it may inadvertently include details that could identify you (such as file paths or usernames). The developers will not attempt to identify you using this information.
+
+Your Choices:
+- If you agree, this data will be sent securely to the developers and used to improve the mod.
+- If you do not agree, no data will be sent, and your gameplay will continue without any changes.
+
+By proceeding, you confirm that you are at least the legal age of digital consent in your country of residence.
+
+Do you agree to share your data with the developers of this mod?",""
+BeaverBuddies.Settings.ClientConnectionAddress,"Client Connection Address",""
+BeaverBuddies.Settings.ClientConnectionAddress.Tooltip,"Default IP address used when connecting to a Host.",""
+BeaverBuddies.Settings.Port,"Port",""
+BeaverBuddies.Settings.Port.Tooltip,"Port used when hosting or joining a game. This should match a forwaded port for the host.",""
+BeaverBuddies.Settings.SilenceLogging,"Silence Logging",""
+BeaverBuddies.Settings.SilenceLogging.Tooltip,"Prevent this mod from logging to the player log file (except warnings and errors).
+This setting is indended for developers.",""
+BeaverBuddies.Settings.ShowFirstTimerMessage,"Show First Timer Message",""
+BeaverBuddies.Settings.AlwaysTrace,"Always Use Detailed Logging",""
+BeaverBuddies.Settings.AlwaysTrace.Tooltip,"When enabled, the game will always use detailed logging, which enables you to submit desync reports on the first occurrence without manually enabling detailed logging.
+Note that all players must have the setting enabled. 
+This setting will cause some lag and is not recommended for most players.",""
+BeaverBuddies.Settings.ReportingConsent,"Consent to Reporting",""
+BeaverBuddies.Settings.EnableSteamConnection,"Enable Steam Networking",""
+BeaverBuddies.Settings.EnableSteamConnection.Tooltip,"Allows players to join your games via Steam's peer-to-peer networking.
+Players will still be able to join via port forwarding.
+Note: This feature may not work if your network does not support peer-to-peer connections.
+Additionally, peer-to-peer connections may be slower than direct connections.",""
+BeaverBuddies.Settings.FriendsCanJoinSteamGame,"Allow Friends to Join Directly via Steam",""
+BeaverBuddies.Settings.FriendsCanJoinSteamGame.Tooltip,"When enabled, your friends can join your game directly via Steam without you inviting them.",""
+BeaverBuddies.Host.ConnectedClients,"Wait for clients to connect...
+Currently connected clients:",""
+BeaverBuddies.Host.DirectConnectClient,"Direct Connect Client",""
+BeaverBuddies.Host.StartGame,"Start Game",""
+BeaverBuddies.Host.InviteFriends,"Invite Friends",""
+BeaverBuddies.JoinCoopGame.Success,"Joined! Receiving map...",""

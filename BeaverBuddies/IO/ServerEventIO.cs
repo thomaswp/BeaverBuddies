@@ -3,10 +3,15 @@ using System;
 using TimberNet;
 using System.Threading.Tasks;
 using BeaverBuddies.Events;
+using BeaverBuddies.Steam;
+using System.Net.Sockets;
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace BeaverBuddies.IO
 {
-    // TODO: With TimberBorn's current architecture, we cannot feasibly
+    // With TimberBorn's current architecture, we cannot feasibly
     // support joining after the game has started. This is because a number
     // of variables are randomly initialized during load (e.g. tree lifespans)
     // rather than serialized, since they aren't that important. As a result, the
@@ -29,14 +34,34 @@ namespace BeaverBuddies.IO
         // happen in the same order for the server and clients.
         public override UserEventBehavior UserEventBehavior => UserEventBehavior.QueuePlay;
 
+        public ISocketListener SocketListener { get; private set; }
 
         // We only support a static map; see note above
         public void Start(byte[] mapBytes)
         {
             try
             {
-                netBase = new TimberServer(
-                    EventIO.Config.Port,
+                List<ISocketListener> listeners = [
+                    new TCPListenerWrapper(Settings.Port)
+                ];
+                if (SteamOverlayConnectionService.IsSteamEnabled && Settings.EnableSteam)
+                {
+                    listeners.Add(new SteamListener());
+                }
+                SocketListener = new MultiSocketListener(listeners.ToArray());
+                if (SocketListener is MultiSocketListener)
+                {
+                    foreach (ISocketListener child in ((MultiSocketListener)SocketListener).Listeners)
+                    {
+                        TryRegisterSteamPacketReceiver(child);
+                    }
+                }
+                else
+                {
+                    TryRegisterSteamPacketReceiver(SocketListener);
+                }
+                NetBase = new TimberServer(
+                    SocketListener,
                     () =>
                     {
                         // TODO: Probably don't need to hold it in memory after the first tick...
@@ -54,9 +79,9 @@ namespace BeaverBuddies.IO
                 return;
             }
             //netBase = new TimberServer(port, mapProvider, null);
-            netBase.OnLog += Plugin.Log;
-            netBase.OnMapReceived += NetBase_OnClientConnected;
-            netBase.Start();
+            NetBase.OnLog += Plugin.Log;
+            NetBase.OnMapReceived += NetBase_OnClientConnected;
+            NetBase.Start();
         }
 
         private Func<JObject> CreateInitEvent()
@@ -79,7 +104,7 @@ namespace BeaverBuddies.IO
             Plugin.Log("Game started: no longer accepting clients");
             string message = $"The Host has already started the game, and the game can no longer be joined. " +
                 $"Ask the Host to rehost and join before they unpause.";
-            netBase.StopAcceptingClients(message);
+            NetBase.StopAcceptingClients(message);
             // TODO: remove map from memory
         }
 

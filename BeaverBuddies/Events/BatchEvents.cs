@@ -9,10 +9,11 @@ using Timberborn.Goods;
 namespace BeaverBuddies.Events
 {
     enum DistributorType
-    { 
+    {
         Children,
         Adults,
         Bots,
+        Contaminated,
         Unknown
     }
 
@@ -25,6 +26,7 @@ namespace BeaverBuddies.Events
                 ChildrenDistributorTemplate _ => DistributorType.Children,
                 AdultsDistributorTemplate _ => DistributorType.Adults,
                 BotsDistributorTemplate _ => DistributorType.Bots,
+                ContaminatedDistributorTemplate _ => DistributorType.Contaminated,
                 _ => DistributorType.Unknown
             };
             if (type == DistributorType.Unknown)
@@ -35,7 +37,7 @@ namespace BeaverBuddies.Events
         }
 
 
-        private static PopulationDistributorRetriever retreiver = 
+        private static PopulationDistributorRetriever retreiver =
             new PopulationDistributorRetriever();
         public static PopulationDistributor GetDistributor(DistributorType distributorType, DistrictCenter districtCenter)
         {
@@ -44,6 +46,7 @@ namespace BeaverBuddies.Events
                 DistributorType.Children => retreiver.GetPopulationDistributor<ChildrenDistributorTemplate>(districtCenter),
                 DistributorType.Adults => retreiver.GetPopulationDistributor<AdultsDistributorTemplate>(districtCenter),
                 DistributorType.Bots => retreiver.GetPopulationDistributor<BotsDistributorTemplate>(districtCenter),
+                DistributorType.Contaminated => retreiver.GetPopulationDistributor<ContaminatedDistributorTemplate>(districtCenter),
                 _ => null
             };
             if (distributor == null)
@@ -66,11 +69,11 @@ namespace BeaverBuddies.Events
             var fromDistrictCenter = GetComponent<DistrictCenter>(context, fromDistrictID);
             var toDistrictCenter = GetComponent<DistrictCenter>(context, toDistrictID);
             if (fromDistrictCenter == null || toDistrictCenter == null) { return; }
-            
+
             var distributor = DistributorUtils.GetDistributor(distributorType, fromDistrictCenter);
-            if (distributor == null) 
+            if (distributor == null)
             {
-                return; 
+                return;
             }
 
             int amount = Math.Min(this.amount, distributor.Current);
@@ -235,7 +238,7 @@ namespace BeaverBuddies.Events
     {
         public DistrictDistributionSetting DistrictSetting { get; private set; }
 
-        public GoodDistributionSettingWithDistrict(GoodSpecification goodSpecification, DistrictDistributionSetting districtSetting) : base(goodSpecification)
+        public GoodDistributionSettingWithDistrict(GoodSpec goodSpec, DistrictDistributionSetting districtSetting) : base(goodSpec)
         {
             this.DistrictSetting = districtSetting;
         }
@@ -247,7 +250,7 @@ namespace BeaverBuddies.Events
         static void Prefix(DistrictDistributionSetting __instance, ref GoodDistributionSetting goodDistributionSetting)
         {
             // Replace the goodDistributionSetting with a new one that has a reference to the district
-            var newSetting = new GoodDistributionSettingWithDistrict(goodDistributionSetting._goodSpecification, __instance);
+            var newSetting = new GoodDistributionSettingWithDistrict(goodDistributionSetting._goodSpec, __instance);
             newSetting.ExportThreshold = goodDistributionSetting.ExportThreshold;
             newSetting.ImportOption = goodDistributionSetting.ImportOption;
             newSetting.LastImportTimestamp = goodDistributionSetting.LastImportTimestamp;
@@ -339,7 +342,7 @@ namespace BeaverBuddies.Events
         static bool Prefix(GoodDistributionSetting __instance)
         {
             var exportThreshold = 0f;
-            var importOption = ((!__instance._goodSpecification.ForceImport) ? ImportOption.Auto : ImportOption.Forced);
+            var importOption = ((!__instance._goodSpec.ForceImport) ? ImportOption.Auto : ImportOption.Forced);
             if (__instance.ImportOption == importOption && __instance.ExportThreshold == exportThreshold) return true;
             return GoodDistributionSettingChangedEvent.DoPrefix(__instance, exportThreshold, importOption, false);
         }

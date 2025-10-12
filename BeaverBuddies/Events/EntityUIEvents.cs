@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Timberborn.BaseComponentSystem;
 using Timberborn.BeaversUI;
@@ -8,28 +9,48 @@ using Timberborn.BuilderPrioritySystem;
 using Timberborn.BuildingsBlocking;
 using Timberborn.BuildingsUI;
 using Timberborn.Characters;
+using Timberborn.CharactersUI;
+using Timberborn.CoreUI;
 using Timberborn.Demolishing;
 using Timberborn.DemolishingUI;
 using Timberborn.Emptying;
+using Timberborn.EntityPanelSystem;
 using Timberborn.EntitySystem;
 using Timberborn.Explosions;
 using Timberborn.ExplosionsUI;
 using Timberborn.Fields;
+using Timberborn.Forestry;
+using Timberborn.GameDistrictsUI;
+using Timberborn.GameSaveRepositorySystem;
+using Timberborn.GameStartup;
 using Timberborn.Gathering;
 using Timberborn.Goods;
+using Timberborn.Hauling;
+using Timberborn.HaulingUI;
 using Timberborn.InventorySystem;
 using Timberborn.Planting;
 using Timberborn.PrefabSystem;
 using Timberborn.PrioritySystem;
 using Timberborn.RecoveredGoodSystem;
 using Timberborn.RecoveredGoodSystemUI;
+using Timberborn.SettlementNameSystemUI;
+using Timberborn.SingletonSystem;
 using Timberborn.StockpilePrioritySystem;
 using Timberborn.StockpilePriorityUISystem;
 using Timberborn.WaterBuildings;
+using Timberborn.WaterBuildingsUI;
+using Timberborn.WaterSourceSystem;
+using Timberborn.WaterSourceSystemUI;
+using Timberborn.Wonders;
+using Timberborn.WondersUI;
 using Timberborn.WorkerTypesUI;
 using Timberborn.Workshops;
 using Timberborn.WorkSystem;
 using Timberborn.WorkSystemUI;
+using Timberborn.ZiplineSystem;
+using Timberborn.ZiplineSystemUI;
+using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace BeaverBuddies.Events
 {
@@ -44,7 +65,7 @@ namespace BeaverBuddies.Events
         {
             if (entityID == null) return;
 
-            
+
             var selector = GetComponent<Selector>(context, entityID);
             if (selector == null) return;
             SetValue(context, selector, itemID);
@@ -57,7 +78,7 @@ namespace BeaverBuddies.Events
     {
         protected override void SetValue(IReplayContext context, GatherablePrioritizer prioritizer, string prefabName)
         {
-            Gatherable gatherable = null;
+            GatherableSpec gatherable = null;
             if (itemID != null)
             {
                 gatherable = prioritizer.GetGatherable(prefabName);
@@ -79,11 +100,11 @@ namespace BeaverBuddies.Events
     [HarmonyPatch(typeof(GatherablePrioritizer), nameof(GatherablePrioritizer.PrioritizeGatherable))]
     class GatherablePrioritizerPatcher
     {
-        static bool Prefix(GatherablePrioritizer __instance, Gatherable gatherable)
+        static bool Prefix(GatherablePrioritizer __instance, GatherableSpec gatherableSpec)
         {
             return ReplayEvent.DoEntityPrefix(__instance, entityID =>
             {
-                var name = gatherable?.GetComponentFast<Prefab>()?.PrefabName;
+                var name = gatherableSpec?.GetComponentFast<PrefabSpec>()?.PrefabName;
                 return new GatheringPrioritizedEvent()
                 {
                     entityID = entityID,
@@ -97,10 +118,10 @@ namespace BeaverBuddies.Events
     {
         protected override void SetValue(IReplayContext context, Manufactory prioritizer, string itemID)
         {
-            RecipeSpecification recipe = null;
+            RecipeSpec recipe = null;
             if (itemID != null)
             {
-                recipe = context.GetSingleton<RecipeSpecificationService>()?.GetRecipe(itemID);
+                recipe = context.GetSingleton<RecipeSpecService>()?.GetRecipe(itemID);
                 if (recipe == null)
                 {
                     Plugin.LogWarning($"Could not find recipe for id: {itemID}");
@@ -119,7 +140,7 @@ namespace BeaverBuddies.Events
     [HarmonyPatch(typeof(Manufactory), nameof(Manufactory.SetRecipe))]
     class ManufactorySetRecipePatcher
     {
-        static bool Prefix(Manufactory __instance, RecipeSpecification selectedRecipe)
+        static bool Prefix(Manufactory __instance, RecipeSpec selectedRecipe)
         {
             return ReplayEvent.DoEntityPrefix(__instance, entityID =>
             {
@@ -137,7 +158,7 @@ namespace BeaverBuddies.Events
     {
         protected override void SetValue(IReplayContext context, PlantablePrioritizer prioritizer, string itemID)
         {
-            Plantable plantable = null;
+            PlantableSpec plantable = null;
             if (itemID != null)
             {
                 var planterBuilding = prioritizer.GetComponentFast<PlanterBuilding>();
@@ -161,11 +182,11 @@ namespace BeaverBuddies.Events
     [HarmonyPatch(typeof(PlantablePrioritizer), nameof(PlantablePrioritizer.PrioritizePlantable))]
     class PlantablePrioritizerPatcher
     {
-        static bool Prefix(PlantablePrioritizer __instance, Plantable plantable)
+        static bool Prefix(PlantablePrioritizer __instance, PlantableSpec plantableSpec)
         {
             return ReplayEvent.DoEntityPrefix(__instance, entityID =>
             {
-                var id = plantable?.PrefabName;
+                var id = plantableSpec?.PrefabName;
 
                 return new PlantablePrioritizedEvent()
                 {
@@ -401,7 +422,7 @@ namespace BeaverBuddies.Events
                 .DoPrefix(__instance, priority, () => new ConstructionPriorityChangedEvent());
         }
     }
-    
+
     class WorkplacePriorityChangedEvent : PriorityChangedEvent<WorkplacePriority>
     {
     }
@@ -439,7 +460,7 @@ namespace BeaverBuddies.Events
         public static bool DoPrefix(Workplace __instance, bool increased)
         {
             // Ignore if we're already at max/min workers
-            if (increased && __instance.DesiredWorkers >= __instance._workplaceSpecification.MaxWorkers) return true;
+            if (increased && __instance.DesiredWorkers >= __instance._workplaceSpec.MaxWorkers) return true;
             if (!increased && __instance.DesiredWorkers <= 1) return true;
 
             return DoEntityPrefix(__instance, entityID =>
@@ -751,16 +772,14 @@ namespace BeaverBuddies.Events
     }
 
     [Serializable]
-    class BeaverRenamedEvent : ReplayEvent
+    class EntityRenamedEvent : ReplayEvent
     {
         public string entityID;
         public string newName;
 
         public override void Replay(IReplayContext context)
         {
-            var character = GetComponent<Character>(context, entityID);
-            if (character == null) return;
-            character.FirstName = newName;
+            GetComponent<IModifiableEntityBadge>(context, entityID)?.SetEntityName(newName);
         }
 
         public override string ToActionString()
@@ -769,19 +788,56 @@ namespace BeaverBuddies.Events
         }
     }
 
-    // TODO: Need to make it work for all Characters, not just beavers
-    [HarmonyPatch(typeof(BeaverEntityBadge), nameof(BeaverEntityBadge.SetEntityName))]
-    class BeaverEntityBadgePatcher
+    [HarmonyPatch(typeof(EntityPanel), nameof(EntityPanel.SetEntityName))]
+    [ManualMethodOverwrite]
+    /**
+     *  6/20/2025
+		if ((bool)_shownEntity && !string.IsNullOrWhiteSpace(newName))
+		{
+			_entityBadgeService.SetEntityName(_shownEntity, newName.Trim());
+		}
+     */
+    class EntityPanelSetEntityNamePatcher
     {
-        static bool Prefix(BeaverEntityBadge __instance, string entityName)
+        static bool Prefix(EntityPanel __instance, string newName)
         {
-            return ReplayEvent.DoEntityPrefix(__instance._character, entityID =>
+            // If the name / change is invalid, we don't record it and use the default behavior.
+            // We capture the UI hook, rather than EntityBadgeService, in case the latter is use
+            // in game logic.
+            if (!((bool)__instance._shownEntity && !string.IsNullOrWhiteSpace(newName)))
             {
-                return new BeaverRenamedEvent()
+                return true;
+            }
+            return ReplayEvent.DoEntityPrefix(__instance._shownEntity, entityID =>
+            {
+                return new EntityRenamedEvent()
                 {
                     entityID = entityID,
-                    newName = entityName,
+                    newName = newName,
                 };
+            });
+        }
+    }
+
+    [HarmonyPatch(typeof(CharacterBatchControlRowItemFactory), nameof(CharacterBatchControlRowItemFactory.SetEntityName))]
+    [ManualMethodOverwrite]
+    /**
+     * Mirror of EntityPanel.SetEntityName capture, routed through batch control row factory.
+     *  6/20/2025
+		if ((bool)_shownEntity && !string.IsNullOrWhiteSpace(newName))
+		{
+			_entityBadgeService.SetEntityName(_shownEntity, newName.Trim());
+		}
+     */
+    class CharacterBatchControlRowItemFactorySetEntityNamePatcher
+    {
+        static bool Prefix(CharacterBatchControlRowItemFactory __instance, string newName, Character character)
+        {
+            if (!(character != null && !string.IsNullOrWhiteSpace(newName))) return true;
+            return ReplayEvent.DoEntityPrefix(character, entityID => new EntityRenamedEvent()
+            {
+                entityID = entityID,
+                newName = newName,
             });
         }
     }
@@ -858,7 +914,7 @@ namespace BeaverBuddies.Events
 
     [ManualMethodOverwrite]
     /*
-        7/20/2024
+        04/19/2025
 		UnlockableWorkerType botUnlockableWorkerType = GetBotUnlockableWorkerType();
 		_workplaceUnlockingDialogService.TryToUnlockWorkerType(botUnlockableWorkerType, SetBotWorkerType);
      */
@@ -890,6 +946,681 @@ namespace BeaverBuddies.Events
 
             // Always override
             return false;
+        }
+    }
+
+    [Serializable]
+    class HaulPrioritizablePrioritizedEvent : ReplayEvent
+    {
+        public string entityID;
+        public bool prioritized;
+
+        public override void Replay(IReplayContext context)
+        {
+            var prioritizer = GetComponent<HaulPrioritizable>(context, entityID);
+            if (!prioritizer) return;
+            prioritizer.Prioritized = prioritized;
+            // Probably can't update the UI an any reasonable way, but I'm guessing
+            // the other players won't have the relevant UI open at the same time.
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting haul priority for {entityID} to: {prioritized}";
+        }
+    }
+
+
+    [HarmonyPatch(typeof(HaulPrioritizable), nameof(HaulPrioritizable.Prioritized), MethodType.Setter)]
+    class HaulPrioritizablePrioritizedPatcher
+    {
+        public static bool Prefix(HaulPrioritizable __instance, bool value)
+        {
+            if (value == __instance.Prioritized) return true;
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new HaulPrioritizablePrioritizedEvent()
+                {
+                    entityID = entityID,
+                    prioritized = value,
+                };
+            });
+        }
+    }
+
+    [Serializable]
+    class ToggleForresterReplantDeadTreesEvent : ReplayEvent
+    {
+        public string entityID;
+        public bool shouldReplant;
+
+        public override void Replay(IReplayContext context)
+        {
+            var forester = GetComponent<Forester>(context, entityID);
+            if (!forester) return;
+            forester.ReplantDeadTrees = shouldReplant;
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting replant dead trees for Forrester {entityID} to: {shouldReplant}";
+        }
+    }
+
+    [HarmonyPatch(typeof(Forester), nameof(Forester.SetReplantDeadTrees))]
+    class ForesterSetReplantDeadTreesPatcher
+    {
+        public static bool Prefix(Forester __instance, bool replantDeadTrees)
+        {
+            if (__instance.ReplantDeadTrees == replantDeadTrees) return true;
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new ToggleForresterReplantDeadTreesEvent()
+                {
+                    entityID = entityID,
+                    shouldReplant = replantDeadTrees,
+                };
+            });
+        }
+    }
+
+    public enum SluiceToggleType
+    {
+        WaterLevel,
+        AboveContamination,
+        BelowContamination,
+        Synchronization,
+    }
+
+    [Serializable]
+    class SluicePlainToggleUpdatedEvent : ReplayEvent
+    {
+        public string entityID;
+        public bool value;
+        public SluiceToggleType toggleType;
+
+        public override void Replay(IReplayContext context)
+        {
+            var sluice = GetComponent<Sluice>(context, entityID);
+            if (!sluice) return;
+            var sluiceState = sluice._sluiceState;
+            if (toggleType == SluiceToggleType.WaterLevel)
+            {
+                if (value)
+                {
+                    sluiceState.EnableAutoCloseOnOutflow();
+                }
+                else
+                {
+                    sluiceState.DisableAutoCloseOnOutflow();
+                }
+            }
+            else if (toggleType == SluiceToggleType.AboveContamination)
+            {
+                if (value)
+                {
+                    sluiceState.EnableAutoCloseOnAbove();
+                }
+                else
+                {
+                    sluiceState.DisableAutoCloseOnAbove();
+                }
+            }
+            else if (toggleType == SluiceToggleType.BelowContamination)
+            {
+                if (value)
+                {
+                    sluiceState.EnableAutoCloseOnBelow();
+                }
+                else
+                {
+                    sluiceState.DisableAutoCloseOnBelow();
+                }
+            }
+            else if (toggleType == SluiceToggleType.Synchronization)
+            {
+                sluiceState.ToggleSynchronization(value);
+                // This won't update the Fragment's UI like it's supposed to
+                // (I don't think we can get a reference here easily),
+                // but it should update if the user tries to slide the slider,
+                // and I don't think it affects game logic.
+            }
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting sluice {entityID} {toggleType} toggle to: {value}";
+        }
+
+        public static bool DoPrefix(Sluice __instance, bool value, SluiceToggleType toggleType)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new SluicePlainToggleUpdatedEvent()
+                {
+                    entityID = entityID,
+                    value = value,
+                    toggleType = toggleType,
+                };
+            });
+        }
+    }
+
+    [HarmonyPatch(typeof(SluiceFragment), nameof(SluiceFragment.OnWaterLevelToggleChanged))]
+    class SluiceFragmentOnWaterLevelToggleChangedPatcher
+    {
+        public static bool Prefix(SluiceFragment __instance, ChangeEvent<bool> evt)
+        {
+            return SluicePlainToggleUpdatedEvent.DoPrefix(
+                __instance._sluice, evt.newValue, SluiceToggleType.WaterLevel);
+        }
+    }
+
+    [HarmonyPatch(typeof(SluiceFragment), nameof(SluiceFragment.OnAboveContaminationToggleChanged))]
+    class SluiceFragmentOnAboveContaminationToggleChangedPatcher
+    {
+        public static bool Prefix(SluiceFragment __instance, ChangeEvent<bool> evt)
+        {
+            return SluicePlainToggleUpdatedEvent.DoPrefix(
+                __instance._sluice, evt.newValue, SluiceToggleType.AboveContamination);
+        }
+    }
+
+    [HarmonyPatch(typeof(SluiceFragment), nameof(SluiceFragment.OnBelowContaminationToggleChanged))]
+    class SluiceFragmentOnBelowContaminationToggleChangedPatcher
+    {
+        public static bool Prefix(SluiceFragment __instance, ChangeEvent<bool> evt)
+        {
+            return SluicePlainToggleUpdatedEvent.DoPrefix(
+                __instance._sluice, evt.newValue, SluiceToggleType.BelowContamination);
+        }
+    }
+
+    [HarmonyPatch(typeof(SluiceFragment), nameof(SluiceFragment.ToggleSynchronization))]
+    class SluiceFragmentToggleSynchronizationChangedPatcher
+    {
+        public static bool Prefix(SluiceFragment __instance, ChangeEvent<bool> evt)
+        {
+            return SluicePlainToggleUpdatedEvent.DoPrefix(
+                __instance._sluice, evt.newValue, SluiceToggleType.Synchronization);
+        }
+    }
+
+    public enum SluiceLimitSliderType
+    {
+        Outflow,
+        AboveContamination,
+        BelowContamination,
+    }
+
+    [Serializable]
+    class SluiceSliderUpdatedEvent : ReplayEvent
+    {
+        public string entityID;
+        public SluiceLimitSliderType sliderType;
+        public float value;
+
+        public override void Replay(IReplayContext context)
+        {
+            var sluice = GetComponent<Sluice>(context, entityID);
+            if (!sluice) return;
+            var sluiceState = sluice._sluiceState;
+            switch (sliderType)
+            {
+                case SluiceLimitSliderType.Outflow:
+                    sluiceState.SetOutflowLimit(value);
+                    break;
+                case SluiceLimitSliderType.AboveContamination:
+                    sluiceState.SetAboveContaminationLimit(value);
+                    break;
+                case SluiceLimitSliderType.BelowContamination:
+                    sluiceState.SetBelowContaminationLimit(value);
+                    break;
+            }
+        }
+
+        public override string ToActionString()
+        {
+            string type = sliderType.ToString();
+            return $"Setting sluice {entityID} {type} limit to: {value}";
+        }
+
+        public static bool DoPrefix(SluiceState __instance, SluiceLimitSliderType sliderType, float value)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new SluiceSliderUpdatedEvent()
+                {
+                    entityID = entityID,
+                    sliderType = sliderType,
+                    value = value,
+                };
+            });
+        }
+    }
+
+    /*
+     * Note: We override the SluiceState methods instead of the SluiceFragment methods
+     * only for contaminatoin limits, because these methods seem to only be called form the
+     * UI, which contains some additional logic we don't want to have to manually override.
+     * This is not the case for the Outflow, which is called on SluiceState.Tick(), so we
+     * have to override SluiceFragment.ChangeFlow() instead, and duplicate that logic.
+     */
+
+    [HarmonyPatch(typeof(SluiceState), nameof(SluiceState.SetBelowContaminationLimit))]
+    class SluiceStateSetBelowContaminationLimitPatcher
+    {
+        public static bool Prefix(SluiceState __instance, float contaminationLimit)
+        {
+            return SluiceSliderUpdatedEvent.DoPrefix(
+                __instance, SluiceLimitSliderType.BelowContamination, contaminationLimit
+            );
+        }
+    }
+
+    [HarmonyPatch(typeof(SluiceState), nameof(SluiceState.SetAboveContaminationLimit))]
+    class SluiceStateSetAboveContaminationLimitPatcher
+    {
+        public static bool Prefix(SluiceState __instance, float contaminationLimit)
+        {
+            return SluiceSliderUpdatedEvent.DoPrefix(
+                __instance, SluiceLimitSliderType.AboveContamination, contaminationLimit
+            );
+        }
+    }
+
+    [ManualMethodOverwrite]
+    /*
+     * 04/25/2025
+	float num = UpdateWaterLevelSliderValue(newHeight);
+	if (WaterLevelSliderValue != num)
+	{
+		_sluiceState.SetOutflowLimit(num - (float)Range);
+	}
+    */
+    [HarmonyPatch(typeof(SluiceFragment), nameof(SluiceFragment.ChangeFlow))]
+    class SluiceFragmentChangeFlowPatcher
+    {
+        public static bool Prefix(SluiceFragment __instance, float newHeight)
+        {
+            // Note that UpdateWaterLevelSliderValue does modify the slider value, so this
+            // is UI logic we need to keep updated if the method changes.
+            float num = __instance.UpdateWaterLevelSliderValue(newHeight);
+            if (__instance.WaterLevelSliderValue == num) return true;
+            return SluiceSliderUpdatedEvent.DoPrefix(
+                // Note: it's num - Range, not num
+                __instance._sluice._sluiceState, SluiceLimitSliderType.Outflow, num - (float)__instance.Range
+            );
+        }
+    }
+
+    public enum SluiceMode
+    {
+        Auto,
+        Open,
+        Closed
+    }
+
+    [Serializable]
+    class SluiceModeUpdatedEvent : ReplayEvent
+    {
+        public string entityID;
+        public SluiceMode mode;
+
+        public override void Replay(IReplayContext context)
+        {
+            var sluice = GetComponent<Sluice>(context, entityID);
+            if (!sluice) return;
+            var sluiceState = sluice._sluiceState;
+            switch (mode)
+            {
+                case SluiceMode.Auto:
+                    sluiceState.SetAuto();
+                    break;
+                case SluiceMode.Open:
+                    sluiceState.Open();
+                    break;
+                case SluiceMode.Closed:
+                    sluiceState.Close();
+                    break;
+            }
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting sluice {entityID} mode to: {mode}";
+        }
+
+        public static bool DoPrefix(SluiceState __instance, SluiceMode mode)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new SluiceModeUpdatedEvent()
+                {
+                    entityID = entityID,
+                    mode = mode,
+                };
+            });
+        }
+    }
+
+    [HarmonyPatch(typeof(SluiceState), nameof(SluiceState.SetAuto))]
+    class SluiceStateSetAutoPatcher
+    {
+        public static bool Prefix(SluiceState __instance)
+        {
+            return SluiceModeUpdatedEvent.DoPrefix(__instance, SluiceMode.Auto);
+        }
+    }
+
+    [HarmonyPatch(typeof(SluiceState), nameof(SluiceState.Open))]
+    class SluiceStateOpenPatcher
+    {
+        public static bool Prefix(SluiceState __instance)
+        {
+            return SluiceModeUpdatedEvent.DoPrefix(__instance, SluiceMode.Open);
+        }
+    }
+
+    [HarmonyPatch(typeof(SluiceState), nameof(SluiceState.Close))]
+    class SluiceStateClosePatcher
+    {
+        public static bool Prefix(SluiceState __instance)
+        {
+            return SluiceModeUpdatedEvent.DoPrefix(__instance, SluiceMode.Closed);
+        }
+    }
+
+    enum WaterInputDepthAction
+    {
+        ToggleLimit,
+        IncreaseDepthLimit,
+        DecreaseDepthLimit,
+    }
+
+    [Serializable]
+    class WaterInputDepthActionEvent : ReplayEvent
+    {
+        public string entityID;
+        public WaterInputDepthAction action;
+
+        public override void Replay(IReplayContext context)
+        {
+            var waterinput = GetComponent<WaterInputCoordinates>(context, entityID);
+            var waterInputSpec = GetComponent<WaterInputSpec>(context, entityID);
+            if (waterinput == null || waterInputSpec == null) return;
+            switch (action)
+            {
+                case WaterInputDepthAction.ToggleLimit:
+                    if (waterinput.UseDepthLimit)
+                    {
+                        waterinput.DisableDepthLimit();
+                    }
+                    else
+                    {
+                        waterinput.SetDepthLimit(waterinput.Depth);
+                    }
+                    break;
+                case WaterInputDepthAction.IncreaseDepthLimit:
+                    int depthLimit = Math.Min(waterInputSpec.MaxDepth, waterinput.DepthLimit + 1);
+                    waterinput.SetDepthLimit(depthLimit);
+                    break;
+                case WaterInputDepthAction.DecreaseDepthLimit:
+                    depthLimit = Math.Max(0, waterinput.DepthLimit - 1);
+                    waterinput.SetDepthLimit(depthLimit);
+                    break;
+            }
+        }
+
+        public static bool DoPrefix(BaseComponent entityComponent, WaterInputDepthAction action)
+        {
+            return DoEntityPrefix(entityComponent, entityID =>
+            {
+                return new WaterInputDepthActionEvent()
+                {
+                    entityID = entityID,
+                    action = action,
+                };
+            });
+        }
+
+        public override string ToActionString()
+        {
+            return $"Water input {entityID} action={action}";
+        }
+    }
+
+    [HarmonyPatch(typeof(WaterInputDepthFragment), nameof(WaterInputDepthFragment.ToggleDepthLimit))]
+    class WaterInputDepthFragmentToggleDepthLimitPatcher
+    {
+        public static bool Prefix(WaterInputDepthFragment __instance)
+        {
+            return WaterInputDepthActionEvent.DoPrefix(__instance._waterInputCoordinates, WaterInputDepthAction.ToggleLimit);
+        }
+    }
+
+    [HarmonyPatch(typeof(WaterInputDepthFragment), nameof(WaterInputDepthFragment.IncreaseDepth))]
+    class WaterInputDepthFragmentIncreaseDepthPatcher
+    {
+        public static bool Prefix(WaterInputDepthFragment __instance)
+        {
+            return WaterInputDepthActionEvent.DoPrefix(__instance._waterInputCoordinates, WaterInputDepthAction.IncreaseDepthLimit);
+        }
+    }
+
+    [HarmonyPatch(typeof(WaterInputDepthFragment), nameof(WaterInputDepthFragment.DecreaseDepth))]
+    class WaterInputDepthFragmentDecreaseDepthPatcher
+    {
+        public static bool Prefix(WaterInputDepthFragment __instance)
+        {
+            return WaterInputDepthActionEvent.DoPrefix(__instance._waterInputCoordinates, WaterInputDepthAction.DecreaseDepthLimit);
+        }
+    }
+
+    [Serializable]
+    class ZiplineConnectionChangedEvent : ReplayEvent
+    {
+        public string currentTowerEntityID;
+        public string otherTowerEntityID;
+        public bool add;
+
+        public override void Replay(IReplayContext context)
+        {
+            var currentTower = GetComponent<ZiplineTower>(context, currentTowerEntityID);
+            var otherTower = GetComponent<ZiplineTower>(context, otherTowerEntityID);
+            if (!currentTower || !otherTower) return;
+            ZiplineConnectionService ziplineConnectionService = context.GetSingleton<ZiplineConnectionService>();
+            if (add)
+            {
+                if (!ziplineConnectionService.CanBeConnected(currentTower, otherTower))
+                {
+                    Plugin.LogError($"Tried to connect {currentTowerEntityID} to {otherTowerEntityID}, but it was not possible");
+                    return;
+                }
+                ziplineConnectionService.Connect(currentTower, otherTower);
+            }
+            else
+            {
+                ziplineConnectionService.Disconnect(currentTower, otherTower);
+            }
+        }
+
+        public override string ToActionString()
+        {
+            string verb = add ? "Connecting" : "Disconnecting";
+            return $"{verb} zipline connection from {currentTowerEntityID} to {otherTowerEntityID}";
+        }
+    }
+
+    [HarmonyPatch(typeof(ZiplineConnectionAddingTool), nameof(ZiplineConnectionAddingTool.Connect))]
+    class ZiplineConnectionAddingToolConnectPatcher
+    {
+        public static bool Prefix(ZiplineConnectionAddingTool __instance, ZiplineTower ziplineTower)
+        {
+            return ReplayEvent.DoPrefix(() =>
+            {
+                return new ZiplineConnectionChangedEvent()
+                {
+                    currentTowerEntityID = ReplayEvent.GetEntityID(__instance._currentZiplineTower),
+                    otherTowerEntityID = ReplayEvent.GetEntityID(ziplineTower),
+                    add = true,
+                };
+            });
+        }
+    }
+
+    [HarmonyPatch(typeof(ZiplineConnectionButtonFactory), nameof(ZiplineConnectionButtonFactory.RemoveConnection))]
+    class ZiplineConnectionButtonFactoryRemoveConnectionPatcher
+    {
+        public static bool Prefix(ZiplineTower owner, ZiplineTower otherZiplineTower)
+        {
+            return ReplayEvent.DoPrefix(() =>
+            {
+                return new ZiplineConnectionChangedEvent()
+                {
+                    currentTowerEntityID = ReplayEvent.GetEntityID(owner),
+                    otherTowerEntityID = ReplayEvent.GetEntityID(otherZiplineTower),
+                    add = false,
+                };
+            });
+        }
+    }
+
+    [Serializable]
+    class WonderActivatedEvent : ReplayEvent
+    {
+        public string entityID;
+
+        public override void Replay(IReplayContext context)
+        {
+            GetComponent<Wonder>(context, entityID)?.Activate();
+        }
+
+        public override string ToActionString()
+        {
+            return $"Activating wonder {entityID}";
+        }
+    }
+
+    [HarmonyPatch(typeof(WonderFragment), nameof(WonderFragment.ActivateWonder))]
+    class WonderFragmentActivateWonderPatcher
+    {
+        public static bool Prefix(WonderFragment __instance, ClickEvent evt)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance._wonder, entityID =>
+            {
+                return new WonderActivatedEvent()
+                {
+                    entityID = entityID,
+                };
+            });
+        }
+    }
+
+    [Serializable]
+    class DefaultWorkerTypeChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public string workerType;
+
+        public override void Replay(IReplayContext context)
+        {
+            GetComponent<DistrictDefaultWorkerType>(context, entityID)?.SetWorkerType(workerType);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting default worker type for {entityID} to {workerType}";
+        }
+
+        public static bool DoPrefix(DistrictCenterFragment __instance, string workerType)
+        {
+            return DoEntityPrefix(__instance._districtCenter, (entityID) =>
+            {
+                return new DefaultWorkerTypeChangedEvent()
+                {
+                    entityID = entityID,
+                    workerType = workerType,
+                };
+            });
+        }
+    }
+
+    [HarmonyPatch(typeof(DistrictCenterFragment), nameof(DistrictCenterFragment.SetBeaverWorkerType))]
+    class DistrictCenterFragmentSetBeaverWorkerTypePatcher
+    {
+        public static bool Prefix(DistrictCenterFragment __instance)
+        {
+            return DefaultWorkerTypeChangedEvent.DoPrefix(__instance, WorkerTypeHelper.BeaverWorkerType);
+        }
+    }
+
+    [HarmonyPatch(typeof(DistrictCenterFragment), nameof(DistrictCenterFragment.SetBotWorkerType))]
+    class DistrictCenterFragmentSetBotWorkerTypePatcher
+    {
+        public static bool Prefix(DistrictCenterFragment __instance)
+        {
+            return DefaultWorkerTypeChangedEvent.DoPrefix(__instance, WorkerTypeHelper.BotWorkerType);
+        }
+    }
+
+    [Serializable]
+    class WaterSourceRegulatorStateChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public bool isOpen;
+
+        public override void Replay(IReplayContext context)
+        {
+            var regulator = GetComponent<WaterSourceRegulator>(context, entityID);
+            if (regulator == null) return;
+            if (isOpen)
+            {
+                regulator.Open();
+            }
+            else
+            {
+                regulator.Close();
+            }
+        }
+
+        public override string ToActionString()
+        {
+            string verb = isOpen ? "Opening" : "Closing";
+            return $"{verb} water regulator {entityID}";
+        }
+
+        public static bool DoPrefix(WaterSourceRegulator __instance, bool isOpen)
+        {
+            return DoEntityPrefix(__instance, (entityID) =>
+            {
+                return new WaterSourceRegulatorStateChangedEvent()
+                {
+                    entityID = entityID,
+                    isOpen = isOpen,
+                };
+            });
+        }
+    }
+
+    // I can't find anywhere these methods are called outside of the UI, so it
+    // seems safe to patch them directly.
+    // The UI event itself is a bit ugly to patch.
+    [HarmonyPatch(typeof(WaterSourceRegulator), nameof(WaterSourceRegulator.Open))]
+    class WaterSourceRegulatorOpenPatcher
+    {
+        public static bool Prefix(WaterSourceRegulator __instance)
+        {
+            return WaterSourceRegulatorStateChangedEvent.DoPrefix(__instance, true);
+        }
+    }
+
+    [HarmonyPatch(typeof(WaterSourceRegulator), nameof(WaterSourceRegulator.Close))]
+    class WaterSourceRegulatorClosePatcher
+    {
+        public static bool Prefix(WaterSourceRegulator __instance)
+        {
+            return WaterSourceRegulatorStateChangedEvent.DoPrefix(__instance, false);
         }
     }
 }

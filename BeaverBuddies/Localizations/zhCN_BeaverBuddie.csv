@@ -14,3 +14,56 @@ BeaverBuddies.ClientDesynced.FailedToRehostMessage,"重新托管失败。请手�
 BeaverBuddies.ClientDesynced.SaveAndRehostButton,"保存并重新托管","Save and Rehost"
 BeaverBuddies.ClientDesynced.WaitForRehostButton,"重新连接（等待重新托管）","Reconnect (wait for Rehost)"
 BeaverBuddies.ClientDesynced.PostBugReportButton,"提交错误报告","Post Bug Report"
+BeaverBuddies.Editor.StartingLocation1,"起始位置 - 玩家 1",""
+BeaverBuddies.Editor.StartingLocation2,"起始位置 - 玩家 2",""
+BeaverBuddies.Editor.StartingLocation3,"起始位置 - 玩家 3",""
+BeaverBuddies.Editor.StartingLocation4,"起始位置 - 玩家 4",""
+BeaverBuddies.NewGame.MaxStartingLocations,"最大起始位置",""
+BeaverBuddies.ClientDesynced.ReportSuccess,"成功！",""
+BeaverBuddies.ClientDesynced.ReportFailed,"失败 :(",""
+BeaverBuddies.ClientDesynced.ConsentAgreement,"是的，我同意",""
+BeaverBuddies.ClientDesynced.TracingEnabled,"已启用",""
+BeaverBuddies.ClientDesynced.EnableTracing,"启用日志记录",""
+BeaverBuddies.ClientDesynced.NeedToEnableTracing,"要报告此不同步，*所有玩家* 必须首先通过点击下方的“启用日志记录”启用更详细的日志记录。如果再次发生不同步，您将能够提交详细的自动错误报告。日志模式可能会导致一些延迟，但它只会在您重新启动游戏前有效。",""
+BeaverBuddies.ClientDesynced.ConsentMessage,"同意共享使用数据
+
+选择共享您的数据即表示您同意向本模组的开发者发送以下来自您的游戏会话的信息：
+
+- 日志数据：在您的游戏会话期间自动收集的信息，例如游戏事件和用户互动。
+- 存档文件：您当前的游戏存档文件。
+
+我们致力于保护您的隐私，通过尽量保持这些数据的匿名性。然而，由于数据是按原样收集的，它可能无意中包含能够识别您的详细信息（如文件路径或用户名）。开发者不会尝试使用这些信息识别您。
+
+您的选择：
+- 如果您同意，这些数据将安全地发送给开发者，并用于改进模组。
+- 如果您不同意，不会发送任何数据，您的游戏将继续不受影响。
+
+继续表示您确认已达到您所在国家/地区的数字同意法定年龄。
+
+您是否同意与本模组的开发者共享您的数据？",""
+BeaverBuddies.Settings.ClientConnectionAddress,"客户端连接地址",""
+BeaverBuddies.Settings.ClientConnectionAddress.Tooltip,"连接到主机时使用的默认 IP 地址。",""
+BeaverBuddies.Settings.Port,"端口",""
+BeaverBuddies.Settings.Port.Tooltip,"托管或加入游戏时使用的端口。应与主机转发的端口一致。",""
+BeaverBuddies.Settings.SilenceLogging,"静默日志",""
+BeaverBuddies.Settings.SilenceLogging.Tooltip,"防止此模组记录玩家日志文件（警告和错误除外）。
+此设置仅供开发者使用。",""
+BeaverBuddies.Settings.ShowFirstTimerMessage,"显示新手信息",""
+BeaverBuddies.Settings.AlwaysTrace,"始终使用详细日志",""
+BeaverBuddies.Settings.AlwaysTrace.Tooltip,"启用后，游戏将始终使用详细日志，让你在第一次发生 desync 时无需手动开启即可提交报告。
+注意，所有玩家都需启用此设置。
+此设置可能导致一些延迟，不推荐绝大多数玩家使用。",""
+BeaverBuddies.Settings.ReportingConsent,"报告同意",""
+BeaverBuddies.Settings.EnableSteamConnection,"启用 Steam 网络连接",""
+BeaverBuddies.Settings.EnableSteamConnection.Tooltip,"允许玩家通过 Steam 的 P2P 网络加入你的游戏。
+玩家仍可通过端口转发加入。
+注意：若你的网络不支持 P2P，该功能可能无法使用。
+此外，P2P 连接可能比直接连接慢。",""
+BeaverBuddies.Settings.FriendsCanJoinSteamGame,"允许好友通过 Steam 直接加入",""
+BeaverBuddies.Settings.FriendsCanJoinSteamGame.Tooltip,"启用后，你的好友可以通过 Steam 直接加入游戏，无需邀请。",""
+BeaverBuddies.Host.ConnectedClients,"等待客户端连接…
+当前已连接客户端：",""
+BeaverBuddies.Host.DirectConnectClient,"直接连接客户端",""
+BeaverBuddies.Host.StartGame,"开始游戏",""
+BeaverBuddies.Host.InviteFriends,"邀请好友",""
+BeaverBuddies.JoinCoopGame.Success,"已加入！正在接收地图…",""

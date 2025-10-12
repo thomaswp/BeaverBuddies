@@ -15,7 +15,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>BeaverBuddies</AssemblyName>
     <Description>TimberModTest</Description>
-    <Version>1.2.6</Version>
+    <Version>1.5.3</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
@@ -23,15 +23,15 @@
     <!-- Path Config -->
     <BeaverBuddiesModsPath>$(DocumentsPath)Timberborn\Mods\BeaverBuddies\</BeaverBuddiesModsPath>
     <BeaverBuddiesManagedPath>$(TimberbornPath)Timberborn_Data\Managed\</BeaverBuddiesManagedPath>
-    <TempDir>$(ProjectDir)temp/</TempDir>
     <!-- Include HarmonyX file inside $(BeaverBuddiesModsPath) -->
     <includeHarmonyX>true</includeHarmonyX>
+    <NuGetPackagesDir>$(UserProfile)\.nuget\packages\</NuGetPackagesDir>
   </PropertyGroup>
 
   <!-- NuGet -->
   <ItemGroup>
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2" PrivateAssets="all" /> 
-    <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="9.0.0" />
   </ItemGroup> 
 
   <!-- OutSide Project -->
@@ -47,19 +47,33 @@
     <Reference Include="$(BepInExPath)core\MonoMod.*.dll" Private="$(includeHarmonyX)" />
     
     <!-- Timberborn DLL & Publicize (BepInEx.AssemblyPublicizer.MSBuild) -->
+    <Reference Include="$(BeaverBuddiesManagedPath)com.rlabrecque.steamworks.net.dll" Private="false" />
     <Reference Include="$(BeaverBuddiesManagedPath)Bindito.Core.dll" Private="false" />
     <Reference Include="$(BeaverBuddiesManagedPath)Bindito.Unity.dll" Private="false" />
     <Reference Include="$(BeaverBuddiesManagedPath)UnityEngine.*.dll" Publicize="true" Private="false" />
     <Reference Include="$(BeaverBuddiesManagedPath)Timberborn.*.dll" Publicize="true" Private="false" />
+    <Reference Include="$(ModSettingsPath)ModSettings.*.dll" Private="false" />
     <Compile Remove="Fixes\TestingStrategies_Scrap.cs" />
     <None Include="Fixes\TestingStrategies_Scrap.cs" />
     <Reference Include="$(BeaverBuddiesManagedPath)Unity.Services.Analytics.dll" Publicize="true" Private="false" />
   </ItemGroup>
 
+  <!-- Check and log if pat.properties is added as an embedded resource -->
+  <Target Name="CheckPatProperties" BeforeTargets="BeforeBuild">
+    <Message Importance="high" Text="pat.properties was found and added as an embedded resource..." Condition="Exists('pat.properties')" />
+    <Message Importance="high" Text="pat.properties was NOT found. Please ensure the file exists if required." Condition="!Exists('pat.properties')" />
+  </Target>
+  <ItemGroup>
+    <None Remove="pat.properties" />
+    <EmbeddedResource Include="pat.properties" Condition="Exists('pat.properties')" />
+  </ItemGroup>
+
   <!-- Add files to Output folder -->
   <ItemGroup>
     <None Update="manifest.json" CopyToOutputDirectory="PreserveNewest" />
-    <None Update="thumbnail.jpg" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="thumbnail.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="workshop_data.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -81,16 +95,11 @@
       <FilesToCopy Include="$(ProjectDir)$(OutDir)*" />
       <LocalizationFileToCopy Include="$(ProjectDir)$(OutDir)Localizations\*" />
     </ItemGroup>
-    <!-- Copy files we don't want to delete to a temp directory -->
-    <MakeDir Directories="$(TempDir)" />
-    <Copy SourceFiles="$(BeaverBuddiesModsPath)ReplayConfig.json" DestinationFolder="$(TempDir)" Condition="Exists('$(BeaverBuddiesModsPath)ReplayConfig.json')" />
     <!-- Clear BeaverBuddiesModsPath Directory & Copy Output files inside -->
     <RemoveDir Directories="$(BeaverBuddiesModsPath)" />
     <MakeDir Directories="$(BeaverBuddiesModsPath)" />
     <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(BeaverBuddiesModsPath)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(LocalizationFileToCopy)" DestinationFolder="$(BeaverBuddiesModsPath)\Localizations" SkipUnchangedFiles="true" />
-    <!-- Copy files stored in the temp folder back to the Mods directory -->
-    <Copy SourceFiles="$(TempDir)ReplayConfig.json" DestinationFolder="$(BeaverBuddiesModsPath)" Condition="Exists('$(TempDir)ReplayConfig.json')" />
   </Target>
 
 </Project>

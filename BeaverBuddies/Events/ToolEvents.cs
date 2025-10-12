@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using Timberborn.BlockObjectTools;
 using Timberborn.BlockSystem;
@@ -11,7 +12,10 @@ using Timberborn.DemolishingUI;
 using Timberborn.EntitySystem;
 using Timberborn.Forestry;
 using Timberborn.PlantingUI;
+using Timberborn.RootProviders;
 using Timberborn.ScienceSystem;
+using Timberborn.SingletonSystem;
+using Timberborn.TemplateSystem;
 using Timberborn.ToolSystem;
 using Timberborn.WorkSystemUI;
 using UnityEngine;
@@ -31,11 +35,37 @@ namespace BeaverBuddies.Events
         public override void Replay(IReplayContext context)
         {
             var buildingPrefab = GetBuilding(context, prefabName);
-            var blockObject = buildingPrefab.GetComponentFast<BlockObject>();
-            var placer = context.GetSingleton<BlockObjectPlacerService>().GetMatchingPlacer(blockObject);
+            var blockObjectSpec = buildingPrefab.GetComponentFast<BlockObjectSpec>();
+            var placer = context.GetSingleton<BlockObjectPlacerService>().GetMatchingPlacer(blockObjectSpec);
             Placement placement = new Placement(coordinates, orientation, 
                 isFlipped ? FlipMode.Flipped : FlipMode.Unflipped);
-            placer.Place(blockObject, placement);
+            if (!IsPlacementValid(context, placement, buildingPrefab))
+            {
+                Plugin.LogWarning($"Invalid placement for {prefabName} at {coordinates}");
+                return;
+            }
+            placer.Place(blockObjectSpec, placement);
+        }
+
+        // Note: This may not catch every possible invalid placement (e.g. if terrain height changes or something)
+        // but I think it should catch the vast majority of cases due to double placement.
+        private static bool IsPlacementValid(IReplayContext context, Placement placement, BuildingSpec prefab)
+        {
+            var templateInstantiator = context.GetSingleton<TemplateInstantiator>();
+            var roots = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
+            // It's a bit wasteful to instantiate the object just to check if it's valid,
+            // but this is likely the best choice because:
+            // 1) This only happens occasionally, based on UI actions, and
+            // 2) There's no easy way to get at the cache of previews the UI uses,
+            //    and each prefab requires a different GameObject, so we can't cache just one.
+            GameObject gameObject = templateInstantiator.Instantiate(prefab.GameObjectFast, roots.First().transform);
+            gameObject.SetActive(value: false);
+            var blockObject = gameObject.GetComponent<BlockObject>();
+            blockObject.MarkAsPreviewAndInitialize();
+            blockObject.Reposition(placement);
+            bool isValid = blockObject.IsValid();
+            UnityEngine.Object.Destroy(gameObject);
+            return isValid;
         }
 
         public override string ToActionString()
@@ -43,8 +73,7 @@ namespace BeaverBuddies.Events
             return $"Placing {prefabName}, {coordinates}, {orientation}, {isFlipped}";
         }
     }
-
-
+    
     [HarmonyPatch(typeof(BuildingPlacer), nameof(BuildingPlacer.Place))]
     class PlacePatcher
     {
@@ -86,10 +115,10 @@ namespace BeaverBuddies.Events
         }
     }
 
-    [HarmonyPatch(typeof(BlockObjectDeletionTool<Building>), nameof(BlockObjectDeletionTool<Building>.DeleteBlockObjects))]
+    [HarmonyPatch(typeof(BlockObjectDeletionTool<BuildingSpec>), nameof(BlockObjectDeletionTool<BuildingSpec>.DeleteBlockObjects))]
     class BuildingDeconstructionPatcher
     {
-        static bool Prefix(BlockObjectDeletionTool<Building> __instance)
+        static bool Prefix(BlockObjectDeletionTool<BuildingSpec> __instance)
         {
             bool result = ReplayEvent.DoPrefix(() =>
             {
@@ -249,8 +278,6 @@ namespace BeaverBuddies.Events
 
         public override void Replay(IReplayContext context)
         {
-            // TODO: Looks like this doesn't work until the receiver
-            // has at least opened the tool tray. Need to test more.
             var treeService = context.GetSingleton<TreeCuttingArea>();
             if (wasAdded)
             {
@@ -269,8 +296,6 @@ namespace BeaverBuddies.Events
         }
     }
 
-    // TODO: These events seem to only replay successfully if the
-    // tool is open...
     [HarmonyPatch(typeof(TreeCuttingArea), nameof(TreeCuttingArea.AddCoordinates))]
     class TreeCuttingAreaAddedPatcher
     {
@@ -324,13 +349,12 @@ namespace BeaverBuddies.Events
                 {
                     continue;
                 }
-                Building toolBuilding = blockObjectTool.Prefab.GetComponentFast<Building>();
+                BuildingSpec toolBuilding = blockObjectTool.Prefab.GetComponentFast<BuildingSpec>();
                 if (toolBuilding == building)
                 {
                     Plugin.Log("Unlocking tool for building: " + buildingName);
-                    // TODO: Need to test - I think this is equivalent to clearing the lock
-                    // but not sure it'll update the UI
                     blockObjectTool.Locker = null;
+                    toolButton.OnToolUnlocked(new ToolUnlockedEvent(tool));
                 }
             }
         }
@@ -344,7 +368,7 @@ namespace BeaverBuddies.Events
     [HarmonyPatch(typeof(BuildingUnlockingService), nameof(BuildingUnlockingService.Unlock))]
     class BuildingUnlockingServiceUnlockPatcher
     {
-        static bool Prefix(Building building)
+        static bool Prefix(BuildingSpec buildingSpec)
         {
             //Plugin.LogWarning("science again!");
             //Plugin.LogStackTrace();
@@ -352,7 +376,7 @@ namespace BeaverBuddies.Events
             {
                 return new BuildingUnlockedEvent()
                 {
-                    buildingName = building.name,
+                    buildingName = buildingSpec.name,
                 };
             });
         }

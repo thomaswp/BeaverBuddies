@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 
 namespace TimberNet
 {
@@ -20,7 +22,7 @@ namespace TimberNet
         public const string TYPE_KEY = "type";
         public const string SET_STATE_EVENT = "SetState";
         public const string HEARTBEAT_EVENT = "Heartbeat";
-        public const int MAX_BUFFER_SIZE = 8192; // 8K
+        public const int MAX_BUFFER_SIZE = 8192 * 4; // 32K
 
         public delegate void MessageReceived(string message);
         public delegate void MapReceived(byte[] mapBytes);
@@ -72,8 +74,9 @@ namespace TimberNet
 
         protected void Log(string message, int ticks, int hash)
         {
-
-            logQueue.Enqueue($"T{ticks.ToString("D4")} [{hash.ToString("X8")}] : {message}");
+            // Should be threadsafe
+            OnLog?.Invoke($"T{ticks.ToString("D4")} [{hash.ToString("X8")}] : {message}");
+            //logQueue.Enqueue($"T{ticks.ToString("D4")} [{hash.ToString("X8")}] : {message}");
         }
 
         public virtual void Start()
@@ -100,6 +103,7 @@ namespace TimberNet
         {
             int tick = GetTick(message);
             int index = script.FindIndex(m => GetTick(m) > tick);
+
             if (index == -1)
                 script.Add(message);
             else
@@ -162,7 +166,7 @@ namespace TimberNet
             Log($"Event: {GetType(message)}");
         }
 
-        protected void SendLength(NetworkStream stream, int length)
+        protected void SendLength(ISocketStream stream, int length)
         {
             byte[] buffer = BitConverter.GetBytes(length);
             if (BitConverter.IsLittleEndian)
@@ -170,29 +174,43 @@ namespace TimberNet
             stream.Write(buffer, 0, buffer.Length);
         }
 
-        protected void SendEvent(TcpClient client, JObject message)
+        protected void SendDataWithLength(ISocketStream stream, byte[] data)
+        {
+            SendLength(stream, data.Length);
+            int chunkSize = stream.MaxChunkSize;
+            // How long to sleep between chunks (may be 0)
+            int sleepMS = stream.MaxChunkSize * 1000 / stream.MaxBytesPerSecond;
+            for (int i = 0; i < data.Length; i += chunkSize)
+            {
+                if (i != 0)
+                {
+                    Thread.Sleep(sleepMS);
+                }
+                int length = Math.Min(chunkSize, data.Length - i);
+                stream.Write(data, i, length);
+            }
+        }
+
+        protected void SendEvent(ISocketStream client, JObject message)
         {
             Log($"Sending: {GetType(message)} for tick {GetTick(message)}");
-            string json = message.ToString(Newtonsoft.Json.Formatting.None);
-            byte[] buffer = Encoding.UTF8.GetBytes(json);
+            byte[] buffer = MessageToBuffer(message);
 
             try
             {
-                var stream = client.GetStream();
-                SendLength(stream, buffer.Length);
-                stream.Write(buffer, 0, buffer.Length);
+                SendDataWithLength(client, buffer);
             } catch (Exception e)
             {
                 Log($"Error sending event: {e.Message}");
             }
         }
 
-        protected bool TryReadLength(NetworkStream stream, out int length)
+        protected bool TryReadLength(ISocketStream stream, out int length)
         {
-            byte[] headerBuffer = new byte[HEADER_SIZE];
+            byte[] headerBuffer;
             try
             {
-                stream.Read(headerBuffer, 0, headerBuffer.Length);
+                headerBuffer = stream.ReadUntilComplete(HEADER_SIZE);
             }
             catch
             {
@@ -206,25 +224,24 @@ namespace TimberNet
             return true;
         }
 
-        protected void StartListening(TcpClient client, bool isClient)
+        protected void StartListening(ISocketStream client, bool isClient)
         {
             //Log("Client connected");
-            var stream = client.GetStream();
             int messageCount = 0;
             while (client.Connected && !IsStopped)
             {
-                if (!TryReadLength(stream, out int messageLength)) break;
+                if (!TryReadLength(client, out int messageLength)) break;
 
                 // First message is always the file
                 if (messageCount == 0 && isClient)
                 {
                     if (messageLength == 0)
                     {
-                        ReadErrorMessage(stream);
+                        ReadErrorMessage(client);
                         return;
                     }
 
-                    ReceiveFile(stream, messageLength);
+                    ReceiveFile(client, messageLength);
                     messageCount++;
                     continue;
                 }
@@ -235,27 +252,39 @@ namespace TimberNet
                     break;
                 }
 
+                //Log($"Starting to read {messageLength} bytes");
                 // TODO: How should this fail and not hang if map stops sending?
-                byte[] buffer = new byte[messageLength];
-                int read = 0;
-                while (read < messageLength)
-                {
-                    read += stream.Read(buffer, read, messageLength - read);
-                }
+                byte[] buffer = client.ReadUntilComplete(messageLength);
 
-                string message = Encoding.UTF8.GetString(buffer);
+                string message = BufferToStringMessage(buffer);
+                //Log($"Queuing message of length {messageLength} bytes");
                 receivedEventQueue.Enqueue(message);
                 messageCount++;
             }
         }
 
-        private void ReadErrorMessage(NetworkStream stream)
+        protected byte[] MessageToBuffer(JObject message)
+        {
+            string json = message.ToString(Newtonsoft.Json.Formatting.None);
+            return MessageToBuffer(json);
+        }
+
+        protected byte[] MessageToBuffer(string message)
+        {
+            return CompressionUtils.Compress(message);
+        }
+
+        protected string BufferToStringMessage(byte[] buffer)
+        {
+            return CompressionUtils.Decompress(buffer);
+        }
+
+        private void ReadErrorMessage(ISocketStream stream)
         {
             if (TryReadLength(stream, out int length))
             {
-                byte[] bytes = new byte[length];
-                stream.Read(bytes, 0, length);
-                string message = Encoding.UTF8.GetString(bytes);
+                byte[] bytes = stream.ReadUntilComplete(length);
+                string message = BufferToStringMessage(bytes);
                 if (OnError != null)
                 {
                     OnError(message);
@@ -293,21 +322,9 @@ namespace TimberNet
             AddToHash(bytes);
         }
 
-        private void ReceiveFile(NetworkStream stream, int messageLength)
+        private void ReceiveFile(ISocketStream stream, int messageLength)
         {
-            // TODO: How should this fail?
-            int totalBytesRead = 0;
-            MemoryStream ms = new MemoryStream();
-            while (totalBytesRead < messageLength)
-            {
-                int bytesToRead = Math.Min(messageLength - totalBytesRead, MAX_BUFFER_SIZE);
-                byte[] buffer = new byte[bytesToRead];
-                //Log($"{buffer.Length}, {GetHashCode(buffer).ToString("X8")}");
-                int bytesRead = stream.Read(buffer, 0, bytesToRead);
-                totalBytesRead += bytesRead;
-                ms.Write(buffer, 0, bytesRead);
-            }
-            byte[] mapBytes = ms.ToArray();
+            byte[] mapBytes = stream.ReadUntilComplete(messageLength);
             AddFileToHash(mapBytes);
             Log($"Received map with length {mapBytes.Length} and Hash: {GetHashCode(mapBytes).ToString("X8")}");
             this.mapBytes = mapBytes;

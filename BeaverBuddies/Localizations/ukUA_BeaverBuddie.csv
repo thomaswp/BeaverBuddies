@@ -14,3 +14,56 @@ BeaverBuddies.ClientDesynced.FailedToRehostMessage,"Не вдалося повт
 BeaverBuddies.ClientDesynced.SaveAndRehostButton,"Зберегти і повторно розмістити","Save and Rehost"
 BeaverBuddies.ClientDesynced.WaitForRehostButton,"Перепідключитися (очікування повторного розміщення)","Reconnect (wait for Rehost)"
 BeaverBuddies.ClientDesynced.PostBugReportButton,"Подати звіт про помилку","Post Bug Report"
+BeaverBuddies.Editor.StartingLocation1,"Початкова локація - Гравець 1",""
+BeaverBuddies.Editor.StartingLocation2,"Початкова локація - Гравець 2",""
+BeaverBuddies.Editor.StartingLocation3,"Початкова локація - Гравець 3",""
+BeaverBuddies.Editor.StartingLocation4,"Початкова локація - Гравець 4",""
+BeaverBuddies.NewGame.MaxStartingLocations,"Максимальна кількість початкових локацій",""
+BeaverBuddies.ClientDesynced.ReportSuccess,"Успіх!",""
+BeaverBuddies.ClientDesynced.ReportFailed,"Помилка :(",""
+BeaverBuddies.ClientDesynced.ConsentAgreement,"Так, я погоджуюсь",""
+BeaverBuddies.ClientDesynced.TracingEnabled,"Увімкнено",""
+BeaverBuddies.ClientDesynced.EnableTracing,"Увімкнути журналювання",""
+BeaverBuddies.ClientDesynced.NeedToEnableTracing,"Для повідомлення про цю десинхронізацію *всі гравці* повинні спочатку увімкнути детальніше журналювання, натиснувши 'Увімкнути журналювання' нижче. Якщо відбудеться ще одна десинхронізація, ви зможете надіслати детальний автоматичний звіт про помилку. Режим журналювання може спричинити деяку затримку, але він буде активним лише до перезапуску гри.",""
+BeaverBuddies.ClientDesynced.ConsentMessage,"Згода на поширення даних про використання
+
+Обираючи ділитися своїми даними, ви погоджуєтеся надсилати наступну інформацію зі своєї ігрової сесії розробникам цього моду:
+
+- Дані журналу: Інформація, автоматично зібрана під час вашої ігрової сесії, така як події гри та взаємодія користувача.
+- Файл збереження: Ваш поточний файл збереження гри.
+
+Ми прагнемо зберігати вашу конфіденційність, підтримуючи ці дані здебільшого анонімними. Однак, оскільки дані збираються в їх початковому вигляді, вони можуть ненавмисно містити деталі, які можуть вас ідентифікувати (такі як шляхи до файлів або імена користувачів). Розробники не намагатимуться ідентифікувати вас за допомогою цієї інформації.
+
+Ваші варіанти:
+- Якщо ви погоджуєтесь, ці дані будуть безпечно надіслані розробникам і використані для покращення моду.
+- Якщо ви не погоджуєтесь, жодні дані не будуть надіслані, і ваша гра продовжуватиметься без змін.
+
+Продовжуючи, ви підтверджуєте, що досягли віку цифрової згоди у своїй країні проживання.
+
+Чи згодні ви ділитися своїми даними з розробниками цього моду?",""
+BeaverBuddies.Settings.ClientConnectionAddress,"Адреса підключення клієнта",""
+BeaverBuddies.Settings.ClientConnectionAddress.Tooltip,"IP‑адреса за замовчуванням для підключення до хоста.",""
+BeaverBuddies.Settings.Port,"Порт",""
+BeaverBuddies.Settings.Port.Tooltip,"Порт, що використовується під час хостингу або приєднання до гри. Має відповідати перенаправленому порту хоста.",""
+BeaverBuddies.Settings.SilenceLogging,"Вимкнути логування",""
+BeaverBuddies.Settings.SilenceLogging.Tooltip,"Запобігає запису цього моду до журналу гравця (окрім попереджень і помилок).
+Ця опція призначена для розробників.",""
+BeaverBuddies.Settings.ShowFirstTimerMessage,"Показувати повідомлення для новачків",""
+BeaverBuddies.Settings.AlwaysTrace,"Завжди детальне логування",""
+BeaverBuddies.Settings.AlwaysTrace.Tooltip,"Якщо ввімкнено, гра завжди використовуватиме детальний журнал, що дозволяє надсилати звіти про десинхронізацію з першого випадку без ручного увімкнення.
+Усі гравці повинні мати цю опцію активованою.
+Це може спричинити невеликий лаг і не рекомендується для більшості гравців.",""
+BeaverBuddies.Settings.ReportingConsent,"Згода на звітування",""
+BeaverBuddies.Settings.EnableSteamConnection,"Увімкнути Steam‑підключення",""
+BeaverBuddies.Settings.EnableSteamConnection.Tooltip,"Дозволяє гравцям підключатися до вашої гри через peer‑to‑peer мережу Steam.
+Гравці також зможуть підключатися через перенаправлення портів.
+Примітка: ця функція може не працювати, якщо ваша мережа не підтримує P2P.
+Крім того, P2P‑з’єднання можуть бути повільнішими за прямі.",""
+BeaverBuddies.Settings.FriendsCanJoinSteamGame,"Дозволити друзям підключатись через Steam",""
+BeaverBuddies.Settings.FriendsCanJoinSteamGame.Tooltip,"Якщо ввімкнено, ваші друзі зможуть підключитись без запрошення через Steam.",""
+BeaverBuddies.Host.ConnectedClients,"Очікування клієнтів…
+Наразі підключено клієнтів:",""
+BeaverBuddies.Host.DirectConnectClient,"Клієнт прямого підключення",""
+BeaverBuddies.Host.StartGame,"Почати гру",""
+BeaverBuddies.Host.InviteFriends,"Запросити друзів",""
+BeaverBuddies.JoinCoopGame.Success,"Підключено! Отримання карти…",""

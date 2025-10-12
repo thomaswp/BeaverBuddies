@@ -4,29 +4,33 @@ using System.Collections.Generic;
 using System.Linq;
 using BeaverBuddies.Events;
 using TimberNet;
+using BeaverBuddies.Steam;
 
 namespace BeaverBuddies.IO
 {
     public abstract class NetIOBase<T> : EventIO where T : TimberNetBase
     {
 
-        protected T netBase;
+        public T NetBase { get; protected set; }
         public abstract bool RecordReplayedEvents { get; }
         public abstract bool ShouldSendHeartbeat { get; }
         public abstract UserEventBehavior UserEventBehavior { get; }
-        public bool IsOutOfEvents => netBase == null ? true : !netBase.ShouldTick;
-        public int TicksBehind => netBase == null ? 0 : netBase.TicksBehind;
+        public bool IsOutOfEvents => NetBase == null ? true : !NetBase.ShouldTick;
+        public int TicksBehind => NetBase == null ? 0 : NetBase.TicksBehind;
+
+        private SteamPacketListener steamPacketListener = null;
 
         public void Close()
         {
-            if (netBase == null) return;
-            netBase.Close();
+            if (NetBase == null) return;
+            NetBase.Close();
         }
 
         public void Update()
         {
-            if (netBase == null) return;
-            netBase.Update();
+            if (NetBase == null) return;
+            NetBase.Update();
+            steamPacketListener?.Update();
         }
 
         private static ReplayEvent ToEvent(JObject obj)
@@ -45,8 +49,8 @@ namespace BeaverBuddies.IO
 
         public List<ReplayEvent> ReadEvents(int ticksSinceLoad)
         {
-            if (netBase == null) return new List<ReplayEvent>();
-            return netBase.ReadEvents(ticksSinceLoad)
+            if (NetBase == null) return new List<ReplayEvent>();
+            return NetBase.ReadEvents(ticksSinceLoad)
                 .Select(ToEvent)
                 .Where(e => e != null)
                 .ToList();
@@ -54,19 +58,30 @@ namespace BeaverBuddies.IO
 
         public virtual void WriteEvents(params ReplayEvent[] events)
         {
-            if (netBase == null) return;
+            if (NetBase == null) return;
             foreach (ReplayEvent e in events)
             {
                 // TODO: It is silly to convert to JObject here, but not sure if there's
                 // a better way to do it.
-                netBase.DoUserInitiatedEvent(JObject.Parse(JsonSettings.Serialize(e)));
+                NetBase.DoUserInitiatedEvent(JObject.Parse(JsonSettings.Serialize(e)));
             }
         }
 
         public bool HasEventsForTick(int tick)
         {
-            if (netBase == null) return false;
-            return netBase.HasEventsForTick(tick);
+            if (NetBase == null) return false;
+            return NetBase.HasEventsForTick(tick);
+        }
+
+        protected void TryRegisterSteamPacketReceiver(object receiver)
+        {
+            if (!(receiver is ISteamPacketReceiver)) return;
+            if (steamPacketListener == null)
+            {
+                Plugin.Log("Creating SteamPacketListener");
+                steamPacketListener = new SteamPacketListener();
+            }
+            ((ISteamPacketReceiver)receiver).RegisterSteamPacketListener(steamPacketListener);
         }
     }
 }

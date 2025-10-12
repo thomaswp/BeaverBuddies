@@ -10,18 +10,23 @@ using Timberborn.SingletonSystem;
 
 namespace BeaverBuddies
 {
+#pragma warning disable CS0618 // Type or member is obsolete
     internal class ConfigIOService : IPostLoadableSingleton
     {
         public string ConfigFileName => "ReplayConfig";
 
         private ModRepository _modRepository;
+        private Settings _settings;
 
         private string configPath = null;
         private JsonSerializerSettings deserializeSettings;
 
-        public ConfigIOService(ModRepository modRepository)
+        public ConfigIOService(
+            ModRepository modRepository,
+            Settings settings)
         {
             _modRepository = modRepository;
+            _settings = settings;
 
             deserializeSettings = new JsonSerializerSettings
             {
@@ -32,24 +37,31 @@ namespace BeaverBuddies
 
         public void PostLoad()
         {
-            if (!LoadConfigFromFile())
+            if (LoadConfigFromFile(out ReplayConfig config))
             {
-                // If there's not config file, create a new one
-                SaveConfigToFile();
+                _settings.ClientConnectionAddress.SetValue(config.ClientConnectionAddress);
+                _settings.DefaultPort.SetValue(config.Port);
+                _settings.SilenceLogging.SetValue(!config.Verbose);
+                _settings.ShowFirstTimerMessage.SetValue(config.FirstTimer);
+                _settings.ReportingConsent.SetValue(config.ReportingConsent);
+                _settings.AlwaysTrace.SetValue(config.Verbose);
+                _settings.AlwaysTrace.SetValue(config.AlwaysDebug);
+                Plugin.Log("Transferred config from file to settings.");
+                DeleteConfigFile();
             }
         }
 
-        public bool LoadConfigFromFile()
+        private bool LoadConfigFromFile(out ReplayConfig config)
         {
             string path = GetConfigPath();
+            config = null;
             if (path == null) return false;
             // Create directories if they don't exit
-            ReplayConfig config = new ReplayConfig();
+
+            config = new ReplayConfig();
             try
             {
                 JsonConvert.PopulateObject(File.ReadAllText(configPath), config, deserializeSettings);
-                EventIO.Config = config;
-                Plugin.Log("Config loaded!");
                 return true;
             }
             catch (Exception)
@@ -59,7 +71,7 @@ namespace BeaverBuddies
             }
         }
 
-        public string GetConfigPath()
+        private string GetConfigPath()
         {
             if (configPath != null) return configPath;
 
@@ -78,18 +90,17 @@ namespace BeaverBuddies
             return configPath;
         }
 
-        public void SaveConfigToFile()
+        public void DeleteConfigFile()
         {
             string path = GetConfigPath();
-            if (path == null) return;
-            Plugin.Log($"Writing config to: {path}");
+            Plugin.Log($"Deleting config at path: {path}");
             try
             {
-                File.WriteAllText(configPath, JsonConvert.SerializeObject(EventIO.Config, Formatting.Indented));
+                File.Delete(path);
             }
             catch (Exception e)
             {
-                Plugin.LogWarning($"Failed to save config: {e}");
+                Plugin.LogWarning($"Failed to delete config: {e}");
             }
         }
     }

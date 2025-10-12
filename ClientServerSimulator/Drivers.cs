@@ -71,7 +71,7 @@ namespace TimberNet
     {
         const string SCRIPT_PATH = "client.json";
 
-        public ClientDriver() : base(SCRIPT_PATH, new TimberClient(LOCALHOST, PORT))
+        public ClientDriver() : base(SCRIPT_PATH, new TimberClient(new TCPClientWrapper(LOCALHOST, PORT)))
         {
         }
     }
@@ -81,7 +81,7 @@ namespace TimberNet
         const string SCRIPT_PATH = "server.json";
         const string SAVE_PATH = "save.timber";
 
-        public ServerDriver() : base(SCRIPT_PATH, new TimberServer(PORT, 
+        public ServerDriver() : base(SCRIPT_PATH, new TimberServer(new TCPListenerWrapper(PORT), 
             () => File.ReadAllBytesAsync(SAVE_PATH), CreateInitEvent()))
         {
             

@@ -34,25 +34,22 @@ namespace BeaverBuddies.Connect
 
     public class ClientConnectionUI : RegisteredSingleton
     {
-        private DialogBoxShower _dialogBoxShower;
         private InputBoxShower _inputBoxShower;
         private ClientConnectionService _clientConnectionService;
-        private ConfigIOService _configIOService;
         private ILoc _loc;
+        private Settings _settings;
 
-        ClientConnectionUI(
-            DialogBoxShower dialogBoxShower, 
+        public ClientConnectionUI(
             InputBoxShower inputBoxShower, 
             ClientConnectionService clientConnectionService,
-            ConfigIOService configIOService,
-            ILoc loc
+            ILoc loc,
+            Settings settings
         ) 
         {
-            _dialogBoxShower = dialogBoxShower;
             _inputBoxShower = inputBoxShower;
             _clientConnectionService = clientConnectionService;
-            _configIOService = configIOService;
             _loc = loc;
+            _settings = settings;
         }
 
         public void AddJoinButton(VisualElement __result)
@@ -66,31 +63,20 @@ namespace BeaverBuddies.Connect
 
         private void ShowBox()
         {
-            FieldInfo characterLimitField = typeof(InputBoxShower).GetField("CharacterLimit", BindingFlags.Static | BindingFlags.NonPublic);
-            if (characterLimitField != null)
-            {
-                characterLimitField.SetValue(null, 100); 
-            }
-
             ILoc _loc = _inputBoxShower._loc;
             var builder = _inputBoxShower.Create()
                 .SetLocalizedMessage(_loc.T("BeaverBuddies.JoinCoopGame.EnterIp"))
                 .SetConfirmButton(ip =>
                 {
-                    EventIO.Config.ClientConnectionAddress = ip;
-                    _configIOService.SaveConfigToFile();
+                    _settings.ClientConnectionAddress.SetValue(ip);
                     _clientConnectionService.ConnectOrShowFailureMessage(ip);
                 });
 
-            FieldInfo inputFieldInfo = typeof(InputBoxShower.Builder).GetField("_input", BindingFlags.Instance | BindingFlags.NonPublic);
-            TextField inputField = inputFieldInfo?.GetValue(builder) as TextField;
-            if (inputField != null)
-            {
-                inputField.maxLength = 100;
-                inputField.value = EventIO.Config.ClientConnectionAddress; 
-            }
-
             builder.Show();
+
+            // Override max length for IPv6 and host names
+            builder._input.maxLength = 128;
+            builder._input.value = _settings.ClientConnectionAddress.Value;
         }
     }
 }

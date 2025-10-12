@@ -12,8 +12,6 @@ namespace BeaverBuddies.IO
 
     public interface EventIO
     {
-        public static ReplayConfig Config { get; set; }
-
         void Update();
 
         List<ReplayEvent> ReadEvents(int ticksSinceLoad);

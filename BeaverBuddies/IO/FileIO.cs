@@ -89,7 +89,7 @@ namespace BeaverBuddies.IO
     public class RecordToFileService : IPostLoadableSingleton
     {
         private string fileName;
-        public RecordToFileService(SceneLoader sceneLoader)
+        public RecordToFileService(ISceneLoader sceneLoader)
         {
             var saveRef = sceneLoader.GetSceneParameters<GameSceneParameters>()?.SaveReference;
             if (saveRef != null)
@@ -106,10 +106,8 @@ namespace BeaverBuddies.IO
 
         public void PostLoad()
         {
-            if (EventIO.Config.GetNetMode() != NetMode.Record) return;
             Plugin.Log("Recording to file");
             EventIO.Set(new FileWriteIO("Replays/" + fileName));
-
         }
     }
 

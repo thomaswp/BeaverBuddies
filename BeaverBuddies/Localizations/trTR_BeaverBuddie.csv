@@ -14,3 +14,56 @@ BeaverBuddies.ClientDesynced.FailedToRehostMessage,"Yeniden barındırma başar�
 BeaverBuddies.ClientDesynced.SaveAndRehostButton,"Kaydet ve Yeniden Barındır","Save and Rehost"
 BeaverBuddies.ClientDesynced.WaitForRehostButton,"Yeniden Bağlan (yeniden barındırmayı bekle)","Reconnect (wait for Rehost)"
 BeaverBuddies.ClientDesynced.PostBugReportButton,"Hata Raporu Gönder","Post Bug Report"
+BeaverBuddies.Editor.StartingLocation1,"Başlangıç Konumu - Oyuncu 1",""
+BeaverBuddies.Editor.StartingLocation2,"Başlangıç Konumu - Oyuncu 2",""
+BeaverBuddies.Editor.StartingLocation3,"Başlangıç Konumu - Oyuncu 3",""
+BeaverBuddies.Editor.StartingLocation4,"Başlangıç Konumu - Oyuncu 4",""
+BeaverBuddies.NewGame.MaxStartingLocations,"Maksimum Başlangıç Konumu",""
+BeaverBuddies.ClientDesynced.ReportSuccess,"Başarılı!",""
+BeaverBuddies.ClientDesynced.ReportFailed,"Başarısız :(",""
+BeaverBuddies.ClientDesynced.ConsentAgreement,"Evet, kabul ediyorum",""
+BeaverBuddies.ClientDesynced.TracingEnabled,"Etkin",""
+BeaverBuddies.ClientDesynced.EnableTracing,"Günlük Kaydını Etkinleştir",""
+BeaverBuddies.ClientDesynced.NeedToEnableTracing,"Bu senkronizasyon hatasını bildirmek için, *tüm oyuncuların* aşağıdaki 'Günlük Kaydını Etkinleştir' düğmesine basarak daha ayrıntılı günlük kaydını etkinleştirmesi gerekir. Başka bir senkronizasyon hatası oluşursa, ayrıntılı ve otomatik bir hata raporu gönderebilirsiniz. Günlük modu biraz gecikmeye neden olabilir, ancak yalnızca oyunu yeniden başlatana kadar etkin olacaktır.",""
+BeaverBuddies.ClientDesynced.ConsentMessage,"Kullanım Verilerini Paylaşma Onayı
+
+Verilerinizi paylaşmayı seçerek, bu modun geliştiricilerine oyun oturumunuzdan aşağıdaki bilgileri göndermeyi kabul edersiniz:
+
+- Günlük Verileri: Oyun oturumunuz sırasında otomatik olarak toplanan bilgiler, oyun olayları ve kullanıcı etkileşimleri gibi.
+- Kayıt Dosyası: Mevcut oyun kayıt dosyanız.
+
+Bu verileri büyük ölçüde anonim tutarak gizliliğinizi korumaya çalışıyoruz. Ancak, veriler olduğu gibi toplandığından, sizi tanımlayabilecek ayrıntılar (dosya yolları veya kullanıcı adları gibi) içerebilir. Geliştiriciler bu bilgileri kullanarak kimliğinizi belirlemeye çalışmaz.
+
+Seçenekleriniz:
+- Kabul ederseniz, bu veriler güvenli bir şekilde geliştiricilere gönderilir ve modun iyileştirilmesi için kullanılır.
+- Kabul etmezseniz, hiçbir veri gönderilmez ve oyununuz herhangi bir değişiklik olmadan devam eder.
+
+Devam ederek, yaşadığınız ülkede dijital onay yaşı sınırına ulaştığınızı onaylıyorsunuz.
+
+Bu modun geliştiricileriyle verilerinizi paylaşmayı kabul ediyor musunuz?",""
+BeaverBuddies.Settings.ClientConnectionAddress,"İstemci Bağlantı Adresi",""
+BeaverBuddies.Settings.ClientConnectionAddress.Tooltip,"Bir Sunucu'ya bağlanırken varsayılan olarak kullanılan IP adresi.",""
+BeaverBuddies.Settings.Port,"Port",""
+BeaverBuddies.Settings.Port.Tooltip,"Oyunu barındırırken veya katılırken kullanılan port. Sunucunun yönlendirdiği port ile eşleşmelidir.",""
+BeaverBuddies.Settings.SilenceLogging,"Günlüğü Sustur",""
+BeaverBuddies.Settings.SilenceLogging.Tooltip,"Bu modun oyuncu günlük dosyasına yazmasını (uyarılar ve hatalar hariç) engeller.
+Bu ayar geliştiriciler içindir.",""
+BeaverBuddies.Settings.ShowFirstTimerMessage,"İlk Zamanlayıcı Mesajını Göster",""
+BeaverBuddies.Settings.AlwaysTrace,"Her Zaman Ayrıntılı Günlük Kullan",""
+BeaverBuddies.Settings.AlwaysTrace.Tooltip,"Etkinleştirilirse, oyun ilk desenkronizasyon anından itibaren ayrıntılı günlük kullanır ve bunu manuel etkinleştirmeye gerek kalmadan raporlamanıza olanak tanır.
+Tüm oyuncular bu ayarı etkinleştirmeli.
+Bu ayar biraz gecikmeye neden olabilir ve çoğu oyuncu için önerilmez.",""
+BeaverBuddies.Settings.ReportingConsent,"Raporlama Onayı",""
+BeaverBuddies.Settings.EnableSteamConnection,"Steam Bağlantısını Etkinleştir",""
+BeaverBuddies.Settings.EnableSteamConnection.Tooltip,"Oyuncuların Steam’in eşler arası ağı üzerinden oyununuza katılmasına izin verir.
+Oyuncular ayrıca port yönlendirme ile katılabilir.
+Not: Ağınız P2P’yi desteklemiyorsa bu özellik çalışmayabilir.
+Ayrıca eşler arası bağlantılar doğrudan bağlantılardan daha yavaş olabilir.",""
+BeaverBuddies.Settings.FriendsCanJoinSteamGame,"Arkadaşların Steam Üzerinden Katılmasına İzin Ver",""
+BeaverBuddies.Settings.FriendsCanJoinSteamGame.Tooltip,"Etkinleştirilirse, arkadaşlarınız Steam üzerinden sizi davet etmeden doğrudan katılabilir.",""
+BeaverBuddies.Host.ConnectedClients,"Müşterilerin bağlanması bekleniyor…
+Şu anda bağlı müşteriler:",""
+BeaverBuddies.Host.DirectConnectClient,"Doğrudan Bağlantı İstemcisi",""
+BeaverBuddies.Host.StartGame,"Oyunu Başlat",""
+BeaverBuddies.Host.InviteFriends,"Arkadaşları Davet Et",""
+BeaverBuddies.JoinCoopGame.Success,"Katıldı! Harita alınıyor…",""

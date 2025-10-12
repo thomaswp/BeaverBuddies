@@ -16,11 +16,11 @@ namespace TimberNet
     public class TimberServer : TimberNetBase
     {
 
-        private readonly List<TcpClient> clients = new List<TcpClient>();
-        private readonly ConcurrentDictionary<TcpClient, ConcurrentQueue<JObject>> queuedMessages =
-            new ConcurrentDictionary<TcpClient, ConcurrentQueue<JObject>>();
+        private readonly List<ISocketStream> clients = new List<ISocketStream>();
+        private readonly ConcurrentDictionary<ISocketStream, ConcurrentQueue<JObject>> queuedMessages =
+            new ConcurrentDictionary<ISocketStream, ConcurrentQueue<JObject>>();
 
-        private readonly TcpListener listener;
+        private readonly ISocketListener listener;
 
         private Func<Task<byte[]>> mapProvider;
         private Func<JObject>? initEventProvider;
@@ -30,13 +30,16 @@ namespace TimberNet
         private string? errorMessage = null;
         public bool IsAcceptingClients => errorMessage == null;
 
-        public TimberServer(int port, Func<Task<byte[]>> mapProvider, Func<JObject>? initEventProvider)
+        public List<string?> GetConnectedClients()
         {
+            return clients.Select(c => c.Name).ToList();
+        }
+
+        public TimberServer(ISocketListener listener, Func<Task<byte[]>> mapProvider, Func<JObject>? initEventProvider)
+        {
+            this.listener = listener;
             this.mapProvider = mapProvider;
             this.initEventProvider = initEventProvider;
-            // Listen on IPv6 and IPv4
-            listener = new TcpListener(IPAddress.IPv6Any, port);
-            listener.Server.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
         }
 
         public void UpdateProviders(Func<Task<byte[]>> mapProvider, Func<JObject>? initEventProvider)
@@ -65,10 +68,11 @@ namespace TimberNet
                 // Logging now to see if I can catch it.
                 while (!IsStopped)
                 {
-                    TcpClient client;
+                    ISocketStream client;
                     try
                     {
-                        client = listener.AcceptTcpClient();
+                        Log("Accepting client...");
+                        client = listener.AcceptClient();
                     } catch (Exception e)
                     {
                         Log("Error accepting client.");
@@ -79,7 +83,7 @@ namespace TimberNet
                     {
                         if (!IsAcceptingClients)
                         {
-                            await SendErrorMessage(client);
+                            SendErrorMessage(client);
                             client.Close();
                             return;
                         }
@@ -109,7 +113,7 @@ namespace TimberNet
             this.errorMessage = errorMessage;
         }
 
-        private void StartQueuing (TcpClient client)
+        private void StartQueuing (ISocketStream client)
         {
             lock (queuedMessages)
             {
@@ -118,7 +122,7 @@ namespace TimberNet
             }
         }
 
-        private void FinishQueuing(TcpClient client)
+        private void FinishQueuing(ISocketStream client)
         {
             // Log("finishing queuing");
             lock(queuedMessages)
@@ -140,23 +144,19 @@ namespace TimberNet
             }
         }
 
-        private async Task SendErrorMessage(TcpClient client)
+        private void SendErrorMessage(ISocketStream client)
         {
-            NetworkStream stream = client.GetStream();
-            SendLength(stream, 0);
-            byte[] bytes = Encoding.UTF8.GetBytes(errorMessage);
-            SendLength(stream, bytes.Length);
-            await stream.WriteAsync(bytes, 0, bytes.Length);
+            SendLength(client, 0);
+            byte[] bytes = MessageToBuffer(errorMessage!);
+            // TODO: Not sure this makes sense for Steam
+            SendDataWithLength(client, bytes);
         }
 
-        private async Task SendMap(TcpClient client)
-        {
-            NetworkStream stream = client.GetStream();
-
+        private async Task SendMap(ISocketStream client)
+        { 
             Task<byte[]> task = mapProvider();
             Log("Waiting for map...");
             byte[] mapBytes = await task;
-            Log($"Sending map with length {mapBytes.Length}");
 
             // TODO: This may happen a bit early - it seems possible for
             // events from a prior frame to get queued. Maybe just need to filter
@@ -165,21 +165,13 @@ namespace TimberNet
             // while the map is sending
             StartQueuing(client);
 
-
-            SendLength(stream, mapBytes.Length);
-            
-            // Send bytes in chunks
-            int chunkSize = MAX_BUFFER_SIZE;
-            for (int i = 0; i < mapBytes.Length; i += chunkSize)
-            {
-                int length = Math.Min(chunkSize, mapBytes.Length - i);
-                stream.Write(mapBytes, i, length);
-            }
+            Log($"Sending map with length {mapBytes.Length}");
+            SendDataWithLength(client, mapBytes);
 
             Log($"Sent map with length {mapBytes.Length} and Hash: {GetHashCode(mapBytes).ToString("X8")}");
         }
 
-        private void SendState(TcpClient client)
+        private void SendState(ISocketStream client)
         {
             JObject message = new JObject();
             message[TICKS_KEY] = 0;
@@ -228,7 +220,7 @@ namespace TimberNet
             }
         }
 
-        private void QueueOrSentToClient(TcpClient client, JObject message)
+        private void QueueOrSentToClient(ISocketStream client, JObject message)
         {
             if (!client.Connected) return;
 

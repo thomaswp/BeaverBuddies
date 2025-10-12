@@ -12,15 +12,19 @@ namespace BeaverBuddies.Fixes
 #if !NO_SMOOTH_ANIMATION
     [ManualMethodOverwrite]
     /*
-7/20/2024
+4/19/2025
 private void Update(float deltaTime)
 {
-	_animatedPathFollower.Update(Time.time);
-	if (!_animatedPathFollower.Stopped)
-	{
-		UpdateTransform(deltaTime);
-	}
-	InvokeAnimationUpdate();
+    _animatedPathFollower.Update(Time.time);
+    if (!_animatedPathFollower.Stopped)
+    {
+        UpdateTransform(deltaTime);
+        UpdateAnimationSpeed();
+        UpdateGroupId();
+    }
+
+    NotifyAnimationUpdated();
+    UpdateRotation();
 }
      */
     [HarmonyPatch(typeof(MovementAnimator), nameof(MovementAnimator.Update), typeof(float))]
@@ -69,8 +73,11 @@ private void Update(float deltaTime)
             if (!__instance._animatedPathFollower.Stopped)
             {
                 __instance.UpdateTransform(deltaTime);
+                __instance.UpdateAnimationSpeed();
+                __instance.UpdateGroupId();
             }
-            __instance.InvokeAnimationUpdate();
+            __instance.NotifyAnimationUpdated();
+            __instance.UpdateRotation();
 
             //if (position != Vector3.zero)
             //{

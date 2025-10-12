@@ -14,3 +14,56 @@ BeaverBuddies.ClientDesynced.FailedToRehostMessage,"再ホストに失敗しま�
 BeaverBuddies.ClientDesynced.SaveAndRehostButton,"保存して再ホスト","Save and Rehost"
 BeaverBuddies.ClientDesynced.WaitForRehostButton,"再ホストを待って再接続","Reconnect (wait for Rehost)"
 BeaverBuddies.ClientDesynced.PostBugReportButton,"バグ報告を投稿","Post Bug Report"
+BeaverBuddies.Editor.StartingLocation1,"開始地点 - プレイヤー 1",""
+BeaverBuddies.Editor.StartingLocation2,"開始地点 - プレイヤー 2",""
+BeaverBuddies.Editor.StartingLocation3,"開始地点 - プレイヤー 3",""
+BeaverBuddies.Editor.StartingLocation4,"開始地点 - プレイヤー 4",""
+BeaverBuddies.NewGame.MaxStartingLocations,"最大開始地点数",""
+BeaverBuddies.ClientDesynced.ReportSuccess,"成功！",""
+BeaverBuddies.ClientDesynced.ReportFailed,"失敗 :(",""
+BeaverBuddies.ClientDesynced.ConsentAgreement,"はい、同意します",""
+BeaverBuddies.ClientDesynced.TracingEnabled,"有効",""
+BeaverBuddies.ClientDesynced.EnableTracing,"ログ記録を有効にする",""
+BeaverBuddies.ClientDesynced.NeedToEnableTracing,"この同期ズレを報告するには、*全プレイヤー* が下の「ログ記録を有効にする」を押して、詳細なログ記録を有効にする必要があります。別の同期ズレが発生した場合、詳細で自動化されたバグレポートを投稿できます。ログ記録モードは一時的にラグを引き起こす可能性がありますが、ゲームを再起動するまでのみ有効です。",""
+BeaverBuddies.ClientDesynced.ConsentMessage,"使用データ共有の同意
+
+データを共有することを選択することで、プレイセッション中の以下の情報をこのModの開発者に送信することに同意します：
+
+- ログデータ：プレイセッション中に自動的に収集される情報（ゲームイベントやユーザー操作など）。
+- セーブファイル：現在のゲームのセーブファイル。
+
+これらのデータは主に匿名で保持されるよう努めていますが、データはそのまま収集されるため、ファイルパスやユーザー名など、あなたを識別できる情報が含まれる可能性があります。開発者はこの情報を使ってあなたを特定しようとはしません。
+
+選択肢：
+- 同意する場合、これらのデータは安全に開発者に送信され、Modの改善に使用されます。
+- 同意しない場合、データは送信されず、ゲームは変更なく続行されます。
+
+続行することで、居住国でのデジタル同意年齢に達していることを確認します。
+
+このModの開発者とデータを共有することに同意しますか？",""
+BeaverBuddies.Settings.ClientConnectionAddress,"クライアント接続アドレス",""
+BeaverBuddies.Settings.ClientConnectionAddress.Tooltip,"ホストに接続する際に使うデフォルトのIPアドレスです。",""
+BeaverBuddies.Settings.Port,"ポート",""
+BeaverBuddies.Settings.Port.Tooltip,"ゲームをホストまたは参加する際に使用するポートです。ホスト側で転送されたポートと一致させてください。",""
+BeaverBuddies.Settings.SilenceLogging,"ログ記録を停止",""
+BeaverBuddies.Settings.SilenceLogging.Tooltip,"このModがプレイヤーログファイルへの記録を（警告とエラーを除いて）行わないようにします。
+この設定は開発者向けです。",""
+BeaverBuddies.Settings.ShowFirstTimerMessage,"初参加メッセージを表示",""
+BeaverBuddies.Settings.AlwaysTrace,"詳細ログを常に使用",""
+BeaverBuddies.Settings.AlwaysTrace.Tooltip,"有効にすると、ゲームは常に詳細ログを使用し、最初の同期ズレ発生時から手動設定なしで報告が可能になります。
+すべてのプレイヤーがこの設定を有効にしている必要があります。
+この設定はラグを引き起こす可能性があるため、ほとんどのプレイヤーには推奨されません。",""
+BeaverBuddies.Settings.ReportingConsent,"報告への同意",""
+BeaverBuddies.Settings.EnableSteamConnection,"Steamネットワークを有効化",""
+BeaverBuddies.Settings.EnableSteamConnection.Tooltip,"SteamのP2Pネットワーク経由で、プレイヤーがあなたのゲームに参加できるようにします。
+プレイヤーはポート転送経由でも参加可能です。
+注意：ネットワークがP2Pをサポートしていない場合、この機能は動作しないことがあります。
+また、P2P接続は直接接続より遅くなる場合があります。",""
+BeaverBuddies.Settings.FriendsCanJoinSteamGame,"Steam経由で友達が参加可能に",""
+BeaverBuddies.Settings.FriendsCanJoinSteamGame.Tooltip,"有効にすると、あなたの友達がSteam経由で招待なしで直接参加できます。",""
+BeaverBuddies.Host.ConnectedClients,"クライアントを待っています…
+現在接続中のクライアント：",""
+BeaverBuddies.Host.DirectConnectClient,"ダイレクト接続クライアント",""
+BeaverBuddies.Host.StartGame,"ゲーム開始",""
+BeaverBuddies.Host.InviteFriends,"フレンドを招待",""
+BeaverBuddies.JoinCoopGame.Success,"参加しました！マップを受信中…",""

@@ -27,7 +27,7 @@ namespace BeaverBuddies
             // If the next ticked bucket is 0, this means we either just ticked the replay
             // service (meaning *no* entities have ticked this tick) or or we're just about to
             // (meaning *all* entities have ticked this tick).
-            if (TickableBucketService._nextTickedBucketIndex == 0)
+            if (TickableBucketService._nextBucketIndex == 0)
             {
                 // We've only ticked at the start of the tick, before the replay service
                 // has ticked.
@@ -35,8 +35,8 @@ namespace BeaverBuddies
                     && !_tickingService.HasTickedReplayService;
             }
 
-            int lastTickedBucket = TickableBucketService._nextTickedBucketIndex - 1;
-            if (lastTickedBucket < 0) lastTickedBucket += TickableBucketService.NumberOfBuckets;
+            int lastTickedBucket = TickableBucketService._nextBucketIndex - 1;
+            if (lastTickedBucket < 0) lastTickedBucket += TickableBucketService.TotalNumberOfBuckets;
 
             return bucketIndex <= lastTickedBucket;
         }
@@ -44,12 +44,12 @@ namespace BeaverBuddies
         public float PercentTicked(EntityComponent tickableEntity)
         {
             int bucketIndex = GetEntityBucketIndex(tickableEntity);
-            int currentIndex = TickableBucketService._nextTickedBucketIndex;
+            int currentIndex = TickableBucketService._nextBucketIndex;
             // Figure out how many buckets have ticked since this entity's bucket
             int numerator = currentIndex - bucketIndex;
             // If it hasn't ticked yet, add the number of buckets to tick (plus 1 for singletons)
-            if (numerator <= 0) numerator += TickableBucketService.NumberOfBuckets + 1;
-            return (float)(numerator) / (TickableBucketService.NumberOfBuckets + 1);
+            if (numerator <= 0) numerator += TickableBucketService.TotalNumberOfBuckets;
+            return (float)(numerator) / (TickableBucketService.TotalNumberOfBuckets);
         }
 
         public float TimeAtLastTick(EntityComponent tickableEntity)

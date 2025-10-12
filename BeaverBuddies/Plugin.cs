@@ -1,23 +1,35 @@
 ﻿using BeaverBuddies.Connect;
 using BeaverBuddies.DesyncDetecter;
+using BeaverBuddies.Editor;
 using BeaverBuddies.Fixes;
 using BeaverBuddies.IO;
+using BeaverBuddies.MultiStart;
+using BeaverBuddies.Reporting;
+using BeaverBuddies.Steam;
 using BeaverBuddies.Util;
 using BeaverBuddies.Util.Logging;
 using Bindito.Core;
+using Bindito.Core.Internal;
 using HarmonyLib;
 using System.Diagnostics;
+using System.Reflection;
+using Timberborn.EntityPanelSystem;
+using Timberborn.GameDistrictsUI;
 using Timberborn.ModManagerScene;
+using Timberborn.SceneLoading;
+using Timberborn.StartingLocationSystem;
+using Timberborn.TemplateSystem;
+using Timberborn.TutorialSystemUI;
+using Timberborn.WondersUI;
 
 namespace BeaverBuddies
 {
     [Context("Game")]
     public class ReplayConfigurator : IConfigurator
     {
+
         public void Configure(IContainerDefinition containerDefinition)
         {
-            if (EventIO.Config.GetNetMode() == NetMode.None) return;
-
             // Reset everything before loading singletons
             SingletonManager.Reset();
 
@@ -28,7 +40,11 @@ namespace BeaverBuddies
             // playing co-op right now).
             containerDefinition.Bind<ClientConnectionService>().AsSingleton();
             containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
-            containerDefinition.Bind<ConfigIOService>().AsSingleton();
+            containerDefinition.Bind<SteamOverlayConnectionService>().AsSingleton();
+            containerDefinition.Bind<RegisteredLocalizationService>().AsSingleton(); 
+            containerDefinition.Bind<Settings>().AsSingleton();
+
+            MultiStartConfigurator.Configure(containerDefinition);
 
             // EventIO gets set before load, so if it's null, this is a regular
             // game, so don't initialize these services.
@@ -37,19 +53,16 @@ namespace BeaverBuddies
             Plugin.Log("Registering Co-op services");
             //containerDefinition.Bind<ServerConnectionService>().AsSingleton();
             containerDefinition.Bind<ReplayService>().AsSingleton();
-            containerDefinition.Bind<RecordToFileService>().AsSingleton();
             containerDefinition.Bind<TickProgressService>().AsSingleton();
             containerDefinition.Bind<TickingService>().AsSingleton();
             containerDefinition.Bind<DeterminismService>().AsSingleton();
             containerDefinition.Bind<TickReplacerService>().AsSingleton();
             containerDefinition.Bind<RehostingService>().AsSingleton();
+            containerDefinition.Bind<ReportingService>().AsSingleton();
             containerDefinition.Bind<LateTickableBuffer>().AsSingleton();
-
-            if (EventIO.Config.Debug)
-            {
-                Plugin.Log("Debug Mode Active; registering DesyncDetecterService");
-                containerDefinition.Bind<DesyncDetecterService>().AsSingleton();
-            }
+            // We can safely add this regardless of whether tracing is enabled
+            // because it will only trace if the config is set to do so.
+            containerDefinition.Bind<DesyncDetecterService>().AsSingleton();
 
         }
     }
@@ -59,8 +72,6 @@ namespace BeaverBuddies
     {
         public void Configure(IContainerDefinition containerDefinition)
         {
-            if (EventIO.Config.GetNetMode() == NetMode.None) return;
-
             // This will be called if the player exits to the main menu,
             // so it's best to reset everything.
             SingletonManager.Reset();
@@ -71,6 +82,12 @@ namespace BeaverBuddies
             containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
             containerDefinition.Bind<FirstTimerService>().AsSingleton();
             containerDefinition.Bind<ConfigIOService>().AsSingleton();
+            containerDefinition.Bind<RegisteredLocalizationService>().AsSingleton();
+            containerDefinition.Bind<MultiplayerMapMetadataService>().AsSingleton();
+            containerDefinition.Bind<Settings>().AsSingleton();
+
+            //new ReportingService().PostDesync("test").ContinueWith(result => Plugin.Log($"Posted: {result.Result}"));
+            containerDefinition.Bind<SteamOverlayConnectionService>().AsSingleton();
 
             //ReflectionUtils.PrintChildClasses(typeof(MonoBehaviour), 
             //    "Start", "Awake", "Update", "FixedUpdate", "LateUpdate", "OnEnable", "OnDisable", "OnDestroy");
@@ -81,15 +98,14 @@ namespace BeaverBuddies
             //ReflectionUtils.PrintChildClasses(typeof(IParallelTickableSingleton));
             //ReflectionUtils.FindStaticFields();
             //ReflectionUtils.FindHashSetFields();
+            //ReflectionUtils.PrintChildClasses(typeof(IEntityPanelFragment));
         }
     }
 
     [HarmonyPatch]
     public class Plugin : IModStarter
     {
-
-        // TODO: Need to manually keep this updated now
-        public const string Version = "1.2.6";
+        public static readonly string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         public const string Name = "BeaverBuddies";
         public const string ID = "beaverbuddies";
 
@@ -98,19 +114,13 @@ namespace BeaverBuddies
         public void StartMod()
         {
             logger = new UnityLogger();
-
-            // Create a default config temporarily
-            // Will be loaded later by ConfigIOService
-            ReplayConfig config = new ReplayConfig();
-
-            EventIO.Config = config;
             
-            Log($"{Name} is loaded!");
-
-            if (config.GetNetMode() == NetMode.None) return;
+            Log($"{Name} v{Version} is loaded!");
 
             Harmony harmony = new Harmony(ID);
             harmony.PatchAll();
+
+            Log(UnityEngine.Application.consoleLogPath);
         }
 
         public static string GetWithDate(string message)
@@ -120,7 +130,7 @@ namespace BeaverBuddies
 
         public static void Log(string message)
         {
-            if (!EventIO.Config.Verbose) return;
+            if (!Settings.VerboseLogging) return;
             logger.LogInfo(GetWithDate(message));
         }
 

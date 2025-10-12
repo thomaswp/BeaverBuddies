@@ -1,5 +1,7 @@
 ﻿using BeaverBuddies.IO;
+using BeaverBuddies.Steam;
 using BeaverBuddies.Util;
+using Steamworks;
 using System;
 using System.IO;
 using System.Net.Sockets;
@@ -14,90 +16,87 @@ using TimberNet;
 
 namespace BeaverBuddies.Connect
 {
-    public class ClientConnectionService : IUpdatableSingleton, IPostLoadableSingleton
+    public class ClientConnectionService : IUpdatableSingleton
     {
-        // Static here makes sense since it should really only
-        // every happen once
-        private static bool hasAutoloaded = false;
-
-        public const string LOCALHOST = "127.0.0.1";
-
         private GameSceneLoader _gameSceneLoader;
         private GameSaveRepository _gameSaveRepository;
         private DialogBoxShower _dialogBoxShower;
         private UrlOpener _urlOpener;
         private ClientEventIO client;
+        private Settings _settings;
 
         public ClientConnectionService(
             GameSceneLoader gameSceneLoader,
             GameSaveRepository gameSaveRepository,
             DialogBoxShower dialogBoxShower,
-            UrlOpener urlOpener
+            UrlOpener urlOpener,
+            Settings settings
         )
         {
             _gameSceneLoader = gameSceneLoader;
             _gameSaveRepository = gameSaveRepository;
             _dialogBoxShower = dialogBoxShower;
             _urlOpener = urlOpener;
+            _settings = settings;
         }
 
-        public void PostLoad()
+        public bool TryToConnect(CSteamID friendID)
         {
-            if (!hasAutoloaded && EventIO.Config.GetNetMode() == NetMode.AutoconnectClient)
-            {
-                hasAutoloaded = true;
-                ConnectOrShowFailureMessage(EventIO.Config.ClientConnectionAddress);
-            }
+            return TryToConnect(new SteamSocket(friendID));
         }
 
         public bool TryToConnect(string address)
         {
-            // Clean up our current co-op state before connecting,
-            // so we don't, for example, end up ticking the client before
-            // it's actually loaded.
-            SingletonManager.Reset();
-            Plugin.Log("Connecting client");
+            int port = _settings.DefaultPort.Value;
             Plugin.Log("Try to resolve address: " + address);
-
             try
             {
                 // Parse address and port
-                var (hostAddress, port) = ParseAddressAndPort(address);
+                var (hostAddress, parsedPort) = ParseAddressAndPort(address);
 
                 // Set port if provided
-                if (port.HasValue)
+                if (parsedPort.HasValue)
                 {
-                    EventIO.Config.Port = port.Value;
+                    port = parsedPort.Value;
+                    Plugin.Log("Using parsed port: " + port);
                 }
 
                 // Resolve the address if it's a hostname
                 hostAddress = ResolveHostnameIfNecessary(hostAddress);
-
-                // Attempt to create the client
-                client = ClientEventIO.Create(hostAddress, EventIO.Config.Port, LoadMap, error =>
-                {
-                    ShowError("BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError", error);
-                });
-
-                if (client == null)
-                {
-                    Plugin.Log("Client creation failed.");
-                    return false;
-                }
-
-                EventIO.Set(client);
-                return true;
             }
             catch (Exception ex)
             {
+                // TODO: I think it'd be better to have specific messages for parsing errors,
+                // rather than using a connection failed message with more details.
+                // It also shows the error twice.
                 ShowError("BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError", ex.Message);
                 return false;
             }
+
+            return TryToConnect(new TCPClientWrapper(address, port));
+        }
+
+        private bool TryToConnect(ISocketStream socket)
+        {
+            Plugin.Log("Connecting client");
+            client = ClientEventIO.Create(socket, LoadMap, (error) =>
+            {
+                ShowError("BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError", error);
+            });
+
+            if (client == null)
+            {
+                Plugin.Log("Client creation failed.");
+                return false;
+            }
+
+            EventIO.Set(client);
+            return true;
         }
 
         public void ConnectOrShowFailureMessage()
         {
-            ConnectOrShowFailureMessage(EventIO.Config.ClientConnectionAddress);
+            ConnectOrShowFailureMessage(_settings.ClientConnectionAddress.Value);
         }
 
         public void ConnectOrShowFailureMessage(string address)
@@ -105,6 +104,20 @@ namespace BeaverBuddies.Connect
             if (TryToConnect(address)) return;
 
             ShowError("BeaverBuddies.JoinCoopGame.ConnectionFailedMessage");
+        }
+
+        public void ShowConnectionMessage(bool success)
+        {
+            if (success)
+            {
+                _dialogBoxShower.Create()
+                    .SetLocalizedMessage("BeaverBuddies.JoinCoopGame.Success")
+                    .Show();
+            }
+            else
+            {
+                ShowError("BeaverBuddies.JoinCoopGame.ConnectionFailedMessage");
+            }
         }
 
         private void ShowError(string message, string error = null)
@@ -127,6 +140,11 @@ namespace BeaverBuddies.Connect
 
         private void LoadMap(byte[] mapBytes)
         {
+            // Clean up our current co-op state before loading,
+            // so we don't, for example, end up ticking the client before
+            // it's actually loaded.
+            SingletonManager.Reset();
+
             Plugin.Log("Loading map");
             //string saveName = Guid.NewGuid().ToString();
             string saveName = TimberNetBase.GetHashCode(mapBytes).ToString("X8");
@@ -160,6 +178,7 @@ namespace BeaverBuddies.Connect
                 }
                 else
                 {
+                    // TODO: Loc!
                     throw new FormatException("Invalid address format. Could not parse port.");
                 }
             }
@@ -169,19 +188,24 @@ namespace BeaverBuddies.Connect
         private string ResolveHostnameIfNecessary(string address)
         {
             // If it's not an IP address, resolve the hostname
-            if (!IPAddress.TryParse(address, out _))
+            if (IPAddress.TryParse(address, out _))
             {
-                IPHostEntry hostEntry = Dns.GetHostEntry(address);
-                if (hostEntry.AddressList.Length > 0)
-                {
-                    return hostEntry.AddressList[0].ToString();
-                }
-                else
-                {
-                    throw new Exception("Hostname could not be resolved to an IP address.");
-                }
+                return address;
             }
-            return address; // If already an IP, return as-is
+
+            // Otherwise, try to resolve it
+            IPHostEntry hostEntry = Dns.GetHostEntry(address);
+            if (hostEntry.AddressList.Length > 0)
+            {
+                string resolvedAddress = hostEntry.AddressList[0].ToString();
+                Plugin.Log(address + " resolved to " + resolvedAddress);
+                return resolvedAddress;
+            }
+            else
+            {
+                // TODO: Loc!
+                throw new Exception("Hostname could not be resolved to an IP address.");
+            }
         }
     }
 }
