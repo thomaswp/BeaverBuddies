@@ -8,6 +8,8 @@ BeaverBuddies/env.props
 BeaverBuddies/temp
 BeaverBuddies/pat.properties
 
+Inspector/input.txt
+
 # User-specific files
 *.rsuser
 *.suo
