@@ -49,28 +49,39 @@ namespace BeaverBuddies.Connect
         {
             int port = _settings.DefaultPort.Value;
             Plugin.Log("Try to resolve address: " + address);
-            try
+            // Parse address and port
+            if (ParseAddressAndPort(address, out string parsedAddress, out int? parsedPort))
             {
-                // Parse address and port
-                var (hostAddress, parsedPort) = ParseAddressAndPort(address);
+                address = parsedAddress;
+            }
+            else
+            {
+                ShowError("BeaverBuddies.JoinCoopGame.Error.InvalidFormat");
+                return false;
+            }
 
-                // Set port if provided
-                if (parsedPort.HasValue)
-                {
-                    port = parsedPort.Value;
-                    Plugin.Log("Using parsed port: " + port);
-                }
+            // Set port if provided
+            if (parsedPort.HasValue)
+            {
+                port = parsedPort.Value;
+                Plugin.Log("Using parsed port: " + port);
+            }
+
+
+            // If it's not an IP address, resolve the hostname
+            if (!IPAddress.TryParse(address, out _))
+            {
 
                 // Resolve the address if it's a hostname
-                hostAddress = ResolveHostnameIfNecessary(hostAddress);
-            }
-            catch (Exception ex)
-            {
-                // TODO: I think it'd be better to have specific messages for parsing errors,
-                // rather than using a connection failed message with more details.
-                // It also shows the error twice.
-                ShowError("BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError", ex.Message);
-                return false;
+                if (ResolveHostnameIfNecessary(parsedAddress, out string resolvedAddress))
+                {
+                    address = resolvedAddress;
+                }
+                else
+                {
+                    ShowError("BeaverBuddies.JoinCoopGame.Error.InvalidAddress");
+                    return false;
+                }
             }
 
             return TryToConnect(new TCPClientWrapper(address, port));
@@ -81,7 +92,7 @@ namespace BeaverBuddies.Connect
             Plugin.Log("Connecting client");
             client = ClientEventIO.Create(socket, LoadMap, (error) =>
             {
-                ShowError("BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError", error);
+                ShowError("BeaverBuddies.JoinCoopGame.Error.CouldNotConnect", error);
             });
 
             if (client == null)
@@ -101,9 +112,7 @@ namespace BeaverBuddies.Connect
 
         public void ConnectOrShowFailureMessage(string address)
         {
-            if (TryToConnect(address)) return;
-
-            ShowError("BeaverBuddies.JoinCoopGame.ConnectionFailedMessage");
+            TryToConnect(address);
         }
 
         public void ShowConnectionMessage(bool success)
@@ -120,17 +129,44 @@ namespace BeaverBuddies.Connect
             }
         }
 
-        private void ShowError(string message, string error = null)
+        private void ShowError(string reasonKey, string details = null)
         {
+            string messageKey;
+            if (reasonKey != null)
+            {
+                messageKey = "BeaverBuddies.JoinCoopGame.ConnectionFailedMessageWithError";
+            }
+            else
+            {
+                messageKey = "BeaverBuddies.JoinCoopGame.ConnectionFailedMessage";
+            }
 
             ILoc _loc = _dialogBoxShower._loc;
+            string reasonMessage = null;
+            if (reasonKey != null)
+            {
+                reasonMessage = _loc.T(reasonKey);
+            }
+
+            if (details != null)
+            {
+                if (reasonMessage != null)
+                {
+                    reasonMessage += "\n";
+                }
+                else
+                {
+                    reasonMessage = "";
+                }
+                reasonMessage += "\"" + details + "\"";
+            }
 
             var action = () =>
             {
                 _urlOpener.OpenUrl(LinkHelper.TroubleshootingUrl);
             };
 
-            message = _loc.T(message, error);
+            string message = _loc.T(messageKey, reasonMessage);
             _dialogBoxShower.Create()
                 .SetMessage(message)
                 .SetConfirmButton(action)
@@ -166,46 +202,51 @@ namespace BeaverBuddies.Connect
             client.Update();
         }
 
-        private (string, int?) ParseAddressAndPort(string address)
+        private bool ParseAddressAndPort(string address, out string parsedAddress, out int? port)
         {
             // If address contains a port, split and parse it
             if (address.Contains(":"))
             {
                 var tokens = address.Split(':');
-                if (tokens.Length == 2 && int.TryParse(tokens[1], out int port))
+                if (tokens.Length == 2 && int.TryParse(tokens[1], out int parsedPort))
                 {
-                    return (tokens[0], port);
+                    parsedAddress = tokens[0];
+                    port = parsedPort;
+                    return true;
                 }
                 else
                 {
-                    // TODO: Loc!
-                    throw new FormatException("Invalid address format. Could not parse port.");
+                    parsedAddress = null;
+                    port = null;
+                    return false;
                 }
             }
-            return (address, null);
+            parsedAddress = address;
+            port = null;
+            return true;
         }
 
-        private string ResolveHostnameIfNecessary(string address)
+        private bool ResolveHostnameIfNecessary(string address, out string resolvedAddress)
         {
-            // If it's not an IP address, resolve the hostname
-            if (IPAddress.TryParse(address, out _))
+            resolvedAddress = null;
+
+            try
             {
-                return address;
+                // Otherwise, try to resolve it
+                IPHostEntry hostEntry = Dns.GetHostEntry(address);
+                if (hostEntry.AddressList.Length > 0)
+                {
+                    resolvedAddress = hostEntry.AddressList[0].ToString();
+                    Plugin.Log(address + " resolved to " + resolvedAddress);
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.LogError("Could not resolve hostname: " + ex.ToString());
             }
 
-            // Otherwise, try to resolve it
-            IPHostEntry hostEntry = Dns.GetHostEntry(address);
-            if (hostEntry.AddressList.Length > 0)
-            {
-                string resolvedAddress = hostEntry.AddressList[0].ToString();
-                Plugin.Log(address + " resolved to " + resolvedAddress);
-                return resolvedAddress;
-            }
-            else
-            {
-                // TODO: Loc!
-                throw new Exception("Hostname could not be resolved to an IP address.");
-            }
+            return false;
         }
     }
 }

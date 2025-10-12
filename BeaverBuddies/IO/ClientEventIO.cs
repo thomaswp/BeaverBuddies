@@ -45,6 +45,7 @@ namespace BeaverBuddies.IO
             }
             catch (Exception ex)
             {
+                onError(ex.Message);
                 Plugin.LogError(ex.ToString());
                 CleanUp();
                 FailedToConnect = true;

@@ -67,3 +67,7 @@ BeaverBuddies.Host.DirectConnectClient,"Direct Connect Client",""
 BeaverBuddies.Host.StartGame,"Start Game",""
 BeaverBuddies.Host.InviteFriends,"Invite Friends",""
 BeaverBuddies.JoinCoopGame.Success,"Joined! Receiving map...",""
+BeaverBuddies.JoinCoopGame.Error.InvalidFormat,"Invalid address format. Could not parse port.",""
+BeaverBuddies.JoinCoopGame.Error.InvalidAddress,"Address was not a valid IP address.
+Attempted to resolve it as a host name, but it did not resolve to an IP address.",""
+BeaverBuddies.JoinCoopGame.Error.CouldNotConnect,"Could not connect to Host. Please check the address and port, and make sure the Host is hosting and has port forwarded if needed. Error details:",""
