@@ -67,3 +67,7 @@ BeaverBuddies.Host.DirectConnectClient,"直接連接客戶端",""
 BeaverBuddies.Host.StartGame,"開始遊戲",""
 BeaverBuddies.Host.InviteFriends,"邀請好友",""
 BeaverBuddies.JoinCoopGame.Success,"已加入！正在接收地圖…",""
+BeaverBuddies.JoinCoopGame.Error.InvalidFormat,"無效的位址格式。無法解析埠號。",""
+BeaverBuddies.JoinCoopGame.Error.InvalidAddress,"該位址不是有效的 IP 位址。
+嘗試將其解析為主機名稱，但未能解析為 IP 位址。",""
+BeaverBuddies.JoinCoopGame.Error.CouldNotConnect,"無法連線到主機。請檢查位址和埠號，並確保主機正在運行且在需要時已設定埠號轉送。錯誤詳細資訊：",""

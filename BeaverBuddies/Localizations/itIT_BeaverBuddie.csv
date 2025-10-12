@@ -67,3 +67,7 @@ BeaverBuddies.Host.DirectConnectClient,"Client connessione diretta",""
 BeaverBuddies.Host.StartGame,"Avvia partita",""
 BeaverBuddies.Host.InviteFriends,"Invita amici",""
 BeaverBuddies.JoinCoopGame.Success,"Connesso! Ricezione mappa…",""
+BeaverBuddies.JoinCoopGame.Error.InvalidFormat,"Formato dell’indirizzo non valido. Impossibile analizzare la porta.",""
+BeaverBuddies.JoinCoopGame.Error.InvalidAddress,"L’indirizzo non era un indirizzo IP valido.
+Si è tentato di risolverlo come nome host, ma non è stato possibile ottenere un indirizzo IP.",""
+BeaverBuddies.JoinCoopGame.Error.CouldNotConnect,"Impossibile connettersi all’host. Controlla l’indirizzo e la porta e assicurati che l’host stia effettivamente ospitando e che la porta sia inoltrata, se necessario. Dettagli errore:",""

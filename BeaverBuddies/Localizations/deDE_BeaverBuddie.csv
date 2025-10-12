@@ -67,3 +67,7 @@ BeaverBuddies.Host.DirectConnectClient,"Direkt‑Connect‑Client",""
 BeaverBuddies.Host.StartGame,"Spiel starten",""
 BeaverBuddies.Host.InviteFriends,"Freunde einladen",""
 BeaverBuddies.JoinCoopGame.Success,"Beigetreten! Karte wird empfangen…",""
+BeaverBuddies.JoinCoopGame.Error.InvalidFormat,"Ungültiges Adressformat. Port konnte nicht analysiert werden.",""
+BeaverBuddies.JoinCoopGame.Error.InvalidAddress,"Die Adresse war keine gültige IP-Adresse.
+Es wurde versucht, sie als Hostnamen aufzulösen, aber sie konnte keiner IP-Adresse zugeordnet werden.",""
+BeaverBuddies.JoinCoopGame.Error.CouldNotConnect,"Verbindung zum Host konnte nicht hergestellt werden. Bitte überprüfen Sie die Adresse und den Port und stellen Sie sicher, dass der Host das Spiel hostet und die Portweiterleitung aktiviert ist, falls erforderlich. Fehlerinformationen:",""

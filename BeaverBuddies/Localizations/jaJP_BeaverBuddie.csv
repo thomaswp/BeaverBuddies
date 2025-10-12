@@ -67,3 +67,7 @@ BeaverBuddies.Host.DirectConnectClient,"ダイレクト接続クライアント"
 BeaverBuddies.Host.StartGame,"ゲーム開始",""
 BeaverBuddies.Host.InviteFriends,"フレンドを招待",""
 BeaverBuddies.JoinCoopGame.Success,"参加しました！マップを受信中…",""
+BeaverBuddies.JoinCoopGame.Error.InvalidFormat,"無効なアドレス形式です。ポートを解析できませんでした。",""
+BeaverBuddies.JoinCoopGame.Error.InvalidAddress,"アドレスが有効なIPアドレスではありませんでした。
+ホスト名として解決を試みましたが、IPアドレスに解決できませんでした。",""
+BeaverBuddies.JoinCoopGame.Error.CouldNotConnect,"ホストに接続できませんでした。アドレスとポートを確認し、ホストが実際にホスティングしており、必要に応じてポート転送が設定されていることを確認してください。エラー詳細:",""

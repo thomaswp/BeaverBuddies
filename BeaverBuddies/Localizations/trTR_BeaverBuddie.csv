@@ -67,3 +67,7 @@ BeaverBuddies.Host.DirectConnectClient,"Doğrudan Bağlantı İstemcisi",""
 BeaverBuddies.Host.StartGame,"Oyunu Başlat",""
 BeaverBuddies.Host.InviteFriends,"Arkadaşları Davet Et",""
 BeaverBuddies.JoinCoopGame.Success,"Katıldı! Harita alınıyor…",""
+BeaverBuddies.JoinCoopGame.Error.InvalidFormat,"Geçersiz adres biçimi. Port çözümlenemedi.",""
+BeaverBuddies.JoinCoopGame.Error.InvalidAddress,"Adres geçerli bir IP adresi değildi.
+Ana bilgisayar adı olarak çözümlemeye çalışıldı, ancak bir IP adresine çözümlenmedi.",""
+BeaverBuddies.JoinCoopGame.Error.CouldNotConnect,"Ana bilgisayara bağlanılamadı. Adresi ve portu kontrol edin ve ana bilgisayarın gerçekten sunucuyu barındırdığından ve gerekiyorsa port yönlendirmesinin etkin olduğundan emin olun. Hata ayrıntıları:",""

@@ -67,3 +67,7 @@ BeaverBuddies.Host.DirectConnectClient,"直接连接客户端",""
 BeaverBuddies.Host.StartGame,"开始游戏",""
 BeaverBuddies.Host.InviteFriends,"邀请好友",""
 BeaverBuddies.JoinCoopGame.Success,"已加入！正在接收地图…",""
+BeaverBuddies.JoinCoopGame.Error.InvalidFormat,"无效的地址格式。无法解析端口。",""
+BeaverBuddies.JoinCoopGame.Error.InvalidAddress,"该地址不是有效的IP地址。
+尝试将其解析为主机名，但未能解析为IP地址。",""
+BeaverBuddies.JoinCoopGame.Error.CouldNotConnect,"无法连接到主机。请检查地址和端口，并确保主机正在运行且在需要时已正确设置端口转发。错误详情：",""
