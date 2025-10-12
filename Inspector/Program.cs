@@ -13,6 +13,11 @@ class Program
 {
     static void Main(string[] args)
     {
+        UpdateLocalizations.Go();
+    }
+
+    static void Test()
+    {
         ConcurrentQueueWithWaitTests.Test();
 
         string folderPath = @"C:\Program Files (x86)\Steam\steamapps\common\Timberborn\Timberborn_Data\Managed";
