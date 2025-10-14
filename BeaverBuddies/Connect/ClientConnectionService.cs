@@ -13,6 +13,7 @@ using Timberborn.Localization;
 using Timberborn.SingletonSystem;
 using Timberborn.WebNavigation;
 using TimberNet;
+using System.Linq;
 
 namespace BeaverBuddies.Connect
 {
@@ -50,9 +51,10 @@ namespace BeaverBuddies.Connect
             int port = _settings.DefaultPort.Value;
             Plugin.Log("Try to resolve address: " + address);
             // Parse address and port
-            if (ParseAddressAndPort(address, out string parsedAddress, out int? parsedPort))
+            if (TryParseHostAndPort(address, out string parsedAddress, out int? parsedPort))
             {
                 address = parsedAddress;
+                Plugin.Log($"Parsed address: {address}, port: {port}");
             }
             else
             {
@@ -64,7 +66,6 @@ namespace BeaverBuddies.Connect
             if (parsedPort.HasValue)
             {
                 port = parsedPort.Value;
-                Plugin.Log("Using parsed port: " + port);
             }
 
 
@@ -202,27 +203,42 @@ namespace BeaverBuddies.Connect
             client.Update();
         }
 
-        private bool ParseAddressAndPort(string address, out string parsedAddress, out int? port)
+        /// <summary>
+        /// Tries to parse a host:port or [IPv6]:port string.
+        /// Supports IPv4, IPv6, and hostnames.
+        /// Returns true if parsing succeeded.
+        /// </summary>
+        public static bool TryParseHostAndPort(
+            string input,
+            out string? host,
+            out int? port)
         {
-            // If address contains a port, split and parse it
-            if (address.Contains(":"))
-            {
-                var tokens = address.Split(':');
-                if (tokens.Length == 2 && int.TryParse(tokens[1], out int parsedPort))
-                {
-                    parsedAddress = tokens[0];
-                    port = parsedPort;
-                    return true;
-                }
-                else
-                {
-                    parsedAddress = null;
-                    port = null;
-                    return false;
-                }
-            }
-            parsedAddress = address;
+            host = null;
             port = null;
+
+            if (string.IsNullOrWhiteSpace(input))
+                return false;
+
+            // Uri requires a scheme, so we prepend a dummy one
+            var uriString = input.Contains("://") ? input : "tcp://" + input;
+
+            if (!Uri.TryCreate(uriString, UriKind.Absolute, out var uri))
+            {
+                if (!input.StartsWith("[") && input.Count(c => c == ':') >= 2)
+                {
+                    Plugin.Log("Attempting to wrap likely IPv6 address");
+                    return TryParseHostAndPort($"[{input}]", out host, out port);
+                }
+                return false;
+            }
+
+            // Hostname or IP string (IPv6 brackets stripped)
+            host = uri.Host;
+
+            // Port: Uri.Port returns -1 if missing
+            if (uri.Port != -1)
+                port = uri.Port;
+
             return true;
         }
 
