@@ -61,6 +61,8 @@ BeaverBuddies.Settings.EnableSteamConnection.Tooltip,"Steam의 P2P 네트워크�
 또한 P2P 연결은 직접 연결보다 느릴 수 있습니다.",""
 BeaverBuddies.Settings.FriendsCanJoinSteamGame,"친구가 Steam에서 바로 참여 가능",""
 BeaverBuddies.Settings.FriendsCanJoinSteamGame.Tooltip,"활성화하면 당신의 친구들이 Steam을 통해 초대 없이 바로 참여할 수 있습니다.",""
+BeaverBuddies.Settings.ReducePauses,"강제 일시정지 횟수 줄이기",""
+BeaverBuddies.Settings.ReducePauses.Tooltip,"활성화하면 강제 일시정지(메인 메뉴, 해체 등)의 횟수가 크게 줄어듭니다. 최적의 경험을 위해 모든 플레이어가 동일한 설정을 사용하는 것이 좋습니다.",""
 BeaverBuddies.Host.ConnectedClients,"클라이언트 연결 대기 중…
 현재 연결된 클라이언트:",""
 BeaverBuddies.Host.DirectConnectClient,"다이렉트 연결 클라이언트",""
