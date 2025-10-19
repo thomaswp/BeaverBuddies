@@ -61,8 +61,15 @@ Not: Ağınız P2P’yi desteklemiyorsa bu özellik çalışmayabilir.
 Ayrıca eşler arası bağlantılar doğrudan bağlantılardan daha yavaş olabilir.",""
 BeaverBuddies.Settings.FriendsCanJoinSteamGame,"Arkadaşların Steam Üzerinden Katılmasına İzin Ver",""
 BeaverBuddies.Settings.FriendsCanJoinSteamGame.Tooltip,"Etkinleştirilirse, arkadaşlarınız Steam üzerinden sizi davet etmeden doğrudan katılabilir.",""
-BeaverBuddies.Settings.ReducePauses,"Zorunlu duraklamaların sayısını azalt",""
-BeaverBuddies.Settings.ReducePauses.Tooltip,"Etkinleştirildiğinde zorunlu duraklamalar (ana menü, yıkımlar vb.) büyük ölçüde azalır. En iyi deneyim için tüm oyuncuların aynı ayarı kullanması önerilir.",""
+BeaverBuddies.Settings.PauseReduction,"Zorunlu duraklamaların sayısını azalt",""
+BeaverBuddies.Settings.PauseReduction.Tooltip,"En iyi deneyim için tüm oyuncuların aynı ayarı kullanması önerilir.
+
+Kapalı - Varsayılan davranış
+Önerilen - Oyun yıkımlar sırasında duraklatılmayacak
+Yüksek Riskli - Önerilen'e ek olarak, menü açılırken oyun duraklatılmayacak. Kaydetmeden önce oyunu duraklatmazsanız kayıt bozulmalarına yol açabilir.",""
+BeaverBuddies.Settings.PauseReduction.Off,"Kapalı",""
+BeaverBuddies.Settings.PauseReduction.LowRisk,"Önerilen",""
+BeaverBuddies.Settings.PauseReduction.HighRisk,"Yüksek Riskli",""
 BeaverBuddies.Host.ConnectedClients,"Müşterilerin bağlanması bekleniyor…
 Şu anda bağlı müşteriler:",""
 BeaverBuddies.Host.DirectConnectClient,"Doğrudan Bağlantı İstemcisi",""

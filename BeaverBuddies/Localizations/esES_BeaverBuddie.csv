@@ -61,8 +61,15 @@ Nota: esta función puede no funcionar si tu red no soporta conexiones P2P.
 Además, las conexiones P2P pueden ser más lentas que las directas.",""
 BeaverBuddies.Settings.FriendsCanJoinSteamGame,"Permitir que amigos se unan directamente vía Steam",""
 BeaverBuddies.Settings.FriendsCanJoinSteamGame.Tooltip,"Si está activado, tus amigos pueden unirse directamente a tu juego mediante Steam sin que los invites.",""
-BeaverBuddies.Settings.ReducePauses,"Reducir el número de pausas forzadas",""
-BeaverBuddies.Settings.ReducePauses.Tooltip,"Si está activado, se reducirán drásticamente las pausas forzadas (menú principal, deconstrucciones, etc.). Para una experiencia óptima, todos los jugadores deberían usar el mismo ajuste.",""
+BeaverBuddies.Settings.PauseReduction,"Reducir el número de pausas forzadas",""
+BeaverBuddies.Settings.PauseReduction.Tooltip,"Para una experiencia óptima, todos los jugadores deberían usar el mismo ajuste.
+
+Desactivado - Comportamiento predeterminado
+Recomendado - El juego no se pausará durante las deconstrucciones
+Alto riesgo - Además de Recomendado, el juego tampoco se pausará al abrir el menú. Esto puede causar corrupción de guardado si no pausas el juego antes de guardar.",""
+BeaverBuddies.Settings.PauseReduction.Off,"Desactivado",""
+BeaverBuddies.Settings.PauseReduction.LowRisk,"Recomendado",""
+BeaverBuddies.Settings.PauseReduction.HighRisk,"Alto riesgo",""
 BeaverBuddies.Host.ConnectedClients,"Esperando clientes…
 Clientes actualmente conectados:",""
 BeaverBuddies.Host.DirectConnectClient,"Cliente de conexión directa",""
