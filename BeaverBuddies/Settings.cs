@@ -1,6 +1,7 @@
 ﻿using BeaverBuddies.DesyncDetecter;
 using Bindito.Core.Internal;
 using ModSettings.Core;
+using ModSettings.Common;
 using Timberborn.Modding;
 using Timberborn.SettingsSystem;
 
@@ -54,11 +55,13 @@ namespace BeaverBuddies
 
         // ---- Quality of Life Settings ----
 
-        public ModSetting<bool> ReducePauses { get; } =
-            new(false,
-            ModSettingDescriptor.CreateLocalized(
-                "BeaverBuddies.Settings.ReducePauses"
-            ).SetLocalizedTooltip("BeaverBuddies.Settings.ReducePauses.Tooltip")
+        public LimitedStringModSetting PauseReduction { get; } =
+            new(0, new[] {
+                new LimitedStringModSettingValue("0", "BeaverBuddies.Settings.PauseReduction.Off"),
+                new LimitedStringModSettingValue("1", "BeaverBuddies.Settings.PauseReduction.LowRisk"),
+                new LimitedStringModSettingValue("2", "BeaverBuddies.Settings.PauseReduction.HighRisk")
+            }, ModSettingDescriptor.CreateLocalized("BeaverBuddies.Settings.PauseReduction")
+                .SetLocalizedTooltip("BeaverBuddies.Settings.PauseReduction.Tooltip")
         );
 
         // ---- Developer Settings ----
@@ -96,7 +99,20 @@ namespace BeaverBuddies
         public static int Port => instance?.DefaultPort.Value ?? 25565;
         public static bool EnableSteam => instance?.EnableSteamConnection.Value ?? true;
         public static bool LobbyJoinable => instance?.FriendsCanJoinSteamGame.Value ?? true;
-        public static bool ReducePausesEnabled => instance?.ReducePauses.Value ?? false;
+
+        public static int PauseReductionLevel
+        {
+            get
+            {
+                if (instance?.PauseReduction?.Value == null)
+                    return 0;
+
+                if (int.TryParse(instance.PauseReduction.Value, out int level))
+                    return level;
+
+                return 0;
+            }
+        }
 
         public Settings(ISettings settings,
                         ModSettingsOwnerRegistry modSettingsOwnerRegistry,
