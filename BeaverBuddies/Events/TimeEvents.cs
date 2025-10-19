@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using Timberborn.Options;
 using Timberborn.OptionsGame;
 using Timberborn.TimeSystem;
-    using Timberborn.UILayoutSystem;
-    using static BeaverBuddies.SingletonManager;
+using Timberborn.UILayoutSystem;
+using static BeaverBuddies.SingletonManager;
 
 namespace BeaverBuddies.Events
 {
