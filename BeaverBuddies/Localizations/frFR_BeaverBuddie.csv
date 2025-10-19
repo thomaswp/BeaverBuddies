@@ -61,8 +61,8 @@ Remarque : cette fonctionnalité peut ne pas fonctionner si ton réseau ne suppo
 De plus, les connexions P2P peuvent être plus lentes que les connexions directes.",""
 BeaverBuddies.Settings.FriendsCanJoinSteamGame,"Autoriser les amis à rejoindre via Steam",""
 BeaverBuddies.Settings.FriendsCanJoinSteamGame.Tooltip,"Si activé, tes amis peuvent rejoindre ta partie directement via Steam sans invitation.",""
-BeaverBuddies.Settings.ReducePauses,"Réduire le nombre de pauses forcées",""
-BeaverBuddies.Settings.ReducePauses.Tooltip,"Si activé, le nombre de pauses forcées (menu principal, déconstructions, etc.) est fortement réduit. Pour une expérience optimale, tous les joueurs devraient utiliser le même réglage.",""
+BeaverBuddies.Settings.PauseReduction,"Réduire le nombre de pauses forcées",""
+BeaverBuddies.Settings.PauseReduction.Tooltip,"Si activé, le nombre de pauses forcées (menu principal, déconstructions, etc.) est fortement réduit. Pour une expérience optimale, tous les joueurs devraient utiliser le même réglage.",""
 BeaverBuddies.Settings.PauseReduction,"Réduire le nombre de pauses forcées",""
 BeaverBuddies.Settings.PauseReduction.Tooltip,"Pour une expérience optimale, tous les joueurs devraient utiliser le même réglage.
 
