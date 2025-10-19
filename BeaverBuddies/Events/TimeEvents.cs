@@ -163,11 +163,11 @@ namespace BeaverBuddies.Events
         }
     }
 
-    // We make showing the options menu a synced game event, rather than
+    // By default, we make showing the options menu a synced game event, rather than
     // a non-synced UI action, for two reasons:
     // 1) This ensures that the Options menu is always shown when a full
     //    tick has been completed.
-    // 2) This will give other plays a visual clue about why the game has
+    // 2) This will give other players a visual clue about why the game has
     //    paused.
     // However, only the host will be able to unpause, and only by manually
     // setting the game speed, since they won't process any events by clients
@@ -179,17 +179,16 @@ namespace BeaverBuddies.Events
         {
 
             // This would make options menu unsynced and non-pausing,
-            // but I think it's too dangerous to open the menu outside of a synced pause.
-            // If it's going to be an option it should be separate from skipping
-            // other less critical pauses.
-            //if (Settings.ReducePausesEnabled) return true;
+            // but I think it's dangerous to open the menu outside of a synced pause.
+            // So we will only do this if the user explicitly opts into it
+            if (Settings.PauseReductionLevel == 2 ) return true;
 
             return ReplayEvent.DoPrefix(() => new ShowOptionsMenuEvent());
         }
     }
 
     // OverlayPanelSpeedLocker is triggering ChangeAndLockSpeed via OnPanelShown
-    // This is now configurable via Settings.ReducePausesEnable. If we don't freeze, it could
+    // This is now configurable via Settings.PauseReduction. If we don't freeze, it could
     // definitely cause some possible invalid operations (e.g. deleting a building
     // that's not there anymore), but in theory these errors get caught before
     // sending to the server. In practice, though, there could be side-effects of
@@ -200,7 +199,7 @@ namespace BeaverBuddies.Events
     {
         public static bool Prefix()
         {
-            return !Settings.ReducePausesEnabled;
+            return Settings.PauseReductionLevel == 0;
         }
     }
 }
