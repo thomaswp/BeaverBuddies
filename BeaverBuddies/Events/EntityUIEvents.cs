@@ -82,7 +82,7 @@ namespace BeaverBuddies.Events
             if (itemID != null)
             {
                 gatherable = prioritizer.GetGatherable(prefabName);
-                if (!gatherable)
+                if (gatherable == null)
                 {
                     Plugin.LogWarning($"Could not find gatherable for prefab: {prefabName}");
                     return;
@@ -104,7 +104,7 @@ namespace BeaverBuddies.Events
         {
             return ReplayEvent.DoEntityPrefix(__instance, entityID =>
             {
-                var name = gatherableSpec?.GetComponentFast<PrefabSpec>()?.PrefabName;
+                var name = gatherableSpec?.GetComponent<PrefabSpec>()?.PrefabName;
                 return new GatheringPrioritizedEvent()
                 {
                     entityID = entityID,

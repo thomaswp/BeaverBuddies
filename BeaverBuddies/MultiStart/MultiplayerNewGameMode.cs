@@ -6,11 +6,11 @@ using Timberborn.GameSceneLoading;
 
 namespace BeaverBuddies.MultiStart
 {
-    internal class MultiplayerNewGameMode : NewGameMode
+    internal record MultiplayerNewGameMode : NewGameModeSpec
     {
         public int Players { get; }
 
-        public MultiplayerNewGameMode(NewGameMode mode, int players) : 
+        public MultiplayerNewGameMode(NewGameModeSpec mode, int players) : 
             base(mode.StartingAdults, mode.AdultAgeProgress, mode.StartingChildren, mode.ChildAgeProgress, mode.FoodConsumption, mode.WaterConsumption, mode.StartingFood, mode.StartingWater, mode.TemperateWeatherDuration, mode.DroughtDuration, mode.DroughtDurationHandicapMultiplier, mode.DroughtDurationHandicapCycles, mode.CyclesBeforeRandomizingBadtide, mode.ChanceForBadtide, mode.BadtideDuration, mode.BadtideDurationHandicapMultiplier, mode.BadtideDurationHandicapCycles, mode.InjuryChance, mode.DemolishableRecoveryRate)
         {
             Players = players;

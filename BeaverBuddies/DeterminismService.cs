@@ -222,7 +222,7 @@ namespace BeaverBuddies
                     {
                         DesyncDetecterService.Trace($"Tick RNG; " +
                         $"s0 before: {UnityEngine.Random.state.s0:X8}; " +
-                        $"Last entity: {entity?.name} - {entity?.EntityId}");
+                        $"Last entity: {entity?.Name} - {entity?.EntityId}");
                     }
                     return false;
                 }
@@ -569,7 +569,7 @@ namespace BeaverBuddies
         }
     }
 
-    [HarmonyPatch(typeof(PlantableDescriber), nameof(PlantableDescriber.GetPreviewFromPrefab))]
+    [HarmonyPatch(typeof(PlantableDescriber), nameof(PlantableDescriber.GetPreviewFromTemplate))]
     public class PlantableDescriberPatcher
     {
         static void Prefix()
@@ -919,8 +919,8 @@ namespace BeaverBuddies
                 EntityUpdateHash = TimberNetBase.CombineHash(EntityUpdateHash, entity.EntityId.GetHashCode());
 
                 var entityComponent = entity._entityComponent;
-                var pathFollower = entityComponent.GetComponentFast<Walker>()?.PathFollower;
-                var animatedPathFollower = entityComponent.GetComponentFast<MovementAnimator>()?._animatedPathFollower;
+                var pathFollower = entityComponent.GetComponent<Walker>()?.PathFollower;
+                var animatedPathFollower = entityComponent.GetComponent<MovementAnimator>()?._animatedPathFollower;
                 if (pathFollower != null && animatedPathFollower != null)
                 {
                     // Update the animated path follower to the path follower's
@@ -932,17 +932,17 @@ namespace BeaverBuddies
                 // Make sure it updates the model's position as well
                 try
                 {
-                    MovementAnimator anim = entityComponent.GetComponentFast<MovementAnimator>();
-                    CharacterRotator rotator = entityComponent.GetComponentFast<CharacterRotator>();
+                    MovementAnimator anim = entityComponent.GetComponent<MovementAnimator>();
+                    CharacterRotator rotator = entityComponent.GetComponent<CharacterRotator>();
                     // The CharacterRotator seems to sometimes not be initialized when this is caused, and
                     // therefore something is null, likely _animatedPathFollower.
-                    if (anim != null && rotator != null && rotator.didAwake && rotator._animatedPathFollower != null)
+                    if (anim != null && rotator != null && rotator.Started && rotator._animatedPathFollower != null)
                     {
                         anim.UpdateTransform(0);
                     }
                 } catch (Exception e)
                 {
-                    Plugin.LogError($"Failed to update transform of {entityComponent?.name}");
+                    Plugin.LogError($"Failed to update transform of {entityComponent?.Name}");
                     Plugin.LogError(e.StackTrace.ToString());
                 }
 

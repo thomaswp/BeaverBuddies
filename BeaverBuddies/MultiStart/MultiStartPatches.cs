@@ -208,7 +208,7 @@ namespace BeaverBuddies.MultiStart
     [HarmonyPatch(typeof(CustomNewGameModeController), nameof(CustomNewGameModeController.GetNewGameMode))]
     public class CustomNewGameModeControllerGetNewGameModePatcher
 	{
-		public static void Postfix(CustomNewGameModeController __instance, ref NewGameMode __result)
+		public static void Postfix(CustomNewGameModeController __instance, ref NewGameModeSpec __result)
 		{
 			string fieldName = CustomNewGameModeControllerInitializePatcher.playersFieldName;
             var playersField = __instance._integerFields.Where(x => x.name == fieldName).FirstOrDefault();

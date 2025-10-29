@@ -27,7 +27,7 @@ namespace BeaverBuddies.Connect
         private readonly AutosaveNameService _autosaveNameService;
         private readonly GameSaver _gameSaver;
         private readonly GameSaveRepository _gameSaveRepository;
-        private readonly SettlementNameService _settlementNameService;
+        private readonly SettlementReferenceService _settlementNameService;
         private readonly ValidatingGameLoader _validatingGameLoader;
         private readonly DialogBoxShower _dialogBoxShower;
 
@@ -36,7 +36,7 @@ namespace BeaverBuddies.Connect
             AutosaveNameService autosaveNameService, 
             GameSaver gameSaver, 
             GameSaveRepository gameSaveRepository, 
-            SettlementNameService settlementNameService,
+            SettlementReferenceService settlementNameService,
             ValidatingGameLoader validatingGameLoader,
             DialogBoxShower dialogBoxShower
         ) 
@@ -70,9 +70,11 @@ namespace BeaverBuddies.Connect
                     });
                 };
             }
-            string settlementName = _settlementNameService.SettlementName;
+
+            var settlementRef = _settlementNameService.SettlementReference;
+            string settlementName = settlementRef.SettlementName;
             string saveName = _autosaveNameService.Timestamp().Replace(",", "") + " Rehost";
-            SaveReference saveReference = new SaveReference(settlementName, saveName);
+            SaveReference saveReference = new SaveReference(settlementName, settlementRef);
             try
             {
                 _gameSaver.SaveInstantlySkippingNameValidation(saveReference, () =>
