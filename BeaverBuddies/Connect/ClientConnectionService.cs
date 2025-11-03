@@ -14,6 +14,7 @@ using Timberborn.SingletonSystem;
 using Timberborn.WebNavigation;
 using TimberNet;
 using System.Linq;
+using Timberborn.SettlementNameSystem;
 
 namespace BeaverBuddies.Connect
 {
@@ -185,7 +186,7 @@ namespace BeaverBuddies.Connect
             Plugin.Log("Loading map");
             //string saveName = Guid.NewGuid().ToString();
             string saveName = TimberNetBase.GetHashCode(mapBytes).ToString("X8");
-            SaveReference saveRef = new SaveReference("Online Games", saveName);
+            SaveReference saveRef = new SaveReference("Online Games", new SettlementReference(saveName, _gameSaveRepository.DefaultSaveDirectory));
             Stream stream = _gameSaveRepository.CreateSaveSkippingNameValidation(saveRef);
             stream.Write(mapBytes);
             stream.Close();

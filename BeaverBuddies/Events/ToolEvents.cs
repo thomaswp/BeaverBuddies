@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using Timberborn.BaseComponentSystem;
 using Timberborn.BlockObjectTools;
 using Timberborn.BlockSystem;
 using Timberborn.Buildings;
@@ -15,7 +16,9 @@ using Timberborn.PlantingUI;
 using Timberborn.RootProviders;
 using Timberborn.ScienceSystem;
 using Timberborn.SingletonSystem;
+using Timberborn.TemplateInstantiation;
 using Timberborn.TemplateSystem;
+using Timberborn.ToolButtonSystem;
 using Timberborn.ToolSystem;
 using Timberborn.WorkSystemUI;
 using UnityEngine;
@@ -35,7 +38,7 @@ namespace BeaverBuddies.Events
         public override void Replay(IReplayContext context)
         {
             var buildingPrefab = GetBuilding(context, prefabName);
-            var blockObjectSpec = buildingPrefab.GetComponentFast<BlockObjectSpec>();
+            var blockObjectSpec = buildingPrefab.GetSpec<BlockObjectSpec>();
             var placer = context.GetSingleton<BlockObjectPlacerService>().GetMatchingPlacer(blockObjectSpec);
             Placement placement = new Placement(coordinates, orientation, 
                 isFlipped ? FlipMode.Flipped : FlipMode.Unflipped);
@@ -44,7 +47,7 @@ namespace BeaverBuddies.Events
                 Plugin.LogWarning($"Invalid placement for {prefabName} at {coordinates}");
                 return;
             }
-            placer.Place(blockObjectSpec, placement);
+            placer.Place(blockObjectSpec, placement, null);
         }
 
         // Note: This may not catch every possible invalid placement (e.g. if terrain height changes or something)
@@ -58,7 +61,7 @@ namespace BeaverBuddies.Events
             // 1) This only happens occasionally, based on UI actions, and
             // 2) There's no easy way to get at the cache of previews the UI uses,
             //    and each prefab requires a different GameObject, so we can't cache just one.
-            GameObject gameObject = templateInstantiator.Instantiate(prefab.GameObjectFast, roots.First().transform);
+            GameObject gameObject = templateInstantiator.Instantiate(prefab.Blueprint, roots.First().transform);
             gameObject.SetActive(value: false);
             var blockObject = gameObject.GetComponent<BlockObject>();
             blockObject.MarkAsPreviewAndInitialize();
@@ -77,11 +80,11 @@ namespace BeaverBuddies.Events
     [HarmonyPatch(typeof(BuildingPlacer), nameof(BuildingPlacer.Place))]
     class PlacePatcher
     {
-        static bool Prefix(BlockObject prefab, Placement placement)
+        static bool Prefix(BlockObjectSpec template, Placement placement, Action<BaseComponent> placedCallback)
         {
             return ReplayEvent.DoPrefix(() =>
             {
-                string prefabName = ReplayEvent.GetBuildingName(prefab);
+                string prefabName = ReplayEvent.GetBuildingName(template);
 
                 return new BuildingPlacedEvent()
                 {
@@ -174,13 +177,13 @@ namespace BeaverBuddies.Events
     [HarmonyPatch(typeof(PlantingSelectionService), nameof(PlantingSelectionService.MarkArea))]
     class PlantingAreaMarkedPatcher
     {
-        static bool Prefix(IEnumerable<Vector3Int> inputBlocks, Ray ray, string prefabName)
+        static bool Prefix(IEnumerable<Vector3Int> inputBlocks, Ray ray, string templateName)
         {
             return ReplayEvent.DoPrefix(() =>
             {
                 return new PlantingAreaMarkedEvent()
                 {
-                    prefabName = prefabName,
+                    prefabName = templateName,
                     ray = ray,
                     inputBlocks = new List<Vector3Int>(inputBlocks)
                 };
@@ -219,7 +222,7 @@ namespace BeaverBuddies.Events
             var blockObjects = blocks.Select(guid => {
                 return context.GetSingleton<EntityRegistry>()
                 .GetEntity(guid)
-                .GetComponentFast<BlockObject>();
+                .GetComponent<BlockObject>();
             }).ToList();
             if (markForDemolition)
             {
@@ -240,7 +243,7 @@ namespace BeaverBuddies.Events
         {
             return DoPrefix(() =>
             {
-                var ids = blockObjects.Select(obj => obj.GetComponentFast<EntityComponent>().EntityId);
+                var ids = blockObjects.Select(obj => obj.GetComponent<EntityComponent>().EntityId);
                 return new ClearResourcesMarkedEvent()
                 {
                     blocks = ids.ToList(),
@@ -343,17 +346,17 @@ namespace BeaverBuddies.Events
 
             foreach (ToolButton toolButton in toolButtonService.ToolButtons)
             {
-                Tool tool = toolButton.Tool;
+                var tool = toolButton.Tool;
                 BlockObjectTool blockObjectTool = tool as BlockObjectTool;
                 if (blockObjectTool == null)
                 {
                     continue;
                 }
-                BuildingSpec toolBuilding = blockObjectTool.Prefab.GetComponentFast<BuildingSpec>();
+                BuildingSpec toolBuilding = blockObjectTool.Template.GetSpec<BuildingSpec>();
                 if (toolBuilding == building)
                 {
                     Plugin.Log("Unlocking tool for building: " + buildingName);
-                    blockObjectTool.Locker = null;
+                    //blockObjectTool.Locker = null;
                     toolButton.OnToolUnlocked(new ToolUnlockedEvent(tool));
                 }
             }
@@ -376,7 +379,7 @@ namespace BeaverBuddies.Events
             {
                 return new BuildingUnlockedEvent()
                 {
-                    buildingName = buildingSpec.name,
+                    buildingName = buildingSpec.Blueprint.Name,
                 };
             });
         }

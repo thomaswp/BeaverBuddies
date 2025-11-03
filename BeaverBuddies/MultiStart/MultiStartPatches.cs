@@ -1,5 +1,4 @@
-﻿using AsmResolver.PE.DotNet.Metadata;
-using BeaverBuddies.Editor;
+﻿using BeaverBuddies.Editor;
 using BeaverBuddies.Util;
 using HarmonyLib;
 using System;
@@ -52,7 +51,7 @@ namespace BeaverBuddies.MultiStart
 
 			// Order the locations by player index
 			startingLocations = startingLocations.OrderBy(
-				sl => sl.GetComponentFast<StartingLocationPlayer>()?.PlayerIndex ?? 0
+				sl => sl.GetComponent<StartingLocationPlayer>()?.PlayerIndex ?? 0
 			).ToList();
 
 			int count = 0;
@@ -62,9 +61,9 @@ namespace BeaverBuddies.MultiStart
 			// Initialize each starting location; not just the first
 			foreach (var startingLocation in startingLocations)
 			{
-				__instance._startingBuildingSpawner.Place(startingLocation.GetComponentFast<BlockObject>().Placement);
+				__instance._startingBuildingSpawner.Place(startingLocation.GetComponent<BlockObject>().Placement);
 				// Register all start buildings
-				startBuildingService.RegisterStartingBuilding(__instance._startingBuildingSpawner.StartingBuildingSpec);
+				startBuildingService.RegisterStartingBuilding(__instance._startingBuildingSpawner.StartingBuildingTemplateSpec.GetSpec<BuildingSpec>());
 
 
                 // If we're playing with fewer players than the map can support, stop early
@@ -74,7 +73,7 @@ namespace BeaverBuddies.MultiStart
 
 			// Center on the first spawn location
 			__instance._startingBuildingSpawner._cameraTargeter
-				.CenterCameraOn(startingLocations[0].GetComponentFast<SelectableObject>());
+				.CenterCameraOn(startingLocations[0].GetComponent<SelectableObject>());
 			__instance.SetCamera();
 
 			// We still delete all starting locations
@@ -83,9 +82,9 @@ namespace BeaverBuddies.MultiStart
 			return false;
 		}
 
-		public static List<StartingLocationSpec> GetAllStartingLocations(StartingLocationService sls)
+		public static List<StartingLocation> GetAllStartingLocations(StartingLocationService sls)
 		{
-			return sls._entityComponentRegistry.GetEnabled<StartingLocationSpec>().ToList();
+			return sls._entityComponentRegistry.GetEnabled<StartingLocation>().ToList();
 		}
 	}
 
@@ -116,11 +115,11 @@ namespace BeaverBuddies.MultiStart
 
 			foreach (BuildingSpec startingBuilding in startBuildingsService.StartingBuildings)
 			{
-				Vector3? unblockedSingleAccess = startingBuilding.GetComponentFast<BuildingAccessible>().Accessible.UnblockedSingleAccess;
+				Vector3? unblockedSingleAccess = startingBuilding.GetSpec<BuildingAccessible>().Accessible.UnblockedSingleAccess;
 				if (unblockedSingleAccess.HasValue)
 				{
 					Vector3 valueOrDefault = unblockedSingleAccess.GetValueOrDefault();
-					NewGameMode newGameMode = __instance._sceneLoader.GetSceneParameters<GameSceneParameters>().NewGameConfiguration.NewGameMode;
+					NewGameModeSpec newGameMode = __instance._sceneLoader.GetSceneParameters<GameSceneParameters>().NewGameConfiguration.NewGameMode;
 					__instance._startingBeaverInitializer.Initialize(valueOrDefault, newGameMode.StartingAdults, newGameMode.AdultAgeProgress, newGameMode.StartingChildren, newGameMode.ChildAgeProgress);
 				}
 			}
@@ -166,7 +165,7 @@ namespace BeaverBuddies.MultiStart
 
 		public const string playersFieldName = "Players";
 
-        public static void Postfix(CustomNewGameModeController __instance, VisualElement root, NewGameMode defaultNewGameMode, Action newGameModeChangedCallback)
+        public static void Postfix(CustomNewGameModeController __instance, VisualElement root, NewGameModeSpec defaultNewGameMode, Action newGameModeChangedCallback)
 		{
 			IntegerField playersField = root.Query<IntegerField>(playersFieldName);
 
@@ -215,8 +214,8 @@ namespace BeaverBuddies.MultiStart
 			if (playersField != null)
 			{
 				int maxStartingSpots = CustomNewGameModeController.GetInt(playersField);
-				__result = new MultiplayerNewGameMode(__result, maxStartingSpots);
-			}
+				__result = new MultiplayerNewGameModeSpec(__result, maxStartingSpots);
+            }
 		}
 	}
 
@@ -265,7 +264,7 @@ namespace BeaverBuddies.MultiStart
     [HarmonyPatch(typeof(NewGameModePanel), nameof(NewGameModePanel.SelectModeButton))]
     public class NewGameModePanelSelectModeButtonPatcher
 	{
-		public static void Postfix(NewGameModePanel __instance, Button button, NewGameMode predefinedNewGameMode)
+		public static void Postfix(NewGameModePanel __instance, Button button, NewGameModeSpec predefinedNewGameMode)
 		{
             if (button == null || predefinedNewGameMode == null)
 			{

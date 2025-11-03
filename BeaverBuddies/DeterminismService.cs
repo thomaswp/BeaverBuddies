@@ -17,6 +17,7 @@ using Timberborn.Analytics;
 using Timberborn.Autosaving;
 using Timberborn.BaseComponentSystem;
 using Timberborn.Beavers;
+using Timberborn.BlueprintSystem;
 using Timberborn.BotUpkeep;
 using Timberborn.Brushes;
 using Timberborn.CharacterMovementSystem;
@@ -815,10 +816,10 @@ namespace BeaverBuddies
     }
 
 
-    [HarmonyPatch(typeof(EntityService), nameof(EntityService.Instantiate), typeof(BaseComponent), typeof(Guid))]
+    [HarmonyPatch(typeof(EntityService), nameof(EntityService.Instantiate), typeof(Blueprint), typeof(Guid))]
     static class EntityComponentInstantiatePatcher
     {
-        static void Prefix(EntityService __instance, BaseComponent prefab, ref Guid id)
+        static void Prefix(EntityService __instance, Blueprint template, ref Guid id)
         {
             if (EventIO.IsNull) return;
 
@@ -939,7 +940,7 @@ namespace BeaverBuddies
                     if (anim != null && rotator != null && rotator.Started && rotator._animatedPathFollower != null)
                     {
                         anim.UpdateTransform(0);
-                    }
+                    }*/
                 } catch (Exception e)
                 {
                     Plugin.LogError($"Failed to update transform of {entityComponent?.Name}");

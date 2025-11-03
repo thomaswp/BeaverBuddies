@@ -39,7 +39,7 @@ private void Update(float deltaTime)
             //Vector3 position = Vector3.zero;
 
             float time = Time.time;
-            EntityComponent entity = __instance.GetComponentFast<EntityComponent>();
+            EntityComponent entity = __instance.GetComponent<EntityComponent>();
             if (entity != null)
             {
                 // For the movement animation, use interpolated time based on

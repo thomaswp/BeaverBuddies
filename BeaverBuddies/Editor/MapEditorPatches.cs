@@ -23,7 +23,7 @@ using UnityEngine;
 namespace BeaverBuddies.Editor
 {
 
-    [HarmonyPatch(typeof(MapEditorButtons), nameof(MapEditorButtons.GetElements))]
+    /*[HarmonyPatch(typeof(MapEditorButtons), nameof(MapEditorButtons.GetElements))]
     public class MapEditorButtonsGetElementsPatcher
     {
 
@@ -108,7 +108,7 @@ namespace BeaverBuddies.Editor
         }
     }
 
-    [ManualMethodOverwrite]
+    [ManualMethodOverwrite]*/
     /*
      * 04/19/2025
 	private void DeleteOtherStartingLocations(StartingLocation remainingStartingLocationSpec)
@@ -121,7 +121,7 @@ namespace BeaverBuddies.Editor
 		}
 	}
      */
-    [HarmonyPatch(typeof(StartingLocationService), nameof(StartingLocationService.DeleteOtherStartingLocations))]
+    /*[HarmonyPatch(typeof(StartingLocationService), nameof(StartingLocationService.DeleteOtherStartingLocations))]
     public class StartingLocationServiceDeleteOtherStartingLocationsPatcher
     {
         public static bool Prefix(StartingLocationService __instance, StartingLocationSpec remainingStartingLocationSpec)
@@ -143,7 +143,7 @@ namespace BeaverBuddies.Editor
         }
     }
 
-    [ManualMethodOverwrite]
+    [ManualMethodOverwrite]*/
     /*
      * 04/19/2025
 	List<StartingLocation> list = _entityComponentRegistry.GetEnabled<StartingLocation>().ToList();
@@ -157,7 +157,7 @@ namespace BeaverBuddies.Editor
 	}
 	return list[0];
      */
-    [HarmonyPatch(typeof(StartingLocationService), nameof(StartingLocationService.GetStartingLocation))]
+    /*[HarmonyPatch(typeof(StartingLocationService), nameof(StartingLocationService.GetStartingLocation))]
     public class StartingLocationServiceGetStartingLocationPatcher
     {
         public static bool Prefix(StartingLocationService __instance, ref StartingLocationSpec __result)
@@ -172,10 +172,10 @@ namespace BeaverBuddies.Editor
             __result = list[0];
             return false;
         }
-    }
+    }*/
 
 
-    [HarmonyPatch(typeof(MapMetadataSaveEntryWriter), nameof(MapMetadataSaveEntryWriter.CreateMapMetadata))]
+    /*[HarmonyPatch(typeof(MapMetadataSaveEntryWriter), nameof(MapMetadataSaveEntryWriter.CreateMapMetadata))]
     public class MapMetadataSaveEntryWriterCreateMapMetadataPatcher
     {
         public static void Postfix(MapMetadataSaveEntryWriter __instance, ref MapMetadata __result)
@@ -186,7 +186,7 @@ namespace BeaverBuddies.Editor
             Plugin.Log($"Saving map with max players: {maxPlayers}");
             __result = new MultiplayerMapMetadata(__result, maxPlayers);
         }
-    }
+    }*/
 
     [HarmonyPatch(typeof(MapMetadataSerializer), nameof(MapMetadataSerializer.GetMapMetadataSerializedObject))]
     public class MapMetadataSerializerGetMapMetadataSerializedObjectPatcher

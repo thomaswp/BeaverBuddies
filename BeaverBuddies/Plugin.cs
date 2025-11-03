@@ -111,7 +111,7 @@ namespace BeaverBuddies
 
         private static ILogger logger;
 
-        public void StartMod()
+        public void StartMod(IModEnvironment modEnvironment)
         {
             logger = new UnityLogger();
             

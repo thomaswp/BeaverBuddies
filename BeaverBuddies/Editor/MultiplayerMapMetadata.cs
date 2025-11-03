@@ -12,7 +12,7 @@ namespace BeaverBuddies.Editor
         public int MaxPlayers { get; }
 
         public MultiplayerMapMetadata(MapMetadata metadata, int maxPlayers) : 
-            base(metadata.Width, metadata.Height, metadata.MapNameLocKey, metadata.MapDescriptionLocKey, metadata.MapDescription, metadata.IsRecommended, metadata.IsDev)
+            base(metadata.Width, metadata.Height, metadata.MapNameLocKey, metadata.MapDescriptionLocKey, metadata.MapDescription, metadata.IsRecommended, metadata.IsUnconventional, metadata.IsDev)
         {
             MaxPlayers = maxPlayers;
         }

@@ -31,7 +31,7 @@ namespace BeaverBuddies.DesyncDetecter
             if (!ReplayService.IsLoaded) return;
             var key = ReproducibleKey.Create(reproducible);
             lastCount = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0;
-            DesyncDetecterService.Trace($"Marking spots for   {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
+            DesyncDetecterService.Trace($"Marking spots for   {reproducible.Id} at {reproducible.GetComponent<BlockObject>().Coordinates} ({reproducible.GetComponent<EntityComponent>().EntityId})");
         }
 
         public static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
@@ -54,7 +54,7 @@ namespace BeaverBuddies.DesyncDetecter
             if (!ReplayService.IsLoaded) return;
             var key = ReproducibleKey.Create(reproducible);
             lastCount = __instance._potentialSpots.ContainsKey(key) ? __instance._potentialSpots[key].Count : 0; if (!ReplayService.IsLoaded) return;
-            DesyncDetecterService.Trace($"Unmarking spots for   {reproducible.Id} at {reproducible.GetComponentFast<BlockObject>().Coordinates} ({reproducible.GetComponentFast<EntityComponent>().EntityId})");
+            DesyncDetecterService.Trace($"Unmarking spots for   {reproducible.Id} at {reproducible.GetComponent<BlockObject>().Coordinates} ({reproducible.GetComponent<EntityComponent>().EntityId})");
         }
 
         static void Postfix(NaturalResourceReproducer __instance, Reproducible reproducible)
@@ -101,13 +101,13 @@ namespace BeaverBuddies.DesyncDetecter
     [HarmonyPatch(typeof(SpawnValidationService), nameof(SpawnValidationService.CanSpawn))]
     class SpawnValidationServiceCanSpawnPatcher
     {
-        public static void Postfix(SpawnValidationService __instance, bool __result, Vector3Int coordinates, BlockObjectSpec blockObjectSpec, string resourcePrefabName)
+        public static void Postfix(SpawnValidationService __instance, bool __result, Vector3Int coordinates, BlockObjectSpec blockObjectSpec, string resourceId)
         {
             if (!Settings.Debug) return;
-            DesyncDetecterService.Trace($"Trying to spawn {resourcePrefabName} at {coordinates}: {__result}\n" +
+            DesyncDetecterService.Trace($"Trying to spawn {resourceId} at {coordinates}: {__result}\n" +
                 $"IsSuitableTerrain: {__instance.IsSuitableTerrain(coordinates)}\n" +
-                $"SpotIsValid: {__instance.SpotIsValid(coordinates, resourcePrefabName)}\n" +
-                $"IsUnobstructed: {__instance.IsUnobstructed(coordinates, resourcePrefabName)}");
+                $"SpotIsValid: {__instance.SpotIsValid(coordinates, resourceId)}\n" +
+                $"IsUnobstructed: {__instance.IsUnobstructed(coordinates, resourceId)}");
         }
     }
 
@@ -132,7 +132,7 @@ namespace BeaverBuddies.DesyncDetecter
         public static void Prefix(Walker __instance, IDestination destination)
         {
             if (!Settings.Debug) return;
-            string entityID = __instance.GetComponentFast<EntityComponent>().EntityId.ToString();
+            string entityID = __instance.GetComponent<EntityComponent>().EntityId.ToString();
             string destinationString = GetDestinationString(destination);
             DesyncDetecterService.Trace($"{entityID} going to: {destinationString}");
         }
@@ -148,7 +148,7 @@ namespace BeaverBuddies.DesyncDetecter
             {
                 var accessible = ((AccessibleDestination)destination).Accessible;
                 // Manually check since MonoBehavior doesn't support null conditional operator
-                if (accessible != null) destinationString = accessible?.GameObjectFast?.name;
+                if (accessible != null) destinationString = accessible?.GameObject?.name;
             }
             if (destinationString == null) destinationString = destination?.GetType().Name;
             return destinationString;
@@ -162,7 +162,7 @@ namespace BeaverBuddies.DesyncDetecter
         public static void Postfix(NaturalResourceModelRandomizer __instance)
         {
             if (!Settings.Debug) return;
-            var id = __instance.GetComponentFast<EntityComponent>().EntityId;
+            var id = __instance.GetComponent<EntityComponent>().EntityId;
             DesyncDetecterService.Trace($"NaturalResourceModelRandomizer {id} randomizing diameter scale to {__instance.DiameterScale}");
         }
     }
@@ -173,7 +173,7 @@ namespace BeaverBuddies.DesyncDetecter
         public static void Prefix(WalkToReservableExecutor __instance, ReservableReacher reservableReacher)
         {
             if (!Settings.Debug) return;
-            var id = __instance.GetComponentFast<EntityComponent>().EntityId;
+            var id = __instance.GetComponent<EntityComponent>().EntityId;
             DesyncDetecterService.Trace(
                 $"WalkToReservableExecutor for {id} launching to " +
                 $"{reservableReacher.GetType().Name} -> " +
@@ -188,7 +188,7 @@ namespace BeaverBuddies.DesyncDetecter
         public static void Prefix(WateredNaturalResource __instance)
         {
             if (!Settings.Debug) return;
-            var id = __instance.GetComponentFast<EntityComponent>().EntityId;
+            var id = __instance.GetComponent<EntityComponent>().EntityId;
             var isDead = __instance._livingNaturalResource.IsDead;
             var time = ((TimeTrigger)__instance._timeTrigger)._delayLeftInDays;
             DesyncDetecterService.Trace(

@@ -29,8 +29,8 @@ namespace BeaverBuddies.MultiStart
 
         public int MaxStartLocations()
         {
-            NewGameMode newGameMode = _sceneLoader.GetSceneParameters<GameSceneParameters>().NewGameConfiguration.NewGameMode;
-            if (newGameMode is MultiplayerNewGameMode multiplayerNewGameMode)
+            NewGameModeSpec newGameMode = _sceneLoader.GetSceneParameters<GameSceneParameters>().NewGameConfiguration.NewGameMode;
+            if (newGameMode is MultiplayerNewGameModeSpec multiplayerNewGameMode)
             {
                 return multiplayerNewGameMode.Players;
             }
