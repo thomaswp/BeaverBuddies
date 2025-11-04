@@ -121,12 +121,12 @@ namespace BeaverBuddies.Editor
 		}
 	}
      */
-    /*[HarmonyPatch(typeof(StartingLocationService), nameof(StartingLocationService.DeleteOtherStartingLocations))]
+    [HarmonyPatch(typeof(StartingLocationService), nameof(StartingLocationService.DeleteOtherStartingLocations))]
     public class StartingLocationServiceDeleteOtherStartingLocationsPatcher
     {
-        public static bool Prefix(StartingLocationService __instance, StartingLocationSpec remainingStartingLocationSpec)
+        public static bool Prefix(StartingLocationService __instance, StartingLocation remainingStartingLocation)
         {
-            var player = remainingStartingLocationSpec.GetComponentFast<StartingLocationPlayer>();
+            var player = remainingStartingLocation.GetComponent<StartingLocationPlayer>();
             if (!player)
             {
                 return true;
@@ -143,7 +143,7 @@ namespace BeaverBuddies.Editor
         }
     }
 
-    [ManualMethodOverwrite]*/
+    [ManualMethodOverwrite]
     /*
      * 04/19/2025
 	List<StartingLocation> list = _entityComponentRegistry.GetEnabled<StartingLocation>().ToList();
@@ -157,12 +157,12 @@ namespace BeaverBuddies.Editor
 	}
 	return list[0];
      */
-    /*[HarmonyPatch(typeof(StartingLocationService), nameof(StartingLocationService.GetStartingLocation))]
+    [HarmonyPatch(typeof(StartingLocationService), nameof(StartingLocationService.GetStartingLocation))]
     public class StartingLocationServiceGetStartingLocationPatcher
     {
-        public static bool Prefix(StartingLocationService __instance, ref StartingLocationSpec __result)
+        public static bool Prefix(StartingLocationService __instance, ref StartingLocation __result)
         {
-            List<StartingLocationSpec> list = __instance._entityComponentRegistry.GetEnabled<StartingLocationSpec>().ToList();
+            List<StartingLocation> list = __instance._entityComponentRegistry.GetEnabled<StartingLocation>().ToList();
             if (list.Count <= 1)
             {
                 return true;
@@ -172,7 +172,7 @@ namespace BeaverBuddies.Editor
             __result = list[0];
             return false;
         }
-    }*/
+    }
 
 
     /*[HarmonyPatch(typeof(MapMetadataSaveEntryWriter), nameof(MapMetadataSaveEntryWriter.CreateMapMetadata))]
