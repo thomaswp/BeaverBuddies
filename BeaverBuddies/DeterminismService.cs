@@ -940,7 +940,7 @@ namespace BeaverBuddies
                     if (anim != null && rotator != null && rotator.Started && rotator._animatedPathFollower != null)
                     {
                         anim.UpdateTransform(0);
-                    }*/
+                    }
                 } catch (Exception e)
                 {
                     Plugin.LogError($"Failed to update transform of {entityComponent?.Name}");
