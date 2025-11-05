@@ -1,5 +1,6 @@
 ﻿using Timberborn.BaseComponentSystem;
 using Timberborn.BlockSystem;
+using Timberborn.BlueprintSystem;
 using Timberborn.Coordinates;
 using Timberborn.EntitySystem;
 using Timberborn.Persistence;
@@ -9,7 +10,12 @@ using UnityEngine;
 
 namespace BeaverBuddies.Editor
 {
-    public class StartingLocationPlayer : BaseComponent, IRegisteredComponent, IPersistentEntity
+    public record StartingLocationPlayerSpec : ComponentSpec
+    {
+        public int PlayerIndex { get; set; }
+    }
+
+    public class StartingLocationPlayer : BaseComponent, IAwakableComponent, IRegisteredComponent, IPersistentEntity
     {
         public static readonly Color[] PLAYER_COLORS =
         {
@@ -25,7 +31,18 @@ namespace BeaverBuddies.Editor
         public static readonly ComponentKey StartingLocationPlayerKey = new ComponentKey("StartingLocationPlayer");
         public static readonly PropertyKey<int> PlayerIndexKey = new PropertyKey<int>("PlayerIndex");
 
-        public int PlayerIndex;
+        private StartingLocationPlayerSpec _startingLocationPlayerSpec;
+
+        public int PlayerIndex
+        {
+            get => _startingLocationPlayerSpec.PlayerIndex;
+            set => _startingLocationPlayerSpec.PlayerIndex = value;
+        }
+
+        public void Awake()
+        {
+            _startingLocationPlayerSpec = GetComponent<StartingLocationPlayerSpec>();
+        }
 
         public void Start()
         {
