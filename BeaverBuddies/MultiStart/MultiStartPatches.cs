@@ -63,7 +63,7 @@ namespace BeaverBuddies.MultiStart
 			{
 				__instance._startingBuildingSpawner.Place(startingLocation.GetComponent<BlockObject>().Placement);
 				// Register all start buildings
-				startBuildingService.RegisterStartingBuilding(__instance._startingBuildingSpawner.StartingBuildingTemplateSpec.GetSpec<BuildingSpec>());
+				startBuildingService.RegisterStartingBuilding(__instance._startingBuildingSpawner.StartingBuilding);
 
 
                 // If we're playing with fewer players than the map can support, stop early
@@ -113,9 +113,9 @@ namespace BeaverBuddies.MultiStart
 			StartBuildingsService startBuildingsService = GetSingleton<StartBuildingsService>();
 			if (!startBuildingsService.IsMultiStart) return true;
 
-			foreach (BuildingSpec startingBuilding in startBuildingsService.StartingBuildings)
+			foreach (Building startingBuilding in startBuildingsService.StartingBuildings)
 			{
-				Vector3? unblockedSingleAccess = startingBuilding.GetSpec<BuildingAccessible>().Accessible.UnblockedSingleAccess;
+				Vector3? unblockedSingleAccess = startingBuilding.GetComponent<BuildingAccessible>().Accessible.UnblockedSingleAccess;
 				if (unblockedSingleAccess.HasValue)
 				{
 					Vector3 valueOrDefault = unblockedSingleAccess.GetValueOrDefault();

@@ -13,7 +13,7 @@ namespace BeaverBuddies.MultiStart
 
         private readonly ISceneLoader _sceneLoader;
 
-        public List<BuildingSpec> StartingBuildings { get; private set; } = new List<BuildingSpec>();
+        public List<Building> StartingBuildings { get; private set; } = new List<Building>();
         public bool IsMultiStart => StartingBuildings.Count > 1;
 
         public StartBuildingsService(ISceneLoader sceneLoader)
@@ -21,7 +21,7 @@ namespace BeaverBuddies.MultiStart
             _sceneLoader = sceneLoader;
         }
 
-        public void RegisterStartingBuilding(BuildingSpec building)
+        public void RegisterStartingBuilding(Building building)
         {
             Plugin.Log($"Registering start building #{StartingBuildings.Count}");
             StartingBuildings.Add(building);
