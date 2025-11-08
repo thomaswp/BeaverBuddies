@@ -41,7 +41,11 @@ namespace BeaverBuddies.Editor
 
         public void Awake()
         {
-            _startingLocationPlayerSpec = GetComponent<StartingLocationPlayerSpec>();
+            if (!TryGetComponent<StartingLocationPlayerSpec>(out _startingLocationPlayerSpec))
+            {
+                // Create empty spec on a map not adapted for multi-start
+                _startingLocationPlayerSpec = new StartingLocationPlayerSpec { };
+            }
         }
 
         public void Start()
