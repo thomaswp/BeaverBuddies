@@ -12,7 +12,7 @@ namespace BeaverBuddies.Editor
 {
     public record StartingLocationPlayerSpec : ComponentSpec
     {
-        public int PlayerIndex { get; set; }
+        public int PlayerIndex { get; init; }
     }
 
     public class StartingLocationPlayer : BaseComponent, IAwakableComponent, IRegisteredComponent, IPersistentEntity
@@ -33,18 +33,15 @@ namespace BeaverBuddies.Editor
 
         private StartingLocationPlayerSpec _startingLocationPlayerSpec;
 
-        public int PlayerIndex
-        {
-            get => _startingLocationPlayerSpec.PlayerIndex;
-            set => _startingLocationPlayerSpec.PlayerIndex = value;
-        }
+        public int PlayerIndex { get; set; }
 
         public void Awake()
         {
-            if (!TryGetComponent<StartingLocationPlayerSpec>(out _startingLocationPlayerSpec))
+            if (TryGetComponent<StartingLocationPlayerSpec>(out _startingLocationPlayerSpec))
             {
-                // Create empty spec on a map not adapted for multi-start
-                _startingLocationPlayerSpec = new StartingLocationPlayerSpec { };
+                // Copy PlayerIndex from spec to instance, because it might be changed for this instance 
+                // later on and Specs are shared between multiple entities.
+                PlayerIndex = _startingLocationPlayerSpec.PlayerIndex;
             }
         }
 
