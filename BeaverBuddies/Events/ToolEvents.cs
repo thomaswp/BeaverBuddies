@@ -37,22 +37,22 @@ namespace BeaverBuddies.Events
 
         public override void Replay(IReplayContext context)
         {
-            var buildingPrefab = GetBuilding(context, prefabName);
-            var blockObjectSpec = buildingPrefab.GetSpec<BlockObjectSpec>();
+            var buildingSpec = GetBuilding(context, prefabName);
+            var blockObjectSpec = buildingSpec.GetSpec<BlockObjectSpec>();
             var placer = context.GetSingleton<BlockObjectPlacerService>().GetMatchingPlacer(blockObjectSpec);
             Placement placement = new Placement(coordinates, orientation, 
                 isFlipped ? FlipMode.Flipped : FlipMode.Unflipped);
-            if (!IsPlacementValid(context, placement, buildingPrefab))
+            if (!IsPlacementValid(context, placement, buildingSpec))
             {
                 Plugin.LogWarning($"Invalid placement for {prefabName} at {coordinates}");
                 return;
             }
-            placer.Place(blockObjectSpec, placement, null);
+            placer.Place(blockObjectSpec, placement, (_) => {});
         }
 
         // Note: This may not catch every possible invalid placement (e.g. if terrain height changes or something)
         // but I think it should catch the vast majority of cases due to double placement.
-        private static bool IsPlacementValid(IReplayContext context, Placement placement, BuildingSpec prefab)
+        private static bool IsPlacementValid(IReplayContext context, Placement placement, BuildingSpec spec)
         {
             var templateInstantiator = context.GetSingleton<TemplateInstantiator>();
             var roots = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
@@ -60,10 +60,11 @@ namespace BeaverBuddies.Events
             // but this is likely the best choice because:
             // 1) This only happens occasionally, based on UI actions, and
             // 2) There's no easy way to get at the cache of previews the UI uses,
-            //    and each prefab requires a different GameObject, so we can't cache just one.
-            GameObject gameObject = templateInstantiator.Instantiate(prefab.Blueprint, roots.First().transform);
+            //    and each blueprint requires a different GameObject, so we can't cache just one.
+            // TODO: Check if this is still the case with the new blueprint system.
+            GameObject gameObject = templateInstantiator.Instantiate(spec.Blueprint, roots.First().transform);
             gameObject.SetActive(value: false);
-            var blockObject = gameObject.GetComponent<BlockObject>();
+            var blockObject = gameObject.GetComponentSlow<BlockObject>();
             blockObject.MarkAsPreviewAndInitialize();
             blockObject.Reposition(placement);
             bool isValid = blockObject.IsValid();
