@@ -10,6 +10,7 @@ using Timberborn.Buildings;
 using Timberborn.BuildingTools;
 using Timberborn.Coordinates;
 using Timberborn.DemolishingUI;
+using Timberborn.DuplicationSystem;
 using Timberborn.EntitySystem;
 using Timberborn.Forestry;
 using Timberborn.PlantingUI;
@@ -35,19 +36,32 @@ namespace BeaverBuddies.Events
         public Orientation orientation;
         public bool isFlipped;
 
+        [NonSerialized] public Action<BaseComponent> placedCallback;
+
         public override void Replay(IReplayContext context)
         {
             var buildingSpec = GetBuilding(context, prefabName);
             var blockObjectSpec = buildingSpec.GetSpec<BlockObjectSpec>();
             var placer = context.GetSingleton<BlockObjectPlacerService>().GetMatchingPlacer(blockObjectSpec);
-            Placement placement = new Placement(coordinates, orientation, 
+            Placement placement = new Placement(coordinates, orientation,
                 isFlipped ? FlipMode.Flipped : FlipMode.Unflipped);
             if (!IsPlacementValid(context, placement, buildingSpec))
             {
                 Plugin.LogWarning($"Invalid placement for {prefabName} at {coordinates}");
                 return;
             }
-            placer.Place(blockObjectSpec, placement, (_) => {});
+            placer.Place(blockObjectSpec, placement, (BaseComponent baseComponent) =>
+            {
+                if (placedCallback == null) return;
+
+                ReplayService replayService = GetReplayServiceIfReady();
+                if (replayService == null) return;
+
+                replayService.QueuePostReplayAction(() =>
+                {
+                    placedCallback(baseComponent);
+                });
+            });
         }
 
         // Note: This may not catch every possible invalid placement (e.g. if terrain height changes or something)
@@ -77,7 +91,7 @@ namespace BeaverBuddies.Events
             return $"Placing {prefabName}, {coordinates}, {orientation}, {isFlipped}";
         }
     }
-    
+
     [HarmonyPatch(typeof(BuildingPlacer), nameof(BuildingPlacer.Place))]
     class PlacePatcher
     {
@@ -93,6 +107,7 @@ namespace BeaverBuddies.Events
                     coordinates = placement.Coordinates,
                     orientation = placement.Orientation,
                     isFlipped = placement.FlipMode.IsFlipped,
+                    placedCallback = placedCallback,
                 };
             });
         }
@@ -220,7 +235,8 @@ namespace BeaverBuddies.Events
         public override void Replay(IReplayContext context)
         {
             var entityService = context.GetSingleton<EntityService>();
-            var blockObjects = blocks.Select(guid => {
+            var blockObjects = blocks.Select(guid =>
+            {
                 return context.GetSingleton<EntityRegistry>()
                 .GetEntity(guid)
                 .GetComponent<BlockObject>();
@@ -420,6 +436,43 @@ namespace BeaverBuddies.Events
             // Update the title if we're actually calling this event
             if (!value) __instance.UpdateTitle();
             return value;
+        }
+    }
+
+    [Serializable]
+    class DuplicationEvent : ReplayEvent
+    {
+        public string sourceEntityID;
+        public string targetEntityID;
+
+        public override void Replay(IReplayContext context)
+        {
+            var duplicator = new Duplicator();
+            duplicator.Duplicate(
+                GetEntityComponent(context, sourceEntityID),
+                GetEntityComponent(context, targetEntityID)
+            );
+        }
+
+        public override string ToActionString()
+        {
+            return $"Duplicating properties from {sourceEntityID} to {targetEntityID}";
+        }
+    }
+
+    [HarmonyPatch(typeof(Duplicator), nameof(Duplicator.Duplicate))]
+    class DuplicatorDuplicatePatcher
+    {
+        static bool Prefix(BaseComponent sourceEntity, BaseComponent targetEntity)
+        {
+            return ReplayEvent.DoPrefix(() =>
+            {
+                return new DuplicationEvent()
+                {
+                    sourceEntityID = ReplayEvent.GetEntityID(sourceEntity),
+                    targetEntityID = ReplayEvent.GetEntityID(targetEntity),
+                };
+            });
         }
     }
 }
