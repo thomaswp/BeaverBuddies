@@ -82,6 +82,11 @@ namespace BeaverBuddies.Events
             if (itemID != null)
             {
                 gatherable = prioritizer.GetGatherable(prefabName);
+                if (gatherable == null)
+                {
+                    Plugin.LogWarning($"Could not find gatherable for prefab: {prefabName}");
+                    return;
+                }
             }
             prioritizer.PrioritizeGatherable(gatherable);
         }
