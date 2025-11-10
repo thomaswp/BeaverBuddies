@@ -57,7 +57,6 @@ namespace BeaverBuddies.Editor
             List<BottomBarElement> newResult = new List<BottomBarElement>(__result);
 
             List<PlaceableBlockObjectSpec> startingLocations = new List<PlaceableBlockObjectSpec>();
-            Sprite baseSprite = BlockObjectToolButtonFactory.GetToolImage(startingLocation);
             for (int i = 0; i < StartingLocationPlayer.MAX_PLAYERS; i++)
             {
                 var specs = startingLocation.Blueprint.CopySpecs(startingLocation.Blueprint.Specs, startingLocation.GetSpec<LabeledEntitySpec>(), null)
