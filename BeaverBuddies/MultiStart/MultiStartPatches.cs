@@ -215,7 +215,7 @@ namespace BeaverBuddies.MultiStart
 			{
 				int maxStartingSpots = CustomNewGameModeController.GetInt(playersField);
 				__result = new MultiplayerNewGameModeSpec(__result, maxStartingSpots);
-            }
+			}
 		}
 	}
 
