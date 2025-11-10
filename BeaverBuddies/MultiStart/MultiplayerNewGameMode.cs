@@ -8,7 +8,7 @@ namespace BeaverBuddies.MultiStart
 {
     public record MultiplayerNewGameModeSpec : NewGameModeSpec
     {
-        public int Players { get; init;  }
+        public int Players { get; init; }
 
         public MultiplayerNewGameModeSpec(NewGameModeSpec mode, int players) : base(mode)
         {
