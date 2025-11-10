@@ -620,7 +620,7 @@ namespace BeaverBuddies.Events
         }
     }
 
-    [HarmonyPatch(typeof(StockpilePriority), nameof(StockpilePriorityState.Accept))]
+    [HarmonyPatch(typeof(StockpilePriority), nameof(StockpilePriority.Accept))]
     class SStockpilePriorityActive
     {
         static bool Prefix(StockpilePriority __instance)
