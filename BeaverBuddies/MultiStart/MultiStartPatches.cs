@@ -12,6 +12,7 @@ using Timberborn.EntitySystem;
 using Timberborn.GameSceneLoading;
 using Timberborn.GameStartup;
 using Timberborn.MainMenuPanels;
+using Timberborn.NewGameConfigurationSystem;
 using Timberborn.SceneLoading;
 using Timberborn.SelectionSystem;
 using Timberborn.StartingLocationSystem;
@@ -119,7 +120,7 @@ namespace BeaverBuddies.MultiStart
 				if (unblockedSingleAccess.HasValue)
 				{
 					Vector3 valueOrDefault = unblockedSingleAccess.GetValueOrDefault();
-					NewGameModeSpec newGameMode = __instance._sceneLoader.GetSceneParameters<GameSceneParameters>().NewGameConfiguration.NewGameMode;
+					GameModeSpec newGameMode = __instance._sceneLoader.GetSceneParameters<GameSceneParameters>().NewGameConfiguration.GameMode;
 					__instance._startingBeaverInitializer.Initialize(valueOrDefault, newGameMode.StartingAdults, newGameMode.AdultAgeProgress, newGameMode.StartingChildren, newGameMode.ChildAgeProgress);
 				}
 			}
@@ -165,7 +166,7 @@ namespace BeaverBuddies.MultiStart
 
 		public const string playersFieldName = "Players";
 
-        public static void Postfix(CustomNewGameModeController __instance, VisualElement root, NewGameModeSpec defaultNewGameMode, Action newGameModeChangedCallback)
+        public static void Postfix(CustomNewGameModeController __instance, VisualElement root, GameModeSpec defaultGameMode, Action gameModeChangedCallback)
 		{
 			IntegerField playersField = root.Query<IntegerField>(playersFieldName);
 
@@ -204,10 +205,10 @@ namespace BeaverBuddies.MultiStart
         }
 	}
 
-    [HarmonyPatch(typeof(CustomNewGameModeController), nameof(CustomNewGameModeController.GetNewGameMode))]
+    [HarmonyPatch(typeof(CustomNewGameModeController), nameof(CustomNewGameModeController.GetGameMode))]
     public class CustomNewGameModeControllerGetNewGameModePatcher
 	{
-		public static void Postfix(CustomNewGameModeController __instance, ref NewGameModeSpec __result)
+		public static void Postfix(CustomNewGameModeController __instance, ref GameModeSpec __result)
 		{
 			string fieldName = CustomNewGameModeControllerInitializePatcher.playersFieldName;
             var playersField = __instance._integerFields.Where(x => x.name == fieldName).FirstOrDefault();
@@ -264,9 +265,9 @@ namespace BeaverBuddies.MultiStart
     [HarmonyPatch(typeof(NewGameModePanel), nameof(NewGameModePanel.SelectModeButton))]
     public class NewGameModePanelSelectModeButtonPatcher
 	{
-		public static void Postfix(NewGameModePanel __instance, Button button, NewGameModeSpec predefinedNewGameMode)
+		public static void Postfix(NewGameModePanel __instance, Button button, GameModeSpec predefinedGameMode)
 		{
-            if (button == null || predefinedNewGameMode == null)
+            if (button == null || predefinedGameMode == null)
 			{
 				return;
 			}

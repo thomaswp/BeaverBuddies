@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using Timberborn.Buildings;
 using Timberborn.GameSceneLoading;
+using Timberborn.NewGameConfigurationSystem;
 using Timberborn.SceneLoading;
 
 namespace BeaverBuddies.MultiStart
@@ -29,7 +30,7 @@ namespace BeaverBuddies.MultiStart
 
         public int MaxStartLocations()
         {
-            NewGameModeSpec newGameMode = _sceneLoader.GetSceneParameters<GameSceneParameters>().NewGameConfiguration.NewGameMode;
+            GameModeSpec newGameMode = _sceneLoader.GetSceneParameters<GameSceneParameters>().NewGameConfiguration.GameMode;
             if (newGameMode is MultiplayerNewGameModeSpec multiplayerNewGameMode)
             {
                 return multiplayerNewGameMode.Players;
