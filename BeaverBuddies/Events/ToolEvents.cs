@@ -373,7 +373,7 @@ namespace BeaverBuddies.Events
                 if (toolBuilding == building)
                 {
                     Plugin.Log("Unlocking tool for building: " + buildingName);
-                    //blockObjectTool.Locker = null;
+                    context.GetSingleton<UnlockedPlantableGroupsRegistry>().AddUnlockedPlantableGroups(toolBuilding);
                     toolButton.OnToolUnlocked(new ToolUnlockedEvent(tool));
                 }
             }
@@ -390,8 +390,6 @@ namespace BeaverBuddies.Events
     {
         static bool Prefix(BuildingSpec buildingSpec)
         {
-            //Plugin.LogWarning("science again!");
-            //Plugin.LogStackTrace();
             return ReplayEvent.DoPrefix(() =>
             {
                 return new BuildingUnlockedEvent()
