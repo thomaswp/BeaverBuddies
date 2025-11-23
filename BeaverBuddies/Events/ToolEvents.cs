@@ -107,8 +107,6 @@ namespace BeaverBuddies.Events
 
                 if (placedCallback != null)
                 {
-
-                    Plugin.Log($"Delcaring type: {placedCallback.Method.DeclaringType.FullName}");
                     if (placedCallback.Method.DeclaringType == typeof(BlockObjectTool) && placedCallback.Method.Name == "PlacedCallback")
                     {
                         // BuldingPlacer.PlacedCallback is currently used to copy properties when a building is duplicated.
