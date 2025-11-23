@@ -612,14 +612,14 @@ namespace BeaverBuddies.Events
             return $"Setting good priority for {entityID} to: {priority}";
         }
 
-        public static bool DoPrefix(StockpilePriority toggle, StockpilePriorityState priority)
+        public static bool DoPrefix(StockpilePriority priority, StockpilePriorityState priorityState)
         {
-            return DoEntityPrefix(toggle, entityID =>
+            return DoEntityPrefix(priority, entityID =>
             {
                 return new StockpilePriorityChangedEvent()
                 {
                     entityID = entityID,
-                    priority = priority,
+                    priority = priorityState,
                 };
             });
         }
