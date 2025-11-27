@@ -35,9 +35,6 @@ namespace BeaverBuddies.Events
         public Vector3Int coordinates;
         public Orientation orientation;
         public bool isFlipped;
-        public string sourceEntityID;
-
-        [NonSerialized] private BaseComponent _sourceEntity;
 
         public override void Replay(IReplayContext context)
         {
@@ -52,8 +49,14 @@ namespace BeaverBuddies.Events
                 return;
             }
 
-            _sourceEntity = sourceEntityID != null ? GetEntityComponent(context, sourceEntityID) : null;
-            placer.Place(blockObjectSpec, placement, PlacedCallback);
+            // Note: We do not call callbacks here. Instead we require
+            // any actions that would be called by the callback instead
+            // get captured as replay events. Currently, the only callback
+            // is to duplicate building settings, which is captured by
+            // DuplicatorDuplicatePatcher. This callback is actually
+            // called immediately during placer.Place, so it will occur
+            // in the same frame.
+            placer.Place(blockObjectSpec, placement, (obj) => { });
         }
 
         // Note: This may not catch every possible invalid placement (e.g. if terrain height changes or something)
@@ -80,51 +83,17 @@ namespace BeaverBuddies.Events
 
         public override string ToActionString()
         {
-            return $"Placing {prefabName}, {coordinates}, {orientation}, {isFlipped}, {sourceEntityID}";
-        }
-
-        private void PlacedCallback(BaseComponent baseComponent)
-        {
-            if (_sourceEntity != null)
-            {
-                var duplicator = new Duplicator();
-                duplicator.Duplicate(
-                    _sourceEntity,
-                    baseComponent
-                );
-            }
+            return $"Placing {prefabName}, {coordinates}, {orientation}, {isFlipped}";
         }
     }
 
     [HarmonyPatch(typeof(BuildingPlacer), nameof(BuildingPlacer.Place))]
     class PlacePatcher
     {
-        static bool Prefix(BlockObjectSpec template, Placement placement, Action<BaseComponent> placedCallback)
+        static bool Prefix(BlockObjectSpec template, Placement placement)
         {
             return ReplayEvent.DoPrefix(() =>
             {
-                string sourceEntityID = null;
-
-                if (placedCallback != null)
-                {
-                    if (placedCallback.Method.DeclaringType == typeof(BlockObjectTool) && placedCallback.Method.Name == "PlacedCallback")
-                    {
-                        // BuldingPlacer.PlacedCallback is currently used to copy properties when a building is duplicated.
-                        // Sine this interferes with replay, we instead capture the duplication status of BlockObjectTool
-                        // and handle duplication directly in BuildingPlacedEvent.Replay.
-
-                        var blockObjectTool = placedCallback.Target as BlockObjectTool;
-                        if ((bool)blockObjectTool._duplicationSource)
-                        {
-                            sourceEntityID = ReplayEvent.GetEntityID(blockObjectTool._duplicationSource);
-                        }
-                    }
-                    else if(placedCallback.Method.DeclaringType != typeof(BuildingPlacedEvent))
-                    {
-                        Plugin.LogWarning($"Unexpected placedCallback {placedCallback.Method.FullDescription()} detected in BuildingPlacer.Place; The feature might not work correctly.");
-                    }
-                }
-
                 string prefabName = ReplayEvent.GetBuildingName(template);
 
                 return new BuildingPlacedEvent()
@@ -133,7 +102,6 @@ namespace BeaverBuddies.Events
                     coordinates = placement.Coordinates,
                     orientation = placement.Orientation,
                     isFlipped = placement.FlipMode.IsFlipped,
-                    sourceEntityID = sourceEntityID,
                 };
             });
         }
@@ -460,6 +428,43 @@ namespace BeaverBuddies.Events
             // Update the title if we're actually calling this event
             if (!value) __instance.UpdateTitle();
             return value;
+        }
+    }
+
+    [Serializable]
+    class DuplicationEvent : ReplayEvent
+    {
+        public string sourceEntityID;
+        public string targetEntityID;
+
+        public override void Replay(IReplayContext context)
+        {
+            var duplicator = new Duplicator();
+            duplicator.Duplicate(
+                GetEntityComponent(context, sourceEntityID),
+                GetEntityComponent(context, targetEntityID)
+            );
+        }
+
+        public override string ToActionString()
+        {
+            return $"Duplicating properties from {sourceEntityID} to {targetEntityID}";
+        }
+    }
+
+    [HarmonyPatch(typeof(Duplicator), nameof(Duplicator.Duplicate))]
+    class DuplicatorDuplicatePatcher
+    {
+        static bool Prefix(BaseComponent sourceEntity, BaseComponent targetEntity)
+        {
+            return ReplayEvent.DoPrefix(() =>
+            {
+                return new DuplicationEvent()
+                {
+                    sourceEntityID = ReplayEvent.GetEntityID(sourceEntity),
+                    targetEntityID = ReplayEvent.GetEntityID(targetEntity),
+                };
+            });
         }
     }
 }
