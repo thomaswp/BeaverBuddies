@@ -452,6 +452,19 @@ namespace BeaverBuddies.Events
         }
     }
 
+    [ManualMethodOverwrite]
+    /*
+     * 11/26/2025
+     * This isn't a real manual method overwrite, but it still needs
+     * to be reviewed when the Timberborn code updates. It makes a strong
+     * assumption that Duplicator.Duplicate is only called by UI events
+     * and that it's the only callback that gets called when a building
+     * is placed (see BuildingPlacedEvent).
+     * Check
+     * * IBlockObjectPlacer.Place: Make sure it's only called with
+     *   a callback that calls this method.
+     * * Duplicator.Duplicate: Make sure it's only called by UI actions.
+     */
     [HarmonyPatch(typeof(Duplicator), nameof(Duplicator.Duplicate))]
     class DuplicatorDuplicatePatcher
     {
