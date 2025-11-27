@@ -14,6 +14,8 @@ using Timberborn.BlueprintSystem;
 using Timberborn.BottomBarSystem;
 using Timberborn.Common;
 using Timberborn.ConstructionMode;
+using Timberborn.DuplicationSystem;
+using Timberborn.DuplicationSystemUI;
 using Timberborn.EntitySystem;
 using Timberborn.MapEditorUI;
 using Timberborn.MapMetadataSystem;
@@ -21,6 +23,7 @@ using Timberborn.MapMetadataSystemUI;
 using Timberborn.MapThumbnailCapturing;
 using Timberborn.SerializationSystem;
 using Timberborn.StartingLocationSystem;
+using Timberborn.TemplateSystem;
 using Timberborn.ToolButtonSystem;
 using Timberborn.ToolSystem;
 using UnityEngine;
@@ -54,7 +57,7 @@ namespace BeaverBuddies.Editor
                 return;
             }
 
-            List<BottomBarElement> newResult = new List<BottomBarElement>(__result);
+            List<BottomBarElement> newResult = new(__result);
 
             List<PlaceableBlockObjectSpec> startingLocations = new List<PlaceableBlockObjectSpec>();
             for (int i = 0; i < StartingLocationPlayer.MAX_PLAYERS; i++)
@@ -123,22 +126,29 @@ namespace BeaverBuddies.Editor
 
     [ManualMethodOverwrite]
     /*
-     * 04/19/2025
-	private void DeleteOtherStartingLocations(StartingLocation remainingStartingLocationSpec)
-	{
-		foreach (StartingLocation item in (from startingLocation in _entityComponentRegistry.GetEnabled<StartingLocationSpec>()
-			where startingLocation != remainingStartingLocationSpec
-			select startingLocation).ToList())
-		{
-			_entityService.Delete(item);
-		}
-	}
+     * 11/26/2025
+        if (_undoRegistry.IsProcessingStack)
+        {
+            return;
+        }
+
+        foreach (StartingLocation item in (from startingLocation in _entityComponentRegistry.GetEnabled<StartingLocation>()
+                                           where startingLocation != remainingStartingLocation
+                                           select startingLocation).ToList())
+        {
+            _entityService.Delete(item);
+        }
      */
     [HarmonyPatch(typeof(StartingLocationService), nameof(StartingLocationService.DeleteOtherStartingLocations))]
     public class StartingLocationServiceDeleteOtherStartingLocationsPatcher
     {
         public static bool Prefix(StartingLocationService __instance, StartingLocation remainingStartingLocation)
         {
+            if (__instance._undoRegistry.IsProcessingStack)
+            {
+                return true;
+            }
+
             var player = remainingStartingLocation.GetComponent<StartingLocationPlayer>();
             if (!player)
             {
@@ -146,9 +156,9 @@ namespace BeaverBuddies.Editor
             }
             Plugin.Log($"Deleting other starting locations for {player.PlayerIndex}");
             foreach (StartingLocationPlayer item in (from startingLocation in __instance._entityComponentRegistry.GetEnabled<StartingLocationPlayer>()
-                                               // Get only the starting locations that match this player index
-                                               where startingLocation != player && startingLocation.PlayerIndex == player.PlayerIndex
-                                               select startingLocation).ToList())
+                                                         // Get only the starting locations that match this player index
+                                                     where startingLocation != player && startingLocation.PlayerIndex == player.PlayerIndex
+                                                     select startingLocation).ToList())
             {
                 __instance._entityService.Delete(item);
             }
@@ -156,19 +166,39 @@ namespace BeaverBuddies.Editor
         }
     }
 
+    // TODO: I think this actually prevents duplicating the original starting location. Not a big deal,
+    // but should be a way to differentiate the editor entity from the game entity.
+    [HarmonyPatch(typeof(DuplicationValidator), nameof(DuplicationValidator.CanDuplicateObject))]
+    public class DuplicationValidatorCanDuplicateObjectPatcher
+    {
+        public static bool Prefix(DuplicationValidator __instance, BaseComponent entity, out Action toolActivationAction, out bool __result)
+        {
+            toolActivationAction = null;
+            if (entity.GetComponent<StartingLocationPlayer>() != null)
+            {
+                __result = false;
+                return false;
+            }
+            __result = true;
+            return true;
+        }
+    }
+
     [ManualMethodOverwrite]
     /*
      * 04/19/2025
-	List<StartingLocation> list = _entityComponentRegistry.GetEnabled<StartingLocation>().ToList();
-	if (list.IsEmpty())
-	{
-		throw new InvalidOperationException("No StartingLocation exists.");
-	}
-	if (list.Count > 1)
-	{
-		throw new InvalidOperationException("There must be only one StartingLocation.");
-	}
-	return list[0];
+        List<StartingLocation> list = _entityComponentRegistry.GetEnabled<StartingLocation>().ToList();
+        if (list.IsEmpty())
+        {
+            throw new InvalidOperationException("No StartingLocationSpec exists.");
+        }
+
+        if (list.Count > 1)
+        {
+            throw new InvalidOperationException("There must be only one StartingLocationSpec.");
+        }
+
+        return list[0];
      */
     [HarmonyPatch(typeof(StartingLocationService), nameof(StartingLocationService.GetStartingLocation))]
     public class StartingLocationServiceGetStartingLocationPatcher
