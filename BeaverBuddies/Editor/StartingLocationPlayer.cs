@@ -1,5 +1,6 @@
 ﻿using Timberborn.BaseComponentSystem;
 using Timberborn.BlockSystem;
+using Timberborn.BlueprintSystem;
 using Timberborn.Coordinates;
 using Timberborn.EntitySystem;
 using Timberborn.Persistence;
@@ -9,7 +10,12 @@ using UnityEngine;
 
 namespace BeaverBuddies.Editor
 {
-    public class StartingLocationPlayer : BaseComponent, IRegisteredComponent, IPersistentEntity
+    public record StartingLocationPlayerSpec : ComponentSpec
+    {
+        public int PlayerIndex { get; init; }
+    }
+
+    public class StartingLocationPlayer : BaseComponent, IAwakableComponent, IRegisteredComponent, IPersistentEntity
     {
         public static readonly Color[] PLAYER_COLORS =
         {
@@ -25,12 +31,24 @@ namespace BeaverBuddies.Editor
         public static readonly ComponentKey StartingLocationPlayerKey = new ComponentKey("StartingLocationPlayer");
         public static readonly PropertyKey<int> PlayerIndexKey = new PropertyKey<int>("PlayerIndex");
 
-        public int PlayerIndex;
+        private StartingLocationPlayerSpec _startingLocationPlayerSpec;
+
+        public int PlayerIndex { get; set; }
+
+        public void Awake()
+        {
+            if (TryGetComponent<StartingLocationPlayerSpec>(out _startingLocationPlayerSpec))
+            {
+                // Copy PlayerIndex from spec to instance, because it might be changed for this instance 
+                // later on and Specs are shared between multiple entities.
+                PlayerIndex = _startingLocationPlayerSpec.PlayerIndex;
+            }
+        }
 
         public void Start()
         {
             Plugin.Log($"Start index initialized with PlayerIndex: {PlayerIndex}");
-            StartingLocationRenderer renderer = GetComponentFast<StartingLocationRenderer>();
+            StartingLocationRenderer renderer = GetComponent<StartingLocationRenderer>();
             if (renderer != null )
             {
                 renderer._renderers.ForEach(r =>

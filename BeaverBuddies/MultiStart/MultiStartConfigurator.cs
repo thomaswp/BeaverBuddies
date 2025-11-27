@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Timberborn.StartingLocationSystem;
+using Timberborn.TemplateInstantiation;
 using Timberborn.TemplateSystem;
 
 namespace BeaverBuddies.MultiStart
@@ -23,6 +24,7 @@ namespace BeaverBuddies.MultiStart
         public static void Configure(IContainerDefinition containerDefinition)
         {
             containerDefinition.Bind<StartBuildingsService>().AsSingleton();
+            containerDefinition.Bind<StartingLocationPlayer>().AsTransient();
             containerDefinition.MultiBind<TemplateModule>().ToProvider<TemplateModuleProvider>().AsSingleton();
         }
     }

@@ -2,13 +2,14 @@
 using HarmonyLib;
 using Timberborn.Buildings;
 using Timberborn.TimeSystem;
-using Timberborn.PrefabSystem;
 using Timberborn.EntitySystem;
 using Timberborn.BaseComponentSystem;
 using static BeaverBuddies.SingletonManager;
 using Timberborn.OptionsGame;
 using Timberborn.Options;
 using BeaverBuddies.IO;
+using Timberborn.TemplateSystem;
+using Timberborn.BlueprintSystem;
 
 namespace BeaverBuddies.Events
 {
@@ -63,7 +64,7 @@ namespace BeaverBuddies.Events
         {
             var entity = GetEntityComponent(context, entityID);
             if (entity == null) return default;
-            var component = entity.GetComponentFast<T>();
+            var component = entity.GetComponent<T>();
             if (component == null)
             {
                 Plugin.LogWarning($"Could not find component {typeof(T)} on entity {entityID}");
@@ -73,12 +74,12 @@ namespace BeaverBuddies.Events
 
         public static string GetEntityID(BaseComponent component)
         {
-            return component?.GetComponentFast<EntityComponent>()?.EntityId.ToString();
+            return component?.GetComponent<EntityComponent>()?.EntityId.ToString();
         }
 
         protected BuildingSpec GetBuilding(IReplayContext context, string buildingName)
         {
-            var result = context.GetSingleton<BuildingService>().GetBuildingPrefab(buildingName);
+            var result = context.GetSingleton<BuildingService>().GetBuildingTemplate(buildingName);
             if (result == null)
             {
                 Plugin.LogWarning($"Could not find building prefab: {buildingName}");
@@ -86,9 +87,9 @@ namespace BeaverBuddies.Events
             return result;
         }
 
-        public static string GetBuildingName(BaseComponent component)
+        public static string GetBuildingName(ComponentSpec component)
         {
-            return component.GetComponentFast<PrefabSpec>()?.PrefabName;
+            return component.GetSpec<TemplateSpec>()?.TemplateName;
         }
 
         public static ReplayService GetReplayServiceIfReady()

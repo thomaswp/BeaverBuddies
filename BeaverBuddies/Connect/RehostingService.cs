@@ -27,7 +27,7 @@ namespace BeaverBuddies.Connect
         private readonly AutosaveNameService _autosaveNameService;
         private readonly GameSaver _gameSaver;
         private readonly GameSaveRepository _gameSaveRepository;
-        private readonly SettlementReferenceService _settlementNameService;
+        private readonly SettlementReferenceService _settlementReferenceService;
         private readonly ValidatingGameLoader _validatingGameLoader;
         private readonly DialogBoxShower _dialogBoxShower;
 
@@ -35,8 +35,8 @@ namespace BeaverBuddies.Connect
         public RehostingService(
             AutosaveNameService autosaveNameService, 
             GameSaver gameSaver, 
-            GameSaveRepository gameSaveRepository, 
-            SettlementReferenceService settlementNameService,
+            GameSaveRepository gameSaveRepository,
+            SettlementReferenceService settlementReferenceService,
             ValidatingGameLoader validatingGameLoader,
             DialogBoxShower dialogBoxShower
         ) 
@@ -44,7 +44,7 @@ namespace BeaverBuddies.Connect
             _autosaveNameService = autosaveNameService;
             _gameSaver = gameSaver;
             _gameSaveRepository = gameSaveRepository;
-            _settlementNameService = settlementNameService;
+            _settlementReferenceService = settlementReferenceService;
             _validatingGameLoader = validatingGameLoader;
             _dialogBoxShower = dialogBoxShower;
         }
@@ -63,18 +63,16 @@ namespace BeaverBuddies.Connect
                     // Run on next frame because the GameSaver doesn't release its
                     // handle on the save stream until the method finishes executing
                     // i.e. after the callback has run.
-                    var mono = ServerHostingUtils.GetMonoBehaviour(_settlementNameService._sceneLoader);
+                    var mono = ServerHostingUtils.GetMonoBehaviour(_settlementReferenceService._sceneLoader);
                     TimeoutUtils.RunAfterFrames(mono, () =>
                     {
                         originalCallback(saveReference);
                     });
                 };
             }
-
-            var settlementRef = _settlementNameService.SettlementReference;
-            string settlementName = settlementRef.SettlementName;
+            SettlementReference settlementReference = _settlementReferenceService.SettlementReference;
             string saveName = _autosaveNameService.Timestamp().Replace(",", "") + " Rehost";
-            SaveReference saveReference = new SaveReference(settlementName, settlementRef);
+            SaveReference saveReference = new SaveReference(saveName, settlementReference);
             try
             {
                 _gameSaver.SaveInstantlySkippingNameValidation(saveReference, () =>

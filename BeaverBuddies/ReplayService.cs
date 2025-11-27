@@ -32,6 +32,7 @@ using Timberborn.PlantingUI;
 using Timberborn.ScienceSystem;
 using Timberborn.SettlementNameSystem;
 using Timberborn.SingletonSystem;
+using Timberborn.TemplateInstantiation;
 using Timberborn.TemplateSystem;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;

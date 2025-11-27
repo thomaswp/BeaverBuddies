@@ -48,7 +48,7 @@ namespace BeaverBuddies
                 { typeof(Sounds), nameof(Sounds.GetRandomSound) },
                 { typeof(SoundEmitter), nameof(SoundEmitter.Update) },
                 { typeof(DateSalter), nameof(DateSalter.GenerateRandomNumber) },
-                { typeof(PlantableDescriber), nameof(PlantableDescriber.GetPreviewFromPrefab) }
+                { typeof(PlantableDescriber), nameof(PlantableDescriber.GetPreviewFromTemplate) }
             };
 
             foreach (var type in nonGameRandomMethods.Keys)

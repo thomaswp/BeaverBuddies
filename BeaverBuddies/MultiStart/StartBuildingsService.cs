@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using Timberborn.Buildings;
 using Timberborn.GameSceneLoading;
+using Timberborn.NewGameConfigurationSystem;
 using Timberborn.SceneLoading;
 
 namespace BeaverBuddies.MultiStart
@@ -13,7 +14,7 @@ namespace BeaverBuddies.MultiStart
 
         private readonly ISceneLoader _sceneLoader;
 
-        public List<BuildingSpec> StartingBuildings { get; private set; } = new List<BuildingSpec>();
+        public List<Building> StartingBuildings { get; private set; } = new List<Building>();
         public bool IsMultiStart => StartingBuildings.Count > 1;
 
         public StartBuildingsService(ISceneLoader sceneLoader)
@@ -21,7 +22,7 @@ namespace BeaverBuddies.MultiStart
             _sceneLoader = sceneLoader;
         }
 
-        public void RegisterStartingBuilding(BuildingSpec building)
+        public void RegisterStartingBuilding(Building building)
         {
             Plugin.Log($"Registering start building #{StartingBuildings.Count}");
             StartingBuildings.Add(building);
@@ -29,8 +30,8 @@ namespace BeaverBuddies.MultiStart
 
         public int MaxStartLocations()
         {
-            NewGameMode newGameMode = _sceneLoader.GetSceneParameters<GameSceneParameters>().NewGameConfiguration.NewGameMode;
-            if (newGameMode is MultiplayerNewGameMode multiplayerNewGameMode)
+            GameModeSpec newGameMode = _sceneLoader.GetSceneParameters<GameSceneParameters>().NewGameConfiguration.GameMode;
+            if (newGameMode is MultiplayerNewGameModeSpec multiplayerNewGameMode)
             {
                 return multiplayerNewGameMode.Players;
             }

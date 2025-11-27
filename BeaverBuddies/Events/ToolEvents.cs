@@ -3,19 +3,23 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using Timberborn.BaseComponentSystem;
 using Timberborn.BlockObjectTools;
 using Timberborn.BlockSystem;
 using Timberborn.Buildings;
 using Timberborn.BuildingTools;
 using Timberborn.Coordinates;
 using Timberborn.DemolishingUI;
+using Timberborn.DuplicationSystem;
 using Timberborn.EntitySystem;
 using Timberborn.Forestry;
 using Timberborn.PlantingUI;
 using Timberborn.RootProviders;
 using Timberborn.ScienceSystem;
 using Timberborn.SingletonSystem;
+using Timberborn.TemplateInstantiation;
 using Timberborn.TemplateSystem;
+using Timberborn.ToolButtonSystem;
 using Timberborn.ToolSystem;
 using Timberborn.WorkSystemUI;
 using UnityEngine;
@@ -31,25 +35,30 @@ namespace BeaverBuddies.Events
         public Vector3Int coordinates;
         public Orientation orientation;
         public bool isFlipped;
+        public string sourceEntityID;
+
+        [NonSerialized] private BaseComponent _sourceEntity;
 
         public override void Replay(IReplayContext context)
         {
-            var buildingPrefab = GetBuilding(context, prefabName);
-            var blockObjectSpec = buildingPrefab.GetComponentFast<BlockObjectSpec>();
+            var buildingSpec = GetBuilding(context, prefabName);
+            var blockObjectSpec = buildingSpec.GetSpec<BlockObjectSpec>();
             var placer = context.GetSingleton<BlockObjectPlacerService>().GetMatchingPlacer(blockObjectSpec);
-            Placement placement = new Placement(coordinates, orientation, 
+            Placement placement = new Placement(coordinates, orientation,
                 isFlipped ? FlipMode.Flipped : FlipMode.Unflipped);
-            if (!IsPlacementValid(context, placement, buildingPrefab))
+            if (!IsPlacementValid(context, placement, buildingSpec))
             {
                 Plugin.LogWarning($"Invalid placement for {prefabName} at {coordinates}");
                 return;
             }
-            placer.Place(blockObjectSpec, placement);
+
+            _sourceEntity = sourceEntityID != null ? GetEntityComponent(context, sourceEntityID) : null;
+            placer.Place(blockObjectSpec, placement, PlacedCallback);
         }
 
         // Note: This may not catch every possible invalid placement (e.g. if terrain height changes or something)
         // but I think it should catch the vast majority of cases due to double placement.
-        private static bool IsPlacementValid(IReplayContext context, Placement placement, BuildingSpec prefab)
+        private static bool IsPlacementValid(IReplayContext context, Placement placement, BuildingSpec spec)
         {
             var templateInstantiator = context.GetSingleton<TemplateInstantiator>();
             var roots = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
@@ -57,10 +66,11 @@ namespace BeaverBuddies.Events
             // but this is likely the best choice because:
             // 1) This only happens occasionally, based on UI actions, and
             // 2) There's no easy way to get at the cache of previews the UI uses,
-            //    and each prefab requires a different GameObject, so we can't cache just one.
-            GameObject gameObject = templateInstantiator.Instantiate(prefab.GameObjectFast, roots.First().transform);
+            //    and each blueprint requires a different GameObject, so we can't cache just one.
+            // TODO: Check if this is still the case with the new blueprint system.
+            GameObject gameObject = templateInstantiator.Instantiate(spec.Blueprint, roots.First().transform);
             gameObject.SetActive(value: false);
-            var blockObject = gameObject.GetComponent<BlockObject>();
+            var blockObject = gameObject.GetComponentSlow<BlockObject>();
             blockObject.MarkAsPreviewAndInitialize();
             blockObject.Reposition(placement);
             bool isValid = blockObject.IsValid();
@@ -70,18 +80,52 @@ namespace BeaverBuddies.Events
 
         public override string ToActionString()
         {
-            return $"Placing {prefabName}, {coordinates}, {orientation}, {isFlipped}";
+            return $"Placing {prefabName}, {coordinates}, {orientation}, {isFlipped}, {sourceEntityID}";
+        }
+
+        private void PlacedCallback(BaseComponent baseComponent)
+        {
+            if (_sourceEntity != null)
+            {
+                var duplicator = new Duplicator();
+                duplicator.Duplicate(
+                    _sourceEntity,
+                    baseComponent
+                );
+            }
         }
     }
-    
+
     [HarmonyPatch(typeof(BuildingPlacer), nameof(BuildingPlacer.Place))]
     class PlacePatcher
     {
-        static bool Prefix(BlockObject prefab, Placement placement)
+        static bool Prefix(BlockObjectSpec template, Placement placement, Action<BaseComponent> placedCallback)
         {
             return ReplayEvent.DoPrefix(() =>
             {
-                string prefabName = ReplayEvent.GetBuildingName(prefab);
+                string sourceEntityID = null;
+
+                if (placedCallback != null)
+                {
+                    if (placedCallback.Method.DeclaringType == typeof(BlockObjectTool) && placedCallback.Method.Name == "PlacedCallback")
+                    {
+                        // BuldingPlacer.PlacedCallback is currently used to copy properties when a building is duplicated.
+                        // Sine this interferes with replay, we instead capture the duplication status of BlockObjectTool
+                        // and handle duplication directly in BuildingPlacedEvent.Replay.
+
+                        var blockObjectTool = placedCallback.Target as BlockObjectTool;
+                        if ((bool)blockObjectTool._duplicationSource)
+                        {
+                            sourceEntityID = ReplayEvent.GetEntityID(blockObjectTool._duplicationSource);
+                        }
+                    }
+                    else if(placedCallback.Method.DeclaringType != typeof(BuildingPlacedEvent))
+                    {
+                        Plugin.LogWarning($"Unexpected placedCallback {placedCallback.Method.FullDescription()} detected in BuildingPlacer.Place; The feature might not work correctly.");
+                    }
+                }
+
+                string prefabName = ReplayEvent.GetBuildingName(template);
 
                 return new BuildingPlacedEvent()
                 {
@@ -89,6 +133,7 @@ namespace BeaverBuddies.Events
                     coordinates = placement.Coordinates,
                     orientation = placement.Orientation,
                     isFlipped = placement.FlipMode.IsFlipped,
+                    sourceEntityID = sourceEntityID,
                 };
             });
         }
@@ -174,13 +219,13 @@ namespace BeaverBuddies.Events
     [HarmonyPatch(typeof(PlantingSelectionService), nameof(PlantingSelectionService.MarkArea))]
     class PlantingAreaMarkedPatcher
     {
-        static bool Prefix(IEnumerable<Vector3Int> inputBlocks, Ray ray, string prefabName)
+        static bool Prefix(IEnumerable<Vector3Int> inputBlocks, Ray ray, string templateName)
         {
             return ReplayEvent.DoPrefix(() =>
             {
                 return new PlantingAreaMarkedEvent()
                 {
-                    prefabName = prefabName,
+                    prefabName = templateName,
                     ray = ray,
                     inputBlocks = new List<Vector3Int>(inputBlocks)
                 };
@@ -216,10 +261,11 @@ namespace BeaverBuddies.Events
         public override void Replay(IReplayContext context)
         {
             var entityService = context.GetSingleton<EntityService>();
-            var blockObjects = blocks.Select(guid => {
+            var blockObjects = blocks.Select(guid =>
+            {
                 return context.GetSingleton<EntityRegistry>()
                 .GetEntity(guid)
-                .GetComponentFast<BlockObject>();
+                .GetComponent<BlockObject>();
             }).ToList();
             if (markForDemolition)
             {
@@ -240,7 +286,7 @@ namespace BeaverBuddies.Events
         {
             return DoPrefix(() =>
             {
-                var ids = blockObjects.Select(obj => obj.GetComponentFast<EntityComponent>().EntityId);
+                var ids = blockObjects.Select(obj => obj.GetComponent<EntityComponent>().EntityId);
                 return new ClearResourcesMarkedEvent()
                 {
                     blocks = ids.ToList(),
@@ -343,17 +389,17 @@ namespace BeaverBuddies.Events
 
             foreach (ToolButton toolButton in toolButtonService.ToolButtons)
             {
-                Tool tool = toolButton.Tool;
+                var tool = toolButton.Tool;
                 BlockObjectTool blockObjectTool = tool as BlockObjectTool;
                 if (blockObjectTool == null)
                 {
                     continue;
                 }
-                BuildingSpec toolBuilding = blockObjectTool.Prefab.GetComponentFast<BuildingSpec>();
+                BuildingSpec toolBuilding = blockObjectTool.Template.GetSpec<BuildingSpec>();
                 if (toolBuilding == building)
                 {
                     Plugin.Log("Unlocking tool for building: " + buildingName);
-                    blockObjectTool.Locker = null;
+                    context.GetSingleton<UnlockedPlantableGroupsRegistry>().AddUnlockedPlantableGroups(toolBuilding);
                     toolButton.OnToolUnlocked(new ToolUnlockedEvent(tool));
                 }
             }
@@ -370,13 +416,11 @@ namespace BeaverBuddies.Events
     {
         static bool Prefix(BuildingSpec buildingSpec)
         {
-            //Plugin.LogWarning("science again!");
-            //Plugin.LogStackTrace();
             return ReplayEvent.DoPrefix(() =>
             {
                 return new BuildingUnlockedEvent()
                 {
-                    buildingName = buildingSpec.name,
+                    buildingName = buildingSpec.Blueprint.Name,
                 };
             });
         }

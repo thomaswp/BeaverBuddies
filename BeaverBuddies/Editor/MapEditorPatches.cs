@@ -2,14 +2,18 @@
 using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Timberborn.BaseComponentSystem;
 using Timberborn.BlockObjectModelSystem;
 using Timberborn.BlockObjectTools;
+using Timberborn.BlockObjectToolsUI;
 using Timberborn.BlockSystem;
+using Timberborn.BlueprintSystem;
 using Timberborn.BottomBarSystem;
 using Timberborn.Common;
+using Timberborn.ConstructionMode;
 using Timberborn.EntitySystem;
 using Timberborn.MapEditorUI;
 using Timberborn.MapMetadataSystem;
@@ -17,25 +21,26 @@ using Timberborn.MapMetadataSystemUI;
 using Timberborn.MapThumbnailCapturing;
 using Timberborn.SerializationSystem;
 using Timberborn.StartingLocationSystem;
+using Timberborn.ToolButtonSystem;
 using Timberborn.ToolSystem;
 using UnityEngine;
 
 namespace BeaverBuddies.Editor
 {
 
-    [HarmonyPatch(typeof(MapEditorButtons), nameof(MapEditorButtons.GetElements))]
+    [HarmonyPatch(typeof(MapEditorBlockObjectButtons), nameof(MapEditorBlockObjectButtons.GetElements))]
     public class MapEditorButtonsGetElementsPatcher
     {
 
-        public static void Postfix(MapEditorButtons __instance, ref IEnumerable<BottomBarElement> __result)
+        public static void Postfix(MapEditorBlockObjectButtons __instance, ref IEnumerable<BottomBarElement> __result)
         {
-            ToolGroupSpec toolGroupSpecification = __instance._toolGroupSpecService.GetToolGroupSpecs(MapEditorButtons.MapEditorToolGroup);
-            IEnumerable<PlaceableBlockObjectSpec> blockObjectsFromGroup = __instance._blockObjectToolGroupSpecService.GetBlockObjectsFromGroup(toolGroupSpecification);
+            BlockObjectToolGroupSpec spec = __instance._blockObjectToolGroupSpecService.GetSpec(MapEditorBlockObjectButtons.SingleLevelGroup);
+            IEnumerable<PlaceableBlockObjectSpec> blockObjectsFromGroup = __instance._placeableBlockObjectSpecService.GetBlockObjects(spec);
             Plugin.Log("Buttons:");
             PlaceableBlockObjectSpec startingLocation = null;
             foreach (PlaceableBlockObjectSpec item in blockObjectsFromGroup)
             {
-                if (item.name == "StartingLocation")
+                if (item.Blueprint.Name == "StartingLocation")
                 {
                     startingLocation = item;
                     ToolButton toolButton = __instance._blockObjectToolButtonFactory.Create(item);
@@ -52,30 +57,38 @@ namespace BeaverBuddies.Editor
             List<BottomBarElement> newResult = new List<BottomBarElement>(__result);
 
             List<PlaceableBlockObjectSpec> startingLocations = new List<PlaceableBlockObjectSpec>();
-            Sprite baseSprite = __instance._blockObjectToolButtonFactory.GetToolImage(startingLocation);
             for (int i = 0; i < StartingLocationPlayer.MAX_PLAYERS; i++)
             {
-                // Duplicate the block object
-                var playerStartingLocation = UnityEngine.Object.Instantiate(startingLocation);
-                playerStartingLocation.GameObjectFast.AddComponent<StartingLocationPlayer>().PlayerIndex = i;
-                playerStartingLocation.GetComponentFast<LabeledEntitySpec>()._displayNameLocKey = $"BeaverBuddies.Editor.StartingLocation{i + 1}";
-                startingLocations.Add(playerStartingLocation);
+                var specs = startingLocation.Blueprint.CopySpecs(startingLocation.Blueprint.Specs, startingLocation.GetSpec<LabeledEntitySpec>(), null)
+                    .AddRange(new ComponentSpec[] {
+                        new LabeledEntitySpec
+                        {
+                            DisplayNameLocKey = $"BeaverBuddies.Editor.StartingLocation{i + 1}",
+                            Icon = startingLocation.GetSpec<LabeledEntitySpec>().Icon,
+                        },
+                        new StartingLocationPlayerSpec
+                        {
+                            PlayerIndex = i,
+                        }
+                    });
+
+                var blueprint = new Blueprint($"BeaverBuddies.Editor.StartingLocation{i + 1}", specs, startingLocation.Blueprint.Children);
+
+                startingLocations.Add(blueprint.GetSpec<PlaceableBlockObjectSpec>());
 
                 // To update the icons, I would need to create actual media, since they're
                 // loaded from a path, given in the LabeledEntitySpec
             }
 
-            ToolGroupSpec spec = new ToolGroupSpec() {
+            var startingLocsToolGroup = __instance._blockObjectToolGroupButtonFactory.Create(new BlockObjectToolGroupSpec
+            {
                 Id = null,
-                Order = 0,
-                NameLocKey = startingLocation.GetComponentFast<LabeledEntitySpec>()._displayNameLocKey, // TODO: Find loc key, or add it
-                Icon = baseSprite,
-                FallbackGroup = false
-            };
-            var startingLocsToolGroup = __instance._blockObjectToolGroupFactory.Create(spec, startingLocations);
+                NameLocKey = startingLocation.GetSpec<LabeledEntitySpec>().DisplayNameLocKey, // TODO: Find loc key, or add it
+                Icon = startingLocation.GetSpec<LabeledEntitySpec>().Icon
+            }, startingLocations);
 
             // TODO: Find it in the original list somehow
-            newResult[7] = startingLocsToolGroup;
+            newResult[0] = startingLocsToolGroup;
 
             __result = newResult;
         }
@@ -124,9 +137,9 @@ namespace BeaverBuddies.Editor
     [HarmonyPatch(typeof(StartingLocationService), nameof(StartingLocationService.DeleteOtherStartingLocations))]
     public class StartingLocationServiceDeleteOtherStartingLocationsPatcher
     {
-        public static bool Prefix(StartingLocationService __instance, StartingLocationSpec remainingStartingLocationSpec)
+        public static bool Prefix(StartingLocationService __instance, StartingLocation remainingStartingLocation)
         {
-            var player = remainingStartingLocationSpec.GetComponentFast<StartingLocationPlayer>();
+            var player = remainingStartingLocation.GetComponent<StartingLocationPlayer>();
             if (!player)
             {
                 return true;
@@ -160,9 +173,9 @@ namespace BeaverBuddies.Editor
     [HarmonyPatch(typeof(StartingLocationService), nameof(StartingLocationService.GetStartingLocation))]
     public class StartingLocationServiceGetStartingLocationPatcher
     {
-        public static bool Prefix(StartingLocationService __instance, ref StartingLocationSpec __result)
+        public static bool Prefix(StartingLocationService __instance, ref StartingLocation __result)
         {
-            List<StartingLocationSpec> list = __instance._entityComponentRegistry.GetEnabled<StartingLocationSpec>().ToList();
+            List<StartingLocation> list = __instance._entityComponentRegistry.GetEnabled<StartingLocation>().ToList();
             if (list.Count <= 1)
             {
                 return true;
@@ -175,16 +188,16 @@ namespace BeaverBuddies.Editor
     }
 
 
-    [HarmonyPatch(typeof(MapMetadataSaveEntryWriter), nameof(MapMetadataSaveEntryWriter.CreateMapMetadata))]
+    [HarmonyPatch(typeof(MapMetadataSaveEntryWriter), nameof(MapMetadataSaveEntryWriter.SetCurrentMapMetadata))]
     public class MapMetadataSaveEntryWriterCreateMapMetadataPatcher
     {
-        public static void Postfix(MapMetadataSaveEntryWriter __instance, ref MapMetadata __result)
+        public static void Prefix(MapMetadataSaveEntryWriter __instance, ref MapMetadata mapMetadata)
         {
             var startingLocNumberService = SingletonManager.GetSingleton<StartingLocationNumberService>();
             startingLocNumberService.ResetNumbering();
             int maxPlayers = startingLocNumberService.GetMaxPlayers();
             Plugin.Log($"Saving map with max players: {maxPlayers}");
-            __result = new MultiplayerMapMetadata(__result, maxPlayers);
+            mapMetadata = new MultiplayerMapMetadata(mapMetadata, maxPlayers);
         }
     }
 

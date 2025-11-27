@@ -6,7 +6,7 @@ using System.Linq;
 using Timberborn.BaseComponentSystem;
 using Timberborn.BeaversUI;
 using Timberborn.BuilderPrioritySystem;
-using Timberborn.BuildingsBlocking;
+using Timberborn.Buildings;
 using Timberborn.BuildingsUI;
 using Timberborn.Characters;
 using Timberborn.CharactersUI;
@@ -29,7 +29,6 @@ using Timberborn.Hauling;
 using Timberborn.HaulingUI;
 using Timberborn.InventorySystem;
 using Timberborn.Planting;
-using Timberborn.PrefabSystem;
 using Timberborn.PrioritySystem;
 using Timberborn.RecoveredGoodSystem;
 using Timberborn.RecoveredGoodSystemUI;
@@ -37,6 +36,7 @@ using Timberborn.SettlementNameSystemUI;
 using Timberborn.SingletonSystem;
 using Timberborn.StockpilePrioritySystem;
 using Timberborn.StockpilePriorityUISystem;
+using Timberborn.TemplateSystem;
 using Timberborn.WaterBuildings;
 using Timberborn.WaterBuildingsUI;
 using Timberborn.WaterSourceSystem;
@@ -104,7 +104,7 @@ namespace BeaverBuddies.Events
         {
             return ReplayEvent.DoEntityPrefix(__instance, entityID =>
             {
-                var name = gatherableSpec?.GetComponent<PrefabSpec>()?.PrefabName;
+                var name = gatherableSpec?.GetSpec<TemplateSpec>()?.TemplateName;
                 return new GatheringPrioritizedEvent()
                 {
                     entityID = entityID,
@@ -161,8 +161,8 @@ namespace BeaverBuddies.Events
             PlantableSpec plantable = null;
             if (itemID != null)
             {
-                var planterBuilding = prioritizer.GetComponentFast<PlanterBuilding>();
-                plantable = planterBuilding?.AllowedPlantables.SingleOrDefault((plantable) => plantable.PrefabName == itemID);
+                var planterBuilding = prioritizer.GetComponent<PlanterBuilding>();
+                plantable = planterBuilding?.AllowedPlantables.SingleOrDefault((plantable) => plantable.TemplateName == itemID);
 
                 if (plantable == null)
                 {
@@ -186,7 +186,7 @@ namespace BeaverBuddies.Events
         {
             return ReplayEvent.DoEntityPrefix(__instance, entityID =>
             {
-                var id = plantableSpec?.PrefabName;
+                var id = plantableSpec?.TemplateName;
 
                 return new PlantablePrioritizedEvent()
                 {
@@ -569,7 +569,7 @@ namespace BeaverBuddies.Events
         }
     }
 
-    enum StockpilePriority
+    enum StockpilePriorityState
     {
         Accept,
         Empty,
@@ -581,28 +581,28 @@ namespace BeaverBuddies.Events
     class StockpilePriorityChangedEvent : ReplayEvent
     {
         public string entityID;
-        public StockpilePriority priority;
+        public StockpilePriorityState priority;
 
         public override void Replay(IReplayContext context)
         {
             var emptiable = GetComponent<Emptiable>(context, entityID);
             if (emptiable != null)
             {
-                if (priority == StockpilePriority.Empty) emptiable.MarkForEmptying();
+                if (priority == StockpilePriorityState.Empty) emptiable.MarkForEmptying();
                 else emptiable.UnmarkForEmptying();
             }
 
             var obtainer = GetComponent<GoodObtainer>(context, entityID);
             if (obtainer != null)
             {
-                if (priority == StockpilePriority.Obtain) obtainer.EnableGoodObtaining();
-                else obtainer.DisableGoodObtaining();
+                if (priority == StockpilePriorityState.Obtain) obtainer.EnableObtaining();
+                else obtainer.DisableObtaining();
             }
 
             var supplier = GetComponent<GoodSupplier>(context, entityID);
             if (supplier != null)
             {
-                if (priority == StockpilePriority.Supply) supplier.EnableSupplying();
+                if (priority == StockpilePriorityState.Supply) supplier.EnableSupplying();
                 else supplier.DisableSupplying();
             }
         }
@@ -612,9 +612,9 @@ namespace BeaverBuddies.Events
             return $"Setting good priority for {entityID} to: {priority}";
         }
 
-        public static bool DoPrefix(StockpilePriorityToggle toggle, StockpilePriority priority)
+        public static bool DoPrefix(StockpilePriority toggle, StockpilePriorityState priority)
         {
-            return DoEntityPrefix(toggle._goodObtainer, entityID =>
+            return DoEntityPrefix(toggle, entityID =>
             {
                 return new StockpilePriorityChangedEvent()
                 {
@@ -625,39 +625,39 @@ namespace BeaverBuddies.Events
         }
     }
 
-    [HarmonyPatch(typeof(StockpilePriorityToggle), nameof(StockpilePriorityToggle.AcceptClicked))]
-    class StockpilePriorityToggleActive
+    [HarmonyPatch(typeof(StockpilePriority), nameof(StockpilePriority.Accept))]
+    class SStockpilePriorityActive
     {
-        static bool Prefix(StockpilePriorityToggle __instance)
+        static bool Prefix(StockpilePriority __instance)
         {
-            return StockpilePriorityChangedEvent.DoPrefix(__instance, StockpilePriority.Accept);
+            return StockpilePriorityChangedEvent.DoPrefix(__instance, StockpilePriorityState.Accept);
         }
     }
 
-    [HarmonyPatch(typeof(StockpilePriorityToggle), nameof(StockpilePriorityToggle.EmptyClicked))]
-    class StockpilePriorityToggleEmpty
+    [HarmonyPatch(typeof(StockpilePriority), nameof(StockpilePriority.Empty))]
+    class StockpilePriorityEmpty
     {
-        static bool Prefix(StockpilePriorityToggle __instance)
+        static bool Prefix(StockpilePriority __instance)
         {
-            return StockpilePriorityChangedEvent.DoPrefix(__instance, StockpilePriority.Empty);
+            return StockpilePriorityChangedEvent.DoPrefix(__instance, StockpilePriorityState.Empty);
         }
     }
 
-    [HarmonyPatch(typeof(StockpilePriorityToggle), nameof(StockpilePriorityToggle.ObtainClicked))]
-    class StockpilePriorityToggleObtain
+    [HarmonyPatch(typeof(StockpilePriority), nameof(StockpilePriority.Obtain))]
+    class StockpilePriorityObtain
     {
-        static bool Prefix(StockpilePriorityToggle __instance)
+        static bool Prefix(StockpilePriority __instance)
         {
-            return StockpilePriorityChangedEvent.DoPrefix(__instance, StockpilePriority.Obtain);
+            return StockpilePriorityChangedEvent.DoPrefix(__instance, StockpilePriorityState.Obtain);
         }
     }
 
-    [HarmonyPatch(typeof(StockpilePriorityToggle), nameof(StockpilePriorityToggle.SupplyClicked))]
-    class StockpilePriorityToggleSupply
+    [HarmonyPatch(typeof(StockpilePriority), nameof(StockpilePriority.Supply))]
+    class StockpilePrioritySupply
     {
-        static bool Prefix(StockpilePriorityToggle __instance)
+        static bool Prefix(StockpilePriority __instance)
         {
-            return StockpilePriorityChangedEvent.DoPrefix(__instance, StockpilePriority.Supply);
+            return StockpilePriorityChangedEvent.DoPrefix(__instance, StockpilePriorityState.Supply);
         }
     }
 
@@ -851,7 +851,7 @@ namespace BeaverBuddies.Events
             var service = context.GetSingleton<WorkplaceUnlockingService>();
             if (service.Unlocked(workerType))
             {
-                Plugin.LogWarning($"Tried to unlock {workerType.WorkerType} for {workerType.WorkplacePrefabName} but it was already unlocked");
+                Plugin.LogWarning($"Tried to unlock {workerType.WorkerType} for {workerType.WorkplaceTemplateName} but it was already unlocked");
                 return;
             }
             service.Unlock(workerType);
@@ -859,7 +859,7 @@ namespace BeaverBuddies.Events
 
         public override string ToActionString()
         {
-            return $"Unlocking {workerType.WorkerType} for {workerType.WorkplacePrefabName}";
+            return $"Unlocking {workerType.WorkerType} for {workerType.WorkplaceTemplateName}";
         }
     }
 
