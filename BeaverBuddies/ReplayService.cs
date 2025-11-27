@@ -117,7 +117,6 @@ namespace BeaverBuddies
 
         private ConcurrentQueue<ReplayEvent> eventsToSend = new ConcurrentQueue<ReplayEvent>();
         private ConcurrentQueue<ReplayEvent> eventsToPlay = new ConcurrentQueue<ReplayEvent>();
-        private ConcurrentQueue<Action> postReplayActions = new ConcurrentQueue<Action>();
 
         /// <summary>
         /// Returns true if the ReplayService is ready for the game to
@@ -282,13 +281,6 @@ namespace BeaverBuddies
             }
         }
 
-        // Used to defer an action until after replaying events.
-        // Useful to handle callbacks that might trigger additional replication events.
-        public void QueuePostReplayAction(Action action)
-        {
-            postReplayActions.Enqueue(action);
-        }
-
         private List<ReplayEvent> ReadEventsFromIO(int tick)
         {
             List<ReplayEvent> eventsToReplay = io.ReadEvents(tick);
@@ -363,18 +355,6 @@ namespace BeaverBuddies
                 }
             }
             IsReplayingEvents = false;
-
-            // After replaying, handle any deferred actions
-            if (!postReplayActions.IsEmpty)
-            {
-                while (postReplayActions.TryDequeue(out Action action))
-                {
-                    action();
-                }
-
-                // Call replay events again to immediately handle additional events caused by callbacks.
-                ReplayEvents();
-            }
         }
 
         public void HandleDesync()
