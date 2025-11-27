@@ -6,7 +6,7 @@ using Timberborn.SettingsSystem;
 
 namespace BeaverBuddies
 {
-    public class Settings : ModSettingsOwner
+    public class Settings : ModSettingsOwner 
     {
         public ModSetting<string> ClientConnectionAddress { get; } =
             new("127.0.0.1", 

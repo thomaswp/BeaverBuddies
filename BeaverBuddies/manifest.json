@@ -1,13 +1,13 @@
 {
-  "Name": "BeaverBuddies - Multiplayer Co-Op",
+  "Name": "[1.0 Beta] BeaverBuddies - Multiplayer Co-Op",
   "Version": "1.6.0",
   "Id": "beaverbuddies",
-  "MinimumGameVersion": "0.7.2.0",
+  "MinimumGameVersion": "1.0.1.0",
   "Description": "BeaverBuddies is a Timberborn mod that adds multiplayer co-op!",
   "RequiredMods": [
     {
       "Id": "eMka.ModSettings",
-      "MinimumVersion": "0.7.2.0"
+      "MinimumVersion": "1.0.1.0"
     }
   ]
 }
