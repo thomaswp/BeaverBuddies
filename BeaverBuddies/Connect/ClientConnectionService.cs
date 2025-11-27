@@ -211,7 +211,7 @@ namespace BeaverBuddies.Connect
         /// </summary>
         public static bool TryParseHostAndPort(
             string input,
-            out string? host,
+            out string host,
             out int? port)
         {
             host = null;

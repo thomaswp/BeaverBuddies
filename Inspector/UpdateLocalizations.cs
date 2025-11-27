@@ -39,7 +39,7 @@ class UpdateLocalizations
         foreach (var (locale, csvLines) in translations)
         {
             // Try to find matching csv file by locale prefix (e.g. deDE_*)
-            string? csvPath = allCsvFiles.FirstOrDefault(f =>
+            string csvPath = allCsvFiles.FirstOrDefault(f =>
                 Path.GetFileName(f).StartsWith(locale, StringComparison.OrdinalIgnoreCase));
 
             if (csvPath == null)
@@ -108,7 +108,7 @@ class UpdateLocalizations
     static string ReadMultilineInput()
     {
         var lines = new List<string>();
-        string? line;
+        string line;
         while (!string.IsNullOrEmpty(line = Console.ReadLine()))
         {
             lines.Add(line);
