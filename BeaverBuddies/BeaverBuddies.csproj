@@ -40,6 +40,7 @@
 
   <!-- OutSide Project -->
   <ItemGroup>
+    <ProjectReference Include="..\BeaverBuddiesCore\BeaverBuddiesCore.csproj" />
     <ProjectReference Include="..\TimberNet\TimberNet.csproj" />
   </ItemGroup>
 
