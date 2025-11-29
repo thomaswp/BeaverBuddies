@@ -117,6 +117,12 @@ namespace BeaverBuddies.Events
             ReplayService replayService = GetReplayServiceIfReady();
             if (replayService == null) return true;
 
+            // TODO: I don't think there's any reason to
+            // create the event here when replaying events, since
+            // it'll just get thrown away. Probably not a big deal, but
+            // it can be confusing in debugging. Too afraid it'll break
+            // something to change it right now though.
+
             // Get the event and if it's null, just use default behavior
             ReplayEvent message = getEvent();
             if (message == null) return true;

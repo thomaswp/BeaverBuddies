@@ -35,6 +35,7 @@ namespace BeaverBuddies.Events
         public Vector3Int coordinates;
         public Orientation orientation;
         public bool isFlipped;
+        public string duplicationSourceID;
 
         public override void Replay(IReplayContext context)
         {
@@ -49,14 +50,23 @@ namespace BeaverBuddies.Events
                 return;
             }
 
-            // Note: We do not call callbacks here. Instead we require
-            // any actions that would be called by the callback instead
-            // get captured as replay events. Currently, the only callback
-            // is to duplicate building settings, which is captured by
-            // DuplicatorDuplicatePatcher. This callback is actually
-            // called immediately during placer.Place, so it will occur
-            // in the same frame.
-            placer.Place(blockObjectSpec, placement, (obj) => { });
+            placer.Place(blockObjectSpec, placement, (targetEntity) => {
+                // This callback is called when the object is created (which right now
+                // is just immediately after placement). If we should duplicate settings
+                // to it, the event will have a duplicationSourceID.
+                DuplicateSettingsIfNeeded(context, targetEntity);
+            });
+        }
+
+        private void DuplicateSettingsIfNeeded(IReplayContext context, BaseComponent targetEntity)
+        {
+            if (string.IsNullOrEmpty(duplicationSourceID)) return;
+
+            var sourceEntity = GetEntityComponent(context, duplicationSourceID);
+            if (sourceEntity == null) return;
+
+            var duplicator = new Duplicator();
+            duplicator.Duplicate(sourceEntity, targetEntity);
         }
 
         // Note: This may not catch every possible invalid placement (e.g. if terrain height changes or something)
@@ -87,10 +97,27 @@ namespace BeaverBuddies.Events
         }
     }
 
+    [HarmonyPatch(typeof(BlockObjectTool), nameof(BlockObjectTool.Place))]
+    class BlockObjectToolPlacePatcher
+    {
+        public static BaseComponent DuplicationSource { get; set; }
+
+        static void Prefix(BlockObjectTool __instance)
+        {
+            DuplicationSource = __instance._duplicationSource;
+        }
+
+        static void Postfix(BlockObjectTool __instance)
+        {
+            DuplicationSource = null;
+        }
+    }
+
+
     [HarmonyPatch(typeof(BuildingPlacer), nameof(BuildingPlacer.Place))]
     class PlacePatcher
     {
-        static bool Prefix(BlockObjectSpec template, Placement placement)
+        static bool Prefix(BlockObjectSpec template, Placement placement, Action<BaseComponent> placedCallback)
         {
             return ReplayEvent.DoPrefix(() =>
             {
@@ -102,6 +129,7 @@ namespace BeaverBuddies.Events
                     coordinates = placement.Coordinates,
                     orientation = placement.Orientation,
                     isFlipped = placement.FlipMode.IsFlipped,
+                    duplicationSourceID = ReplayEvent.GetEntityID(BlockObjectToolPlacePatcher.DuplicationSource),
                 };
             });
         }
@@ -464,6 +492,9 @@ namespace BeaverBuddies.Events
      * * IBlockObjectPlacer.Place: Make sure it's only called with
      *   a callback that calls this method.
      * * Duplicator.Duplicate: Make sure it's only called by UI actions.
+     * * DuplicateSettingsTool: Make sure this continues not to do anything
+     *   other than other than registering the change so it can be undone and
+     *   that undos are still only supported in the map editor.
      */
     [HarmonyPatch(typeof(Duplicator), nameof(Duplicator.Duplicate))]
     class DuplicatorDuplicatePatcher
