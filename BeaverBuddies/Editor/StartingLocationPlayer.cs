@@ -15,7 +15,7 @@ namespace BeaverBuddies.Editor
         public int PlayerIndex { get; init; }
     }
 
-    public class StartingLocationPlayer : BaseComponent, IAwakableComponent, IRegisteredComponent, IPersistentEntity
+    public class StartingLocationPlayer : BaseComponent, IAwakableComponent, IRegisteredComponent, IPersistentEntity, IStartableComponent
     {
         public static readonly Color[] PLAYER_COLORS =
         {
