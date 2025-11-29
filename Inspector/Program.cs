@@ -13,7 +13,8 @@ class Program
 {
     static void Main(string[] args)
     {
-        UpdateLocalizations.Go();
+        //UpdateLocalizations.Go();
+        new VerifyILHashes().Main();
     }
 
     static void Test()
