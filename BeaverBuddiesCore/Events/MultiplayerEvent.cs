@@ -25,7 +25,7 @@ namespace BeaverBuddies.Events
         // LogWarning action can be set by the user of this class to handle warnings
         protected static Action<string> LogWarning { get; set; } = s => { };
 
-        public string type => GetType().Name;
+        public virtual string type => GetType().Name;
 
         public int CompareTo(MultiplayerEvent other)
         {

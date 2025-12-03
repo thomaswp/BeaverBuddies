@@ -1,4 +1,5 @@
-﻿using Bindito.Core;
+﻿using BeaverBuddies.Events.Serialization;
+using Bindito.Core;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,6 +12,7 @@ namespace BeaverBuddies.Events
         public void Configure(IContainerDefinition containerDefinition)
         {
             containerDefinition.Bind<MultiplayerEventService>().AsSingleton();
+            containerDefinition.Bind<EventSerializationService>().AsSingleton();
         }
     }
 }

@@ -45,5 +45,11 @@ namespace BeaverBuddies.Events
         {
             eventPlayer.PlayEvent(multiplayerEvent);
         }
+
+        public void PlayEvent<T>(string type, T parameters, Action<T> replay)
+        {
+            var multiplayerEvent = new ParameterizedMultiplayerEvent<T>(type, parameters, replay);
+            eventPlayer.PlayEvent(multiplayerEvent);
+        }
     }
 }
