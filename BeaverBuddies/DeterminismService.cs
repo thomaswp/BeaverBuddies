@@ -43,9 +43,7 @@ using Timberborn.WalkingSystem;
 using Timberborn.WaterBuildings;
 using Timberborn.WorkshopsEffects;
 using TimberNet;
-using Unity.Services.Analytics;
 using UnityEngine;
-using UnityEngine.UIElements;
 using static BeaverBuddies.SingletonManager;
 using static Timberborn.GameSaveRuntimeSystem.GameSaver;
 using static UnityEngine.UIElements.VisualNodePropertyRegistry;
@@ -674,28 +672,6 @@ namespace BeaverBuddies
     // and when it activates this can use randomness (e.g. WateredNaturalResource), which should
     // be considered UI randomness, since this object never gets in the game.
     //[HarmonyPatch(typeof(DescriptionPanel), nameof(DescriptionPanel.SetDescription))]
-
-    // Disable analytics while this mod is enabled, since Unity's Analytics
-    // package seems to cause a bunch of desyncs, and I'm not confident
-    // my patches have fixed them.
-    [HarmonyPatch(typeof(AnalyticsManager), nameof(AnalyticsManager.Enable))]
-    public class AnalyticsManagerEnablePatcher
-    {
-        static bool Prefix()
-        {
-            Plugin.Log("Skipping AnalyticsManager.Enable");
-            return false;
-        }
-    }
-
-    [HarmonyPatch(typeof(AnalyticsContainer), nameof(AnalyticsContainer.Update))]
-    public class AnalyticsContainerUpdatePatcher
-    {
-        static void Prefix()
-        {
-            Plugin.LogWarning("AnalyticsContainer.Update is being called; analytics should be disabled!");
-        }
-    }
 
     [HarmonyPatch(typeof(TickableBucketService), nameof(TickableBucketService.FinishFullTick))]
     static class TickableBucketService_FinishFullTick_Patch
