@@ -860,8 +860,8 @@ namespace BeaverBuddies
     /*
     04/19/2025
     public TimeOfDay FluidTimeOfDay => _secondsPassedToday + _secondsPassedThisTick;
-     */
-    [HarmonyPatch(typeof(DayNightCycle), nameof(DayNightCycle.FluidSecondsPassedToday), MethodType.Getter)]
+     */	 
+/*    [HarmonyPatch(typeof(DayNightCycle), nameof(DayNightCycle.FluidSecondsPassedToday), MethodType.Getter)]
     public class DayNightCycleFluidSecondsPassedTodayPatcher
     {
         static bool Prefix(DayNightCycle __instance, ref float __result)
@@ -873,7 +873,7 @@ namespace BeaverBuddies
             return false;
         }
     }
-
+*/
     [HarmonyPatch(typeof(TickableEntityBucket), nameof(TickableEntityBucket.TickAll))]
     public class TEBPatcher
     {
