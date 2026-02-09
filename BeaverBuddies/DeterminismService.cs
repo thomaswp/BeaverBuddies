@@ -858,8 +858,8 @@ namespace BeaverBuddies
 
     [ManualMethodOverwrite]
     /*
-    04/19/2025
-    public TimeOfDay FluidTimeOfDay => _secondsPassedToday + _secondsPassedThisTick;
+    02/08/2026
+    return (float)_ticksPassedToday * _tickService.TickIntervalInSeconds + _secondsPassedThisTick;
      */
     [HarmonyPatch(typeof(DayNightCycle), nameof(DayNightCycle.FluidSecondsPassedToday), MethodType.Getter)]
     public class DayNightCycleFluidSecondsPassedTodayPatcher
@@ -869,7 +869,7 @@ namespace BeaverBuddies
             if (EventIO.IsNull) return true;
             //Plugin.LogStackTrace();
             // Don't add the seconds passed this tick, since that's based on update
-            __result = __instance._secondsPassedToday;
+            __result = (float)__instance._ticksPassedToday * __instance._tickService.TickIntervalInSeconds;
             return false;
         }
     }
