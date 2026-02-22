@@ -8,6 +8,8 @@ BeaverBuddies/env.props
 BeaverBuddies/temp
 BeaverBuddies/pat.properties
 
+BeaverBuddiesCore/env.props
+
 Inspector/input.txt
 
 # User-specific files
