@@ -19,7 +19,7 @@ namespace BeaverBuddies.Events
         {
             SpeedManager sm = context.GetSingleton<SpeedManager>();
             Plugin.Log($"Event: Changing speed from {sm.CurrentSpeed} to {speed}");
-            if (sm.CurrentSpeed != speed) sm.ChangeSpeed(speed);
+            if (sm.CurrentSpeed != speed) SpeedChangePatcher.SetSpeedSilentlyNow(sm, speed);
 
             ReplayService replayService = context.GetSingleton<ReplayService>();
             if (speed != replayService.TargetSpeed)
@@ -32,24 +32,28 @@ namespace BeaverBuddies.Events
 
     [ManualMethodOverwrite]
     /*
-        04/19/2025
-		if (!_isLocked)
-		{
-			Time.timeScale = ScaleSpeed(speed);
-			CurrentSpeed = speed;
-			_eventBus.Post(new CurrentSpeedChangedEvent(CurrentSpeed));
-		}
+        02/22/2026
+        if (!_isLocked)
+        {
+            _nextSpeed = speed;
+        }
      */
-    [HarmonyPatch(typeof(SpeedManager), nameof(SpeedManager.ChangeSpeed))]
+    [HarmonyPatch(typeof(SpeedManager), nameof(SpeedManager.ChangeSpeed), typeof(float))]
     public class SpeedChangePatcher
     {
         private static bool silently = false;
 
-        public static void SetSpeedSilently(SpeedManager speedManager, float speed)
+        /**
+         * Sets the CurrentSpeed immediately without triggering and event.
+         */
+        public static void SetSpeedSilentlyNow(SpeedManager speedManager, float speed)
         {
             silently = true;
             speedManager.ChangeSpeed(speed);
             silently = false;
+
+            // Have to call ChangeSpeed again to immediate update it.
+            speedManager.ChangeSpeed();
         }
 
         static bool Prefix(SpeedManager __instance, ref float speed)
@@ -112,7 +116,7 @@ namespace BeaverBuddies.Events
             if (!__instance._isLocked)
             {
                 __instance._speedBefore = __instance.CurrentSpeed;
-                SpeedChangePatcher.SetSpeedSilently(__instance, value);
+                SpeedChangePatcher.SetSpeedSilentlyNow(__instance, value);
                 __instance._isLocked = true;
                 __instance._eventBus.Post(new SpeedLockChangedEvent(__instance._isLocked));
             }
@@ -144,7 +148,7 @@ namespace BeaverBuddies.Events
             if (__instance._isLocked)
             {
                 __instance._isLocked = false;
-                SpeedChangePatcher.SetSpeedSilently(__instance, __instance._speedBefore);
+                SpeedChangePatcher.SetSpeedSilentlyNow(__instance, __instance._speedBefore);
                 __instance._eventBus.Post(new SpeedLockChangedEvent(__instance._isLocked));
             }
             return false;

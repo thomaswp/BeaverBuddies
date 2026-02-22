@@ -1483,7 +1483,7 @@ namespace BeaverBuddies.Events
     [HarmonyPatch(typeof(WonderFragment), nameof(WonderFragment.ActivateWonder))]
     class WonderFragmentActivateWonderPatcher
     {
-        public static bool Prefix(WonderFragment __instance, ClickEvent evt)
+        public static bool Prefix(WonderFragment __instance)
         {
             return ReplayEvent.DoEntityPrefix(__instance._wonder, entityID =>
             {

@@ -379,7 +379,7 @@ namespace BeaverBuddies
             // operation, and it really shouldn't be, so this is a short-term fix!
             SendEvents();
             // Pause
-            SpeedChangePatcher.SetSpeedSilently(_speedManager, 0);
+            SpeedChangePatcher.SetSpeedSilentlyNow(_speedManager, 0);
             EventIO.Reset();
         }
 
@@ -484,7 +484,7 @@ namespace BeaverBuddies
                 // Also pause the game (silently) if we're out of events
                 if (_speedManager.CurrentSpeed != 0)
                 {
-                    SpeedChangePatcher.SetSpeedSilently(_speedManager, 0);
+                    SpeedChangePatcher.SetSpeedSilentlyNow(_speedManager, 0);
                 }
                 // And return early
                 return;
@@ -504,7 +504,7 @@ namespace BeaverBuddies
             if (_speedManager.CurrentSpeed != targetSpeed)
             {
                 //Plugin.Log($"Setting speed to target speed: {targetSpeed}");
-                SpeedChangePatcher.SetSpeedSilently(_speedManager, targetSpeed);
+                SpeedChangePatcher.SetSpeedSilentlyNow(_speedManager, targetSpeed);
             }
         }
 
