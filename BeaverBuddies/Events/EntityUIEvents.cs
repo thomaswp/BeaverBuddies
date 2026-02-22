@@ -14,6 +14,8 @@ using Timberborn.CoreUI;
 using Timberborn.Demolishing;
 using Timberborn.DemolishingUI;
 using Timberborn.Emptying;
+using Timberborn.EntityNaming;
+using Timberborn.EntityNamingUI;
 using Timberborn.EntityPanelSystem;
 using Timberborn.EntitySystem;
 using Timberborn.Explosions;
@@ -689,7 +691,7 @@ namespace BeaverBuddies.Events
         }
     }
 
-    [HarmonyPatch(typeof(DemolishableFragment), nameof(DemolishableFragment.OnDemolishButtonClick))]
+    [HarmonyPatch(typeof(DemolishableFragment), nameof(DemolishableFragment.ChangeDemolishState))]
     class DemolishableFragmentButtonClickedPatcher
     {
         static bool Prefix(DemolishableFragment __instance)
@@ -779,7 +781,7 @@ namespace BeaverBuddies.Events
 
         public override void Replay(IReplayContext context)
         {
-            GetComponent<IModifiableEntityBadge>(context, entityID)?.SetEntityName(newName);
+            GetComponent<NamedEntity>(context, entityID)?.SetEntityName(newName);
         }
 
         public override string ToActionString()
@@ -788,27 +790,27 @@ namespace BeaverBuddies.Events
         }
     }
 
-    [HarmonyPatch(typeof(EntityPanel), nameof(EntityPanel.SetEntityName))]
+    [HarmonyPatch(typeof(EntityNameDialog), nameof(EntityNameDialog.SetEntityName))]
     [ManualMethodOverwrite]
     /**
-     *  6/20/2025
-		if ((bool)_shownEntity && !string.IsNullOrWhiteSpace(newName))
-		{
-			_entityBadgeService.SetEntityName(_shownEntity, newName.Trim());
-		}
+     *  02/22/2025
+        if ((bool)namedEntity && !string.IsNullOrWhiteSpace(newName))
+        {
+            namedEntity.SetEntityName(newName.Trim());
+        }
      */
     class EntityPanelSetEntityNamePatcher
     {
-        static bool Prefix(EntityPanel __instance, string newName)
+        static bool Prefix(EntityNameDialog __instance, string newName, NamedEntity namedEntity)
         {
             // If the name / change is invalid, we don't record it and use the default behavior.
             // We capture the UI hook, rather than EntityBadgeService, in case the latter is use
             // in game logic.
-            if (!((bool)__instance._shownEntity && !string.IsNullOrWhiteSpace(newName)))
+            if (!((bool)namedEntity && !string.IsNullOrWhiteSpace(newName)))
             {
                 return true;
             }
-            return ReplayEvent.DoEntityPrefix(__instance._shownEntity, entityID =>
+            return ReplayEvent.DoEntityPrefix(namedEntity, entityID =>
             {
                 return new EntityRenamedEvent()
                 {
@@ -818,30 +820,6 @@ namespace BeaverBuddies.Events
             });
         }
     }
-
-    [HarmonyPatch(typeof(CharacterBatchControlRowItemFactory), nameof(CharacterBatchControlRowItemFactory.SetEntityName))]
-    [ManualMethodOverwrite]
-    /**
-     * Mirror of EntityPanel.SetEntityName capture, routed through batch control row factory.
-     *  6/20/2025
-		if ((bool)_shownEntity && !string.IsNullOrWhiteSpace(newName))
-		{
-			_entityBadgeService.SetEntityName(_shownEntity, newName.Trim());
-		}
-     */
-    class CharacterBatchControlRowItemFactorySetEntityNamePatcher
-    {
-        static bool Prefix(CharacterBatchControlRowItemFactory __instance, string newName, Character character)
-        {
-            if (!(character != null && !string.IsNullOrWhiteSpace(newName))) return true;
-            return ReplayEvent.DoEntityPrefix(character, entityID => new EntityRenamedEvent()
-            {
-                entityID = entityID,
-                newName = newName,
-            });
-        }
-    }
-
     class WorkerTypeUnlockedEvent : ReplayEvent
     {
         public UnlockableWorkerType workerType;
