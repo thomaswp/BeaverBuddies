@@ -119,6 +119,7 @@ namespace BeaverBuddies
 
             Harmony harmony = new Harmony(ID);
             harmony.PatchAll();
+            GameSaverHooker.Init();
 
             Log(UnityEngine.Application.consoleLogPath);
         }

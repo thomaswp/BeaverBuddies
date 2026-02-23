@@ -47,6 +47,7 @@ using UnityEngine;
 using static BeaverBuddies.SingletonManager;
 using static Timberborn.GameSaveRuntimeSystem.GameSaver;
 using static UnityEngine.UIElements.VisualNodePropertyRegistry;
+using MonoMod.RuntimeDetour;
 
 namespace BeaverBuddies
 {
@@ -689,24 +690,64 @@ namespace BeaverBuddies
         }
     }
 
-    [HarmonyPatch(typeof(GameSaver), nameof(GameSaver.Save), typeof(QueuedSave))]
+
+    public delegate void orig_Save(GameSaver self, QueuedSave queuedSave);
+
+    // TODO: Need to test this; may not actually work
+    public class GameSaverHooker
+    {
+        private static Hook _saveHook;
+
+        public static void Init()
+        {
+            // 2. Setup the hook
+            MethodInfo originalMethod = typeof(GameSaver).GetMethod("Save", BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo replacementMethod = typeof(GameSaverHooker).GetMethod(nameof(OnSave), BindingFlags.NonPublic | BindingFlags.Static);
+
+            _saveHook = new Hook(originalMethod, replacementMethod);
+        }
+
+        // 3. This is your "Prefix" and "Override" combined
+        private static void OnSave(orig_Save orig, GameSaver self, QueuedSave queuedSave)
+        {
+            // 'orig' is the original method
+            // 'self' is the 'this' instance
+
+            if (GameSaverSavePatcher.IsSaving || EventIO.IsNull)
+            {
+                orig(self, queuedSave); // Call original and return
+                return;
+            }
+
+            TickingService ts = GetSingleton<TickingService>();
+            if (ts == null)
+            {
+                orig(self, queuedSave);
+                return;
+            }
+
+            ts.FinishFullTickAndThen(() =>
+            {
+                GameSaverSavePatcher.IsSaving = true;
+                try
+                {
+                    // We call 'orig' instead of self.Save() to avoid recursion
+                    orig(self, queuedSave);
+                }
+                finally
+                {
+                    GameSaverSavePatcher.IsSaving = false;
+                }
+            });
+
+            // We don't call orig(self, queuedSave) here, 
+            // effectively "returning false" in Harmony terms.
+        }
+    }
+
     public class GameSaverSavePatcher
     {
         public static bool IsSaving { get; set; }
-
-        static bool Prefix(GameSaver __instance, QueuedSave queuedSave)
-        {
-            if (IsSaving || EventIO.IsNull) return true;
-            TickingService ts = GetSingleton<TickingService>();
-            if (ts == null) return true;
-            ts.FinishFullTickAndThen(() =>
-            {
-                IsSaving = true;
-                __instance.Save(queuedSave);
-                IsSaving = false;
-            });
-            return false;
-        }
     }
 
     [HarmonyPatch(typeof(Autosaver), nameof(Autosaver.CreateExitSave))]
