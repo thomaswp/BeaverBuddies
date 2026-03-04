@@ -1210,11 +1210,10 @@ namespace BeaverBuddies.Events
     [ManualMethodOverwrite]
     /*
      * 04/25/2025
-	float num = UpdateWaterLevelSliderValue(newHeight);
-	if (WaterLevelSliderValue != num)
-	{
-		_sluiceState.SetOutflowLimit(num - (float)Range);
-	}
+    if (WaterLevelSliderValue != newHeight)
+    {
+        _sluiceState.SetOutflowLimit(newHeight - (float)Range);
+    }
     */
     [HarmonyPatch(typeof(SluiceFragment), nameof(SluiceFragment.ChangeFlow))]
     class SluiceFragmentChangeFlowPatcher
@@ -1223,7 +1222,7 @@ namespace BeaverBuddies.Events
         {
             // Note that UpdateWaterLevelSliderValue does modify the slider value, so this
             // is UI logic we need to keep updated if the method changes.
-            float num = __instance.UpdateWaterLevelSliderValue(newHeight);
+            float num = __instance.WaterLevelSliderValue;
             if (__instance.WaterLevelSliderValue == num) return true;
             return SluiceSliderUpdatedEvent.DoPrefix(
                 // Note: it's num - Range, not num
