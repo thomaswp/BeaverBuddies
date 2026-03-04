@@ -1,6 +1,7 @@
 ﻿using BeaverBuddies.Connect;
 using BeaverBuddies.DesyncDetecter;
 using BeaverBuddies.Editor;
+using BeaverBuddies.Events;
 using BeaverBuddies.Fixes;
 using BeaverBuddies.IO;
 using BeaverBuddies.MultiStart;
@@ -119,6 +120,7 @@ namespace BeaverBuddies
 
             Harmony harmony = new Harmony(ID);
             harmony.PatchAll();
+            AutomationEvent.PatchAll(harmony);
 
             Log(UnityEngine.Application.consoleLogPath);
         }
