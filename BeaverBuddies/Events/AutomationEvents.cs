@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Timberborn.Automation;
 using Timberborn.AutomationBuildings;
 using Timberborn.BaseComponentSystem;
 
@@ -61,6 +62,9 @@ namespace BeaverBuddies.Events
 
         public static void PatchAll(Harmony harmony)
         {
+            // Important: We can only override methods like this if they:
+            // 1) Are only ever called from the UI (not from step logic)
+            // 2) Are in a BaseComponent (so we can get the EntityID)
             (Type, string)[] methodsToPatchInfo = new (Type, string)[]
             {
                 (typeof(Chronometer), nameof(Chronometer.SetStartTime)),
@@ -73,6 +77,10 @@ namespace BeaverBuddies.Events
                 (typeof(FlowSensor), nameof(FlowSensor.SetMode)),
                 (typeof(FlowSensor), nameof(FlowSensor.SetThreshold)),
                 (typeof(Gate), nameof(Gate.SetOpeningMode)),
+                (typeof(Indicator), nameof(Indicator.SetColorReplicationEnabled)),
+                (typeof(Indicator), nameof(Indicator.SetJournalEntryEnabled)),
+                (typeof(Indicator), nameof(Indicator.SetPinnedMode)),
+                (typeof(Indicator), nameof(Indicator.SetWarningEnabled)),
             };
             var methodsToPatch = methodsToPatchInfo.Select(
                 info => info.Item1.GetMethod(
