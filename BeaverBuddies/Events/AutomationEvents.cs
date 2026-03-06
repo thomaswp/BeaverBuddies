@@ -14,26 +14,31 @@ namespace BeaverBuddies.Events
     {
         public string entityID;
         public string methodKey;
-        public object argument;
+        public object[] arguments;
 
-        private static readonly Dictionary<string, MethodInfo> setterMethodCache = new();
+        private static readonly Dictionary<string, MethodInfo> methodCache = new();
 
         private static string MakeKey(string className, string methodName) => $"{className}.{methodName}";
 
         public override void Replay(IReplayContext context)
         {
-            if (!TryGetSetterMethodInfo(methodKey, out var setterInfo))
+            if (!TryGetMethodInfo(methodKey, out var methodInfo))
             {
                 Plugin.LogError($"No MethodInfo for: {methodKey}. Cannot replay this event.");
                 return;
             }
-            object componentObj = GetComponentForType(setterInfo.DeclaringType, context);
-            setterInfo.Invoke(componentObj, new object[] { argument });
+            if (methodInfo.GetParameters().Length != arguments.Length)
+            {
+                Plugin.LogError($"Argument count mismatch for {methodKey}. Expected {methodInfo.GetParameters().Length}, got {arguments.Length}. Cannot replay this event.");
+                return;
+            }
+            object componentObj = GetComponentForType(methodInfo.DeclaringType, context);
+            methodInfo.Invoke(componentObj, arguments);
         }
 
-        static bool TryGetSetterMethodInfo(string methodKey, out MethodInfo info)
+        static bool TryGetMethodInfo(string methodKey, out MethodInfo info)
         {
-            if (setterMethodCache.TryGetValue(methodKey, out var cachedInfo))
+            if (methodCache.TryGetValue(methodKey, out var cachedInfo))
             {
                 info = cachedInfo;
                 return true;
@@ -61,6 +66,13 @@ namespace BeaverBuddies.Events
                 (typeof(Chronometer), nameof(Chronometer.SetStartTime)),
                 (typeof(Chronometer), nameof(Chronometer.SetEndTime)),
                 (typeof(Chronometer), nameof(Chronometer.SetMode)),
+                (typeof(ContaminationSensor), nameof(ContaminationSensor.SetMode)),
+                (typeof(ContaminationSensor), nameof(ContaminationSensor.SetThreshold)),
+                (typeof(DepthSensor), nameof(DepthSensor.SetMode)),
+                (typeof(DepthSensor), nameof(DepthSensor.SetThreshold)),
+                (typeof(FlowSensor), nameof(FlowSensor.SetMode)),
+                (typeof(FlowSensor), nameof(FlowSensor.SetThreshold)),
+                (typeof(Gate), nameof(Gate.SetOpeningMode)),
             };
             var methodsToPatch = methodsToPatchInfo.Select(
                 info => info.Item1.GetMethod(
@@ -69,17 +81,14 @@ namespace BeaverBuddies.Events
             ));
             foreach (var method in methodsToPatch)
             {
-                OverrideSetter(harmony, method);
+                OverrideMethod(harmony, method);
             }
         }
 
-        private static void OverrideSetter(Harmony harmony, MethodInfo info)
+        private static void OverrideMethod(Harmony harmony, MethodInfo info)
         {
-            // Note that "setter" here is not a C# property setter, but rather
-            // any method that takes a single argument.
-
             string key = MakeKey(info.DeclaringType.FullName, info.Name);
-            setterMethodCache[key] = info;
+            methodCache[key] = info;
 
             // Prepare the Harmony Prefix
             // We point Harmony to our UniversalPrefix method below
@@ -95,15 +104,11 @@ namespace BeaverBuddies.Events
             // Use the same key logic to identify which method was triggered
             string key = MakeKey(__originalMethod.DeclaringType.FullName, __originalMethod.Name);
 
-            // Since these are "setters," we assume the first argument [0] is the value.
-            // Harmony conveniently wraps this in an object array for us.
-            object argument = (__args != null && __args.Length > 0) ? __args[0] : null;
-
-            // Call your existing logic
-            return DoPrefix(__instance, key, argument);
+            // Call the original logic to create and record the event
+            return DoPrefix(__instance, key, __args);
         }
 
-        private static bool DoPrefix(BaseComponent entity, string methodKey, object argument)
+        private static bool DoPrefix(BaseComponent entity, string methodKey, object[] arguments)
         {
             return DoEntityPrefix(entity, entityID =>
             {
@@ -111,7 +116,7 @@ namespace BeaverBuddies.Events
                 {
                     entityID = entityID,
                     methodKey = methodKey,
-                    argument = argument
+                    arguments = arguments
                 };
             });
         }
