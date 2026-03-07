@@ -3,12 +3,14 @@
   <!-- Import system-specific properties -->
   <Import Project="env.props" Condition="Exists('env.props')" />
   <!-- Or the default properties if they don't exist -->
-  <Import Project="env.props.template" Condition="!Exists('env.props')" />
+  <Import Project="env.props.windows-template" Condition="!Exists('env.props') AND '$(OS)' != 'Unix'" />
+  <Import Project="env.props.unix-template" Condition="!Exists('env.props') AND '$(OS)' == 'Unix'" />
 
   <!-- Before building, create a copy if it doesn't exist -->
   <Target Name="EnsureEnvProps" BeforeTargets="BeforeBuild">
     <Message Importance="high" Text="Checking for env.props file..." />
-    <Exec Command="if not exist env.props copy env.props.template env.props" />
+    <Exec Command="if not exist env.props copy env.props.windows-template env.props" Condition=" '$(OS)' != 'Unix'" />
+    <Exec Command="test -e env.props || cp env.props.unix-template env.props" Condition=" '$(OS)' == 'Unix'" />
   </Target>
 
   <PropertyGroup>
@@ -22,7 +24,7 @@
     <NoWarn>$(NoWarn)</NoWarn>		
     <!-- Path Config -->
     <BeaverBuddiesModsPath>$(DocumentsPath)Timberborn\Mods\BeaverBuddies\</BeaverBuddiesModsPath>
-    <BeaverBuddiesManagedPath>$(TimberbornPath)Timberborn_Data\Managed\</BeaverBuddiesManagedPath>
+    <BeaverBuddiesManagedPath>$(TimberbornPath)Managed\</BeaverBuddiesManagedPath>
     <!-- Include HarmonyX file inside $(BeaverBuddiesModsPath) -->
     <includeHarmonyX>true</includeHarmonyX>
     <NuGetPackagesDir>$(UserProfile)\.nuget\packages\</NuGetPackagesDir>
