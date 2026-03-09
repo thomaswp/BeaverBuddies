@@ -26,7 +26,7 @@
     <BeaverBuddiesModsPath>$(DocumentsPath)Timberborn\Mods\BeaverBuddies\</BeaverBuddiesModsPath>
     <!-- Old env.props files use the TimberbornPath, make that compatible with the new OS-independent TimberbornPath -->
     <TimberbornDataPath Condition="'$(TimberbornDataPath)' == ''">$(TimberbornPath)Timberborn_Data\</TimberbornDataPath>
-    <BeaverBuddiesManagedPath>$(TimberbornDataPath)Managed\</BeaverBuddiesManagedPath>
+    <TimberbornManagedPath>$(TimberbornDataPath)Managed\</TimberbornManagedPath>
     <!-- Include HarmonyX file inside $(BeaverBuddiesModsPath) -->
     <includeHarmonyX>true</includeHarmonyX>
     <NuGetPackagesDir>$(UserProfile)\.nuget\packages\</NuGetPackagesDir>
@@ -63,11 +63,11 @@
     <Reference Include="$(BepInExPath)core\MonoMod.*.dll" Private="$(includeHarmonyX)" />
     
     <!-- Timberborn DLL & Publicize (BepInEx.AssemblyPublicizer.MSBuild) -->
-    <Reference Include="$(BeaverBuddiesManagedPath)com.rlabrecque.steamworks.net.dll" Private="false" />
-    <Reference Include="$(BeaverBuddiesManagedPath)Bindito.Core.dll" Private="false" />
-    <Reference Include="$(BeaverBuddiesManagedPath)Bindito.Unity.dll" Private="false" />
-    <Reference Include="$(BeaverBuddiesManagedPath)UnityEngine.*.dll" Publicize="true" Private="false" />
-    <Reference Include="$(BeaverBuddiesManagedPath)Timberborn.*.dll" Publicize="true" Private="false" />
+    <Reference Include="$(TimberbornManagedPath)com.rlabrecque.steamworks.net.dll" Private="false" />
+    <Reference Include="$(TimberbornManagedPath)Bindito.Core.dll" Private="false" />
+    <Reference Include="$(TimberbornManagedPath)Bindito.Unity.dll" Private="false" />
+    <Reference Include="$(TimberbornManagedPath)UnityEngine.*.dll" Publicize="true" Private="false" />
+    <Reference Include="$(TimberbornManagedPath)Timberborn.*.dll" Publicize="true" Private="false" />
     <Reference Include="$(ModSettingsPath)ModSettings.*.dll" Private="false" />
     <Compile Remove="Fixes\TestingStrategies_Scrap.cs" />
     <None Include="Fixes\TestingStrategies_Scrap.cs" />
