@@ -28,27 +28,30 @@
     <TimberbornDataPath Condition="'$(TimberbornDataPath)' == ''">$(TimberbornPath)Timberborn_Data\</TimberbornDataPath>
     <TimberbornManagedPath>$(TimberbornDataPath)Managed\</TimberbornManagedPath>
     <!-- Include HarmonyX file inside $(BeaverBuddiesModsPath) -->
-    <includeHarmonyX>true</includeHarmonyX>
     <NuGetPackagesDir>$(UserProfile)\.nuget\packages\</NuGetPackagesDir>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <Target Name="CheckEnv" BeforeTargets="BeforeBuild">
     <Warning Text="TimberbornPath property is deprecated, use the more specific TimberbornDataPath instead" Condition="'$(TimberbornDataPath)' == ''"/>
     <Error Text="TimberbornDataPath property directory not found" Condition="!Exists('$(TimberbornDataPath)')"/>
-    <Error Text="BepInExPath property directory not found" Condition="!Exists('$(BepInExPath)')"/>
+    <Error Text="HarmonyPath property directory not found" Condition="!Exists('$(HarmonyPath)')"/>
     <Error Text="ModSettingsPath property directory not found" Condition="!Exists('$(ModSettingsPath)')"/>
     <Error Text="DocumentsPath property directory not found" Condition="!Exists('$(DocumentsPath)')"/>
   </Target>
 
   <!-- NuGet -->
-  <ItemGroup> 
+  <ItemGroup>
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3">
       <PrivateAssets>all</PrivateAssets>
       <PublicizeCompilerGenerated>false</PublicizeCompilerGenerated>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference> 
     <PackageReference Include="System.Collections.Immutable" Version="9.0.0" />
-  </ItemGroup> 
+    <PackageReference Include="MonoMod.Core" Version="1.3.4" />
+    <PackageReference Include="MonoMod.RuntimeDetour" Version="25.3.4" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="16.*" />
+  </ItemGroup>
 
   <!-- OutSide Project -->
   <ItemGroup>
@@ -57,11 +60,9 @@
 
   <!-- Reference DLL -->
   <ItemGroup>
-    <!-- BepInEx (Harmony, Mono.Cecil & MonoMod DLL) -->
-    <Reference Include="$(BepInExPath)core\0Harmony.dll" Private="$(includeHarmonyX)" />
-    <Reference Include="$(BepInExPath)core\Mono.Cecil.*.dll" Private="$(includeHarmonyX)" />
-    <Reference Include="$(BepInExPath)core\MonoMod.*.dll" Private="$(includeHarmonyX)" />
-    
+    <!-- Harmony -->
+    <Reference Include="$(HarmonyPath)0Harmony.dll" Private="false" />
+
     <!-- Timberborn DLL & Publicize (BepInEx.AssemblyPublicizer.MSBuild) -->
     <Reference Include="$(TimberbornManagedPath)com.rlabrecque.steamworks.net.dll" Private="false" />
     <Reference Include="$(TimberbornManagedPath)Bindito.Core.dll" Private="false" />
