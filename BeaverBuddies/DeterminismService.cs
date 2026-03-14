@@ -695,13 +695,18 @@ namespace BeaverBuddies
         }
     }
     
+    // the original GameSaver.Save includes a try-catch-when block.
+    // stock Harmony doesn't support patching methods with such a block.
+    // see https://github.com/pardeike/Harmony/issues/563#issuecomment-1889259983.
+    // this uses Hook from MonoMod.RuntimeDetours instead.
     public class GameSaverSavePatcher {
         public static bool IsSaving { get; set; }
 
         public static void Install() {
             Debug.Log(typeof(System.Reflection.Emit.DynamicMethod).AssemblyQualifiedName);
 
-            var hook = new Hook(
+            // no need to clean up, this hook is intended to be permanent.
+            new Hook(
                 typeof(GameSaver).GetMethod(nameof(GameSaver.Save), BindingFlags.Instance | BindingFlags.NonPublic),
                 Save
             );
@@ -854,6 +859,9 @@ namespace BeaverBuddies
         }
     }
 
+    // the Time.time property getter is a Unity native-code builtin.
+    // stock Harmony doesn't support patching native code & neither does MonoMod.RuntimeDetours.
+    // this uses low-level MonoMod.Core directly.
     public class TimeTimePatcher {
         private static float time = 0;
 
