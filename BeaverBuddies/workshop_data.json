@@ -1,8 +1,8 @@
 {
-  //"ItemId": "3293380223",
-  "ItemId": "3613072673", // Experimental branch
-  //"Name": "BeaverBuddies - Multiplayer Co-Op",
-  "Name": "[1.0 Beta] BeaverBuddies - Multiplayer Co-Op",
+  "ItemId": "3293380223",
+  "Name": "BeaverBuddies - Multiplayer Co-Op",
+  //"ItemId": "3613072673", // Experimental branch
+  //"Name": "[1.0 Beta] BeaverBuddies - Multiplayer Co-Op",
   "Visibility": "Public",
   "UpdateDescription": false,
   "UpdateVisibility": false,
