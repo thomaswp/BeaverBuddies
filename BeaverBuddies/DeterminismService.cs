@@ -870,22 +870,28 @@ namespace BeaverBuddies
         }
 
         public static void Install() {
-            Debug.Log(typeof(Time).GetProperty(nameof(Time.time)).GetGetMethod().GetMethodBody());
-            Debug.Log(PlatformTriple.Current.SupportedFeatures.Has(ArchitectureFeature.CreateAltEntryPoint));
-
+            // get pointers to the original & replacement methods.
             var original_method = typeof(Time).GetProperty(nameof(Time.time)).GetGetMethod();
             var original_pointer = PlatformTriple.Current.GetNativeMethodBody(original_method);
             PlatformTriple.Current.PinMethodIfNeeded(original_method);
             var replacement_pointer = Marshal.GetFunctionPointerForDelegate(GetTime);
 
-            var detour = PlatformTriple.Current.CreateSimpleDetour(
+            // we'd ideally like to use CreateNativeDetour.
+            // it's capable of generate an alternate entrypoint to access the original native method.
+            // however, native MacOS doesn't suppoert ArchitectureFeature.CreateAltEntryPoint.
+            // therefore we have to recklessly overwrite & use a hack to make do, see below.
+            var detour = PlatformTriple.Current.CreateNativeDetour(
                 original_pointer,
                 replacement_pointer
             );
+            var backup_pointer = detour.AltEntry;
         }
 
         static float GetTime() {
-            if (EventIO.IsNull) return 0;
+            // this is our hack to make do; TimberBorn doesn't use timeAsDouble.
+            // as long as that holds that means we don't need to patch it.
+            // therefore we can use it to reconstruct the now-inaccessible Time.time.
+            if (EventIO.IsNull) return (float) Time.timeAsDouble;
             return time;
         }
     }
