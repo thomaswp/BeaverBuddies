@@ -880,11 +880,11 @@ namespace BeaverBuddies
             // it's capable of generate an alternate entrypoint to access the original native method.
             // however, native MacOS doesn't suppoert ArchitectureFeature.CreateAltEntryPoint.
             // therefore we have to recklessly overwrite & use a hack to make do, see below.
-            var detour = PlatformTriple.Current.CreateNativeDetour(
+            // again no need to clean up, this hook is intended to be permanent.
+            PlatformTriple.Current.CreateNativeDetour(
                 original_pointer,
                 replacement_pointer
             );
-            var backup_pointer = detour.AltEntry;
         }
 
         static float GetTime() {
