@@ -8,10 +8,14 @@ using BeaverBuddies.DesyncDetecter;
 using BeaverBuddies.IO;
 using Bindito.Core.Internal;
 using HarmonyLib;
+using MonoMod.RuntimeDetour;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Timberborn.Analytics;
 using Timberborn.Autosaving;
@@ -688,24 +692,35 @@ namespace BeaverBuddies
             return true;
         }
     }
-
-    [HarmonyPatch(typeof(GameSaver), nameof(GameSaver.Save), typeof(QueuedSave))]
-    public class GameSaverSavePatcher
-    {
+    
+    public class GameSaverSavePatcher {
         public static bool IsSaving { get; set; }
 
-        static bool Prefix(GameSaver __instance, QueuedSave queuedSave)
-        {
-            if (IsSaving || EventIO.IsNull) return true;
+        public static void Install() {
+            Debug.Log(typeof(System.Reflection.Emit.DynamicMethod).AssemblyQualifiedName);
+
+            var hook = new Hook(
+                typeof(GameSaver).GetMethod(nameof(GameSaver.Save), BindingFlags.Instance | BindingFlags.NonPublic),
+                Save
+            );
+        }
+
+        private static void Save(GameSaver __instance, QueuedSave queuedSave) {
+            if (IsSaving || EventIO.IsNull) {
+                __instance.Save(queuedSave);
+                return;
+            }
             TickingService ts = GetSingleton<TickingService>();
-            if (ts == null) return true;
+            if (ts == null) {
+                __instance.Save(queuedSave);
+                return;
+            }
             ts.FinishFullTickAndThen(() =>
             {
                 IsSaving = true;
                 __instance.Save(queuedSave);
                 IsSaving = false;
             });
-            return false;
         }
     }
 
@@ -837,21 +852,24 @@ namespace BeaverBuddies
         }
     }
 
-    [HarmonyPatch(typeof(Time), nameof(Time.time), MethodType.Getter)]
-    public class TimeTimePatcher
-    {
+    public class TimeTimePatcher {
         private static float time = 0;
 
-        public static void SetTicksSinceLoaded(int ticks)
-        {
+        public static void SetTicksSinceLoaded(int ticks) {
             time = ticks * Time.fixedDeltaTime;
         }
 
-        static bool Prefix(ref float __result)
+        public static void Install() {
+            var hook = new Hook(
+                typeof(Time).GetProperty(nameof(Time.time)).GetGetMethod(),
+                GetTime
+            );
+        }
+
+        static float GetTime(Time __instance)
         {
-            if (EventIO.IsNull) return true;
-            __result = time;
-            return false;
+            if (EventIO.IsNull) return Time.time;
+            return time;
         }
     }
 
