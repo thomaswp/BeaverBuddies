@@ -118,9 +118,12 @@ namespace BeaverBuddies
             
             Log($"{Name} v{Version} is loaded!");
 
+            // apply all harmony patches automatically.
             Harmony harmony = new Harmony(ID);
             harmony.PatchAll();
             AutomationEvent.ApplyAutomationPatches(harmony);
+
+            // apply each advanced monomod patch manually.
             GameSaverSavePatcher.Install();
             TimeTimePatcher.Install();
 
