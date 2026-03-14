@@ -122,6 +122,7 @@ namespace BeaverBuddies
             harmony.PatchAll();
             AutomationEvent.ApplyAutomationPatches(harmony);
             GameSaverSavePatcher.Install();
+            TimeTimePatcher.Install();
 
             Log(UnityEngine.Application.consoleLogPath);
         }

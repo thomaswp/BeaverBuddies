@@ -8,6 +8,8 @@ using BeaverBuddies.DesyncDetecter;
 using BeaverBuddies.IO;
 using Bindito.Core.Internal;
 using HarmonyLib;
+using Mono.Cecil.Cil;
+using MonoMod.Core.Platforms;
 using MonoMod.RuntimeDetour;
 using System;
 using System.Collections.Generic;
@@ -890,15 +892,22 @@ namespace BeaverBuddies
         }
 
         public static void Install() {
-            var hook = new Hook(
-                typeof(Time).GetProperty(nameof(Time.time)).GetGetMethod(),
-                GetTime
+            Debug.Log(typeof(Time).GetProperty(nameof(Time.time)).GetGetMethod().GetMethodBody());
+            Debug.Log(PlatformTriple.Current.SupportedFeatures.Has(ArchitectureFeature.CreateAltEntryPoint));
+
+            var original_method = typeof(Time).GetProperty(nameof(Time.time)).GetGetMethod();
+            var original_pointer = PlatformTriple.Current.GetNativeMethodBody(original_method);
+            PlatformTriple.Current.PinMethodIfNeeded(original_method);
+            var replacement_pointer = Marshal.GetFunctionPointerForDelegate(GetTime);
+
+            var detour = PlatformTriple.Current.CreateSimpleDetour(
+                original_pointer,
+                replacement_pointer
             );
         }
 
-        static float GetTime(Time __instance)
-        {
-            if (EventIO.IsNull) return Time.time;
+        static float GetTime() {
+            if (EventIO.IsNull) return 0;
             return time;
         }
     }
