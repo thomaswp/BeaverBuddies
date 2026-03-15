@@ -700,13 +700,14 @@ namespace BeaverBuddies
     // see https://github.com/pardeike/Harmony/issues/563#issuecomment-1889259983.
     // this uses Hook from MonoMod.RuntimeDetours instead.
     public class GameSaverSavePatcher {
+        private static Hook hook;
         public static bool IsSaving { get; set; }
 
         public static void Install() {
             Debug.Log(typeof(System.Reflection.Emit.DynamicMethod).AssemblyQualifiedName);
 
-            // no need to clean up, this hook is intended to be permanent.
-            new Hook(
+            // holding a reference to the hook keeps it active.
+            hook = new Hook(
                 typeof(GameSaver).GetMethod(nameof(GameSaver.Save), BindingFlags.Instance | BindingFlags.NonPublic),
                 Save
             );
@@ -863,6 +864,7 @@ namespace BeaverBuddies
     // stock Harmony doesn't support patching native code & neither does MonoMod.RuntimeDetours.
     // this uses low-level MonoMod.Core directly.
     public class TimeTimePatcher {
+        private static SimpleNativeDetour detour;
         private static float time = 0;
 
         public static void SetTicksSinceLoaded(int ticks) {
@@ -876,19 +878,20 @@ namespace BeaverBuddies
             PlatformTriple.Current.PinMethodIfNeeded(original_method);
             var replacement_pointer = Marshal.GetFunctionPointerForDelegate(GetTime);
 
-            // we'd ideally like to use CreateNativeDetour.
+            // using CreateNativeDetour here would be ideal.
             // it's capable of generate an alternate entrypoint to access the original native method.
             // however, native MacOS doesn't suppoert ArchitectureFeature.CreateAltEntryPoint.
-            // therefore we have to recklessly overwrite & use a hack to make do, see below.
-            // again no need to clean up, this hook is intended to be permanent.
-            PlatformTriple.Current.CreateNativeDetour(
+            // using CreateSimpleDetour instead irretrievably overwrites the method.
+            // this forces using make do without the original, see below.
+            // again with the detour, holding a reference keeps it active.
+            detour = PlatformTriple.Current.CreateSimpleDetour(
                 original_pointer,
                 replacement_pointer
             );
         }
 
         static float GetTime() {
-            // this is our hack to make do; TimberBorn doesn't use timeAsDouble.
+            // this is how we make do without original; TimberBorn doesn't use timeAsDouble.
             // as long as that holds that means we don't need to patch it.
             // therefore we can use it to reconstruct the now-inaccessible Time.time.
             if (EventIO.IsNull) return (float) Time.timeAsDouble;
