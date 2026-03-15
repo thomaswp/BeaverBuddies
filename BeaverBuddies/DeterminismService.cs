@@ -743,20 +743,20 @@ namespace BeaverBuddies
             );
         }
 
-        private static void Save(GameSaver __instance, QueuedSave queuedSave) {
+        private static void Save(Action<GameSaver, QueuedSave> original, GameSaver instance, QueuedSave queuedSave) {
             if (IsSaving || EventIO.IsNull) {
-                __instance.Save(queuedSave);
+                original(instance, queuedSave);
                 return;
             }
             TickingService ts = GetSingleton<TickingService>();
             if (ts == null) {
-                __instance.Save(queuedSave);
+                original(instance, queuedSave);
                 return;
             }
             ts.FinishFullTickAndThen(() =>
             {
                 IsSaving = true;
-                __instance.Save(queuedSave);
+                original(instance, queuedSave);
                 IsSaving = false;
             });
         }
