@@ -223,12 +223,6 @@ namespace BeaverBuddies
             _tickingService.replayService = this;
         }
 
-        public void SetTicksSinceLoad(int ticks)
-        {
-            Plugin.Log($"Setting ticks since load to: {ticks}");
-            ticksSinceLoad = ticks;
-        }
-
         public void PostLoad()
         {
             Plugin.Log("PostLoad");
@@ -563,18 +557,6 @@ namespace BeaverBuddies
                 ((ServerEventIO)io).StopAcceptingClients();
             }
         }
-
-        public void FinishFullTickIfNeededAndThen(Action action)
-        {
-            // If we're paused, we should be at the end of a tick anyway
-            if (_speedManager.CurrentSpeed == 0)
-            {
-                action();
-                return;
-            }
-            // If we're not paused, we need to wait until the end of the tick
-            _tickingService.FinishFullTickAndThen(action);
-        }
     }
 
     [HarmonyPatch(typeof(TickableSingletonService), nameof(TickableSingletonService.Load))]
@@ -614,11 +596,6 @@ namespace BeaverBuddies
 
         // Should be ok non-concurrent - for now only main thread call this
         private List<Action> onCompletedFullTick = new List<Action>();
-
-        public void FinishFullTick()
-        {
-            ShouldCompleteFullTick = true;
-        }
 
         public void FinishFullTickAndThen(Action value)
         {

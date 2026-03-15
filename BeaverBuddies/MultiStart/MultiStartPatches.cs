@@ -235,31 +235,6 @@ namespace BeaverBuddies.MultiStart
             var metadata = GetSingleton<MultiplayerMapMetadataService>().TryGetMultiplayerMapMetadata(mapRef.Value);
 			return metadata;
         }
-
-        // This doesn't seem to work; update too late; too buggy to use
-        // And isn't doing anything that important anyway...
-        public static void MapOrDifficultyChanged(NewGameModePanel __instance)
-        {
-			var metadata = GetMetadata(__instance);
-
-            string playersFieldName = CustomNewGameModeControllerInitializePatcher.playersFieldName;
-            var playersField = __instance._root.Q<IntegerField>(playersFieldName);
-
-            if (playersField == null) return;
-
-            // Show/hide the field depending on if we have multiplayer metadata
-			// Seems this has a delay to it
-            playersField.parent.style.display = metadata == null ? DisplayStyle.None : DisplayStyle.Flex;
-
-            if (metadata == null) return;
-
-            Plugin.Log($"Map max players: {metadata.MaxPlayers}");
-			int currentValue = CustomNewGameModeController.GetInt(playersField);
-			if (currentValue > metadata.MaxPlayers)
-			{
-				playersField.value = metadata.MaxPlayers;
-			}
-        }
     }
 
     [HarmonyPatch(typeof(NewGameModePanel), nameof(NewGameModePanel.SelectModeButton))]
