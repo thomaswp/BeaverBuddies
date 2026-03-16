@@ -19,12 +19,13 @@ We appreciate your help! To get started working on BeaverBuddies, see [the guide
 ## How to Build BeaverBuddies
 
 1. Clone this repo `git clone git@github.com:thomaswp/BeaverBuddies`.
-2. Set up DotNet C#.
-   For Windows, download & install [Visual Studio community edition](https://visualstudio.microsoft.com/vs/community).
+2. Set up DotNet C#.  
+   For Windows, download & install [Visual Studio community edition](https://visualstudio.microsoft.com/vs/community).  
    For Mac, either run `brew install dotnet` or download & install [DotNet SDK](https://dotnet.microsoft.com/en-us/download).
-3. Build the project.
-   For Visual Studio, open the solution & hit Ctrl+Shift+B. For DotNet SDK, go to the BeaverBuddies directory & run `dotnet build`.
-   You may get a "directory not found" error. To fix this, open `BeaverBuddies/BeaverBuddies/env.props` and adjust the environmental variables to point to your Timberborn installation & the necessary mods.
+3. Build the project.  
+   For Visual Studio, open the solution & hit Ctrl+Shift+B.  
+   For DotNet SDK, go to the BeaverBuddies directory & run `dotnet build`.  
+   You may get a few "directory not found" errors. To fix these, open `BeaverBuddies/BeaverBuddies/env.props` and adjust the environmental variables there to point to your Timberborn installation & the necessary mods.
 
 Building on Linux is similar to on Mac.
 
@@ -32,5 +33,5 @@ Building on Linux is similar to on Mac.
 
 1. Make sure your project has been built with no errors.
 2. Confirm that the mod files were copied to your Timberborn mods folder (e.g. `Documents/Timberborn/Mods/BeaverBuddies`.
-3. Launch Timberborn and select the BeaverBuddies mod on the mod selection screen.
-   There may be multiple BeaverBuddies mod entries. The one with a "folder" icon next to it is the local build, select it.
+3. Launch Timberborn and select the BeaverBuddies mod on the mod selection screen.  
+   There may be multiple BeaverBuddies mod entries. The one with a "folder" icon next to it is your local build, select it.
