@@ -1,12 +1,8 @@
 ﻿using BeaverBuddies.IO;
-using HarmonyLib;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Timberborn.Options;
 using Timberborn.OptionsGame;
 using Timberborn.TimeSystem;
-using static BeaverBuddies.SingletonManager;
 
 namespace BeaverBuddies.Events
 {

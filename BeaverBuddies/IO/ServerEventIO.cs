@@ -4,9 +4,6 @@ using TimberNet;
 using System.Threading.Tasks;
 using BeaverBuddies.Events;
 using BeaverBuddies.Steam;
-using System.Net.Sockets;
-using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace BeaverBuddies.IO

@@ -1,20 +1,11 @@
-﻿using HarmonyLib;
-using JetBrains.Annotations;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
-using System.Text;
 using Timberborn.BaseComponentSystem;
-using Timberborn.BlockObjectModelSystem;
 using Timberborn.BlockObjectTools;
-using Timberborn.BlockObjectToolsUI;
 using Timberborn.BlockSystem;
 using Timberborn.BlueprintSystem;
 using Timberborn.BottomBarSystem;
-using Timberborn.Common;
-using Timberborn.ConstructionMode;
-using Timberborn.DuplicationSystem;
 using Timberborn.DuplicationSystemUI;
 using Timberborn.EntitySystem;
 using Timberborn.MapEditorUI;
@@ -23,9 +14,7 @@ using Timberborn.MapMetadataSystemUI;
 using Timberborn.MapThumbnailCapturing;
 using Timberborn.SerializationSystem;
 using Timberborn.StartingLocationSystem;
-using Timberborn.TemplateSystem;
 using Timberborn.ToolButtonSystem;
-using Timberborn.ToolSystem;
 using UnityEngine;
 
 namespace BeaverBuddies.Editor

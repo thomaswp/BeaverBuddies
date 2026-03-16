@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BeaverBuddies.Util
+﻿namespace BeaverBuddies.Util
 {
     public static class LinkHelper
     {

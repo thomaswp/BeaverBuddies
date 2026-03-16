@@ -1,10 +1,5 @@
 ﻿using BeaverBuddies.MultiStart;
 using Bindito.Core;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Timberborn.StartingLocationSystem;
-using Timberborn.TemplateSystem;
 
 namespace BeaverBuddies.Editor
 {

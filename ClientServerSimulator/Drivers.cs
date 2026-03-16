@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-
-namespace TimberNet
+﻿namespace TimberNet
 {
     public delegate void TargetSpeedChanged(int speed);
 

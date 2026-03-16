@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BeaverBuddies.Steam
+﻿namespace BeaverBuddies.Steam
 {
     public interface ISteamPacketReceiver
     {

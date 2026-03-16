@@ -1,7 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.IO;
-using Timberborn.Modding;
+﻿using System;
 
 namespace BeaverBuddies
 {

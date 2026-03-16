@@ -1,30 +1,24 @@
 ﻿using BeaverBuddies.Editor;
 using BeaverBuddies.Util;
-using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Timberborn.BaseComponentSystem;
 using Timberborn.BlockSystem;
 using Timberborn.Buildings;
-using Timberborn.EntitySystem;
 using Timberborn.GameSceneLoading;
 using Timberborn.GameStartup;
 using Timberborn.MainMenuPanels;
 using Timberborn.NewGameConfigurationSystem;
-using Timberborn.SceneLoading;
 using Timberborn.SelectionSystem;
 using Timberborn.StartingLocationSystem;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 using UnityEngine.UIElements;
 using static BeaverBuddies.SingletonManager;
 using static Timberborn.GameStartup.GameInitializer;
 
 namespace BeaverBuddies.MultiStart
 {
-	[ManualMethodOverwrite]
+    [ManualMethodOverwrite]
     /*
      * 4/19/2025
         if (_startingLocationService.HasStartingLocation())

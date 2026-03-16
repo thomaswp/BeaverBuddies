@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Text;
-using Timberborn.MapMetadataSystem;
+﻿using Timberborn.MapMetadataSystem;
 using Timberborn.MapRepositorySystem;
 
 namespace BeaverBuddies.Editor
