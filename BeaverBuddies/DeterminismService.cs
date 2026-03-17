@@ -8,10 +8,16 @@ using BeaverBuddies.DesyncDetecter;
 using BeaverBuddies.IO;
 using Bindito.Core.Internal;
 using HarmonyLib;
+using Mono.Cecil.Cil;
+using MonoMod.Core.Platforms;
+using MonoMod.RuntimeDetour;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Timberborn.Analytics;
 using Timberborn.Autosaving;
@@ -688,24 +694,41 @@ namespace BeaverBuddies
             return true;
         }
     }
-
-    [HarmonyPatch(typeof(GameSaver), nameof(GameSaver.Save), typeof(QueuedSave))]
-    public class GameSaverSavePatcher
-    {
+    
+    // the original GameSaver.Save includes a try-catch-when block.
+    // stock Harmony doesn't support patching methods with such a block.
+    // see https://github.com/pardeike/Harmony/issues/563#issuecomment-1889259983.
+    // this uses Hook from MonoMod.RuntimeDetours instead.
+    public class GameSaverSavePatcher {
+        private static Hook hook;
         public static bool IsSaving { get; set; }
 
-        static bool Prefix(GameSaver __instance, QueuedSave queuedSave)
-        {
-            if (IsSaving || EventIO.IsNull) return true;
+        public static void Install() {
+            Debug.Log(typeof(System.Reflection.Emit.DynamicMethod).AssemblyQualifiedName);
+
+            // holding a reference to the hook keeps it active.
+            hook = new Hook(
+                typeof(GameSaver).GetMethod(nameof(GameSaver.Save), BindingFlags.Instance | BindingFlags.NonPublic),
+                Save
+            );
+        }
+
+        private static void Save(Action<GameSaver, QueuedSave> original, GameSaver instance, QueuedSave queuedSave) {
+            if (IsSaving || EventIO.IsNull) {
+                original(instance, queuedSave);
+                return;
+            }
             TickingService ts = GetSingleton<TickingService>();
-            if (ts == null) return true;
+            if (ts == null) {
+                original(instance, queuedSave);
+                return;
+            }
             ts.FinishFullTickAndThen(() =>
             {
                 IsSaving = true;
-                __instance.Save(queuedSave);
+                original(instance, queuedSave);
                 IsSaving = false;
             });
-            return false;
         }
     }
 
@@ -837,21 +860,42 @@ namespace BeaverBuddies
         }
     }
 
-    [HarmonyPatch(typeof(Time), nameof(Time.time), MethodType.Getter)]
-    public class TimeTimePatcher
-    {
+    // the Time.time property getter is a Unity native-code builtin.
+    // stock Harmony doesn't support patching native code & neither does MonoMod.RuntimeDetours.
+    // this uses low-level MonoMod.Core directly.
+    public class TimeTimePatcher {
+        private static SimpleNativeDetour detour;
         private static float time = 0;
 
-        public static void SetTicksSinceLoaded(int ticks)
-        {
+        public static void SetTicksSinceLoaded(int ticks) {
             time = ticks * Time.fixedDeltaTime;
         }
 
-        static bool Prefix(ref float __result)
-        {
-            if (EventIO.IsNull) return true;
-            __result = time;
-            return false;
+        public static void Install() {
+            // get pointers to the original & replacement methods.
+            var original_method = typeof(Time).GetProperty(nameof(Time.time)).GetGetMethod();
+            var original_pointer = PlatformTriple.Current.GetNativeMethodBody(original_method);
+            PlatformTriple.Current.PinMethodIfNeeded(original_method);
+            var replacement_pointer = Marshal.GetFunctionPointerForDelegate(GetTime);
+
+            // using CreateNativeDetour here would be ideal.
+            // it's capable of generate an alternate entrypoint to access the original native method.
+            // however, native MacOS doesn't suppoert ArchitectureFeature.CreateAltEntryPoint.
+            // using CreateSimpleDetour instead irretrievably overwrites the method.
+            // this forces using make do without the original, see below.
+            // again with the detour, holding a reference keeps it active.
+            detour = PlatformTriple.Current.CreateSimpleDetour(
+                original_pointer,
+                replacement_pointer
+            );
+        }
+
+        static float GetTime() {
+            // this is how we make do without original; TimberBorn doesn't use timeAsDouble.
+            // as long as that holds that means we don't need to patch it.
+            // therefore we can use it to reconstruct the now-inaccessible Time.time.
+            if (EventIO.IsNull) return (float) Time.timeAsDouble;
+            return time;
         }
     }
 
