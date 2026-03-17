@@ -1,6 +1,3 @@
-using HarmonyLib;
-using System;
-using System.Reflection;
 using Timberborn.TickSystem;
 
 namespace BeaverBuddies.Fixes

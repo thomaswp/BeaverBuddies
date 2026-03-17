@@ -1,23 +1,12 @@
-﻿using BeaverBuddies.Connect;
-using BeaverBuddies.DesyncDetecter;
-using BeaverBuddies.IO;
+﻿using BeaverBuddies.IO;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Timberborn.Autosaving;
-using Timberborn.GameSaveRepositorySystem;
-using Timberborn.GameSaveRuntimeSystem;
-using Timberborn.SettlementNameSystem;
 using TimberNet;
-using UnityEngine.Bindings;
 
 namespace BeaverBuddies.Reporting
 {

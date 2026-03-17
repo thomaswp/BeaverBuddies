@@ -1,10 +1,6 @@
-﻿using HarmonyLib;
-using System;
-using System.IO;
-using Timberborn.CameraSystem;
+﻿using System;
 using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.GameScene;
-using TimberNet;
 
 namespace BeaverBuddies
 {

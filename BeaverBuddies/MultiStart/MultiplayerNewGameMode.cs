@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Timberborn.Common;
-using Timberborn.GameSceneLoading;
-using Timberborn.NewGameConfigurationSystem;
+﻿using Timberborn.NewGameConfigurationSystem;
 
 namespace BeaverBuddies.MultiStart
 {

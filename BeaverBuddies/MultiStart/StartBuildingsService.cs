@@ -1,7 +1,5 @@
 ﻿using BeaverBuddies.Editor;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using Timberborn.Buildings;
 using Timberborn.GameSceneLoading;
 using Timberborn.NewGameConfigurationSystem;

@@ -1,7 +1,5 @@
 ﻿using Timberborn.BaseComponentSystem;
-using Timberborn.BlockSystem;
 using Timberborn.BlueprintSystem;
-using Timberborn.Coordinates;
 using Timberborn.EntitySystem;
 using Timberborn.Persistence;
 using Timberborn.StartingLocationSystem;

@@ -4,7 +4,6 @@ using BeaverBuddies.Util;
 using Steamworks;
 using System;
 using System.IO;
-using System.Net.Sockets;
 using System.Net;
 using Timberborn.CoreUI;
 using Timberborn.GameSaveRepositorySystem;
@@ -14,7 +13,6 @@ using Timberborn.SingletonSystem;
 using Timberborn.WebNavigation;
 using TimberNet;
 using System.Linq;
-using Timberborn.SettlementNameSystem;
 
 namespace BeaverBuddies.Connect
 {

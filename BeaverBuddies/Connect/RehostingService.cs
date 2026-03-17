@@ -1,24 +1,11 @@
 ﻿using BeaverBuddies.Util;
-using HarmonyLib;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Text;
 using Timberborn.Autosaving;
 using Timberborn.CoreUI;
 using Timberborn.GameSaveRepositorySystem;
 using Timberborn.GameSaveRepositorySystemUI;
 using Timberborn.GameSaveRuntimeSystem;
-using Timberborn.GameSaveRuntimeSystemUI;
-using Timberborn.InputSystem;
-using Timberborn.SaveSystem;
-using Timberborn.SceneLoading;
 using Timberborn.SettlementNameSystem;
-using Timberborn.SingletonSystem;
-using Timberborn.TickSystem;
-using static Timberborn.GameSaveRuntimeSystem.GameSaver;
 
 namespace BeaverBuddies.Connect
 {
