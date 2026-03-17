@@ -30,6 +30,7 @@
     <!-- Include HarmonyX file inside $(BeaverBuddiesModsPath) -->
     <includeHarmonyX>true</includeHarmonyX>
     <NuGetPackagesDir>$(UserProfile)\.nuget\packages\</NuGetPackagesDir>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
 
   <Target Name="CheckEnv" BeforeTargets="BeforeBuild">
