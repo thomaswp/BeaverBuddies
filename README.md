@@ -27,3 +27,4 @@ Enabled = true # Change this to true
 1. Make sure your project has been built with no errors. 
 2. Confirm that the mod files were copied to your Timberborn mods folder (e.g. `Documets/Timberborn/Mods/BeaverBuddies`
 3. Launch Timberborn and select the BeaverBuddies mod on the mod selection screen.
+
