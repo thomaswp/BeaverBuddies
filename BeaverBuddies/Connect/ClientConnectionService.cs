@@ -96,7 +96,7 @@ namespace BeaverBuddies.Connect
             {
                 ShowError("BeaverBuddies.JoinCoopGame.Error.CouldNotConnect", error);
             });
-            
+
             if (client == null)
             {
                 Plugin.Log("Client creation failed.");
