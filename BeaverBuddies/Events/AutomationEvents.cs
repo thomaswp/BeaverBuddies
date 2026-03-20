@@ -9,10 +9,33 @@ using System.Text;
 using Timberborn.Automation;
 using Timberborn.AutomationBuildings;
 using Timberborn.BaseComponentSystem;
+using Timberborn.EntitySystem;
 using Timberborn.TickSystem;
 
 namespace BeaverBuddies.Events
 {
+
+    // It would be lovely to have this in a dict-like lookup, but unfortunately
+    // since we can only get the type at runtime, generics won't work. So I could do
+    // casting here or I could just have a big if/else.
+    // Right now, the if/else is easier, but if it becomes cumbersome, I can easily make this
+    // into non-static methods and use an interface.
+    class ComponentSerializer
+    {
+        // This doesn't actually work because it's generic!
+        public static bool TryDeserialize<T>(string data, IReplayContext context, out T result) where T: BaseComponent
+        {
+            result = ReplayEvent.GetComponent<T>(context, data);
+            return result != null;
+        }
+
+        public static bool TrySerialize(BaseComponent obj, out string result)
+        {
+            result = ReplayEvent.GetEntityID(obj);
+            return result != null;
+        }
+    }
+
     public class AutomationEvent : ReplayEvent
     {
         public string entityID;
@@ -35,7 +58,8 @@ namespace BeaverBuddies.Events
                 Plugin.LogError($"Argument count mismatch for {methodKey}. Expected {methodInfo.GetParameters().Length}, got {arguments.Length}. Cannot replay this event.");
                 return;
             }
-            object componentObj = GetComponentForType(methodInfo.DeclaringType, context);
+            object componentObj = GetComponentForType(methodInfo.DeclaringType, entityID, context);
+            Deserialize(arguments, context, methodInfo);
             methodInfo.Invoke(componentObj, arguments);
         }
 
@@ -50,16 +74,17 @@ namespace BeaverBuddies.Events
             return false;
         }
 
-        private object GetComponentForType(Type type, IReplayContext context)
+        private static object GetComponentForType(Type type, string entityID, IReplayContext context)
         {
-            var methodInfo = typeof(AutomationEvent).GetMethod(nameof(GetComponent),
-                BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            // TODO: For some reason this is failing...
+            var methodInfo = typeof(ReplayEvent).GetMethod(nameof(GetComponent),
+                BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
             if (methodInfo == null || methodInfo.GetParameters().Length != 2)
             {
                 throw new Exception($"GetComponent method not found or has incorrect parameters: {methodInfo?.GetParameters().Length}.");                
             }
             var genericMethod = methodInfo.MakeGenericMethod(type);
-            return genericMethod.Invoke(this, new object[] { context, entityID });
+            return genericMethod.Invoke(null, new object[] { context, entityID });
         }
 
         // TODO: Test building duplication (e.g. Indicator)
@@ -165,10 +190,61 @@ namespace BeaverBuddies.Events
             return DoPrefix(__instance, key, __args);
         }
 
+        private static void Serialize(object[] arguments)
+        {
+            for (int i = 0; i < arguments.Length; i++)
+            {
+                var arg = arguments[i];
+                if (arg == null)
+                    continue;
+                if (arg is BaseComponent)
+                {
+                    if (ComponentSerializer.TrySerialize((BaseComponent)arg, out var serialized))
+                    {
+                        arguments[i] = serialized;
+                    }
+                    else
+                    {
+                        Plugin.LogWarning($"Failed to serialize argument of type {arg.GetType().Name} with value {arg}. This may cause issues during replay.");
+                    }
+                }
+            }
+        }
+
+        private void Deserialize(object[] arguments, IReplayContext context, MethodInfo methodInfo)
+        {
+            for (int i = 0; i < arguments.Length; i++)
+            {
+                var arg = arguments[i];
+                if (arg == null)
+                    continue;
+                if (i >= methodInfo.GetParameters().Length)
+                {
+                    Plugin.LogError($"Argument index {i} is out of range for method {methodInfo.Name}. Cannot deserialize this argument.");
+                    continue;
+                }
+                Type argType = methodInfo.GetParameters()[i].ParameterType;
+
+                if (typeof(BaseComponent).IsAssignableFrom(argType) && arg is string)
+                {
+                    var result = GetComponentForType(argType, (string)arg, context);
+                    if (result != null)
+                    {
+                        arguments[i] = result;
+                    }
+                    else
+                    {
+                        Plugin.LogWarning($"Failed to get component of type {argType.Name} with ID {(string)arg}. This may cause issues during replay.");
+                    }
+                }
+            }
+        }
+
         private static bool DoPrefix(BaseComponent entity, string methodKey, object[] arguments)
         {
             return DoEntityPrefix(entity, entityID =>
             {
+                Serialize(arguments);
                 return new AutomationEvent
                 {
                     entityID = entityID,

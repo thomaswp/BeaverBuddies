@@ -45,7 +45,7 @@ namespace BeaverBuddies.Events
             return $"Doing: {type}";
         }
 
-        protected EntityComponent GetEntityComponent(IReplayContext context, string entityID)
+        public static EntityComponent GetEntityComponent(IReplayContext context, string entityID)
         {
             if (!Guid.TryParse(entityID, out Guid guid))
             {
@@ -60,7 +60,7 @@ namespace BeaverBuddies.Events
             return entity;
         }
 
-        protected T GetComponent<T>(IReplayContext context, string entityID)
+        public static T GetComponent<T>(IReplayContext context, string entityID)
         {
             var entity = GetEntityComponent(context, entityID);
             if (entity == null) return default;
