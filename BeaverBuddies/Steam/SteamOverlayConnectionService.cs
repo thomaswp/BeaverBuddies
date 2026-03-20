@@ -11,6 +11,10 @@ using System.Collections.Generic;
 using System.Text;
 using Timberborn.SingletonSystem;
 using UnityEngine;
+using Timberborn.SteamOverlaySystem;
+using Timberborn.CoreUI;
+using JetBrains.Annotations;
+using UnityEngine.UIElements;
 
 namespace BeaverBuddies.Steam
 {
@@ -21,16 +25,27 @@ namespace BeaverBuddies.Steam
 #if IS_STEAM
         private SteamManager _steamManager;
         private ClientConnectionService _clientConnectionService;
+        private PanelStack _panelStack;
+        private SteamOverlayInputBlocker _inputBlocker;
+        private EventBus _eventBus;
+
+        private bool? _lastSuccess = null;
 
         private static List<IDisposable> callbacks = new List<IDisposable>();
 
         public SteamOverlayConnectionService(
             SteamManager steamManager,
-            ClientConnectionService clientConnectionService
+            ClientConnectionService clientConnectionService,
+            SteamOverlayInputBlocker steamOverlayInputBlocker,
+            PanelStack panelStack,
+            EventBus eventBus
             )
         {
             _steamManager = steamManager;
             _clientConnectionService = clientConnectionService;
+            _panelStack = panelStack;
+            _inputBlocker = steamOverlayInputBlocker;
+            _eventBus = eventBus;
         }
 
         bool done = false;
@@ -104,14 +119,48 @@ namespace BeaverBuddies.Steam
             SteamNetworking.AcceptP2PSessionWithUser(clientId);
         }
 
+        // This should only be called if the SteamOverlayInputBlocker is on top,
+        // so we can assume it was the panel that was just removed.
+        // If the game starts, it clears the stack silently, so this isn't shown
+        // (also this Singleton is disposed when the current scene ends).
+        [OnEvent]
+        public void OnPanelHidden(PanelHiddenEvent panelHiddenEvent)
+        {
+            if (!_lastSuccess.HasValue) return;
+            _clientConnectionService.ShowConnectionMessage(_lastSuccess.Value);
+            ClearWaitForSteamOverlay();
+        }
+
+        private void WaitForSteamOverlayToClose(bool success)
+        {
+            _lastSuccess = success;
+            _eventBus.Register(this);
+        }
+
+        private void ClearWaitForSteamOverlay()
+        {
+            _lastSuccess = null;
+            _eventBus.Unregister(this);
+
+        }
+
+
         private void OnLobbyEntered(LobbyEnter_t callback)
         {
+            ClearWaitForSteamOverlay();
             var owner = SteamMatchmaking.GetLobbyOwner(new CSteamID(callback.m_ulSteamIDLobby));
             if (owner != SteamUser.GetSteamID())
             {
                 Plugin.Log("Joining another's lobby...");
                 bool success = _clientConnectionService.TryToConnect(owner);
-                _clientConnectionService.ShowConnectionMessage(success);
+                if (_panelStack.IsPanelOnTop(_inputBlocker))
+                {
+                    WaitForSteamOverlayToClose(success);
+                }
+                else
+                {
+                    _clientConnectionService.ShowConnectionMessage(success);
+                }
             }
         }
 #else
