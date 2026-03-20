@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using BeaverBuddies.IO;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,6 +9,7 @@ using System.Text;
 using Timberborn.Automation;
 using Timberborn.AutomationBuildings;
 using Timberborn.BaseComponentSystem;
+using Timberborn.TickSystem;
 
 namespace BeaverBuddies.Events
 {
@@ -60,13 +62,14 @@ namespace BeaverBuddies.Events
             return genericMethod.Invoke(this, new object[] { context, entityID });
         }
 
+        // TODO: Test building duplication (e.g. Indicator)
         public static void PatchAll(Harmony harmony)
         {
             // Important: We can only override methods like this if they:
             // 1) Are only ever called from the UI (not from step logic)
             // 2) Are in a BaseComponent (so we can get the EntityID)
-            (Type, string)[] methodsToPatchInfo = new (Type, string)[]
-            {
+            (Type, string)[] methodsToPatchInfo =
+            [
                 (typeof(Chronometer), nameof(Chronometer.SetStartTime)),
                 (typeof(Chronometer), nameof(Chronometer.SetEndTime)),
                 (typeof(Chronometer), nameof(Chronometer.SetMode)),
@@ -81,7 +84,53 @@ namespace BeaverBuddies.Events
                 (typeof(Indicator), nameof(Indicator.SetJournalEntryEnabled)),
                 (typeof(Indicator), nameof(Indicator.SetPinnedMode)),
                 (typeof(Indicator), nameof(Indicator.SetWarningEnabled)),
-            };
+                // Note: Lever calls these methods during load, but this should be
+                // ok because we don't record events until the game has started
+                (typeof(Lever), nameof(Lever.SetPinned)),
+                (typeof(Lever), nameof(Lever.SetSpringReturn)),
+                // Note: This won't be a great UX, since we really have to make
+                // this an event, which will make the UI laggy, but I think that's
+                // unavoidable.
+                (typeof(Lever), nameof(Lever.SwitchState)),
+                (typeof(Memory), nameof(Memory.SetMode)),
+                (typeof(Memory), nameof(Memory.SetInputA)),
+                (typeof(Memory), nameof(Memory.SetInputB)),
+                (typeof(Memory), nameof(Memory.SetResetInput)),
+                (typeof(PopulationCounter), nameof(PopulationCounter.SetComparisonMode)),
+                (typeof(PopulationCounter), nameof(PopulationCounter.SetCountBeavers)),
+                (typeof(PopulationCounter), nameof(PopulationCounter.SetCountBots)),
+                (typeof(PopulationCounter), nameof(PopulationCounter.SetGlobalMode)),
+                (typeof(PopulationCounter), nameof(PopulationCounter.SetMode)),
+                (typeof(PopulationCounter), nameof(PopulationCounter.SetThreshold)),
+                (typeof(PowerMeter), nameof(PowerMeter.SetComparisonMode)),
+                (typeof(PowerMeter), nameof(PowerMeter.SetIntThreshold)),
+                (typeof(PowerMeter), nameof(PowerMeter.SetMode)),
+                (typeof(PowerMeter), nameof(PowerMeter.SetPercentThreshold)),
+                (typeof(Relay), nameof(Relay.SetInputA)),
+                (typeof(Relay), nameof(Relay.SetInputB)),
+                (typeof(Relay), nameof(Relay.SetMode)),
+                (typeof(ResourceCounter), nameof(ResourceCounter.SetComparisonMode)),
+                (typeof(ResourceCounter), nameof(ResourceCounter.SetFillRateThreshold)),
+                (typeof(ResourceCounter), nameof(ResourceCounter.SetGoodId)),
+                (typeof(ResourceCounter), nameof(ResourceCounter.SetIncludeInputs)),
+                (typeof(ResourceCounter), nameof(ResourceCounter.SetMode)),
+                (typeof(ResourceCounter), nameof(ResourceCounter.SetThreshold)),
+                (typeof(ScienceCounter), nameof(ScienceCounter.SetMode)),
+                (typeof(ScienceCounter), nameof(ScienceCounter.SetThreshold)),
+                (typeof(Speaker), nameof(Speaker.SetPlaybackMode)),
+                (typeof(Speaker), nameof(Speaker.SetSoundId)),
+                (typeof(Speaker), nameof(Speaker.SetSpatialMode)),
+                // Note: Timer calls these methods during load (see above)
+                (typeof(Timer), nameof(Timer.SetInput)),
+                (typeof(Timer), nameof(Timer.SetMode)),
+                (typeof(Timer), nameof(Timer.SetResetInput)),
+                (typeof(WeatherStation), nameof(WeatherStation.SetEarlyActivationEnabled)),
+                (typeof(WeatherStation), nameof(WeatherStation.SetEarlyActivationHours)),
+                (typeof(WeatherStation), nameof(WeatherStation.SetMode)),
+                // Note: this intentionally omits the HTTPApi system because, well, that
+                // doesn't really make sense in multiplayer... at the very least it'd be
+                // a larger project.
+            ];
             var methodsToPatch = methodsToPatchInfo.Select(
                 info => info.Item1.GetMethod(
                     info.Item2, 
@@ -127,6 +176,28 @@ namespace BeaverBuddies.Events
                     arguments = arguments
                 };
             });
+        }
+
+        /*
+         * TODO: Implement manually:
+         * Lever:
+         *  SetSpringReturn
+         *  SetPinned
+         *  SwitchState
+         */
+    }
+
+    [HarmonyPatch(typeof(Lever), nameof(Lever.Load))]
+    static class LeverLoadPatch
+    {
+        static void Prefix()
+        {
+            
+        }
+
+        static void Postfix()
+        {
+
         }
     }
 }
