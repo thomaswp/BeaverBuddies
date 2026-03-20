@@ -121,8 +121,8 @@ namespace BeaverBuddies.Steam
 
         // This should only be called if the SteamOverlayInputBlocker is on top,
         // so we can assume it was the panel that was just removed.
-        // TODO: Check if this gets called if the game starts loading and clears the stack...
-        // If so, we need to check for that here before showing the pop-up
+        // If the game starts, it clears the stack silently, so this isn't shown
+        // (also this Singleton is disposed when the current scene ends).
         [OnEvent]
         public void OnPanelHidden(PanelHiddenEvent panelHiddenEvent)
         {
