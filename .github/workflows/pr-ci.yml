@@ -40,16 +40,7 @@ jobs:
         </Project>
         XML
         mkdir ../Output
-      shell: bash
-
-    - name: Pre-build logging
-      run: |
-        set -v
-        ls .
-        ls ./BeaverBuddies
         cat ./BeaverBuddies/env.props
-        ls ..
-        ls ../TimberbornData
       shell: bash
 
     - name: Build
