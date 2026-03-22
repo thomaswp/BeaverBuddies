@@ -236,6 +236,11 @@ namespace BeaverBuddies.Events
                 {
                     arguments[i] = GetComponentForType(argType, (string)arg, context);
                 }
+
+                if (argType.IsEnum && arg is int)
+                {
+                    arguments[i] = Enum.ToObject(argType, arg);
+                }
             }
             return arguments;
         }
