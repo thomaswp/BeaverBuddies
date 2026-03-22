@@ -241,6 +241,17 @@ namespace BeaverBuddies.Events
                 {
                     arguments[i] = Enum.ToObject(argType, arg);
                 }
+
+                // JSON uses doubles only, so downcase to float
+                if (argType == typeof(float) && arg is double)
+                {
+                    arguments[i] = (float)(double)arg;
+                }
+
+                if (argType == typeof(int) && arg is long)
+                {
+                    arguments[i] = (int)(long)arg;
+                }
             }
             return arguments;
         }
