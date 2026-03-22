@@ -1,0 +1,48 @@
+name: PR CI
+
+on:
+  pull_request: {}
+
+jobs:
+  build:
+    runs-on: windows-2025
+
+    steps:
+    - name: Checkout branch
+      uses: actions/checkout@v6
+
+    - name: Pull dependencies
+      env:
+        DEPLOY_KEY: ${{ secrets.TIMBERBORN_DATA_KEY }}
+      run: |
+        set -e
+        mkdir -p ~/.ssh
+        echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/deploy_key
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
+        chmod 644 ~/.ssh/known_hosts
+        eval "$(ssh-agent -s)"
+        ssh-add ~/.ssh/deploy_key
+        git clone --depth 1 git@github.com:robinplace/TimberbornData.git ../TimberbornData
+      shell: bash
+
+    - name: Set up env
+      run: |
+        set -v
+        cat > ./BeaverBuddies/env.props <<XML
+        <Project>
+          <PropertyGroup>
+            <TimberbornDataPath>$(cygpath -w "$(PWD)/../TimberbornData/")</TimberbornDataPath>
+            <DocumentsPath>$(cygpath -w "$(PWD)/../Output/")</DocumentsPath>
+            <HarmonyPath>$(cygpath -w "$(PWD)/../TimberbornData/Mods/Harmony_2.4.1/")</HarmonyPath>
+            <ModSettingsPath>$(cygpath -w "$(PWD)/../TimberbornData/Mods/modsettings-ey0f/version-1.0/Scripts/")</ModSettingsPath>
+          </PropertyGroup>
+        </Project>
+        XML
+        mkdir ../Output
+        cat ./BeaverBuddies/env.props
+      shell: bash
+
+    - name: Build
+      run: dotnet build
+      shell: bash
