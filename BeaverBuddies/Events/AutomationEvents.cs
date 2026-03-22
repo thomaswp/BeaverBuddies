@@ -9,27 +9,6 @@ using Timberborn.BaseComponentSystem;
 namespace BeaverBuddies.Events
 {
 
-    // It would be lovely to have this in a dict-like lookup, but unfortunately
-    // since we can only get the type at runtime, generics won't work. So I could do
-    // casting here or I could just have a big if/else.
-    // Right now, the if/else is easier, but if it becomes cumbersome, I can easily make this
-    // into non-static methods and use an interface.
-    class ComponentSerializer
-    {
-        // This doesn't actually work because it's generic!
-        public static bool TryDeserialize<T>(string data, IReplayContext context, out T result) where T: BaseComponent
-        {
-            result = ReplayEvent.GetComponent<T>(context, data);
-            return result != null;
-        }
-
-        public static bool TrySerialize(BaseComponent obj, out string result)
-        {
-            result = ReplayEvent.GetEntityID(obj);
-            return result != null;
-        }
-    }
-
     public class AutomationEvent : ReplayEvent
     {
         public string entityID;
@@ -200,6 +179,11 @@ namespace BeaverBuddies.Events
             return DoPrefix(__instance, key, __args);
         }
 
+        // It would be lovely to have this in a dict-like lookup, but unfortunately
+        // since we can only get the type at runtime, generics won't work. So I could do
+        // make everything take and return an object, but that's a pain, so I'll just do an if/else.
+        // Right now, the if/else is easier, but if it becomes cumbersome, I can easily make this
+        // into non-static methods and use an interface.
         private static object[] Serialize(object[] arguments)
         {
             object[] argsCopy = new object[arguments.Length];
@@ -212,11 +196,8 @@ namespace BeaverBuddies.Events
                     continue;
                 if (arg is BaseComponent)
                 {
-                    if (ComponentSerializer.TrySerialize((BaseComponent)arg, out var serialized))
-                    {
-                        arguments[i] = serialized;
-                    }
-                    else
+                    arguments[i] = GetEntityID((BaseComponent)arg);
+                    if (arguments[i] == null)
                     {
                         Plugin.LogWarning($"Failed to serialize argument of type {arg.GetType().Name} with value {arg}. This may cause issues during replay.");
                     }
@@ -244,15 +225,7 @@ namespace BeaverBuddies.Events
 
                 if (typeof(BaseComponent).IsAssignableFrom(argType) && arg is string)
                 {
-                    var result = GetComponentForType(argType, (string)arg, context);
-                    if (result != null)
-                    {
-                        arguments[i] = result;
-                    }
-                    else
-                    {
-                        Plugin.LogWarning($"Failed to get component of type {argType.Name} with ID {(string)arg}. This may cause issues during replay.");
-                    }
+                    arguments[i] = GetComponentForType(argType, (string)arg, context);
                 }
             }
             return arguments;
