@@ -7,6 +7,7 @@
 using BeaverBuddies.DesyncDetecter;
 using BeaverBuddies.IO;
 using Bindito.Core.Internal;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -691,9 +692,9 @@ namespace BeaverBuddies
         static bool Prefix(GameSaver __instance, QueuedSave queuedSave)
         {
             if (IsSaving || EventIO.IsNull) return true;
-            TickingService ts = GetSingleton<TickingService>();
-            if (ts == null) return true;
-            ts.FinishFullTickAndThen(() =>
+            ReplayService rs = GetSingleton<ReplayService>();
+            if (rs == null) return true;
+            rs.FinishFullTickIfNeededAndThen(() =>
             {
                 IsSaving = true;
                 __instance.Save(queuedSave);

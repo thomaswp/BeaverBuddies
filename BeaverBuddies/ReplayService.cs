@@ -7,6 +7,7 @@ using BeaverBuddies.DesyncDetecter;
 using BeaverBuddies.Events;
 using BeaverBuddies.IO;
 using BeaverBuddies.Reporting;
+using HarmonyLib;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -549,6 +550,18 @@ namespace BeaverBuddies
             {
                 ((ServerEventIO)io).StopAcceptingClients();
             }
+        }
+
+        public void FinishFullTickIfNeededAndThen(Action action)
+        {
+            // If we're paused, we should be at the end of a tick anyway
+            if (_speedManager.CurrentSpeed == 0)
+            {
+                action();
+                return;
+            }
+            // If we're not paused, we need to wait until the end of the tick
+            _tickingService.FinishFullTickAndThen(action);
         }
     }
 
