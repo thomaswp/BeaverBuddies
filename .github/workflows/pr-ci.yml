@@ -28,7 +28,7 @@ jobs:
 
     - name: Set up env
       run: |
-        set -x
+        set -v
         cat > ./BeaverBuddies/env.props <<XML
         <Project>
           <PropertyGroup>
@@ -39,6 +39,7 @@ jobs:
           </PropertyGroup>
         </Project>
         XML
+        mkdir ../Output
       shell: bash
 
     - name: Pre-build logging
