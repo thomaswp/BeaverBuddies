@@ -30,12 +30,12 @@ jobs:
       run: |
         cat > env.props <<XML
         <Project>
-	        <PropertyGroup>
-		        <TimberbornDataPath>$(PWD)/TimberbornData/</TimberbornDataPath>
-		        <DocumentsPath>$(PWD)/Output/</DocumentsPath>
+          <PropertyGroup>
+            <TimberbornDataPath>$(PWD)/TimberbornData/</TimberbornDataPath>
+            <DocumentsPath>$(PWD)/Output/</DocumentsPath>
             <HarmonyPath>$(PWD)/TimberbornData/Mods/Harmony_2.4.1/</HarmonyPath>
             <ModSettingsPath>$(PWD)/Mods/modsettings-ey0f/version-1.0/Scripts/</ModSettingsPath>
-	        </PropertyGroup>
+          </PropertyGroup>
         </Project>
         XML
       shell: bash
