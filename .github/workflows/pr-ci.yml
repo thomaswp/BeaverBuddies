@@ -40,6 +40,14 @@ jobs:
         XML
       shell: bash
 
+    - name: Pre-build logging
+      run: |
+        ls .
+        ls ./BeaverBuddies
+        ls ..
+        ls ../TimberbornData
+      shell: bash
+
     - name: Build
       run: dotnet build
       shell: bash
