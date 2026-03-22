@@ -23,18 +23,18 @@ jobs:
         chmod 644 ~/.ssh/known_hosts
         eval "$(ssh-agent -s)"
         ssh-add ~/.ssh/deploy_key
-        git clone --depth 1 git@github.com:robinplace/TimberbornData.git
+        git clone --depth 1 git@github.com:robinplace/TimberbornData.git ../TimberbornData
       shell: bash
 
     - name: Set up env
       run: |
-        cat > env.props <<XML
+        cat > ./BeaverBuddies/env.props <<XML
         <Project>
           <PropertyGroup>
-            <TimberbornDataPath>$(PWD)/TimberbornData/</TimberbornDataPath>
-            <DocumentsPath>$(PWD)/Output/</DocumentsPath>
-            <HarmonyPath>$(PWD)/TimberbornData/Mods/Harmony_2.4.1/</HarmonyPath>
-            <ModSettingsPath>$(PWD)/Mods/modsettings-ey0f/version-1.0/Scripts/</ModSettingsPath>
+            <TimberbornDataPath>$(PWD)/../TimberbornData/</TimberbornDataPath>
+            <DocumentsPath>$(PWD)/../Output/</DocumentsPath>
+            <HarmonyPath>$(PWD)/../TimberbornData/Mods/Harmony_2.4.1/</HarmonyPath>
+            <ModSettingsPath>$(PWD)/../TimberbornData/Mods/modsettings-ey0f/version-1.0/Scripts/</ModSettingsPath>
           </PropertyGroup>
         </Project>
         XML
