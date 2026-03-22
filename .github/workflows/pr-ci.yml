@@ -29,15 +29,15 @@ jobs:
     - name: Set up env
       run: |
         cat > env.props <<XML
-<Project>
-	<PropertyGroup>
-		<TimberbornDataPath>$(PWD)/TimberbornData/</TimberbornDataPath>
-		<DocumentsPath>$(PWD)/Output/</DocumentsPath>
-    <HarmonyPath>$(PWD)/TimberbornData/Mods/Harmony_2.4.1/</HarmonyPath>
-    <ModSettingsPath>$(PWD)/Mods/modsettings-ey0f/version-1.0/Scripts/</ModSettingsPath>
-	</PropertyGroup>
-</Project>
-XML
+        <Project>
+	        <PropertyGroup>
+		        <TimberbornDataPath>$(PWD)/TimberbornData/</TimberbornDataPath>
+		        <DocumentsPath>$(PWD)/Output/</DocumentsPath>
+            <HarmonyPath>$(PWD)/TimberbornData/Mods/Harmony_2.4.1/</HarmonyPath>
+            <ModSettingsPath>$(PWD)/Mods/modsettings-ey0f/version-1.0/Scripts/</ModSettingsPath>
+	        </PropertyGroup>
+        </Project>
+        XML
       shell: bash
 
     - name: Build
