@@ -1,16 +1,10 @@
-﻿using BeaverBuddies.IO;
-using HarmonyLib;
+﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using Timberborn.Automation;
 using Timberborn.AutomationBuildings;
 using Timberborn.BaseComponentSystem;
-using Timberborn.EntitySystem;
-using Timberborn.TickSystem;
 
 namespace BeaverBuddies.Events
 {
@@ -46,6 +40,8 @@ namespace BeaverBuddies.Events
 
         private static string MakeKey(string className, string methodName) => $"{className}.{methodName}";
 
+        private static MethodInfo getComponentMethodInfo;
+
         public override void Replay(IReplayContext context)
         {
             if (!TryGetMethodInfo(methodKey, out var methodInfo))
@@ -59,8 +55,13 @@ namespace BeaverBuddies.Events
                 return;
             }
             object componentObj = GetComponentForType(methodInfo.DeclaringType, entityID, context);
-            Deserialize(arguments, context, methodInfo);
-            methodInfo.Invoke(componentObj, arguments);
+            object[] deserialized = Deserialize(arguments, context, methodInfo);
+            methodInfo.Invoke(componentObj, deserialized);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Calling {methodKey} for Entity {entityID}";
         }
 
         static bool TryGetMethodInfo(string methodKey, out MethodInfo info)
@@ -74,15 +75,24 @@ namespace BeaverBuddies.Events
             return false;
         }
 
-        private static object GetComponentForType(Type type, string entityID, IReplayContext context)
+        private static MethodInfo GetMethodInfoForGetComponent()
         {
-            // TODO: For some reason this is failing...
+            if (getComponentMethodInfo != null)
+            {
+                return getComponentMethodInfo;
+            }
             var methodInfo = typeof(ReplayEvent).GetMethod(nameof(GetComponent),
                 BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
             if (methodInfo == null || methodInfo.GetParameters().Length != 2)
             {
-                throw new Exception($"GetComponent method not found or has incorrect parameters: {methodInfo?.GetParameters().Length}.");                
+                throw new Exception($"GetComponent method not found or has incorrect parameters: {methodInfo?.GetParameters().Length}.");
             }
+            return methodInfo;
+        }
+
+        private static object GetComponentForType(Type type, string entityID, IReplayContext context)
+        {
+            MethodInfo methodInfo = GetMethodInfoForGetComponent();
             var genericMethod = methodInfo.MakeGenericMethod(type);
             return genericMethod.Invoke(null, new object[] { context, entityID });
         }
@@ -190,8 +200,11 @@ namespace BeaverBuddies.Events
             return DoPrefix(__instance, key, __args);
         }
 
-        private static void Serialize(object[] arguments)
+        private static object[] Serialize(object[] arguments)
         {
+            object[] argsCopy = new object[arguments.Length];
+            Array.Copy(arguments, argsCopy, arguments.Length);
+            arguments = argsCopy;
             for (int i = 0; i < arguments.Length; i++)
             {
                 var arg = arguments[i];
@@ -209,10 +222,14 @@ namespace BeaverBuddies.Events
                     }
                 }
             }
+            return arguments;
         }
 
-        private void Deserialize(object[] arguments, IReplayContext context, MethodInfo methodInfo)
+        private object[] Deserialize(object[] arguments, IReplayContext context, MethodInfo methodInfo)
         {
+            object[] argsCopy = new object[arguments.Length];
+            Array.Copy(arguments, argsCopy, arguments.Length);
+            arguments = argsCopy;
             for (int i = 0; i < arguments.Length; i++)
             {
                 var arg = arguments[i];
@@ -238,18 +255,20 @@ namespace BeaverBuddies.Events
                     }
                 }
             }
+            return arguments;
         }
 
         private static bool DoPrefix(BaseComponent entity, string methodKey, object[] arguments)
         {
             return DoEntityPrefix(entity, entityID =>
             {
-                Serialize(arguments);
+                //Plugin.Log($"Serializing args for: {methodKey}: {arguments.Length}");
+                //Plugin.LogStackTrace();
                 return new AutomationEvent
                 {
                     entityID = entityID,
                     methodKey = methodKey,
-                    arguments = arguments
+                    arguments = Serialize(arguments)
                 };
             });
         }
