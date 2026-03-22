@@ -8,15 +8,11 @@ using BeaverBuddies.DesyncDetecter;
 using BeaverBuddies.IO;
 using Bindito.Core.Internal;
 using HarmonyLib;
-using Mono.Cecil.Cil;
 using MonoMod.Core.Platforms;
 using MonoMod.RuntimeDetour;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.IO;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Timberborn.Autosaving;
@@ -730,12 +726,11 @@ namespace BeaverBuddies
     // see https://github.com/pardeike/Harmony/issues/563#issuecomment-1889259983.
     // this uses Hook from MonoMod.RuntimeDetours instead.
     public class GameSaverSavePatcher {
+        // Holding the (unused) hook reference keeps it active.
         private static Hook hook;
         public static bool IsSaving { get; set; }
 
         public static void Install() {
-            Debug.Log(typeof(System.Reflection.Emit.DynamicMethod).AssemblyQualifiedName);
-
             // holding a reference to the hook keeps it active.
             hook = new Hook(
                 typeof(GameSaver).GetMethod(nameof(GameSaver.Save), BindingFlags.Instance | BindingFlags.NonPublic),
@@ -748,12 +743,12 @@ namespace BeaverBuddies
                 original(instance, queuedSave);
                 return;
             }
-            TickingService ts = GetSingleton<TickingService>();
-            if (ts == null) {
+            ReplayService replayService = GetSingleton<ReplayService>();
+            if (replayService == null) {
                 original(instance, queuedSave);
                 return;
             }
-            ts.FinishFullTickAndThen(() =>
+            replayService.FinishFullTickIfNeededAndThen(() =>
             {
                 IsSaving = true;
                 original(instance, queuedSave);
@@ -894,10 +889,12 @@ namespace BeaverBuddies
     // stock Harmony doesn't support patching native code & neither does MonoMod.RuntimeDetours.
     // this uses low-level MonoMod.Core directly.
     public class TimeTimePatcher {
+        // Holding the (unused) detour reference keeps it active.
         private static SimpleNativeDetour detour;
         private static float time = 0;
 
-        public static void SetTicksSinceLoaded(int ticks) {
+        public static void SetTicksSinceLoaded(int ticks)
+        {
             time = ticks * Time.fixedDeltaTime;
         }
 
