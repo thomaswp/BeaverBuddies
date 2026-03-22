@@ -237,7 +237,7 @@ namespace BeaverBuddies.Events
                     arguments[i] = GetComponentForType(argType, (string)arg, context);
                 }
 
-                if (argType.IsEnum && arg is int)
+                if (argType.IsEnum && (arg is long || arg is int))
                 {
                     arguments[i] = Enum.ToObject(argType, arg);
                 }
