@@ -80,12 +80,13 @@ namespace BeaverBuddies.Events
             return genericMethod.Invoke(null, new object[] { context, entityID });
         }
 
-        // TODO: Test building duplication (e.g. Indicator)
         public static void PatchAll(Harmony harmony)
         {
             // Important: We can only override methods like this if they:
             // 1) Are only ever called from the UI (not from step logic)
             // 2) Are in a BaseComponent (so we can get the EntityID)
+            // The only exception is Load and Duplicate, but in both cases
+            // other logic prevents events from forming, so it should be safe.
             (Type, string)[] methodsToPatchInfo =
             [
                 (typeof(Chronometer), nameof(Chronometer.SetStartTime)),
@@ -147,6 +148,8 @@ namespace BeaverBuddies.Events
                 (typeof(Timer), nameof(Timer.SetInput)),
                 (typeof(Timer), nameof(Timer.SetMode)),
                 (typeof(Timer), nameof(Timer.SetResetInput)),
+                // TODO: For some reason this one event doesn't seem to replay correctly.
+                // It's sent and received, but the replay doesn't successfully activate it.
                 (typeof(WeatherStation), nameof(WeatherStation.SetEarlyActivationEnabled)),
                 (typeof(WeatherStation), nameof(WeatherStation.SetEarlyActivationHours)),
                 (typeof(WeatherStation), nameof(WeatherStation.SetMode)),
