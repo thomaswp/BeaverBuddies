@@ -42,8 +42,10 @@ jobs:
 
     - name: Pre-build logging
       run: |
+        set -v
         ls .
         ls ./BeaverBuddies
+        cat ./BeaverBuddies/env.props
         ls ..
         ls ../TimberbornData
       shell: bash
