@@ -3,8 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Timberborn.Automation;
 using Timberborn.AutomationBuildings;
+using Timberborn.AutomationBuildingsUI;
+using Timberborn.AutomationUI;
 using Timberborn.BaseComponentSystem;
+using Timberborn.FireworkSystem;
 
 namespace BeaverBuddies.Events
 {
@@ -91,6 +95,11 @@ namespace BeaverBuddies.Events
                 (typeof(ContaminationSensor), nameof(ContaminationSensor.SetThreshold)),
                 (typeof(DepthSensor), nameof(DepthSensor.SetMode)),
                 (typeof(DepthSensor), nameof(DepthSensor.SetThreshold)),
+                (typeof(FireworkLauncher), nameof(FireworkLauncher.SetContinuous)),
+                (typeof(FireworkLauncher), nameof(FireworkLauncher.SetFireworkId)),
+                (typeof(FireworkLauncher), nameof(FireworkLauncher.SetFlightDistance)),
+                (typeof(FireworkLauncher), nameof(FireworkLauncher.SetHeading)),
+                (typeof(FireworkLauncher), nameof(FireworkLauncher.SetPitch)),
                 (typeof(FlowSensor), nameof(FlowSensor.SetMode)),
                 (typeof(FlowSensor), nameof(FlowSensor.SetThreshold)),
                 (typeof(Gate), nameof(Gate.SetOpeningMode)),
@@ -147,7 +156,7 @@ namespace BeaverBuddies.Events
             ];
             var methodsToPatch = methodsToPatchInfo.Select(
                 info => info.Item1.GetMethod(
-                    info.Item2, 
+                    info.Item2,
                     BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance
             ));
             foreach (var method in methodsToPatch)
@@ -245,27 +254,180 @@ namespace BeaverBuddies.Events
                 };
             });
         }
-
-        /*
-         * TODO: Implement manually:
-         * Lever:
-         *  SetSpringReturn
-         *  SetPinned
-         *  SwitchState
-         */
     }
 
-    [HarmonyPatch(typeof(Lever), nameof(Lever.Load))]
-    static class LeverLoadPatch
+    public class SetAutomatableInputEvent : ReplayEvent
     {
-        static void Prefix()
+        public string automatableID;
+        public string inputID;
+
+        public override void Replay(IReplayContext context)
         {
-            
+            Automatable automatable = GetComponent<Automatable>(context, automatableID);
+            Automator automator = GetComponent<Automator>(context, inputID);
+            if (automatable == null || automator == null) return;
+            automatable.SetInput(automator);
         }
 
-        static void Postfix()
+        public override string ToActionString()
         {
+            return $"Setting Automatable {automatableID} input to {inputID}";
+        }
+    }
 
+    [HarmonyPatch(typeof(AutomatableFragment), nameof(AutomatableFragment.SetInput))]
+    static class AutomatableFragmentSetInputPatch
+    {
+        static bool Prefix(AutomatableFragment __instance, Automator automator)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance._automatable, entityID =>
+            {
+                string automatorID = ReplayEvent.GetEntityID(automator);
+                return new SetAutomatableInputEvent
+                {
+                    automatableID = entityID,
+                    inputID = automatorID,
+                };
+            });
+        }
+    }
+
+    public enum TimerIntervalInput
+    {
+        A,
+        B
+    }
+
+    public class SetTimerIntervalEvent : ReplayEvent
+    {
+        public string entityID;
+        public TimerIntervalInput input;
+        public float time;
+        public IntervalType intervalType;
+
+        public override void Replay(IReplayContext context)
+        {
+            var timer = GetComponent<Timer>(context, entityID);
+            if (timer == null) return;
+
+            TimerInterval interval;
+            if (input == TimerIntervalInput.A)
+            {
+                interval = timer.TimerIntervalA;
+            }
+            else
+            {
+                interval = timer.TimerIntervalB;
+            }
+
+            switch (intervalType)
+            {
+                case IntervalType.Ticks:
+                    interval.SetTicks((int)Math.Round(time));
+                    break;
+                case IntervalType.Hours:
+                    interval.SetHours(time);
+                    break;
+                case IntervalType.Days:
+                    interval.SetDays(time);
+                    break;
+            }
+        }
+        public override string ToActionString()
+        {
+            return $"Setting Timer interval {input} to {intervalType}={time} for Entity {entityID}";
+        }
+    }
+
+    // Because TimerIntervalElements don't have access to the Timer they're editing, we need to store it.
+    [HarmonyPatch(typeof(TimerFragment), nameof(TimerFragment.ShowFragment))]
+    static class TimerFragmentShowFragmentPatch
+    {
+        public static Timer CurrentEditingTimer { get; private set; }
+        static void Prefix(BaseComponent entity)
+        {
+            CurrentEditingTimer = entity.GetComponent<Timer>();
+        }
+    }
+
+    // There's no easy way to capture a TimerInterval edit, so we capture it manually.
+    [HarmonyPatch(typeof(TimerIntervalElement), nameof(TimerIntervalElement.SetTimeInterval))]
+    static class TimerIntervalElementSetTimeIntervalPatch
+    {
+        static bool Prefix(TimerIntervalElement __instance, float time, IntervalType intervalType)
+        {
+            Timer timer = TimerFragmentShowFragmentPatch.CurrentEditingTimer;
+            if (timer == null) return true;
+            TimerIntervalInput input = timer.TimerIntervalA == __instance._timerInterval ? TimerIntervalInput.A : TimerIntervalInput.B;
+            return ReplayEvent.DoEntityPrefix(timer, entityID =>
+            {
+                return new SetTimerIntervalEvent
+                {
+                    entityID = entityID,
+                    input = input,
+                    time = time,
+                    intervalType = intervalType,
+                };
+            });
+        }
+    }
+
+    public class ResetTransmitterEvent : ReplayEvent
+    {
+        public string entityID;
+        public bool resetAll;
+
+        public override void Replay(IReplayContext context)
+        {
+            if (resetAll)
+            {
+                ISequentialTransmitter transmitter = GetComponent<ISequentialTransmitter>(context, entityID);
+                if (transmitter == null) return;
+                transmitter.Reset();
+            }
+            else
+            {
+                Automator automator = GetComponent<Automator>(context, entityID);
+                if (automator == null) return;
+                context.GetSingleton<AutomationResetter>().ResetPartition(automator);
+            }
+        }
+
+        public override string ToActionString()
+        {
+            return $"Resetting {(resetAll ? "partition" : "transmitter")} for Entity {entityID}";
+        }
+    }
+
+    [HarmonyPatch(typeof(SequentialTransmitterResetFragment), nameof(SequentialTransmitterResetFragment.OnReset))]
+    static class SequentialTransmitterResetFragmentOnResetPatch
+    {
+        static bool Prefix(SequentialTransmitterResetFragment __instance)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance._automator, entityID =>
+            {
+                return new ResetTransmitterEvent
+                {
+                    entityID = entityID,
+                    resetAll = false,
+                };
+            });
+        }
+    }
+
+    [HarmonyPatch(typeof(SequentialTransmitterResetFragment), nameof(SequentialTransmitterResetFragment.OnResetAll))]
+    static class SequentialTransmitterResetFragmentOnResetAllPatch
+    {
+        static bool Prefix(SequentialTransmitterResetFragment __instance)
+        {
+            return ReplayEvent.DoEntityPrefix(__instance._automator, entityID =>
+            {
+                return new ResetTransmitterEvent
+                {
+                    entityID = entityID,
+                    resetAll = true,
+                };
+            });
         }
     }
 }
