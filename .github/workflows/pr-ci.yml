@@ -28,13 +28,14 @@ jobs:
 
     - name: Set up env
       run: |
+        set -x
         cat > ./BeaverBuddies/env.props <<XML
         <Project>
           <PropertyGroup>
-            <TimberbornDataPath>$(PWD)/../TimberbornData/</TimberbornDataPath>
-            <DocumentsPath>$(PWD)/../Output/</DocumentsPath>
-            <HarmonyPath>$(PWD)/../TimberbornData/Mods/Harmony_2.4.1/</HarmonyPath>
-            <ModSettingsPath>$(PWD)/../TimberbornData/Mods/modsettings-ey0f/version-1.0/Scripts/</ModSettingsPath>
+            <TimberbornDataPath>$(cygpath -w "$(PWD)/../TimberbornData/")</TimberbornDataPath>
+            <DocumentsPath>$(cygpath -w "$(PWD)/../Output/")</DocumentsPath>
+            <HarmonyPath>$(cygpath -w "$(PWD)/../TimberbornData/Mods/Harmony_2.4.1/")</HarmonyPath>
+            <ModSettingsPath>$(cygpath -w "$(PWD)/../TimberbornData/Mods/modsettings-ey0f/version-1.0/Scripts/")</ModSettingsPath>
           </PropertyGroup>
         </Project>
         XML
