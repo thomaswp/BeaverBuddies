@@ -10,12 +10,9 @@ using Bindito.Core.Internal;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Reflection;
 using System.Threading;
-using Timberborn.Analytics;
 using Timberborn.Autosaving;
-using Timberborn.BaseComponentSystem;
 using Timberborn.Beavers;
 using Timberborn.BlueprintSystem;
 using Timberborn.BotUpkeep;
@@ -38,7 +35,6 @@ using Timberborn.StockpileVisualization;
 using Timberborn.TerrainSystemRendering;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
-using Timberborn.ToolSystem;
 using Timberborn.WalkingSystem;
 using Timberborn.WaterBuildings;
 using Timberborn.WorkshopsEffects;
@@ -46,7 +42,6 @@ using TimberNet;
 using UnityEngine;
 using static BeaverBuddies.SingletonManager;
 using static Timberborn.GameSaveRuntimeSystem.GameSaver;
-using static UnityEngine.UIElements.VisualNodePropertyRegistry;
 
 namespace BeaverBuddies
 {
@@ -697,9 +692,9 @@ namespace BeaverBuddies
         static bool Prefix(GameSaver __instance, QueuedSave queuedSave)
         {
             if (IsSaving || EventIO.IsNull) return true;
-            TickingService ts = GetSingleton<TickingService>();
-            if (ts == null) return true;
-            ts.FinishFullTickAndThen(() =>
+            ReplayService rs = GetSingleton<ReplayService>();
+            if (rs == null) return true;
+            rs.FinishFullTickIfNeededAndThen(() =>
             {
                 IsSaving = true;
                 __instance.Save(queuedSave);

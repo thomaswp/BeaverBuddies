@@ -8,7 +8,6 @@ using BeaverBuddies.Events;
 using BeaverBuddies.IO;
 using BeaverBuddies.Reporting;
 using HarmonyLib;
-using MonoMod.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -16,7 +15,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using Timberborn.Autosaving;
-using Timberborn.BaseComponentSystem;
 using Timberborn.BlockObjectTools;
 using Timberborn.Buildings;
 using Timberborn.CoreUI;
@@ -26,14 +24,11 @@ using Timberborn.Forestry;
 using Timberborn.GameSaveRepositorySystem;
 using Timberborn.GameSaveRuntimeSystem;
 using Timberborn.GameWonderCompletion;
-using Timberborn.Goods;
 using Timberborn.Options;
 using Timberborn.PlantingUI;
 using Timberborn.ScienceSystem;
-using Timberborn.SettlementNameSystem;
 using Timberborn.SingletonSystem;
 using Timberborn.TemplateInstantiation;
-using Timberborn.TemplateSystem;
 using Timberborn.TickSystem;
 using Timberborn.TimeSystem;
 using Timberborn.WebNavigation;
@@ -43,7 +38,6 @@ using Timberborn.WorkSystemUI;
 using Timberborn.ZiplineSystem;
 using static BeaverBuddies.SingletonManager;
 using static Timberborn.TickSystem.TickableSingletonService;
-using static UnityEngine.ParticleSystem.PlaybackState;
 
 namespace BeaverBuddies
 {
@@ -221,12 +215,6 @@ namespace BeaverBuddies
             gameSaveHelper = new GameSaveHelper(gameSaver);
 
             _tickingService.replayService = this;
-        }
-
-        public void SetTicksSinceLoad(int ticks)
-        {
-            Plugin.Log($"Setting ticks since load to: {ticks}");
-            ticksSinceLoad = ticks;
         }
 
         public void PostLoad()
@@ -614,11 +602,6 @@ namespace BeaverBuddies
 
         // Should be ok non-concurrent - for now only main thread call this
         private List<Action> onCompletedFullTick = new List<Action>();
-
-        public void FinishFullTick()
-        {
-            ShouldCompleteFullTick = true;
-        }
 
         public void FinishFullTickAndThen(Action value)
         {

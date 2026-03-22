@@ -1,30 +1,24 @@
 ﻿using BeaverBuddies.Editor;
 using BeaverBuddies.Util;
-using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Timberborn.BaseComponentSystem;
 using Timberborn.BlockSystem;
 using Timberborn.Buildings;
-using Timberborn.EntitySystem;
 using Timberborn.GameSceneLoading;
 using Timberborn.GameStartup;
 using Timberborn.MainMenuPanels;
 using Timberborn.NewGameConfigurationSystem;
-using Timberborn.SceneLoading;
 using Timberborn.SelectionSystem;
 using Timberborn.StartingLocationSystem;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 using UnityEngine.UIElements;
 using static BeaverBuddies.SingletonManager;
 using static Timberborn.GameStartup.GameInitializer;
 
 namespace BeaverBuddies.MultiStart
 {
-	[ManualMethodOverwrite]
+    [ManualMethodOverwrite]
     /*
      * 4/19/2025
         if (_startingLocationService.HasStartingLocation())
@@ -234,31 +228,6 @@ namespace BeaverBuddies.MultiStart
 
             var metadata = GetSingleton<MultiplayerMapMetadataService>().TryGetMultiplayerMapMetadata(mapRef.Value);
 			return metadata;
-        }
-
-        // This doesn't seem to work; update too late; too buggy to use
-        // And isn't doing anything that important anyway...
-        public static void MapOrDifficultyChanged(NewGameModePanel __instance)
-        {
-			var metadata = GetMetadata(__instance);
-
-            string playersFieldName = CustomNewGameModeControllerInitializePatcher.playersFieldName;
-            var playersField = __instance._root.Q<IntegerField>(playersFieldName);
-
-            if (playersField == null) return;
-
-            // Show/hide the field depending on if we have multiplayer metadata
-			// Seems this has a delay to it
-            playersField.parent.style.display = metadata == null ? DisplayStyle.None : DisplayStyle.Flex;
-
-            if (metadata == null) return;
-
-            Plugin.Log($"Map max players: {metadata.MaxPlayers}");
-			int currentValue = CustomNewGameModeController.GetInt(playersField);
-			if (currentValue > metadata.MaxPlayers)
-			{
-				playersField.value = metadata.MaxPlayers;
-			}
         }
     }
 

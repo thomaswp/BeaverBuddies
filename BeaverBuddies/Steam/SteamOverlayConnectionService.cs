@@ -65,14 +65,9 @@ namespace BeaverBuddies.Steam
 
                     done = true;
 
-                    //Callback<LobbyCreated_t>.Create(OnLobbyCreated);
-                    //Callback<LobbyInvite_t>.Create(OnLobbyInvite);
-                    //Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
                     callbacks.Add(Callback<GameLobbyJoinRequested_t>.Create(OnLobbyJoinRequested));
                     callbacks.Add(Callback<LobbyEnter_t>.Create(OnLobbyEntered));
                     callbacks.Add(Callback<P2PSessionRequest_t>.Create(OnP2PSessionRequest));
-
-                    //SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 4);
 
                 }
                 else
@@ -105,12 +100,6 @@ namespace BeaverBuddies.Steam
                 byte[] data = Encoding.UTF8.GetBytes(message);
                 SteamNetworking.SendP2PPacket(userJoined, data, (uint)data.Length, EP2PSend.k_EP2PSendReliable);
             }
-        }
-
-        private void OnLobbyInvite(LobbyInvite_t param)
-        {
-            string invitingUser = SteamFriends.GetFriendPersonaName(new CSteamID(param.m_ulSteamIDUser));
-            Plugin.Log($"Invited to lobby {param.m_ulSteamIDLobby} by {invitingUser}");
         }
 
         private void OnP2PSessionRequest(P2PSessionRequest_t callback)

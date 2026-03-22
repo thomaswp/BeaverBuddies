@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using HarmonyLib;
 using static Timberborn.NaturalResourcesReproduction.NaturalResourceReproducer;
 using Timberborn.BlockSystem;
 using Timberborn.EntitySystem;
@@ -12,7 +9,6 @@ using UnityEngine;
 using Timberborn.WalkingSystem;
 using Timberborn.NaturalResourcesMoisture;
 using Timberborn.SoilMoistureSystem;
-using BeaverBuddies.IO;
 using Timberborn.WaterSystem;
 using Timberborn.TickSystem;
 using Timberborn.NaturalResourcesModelSystem;

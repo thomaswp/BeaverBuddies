@@ -1,13 +1,10 @@
 ﻿using BeaverBuddies.Events;
-using BeaverBuddies.IO;
 using BeaverBuddies.Reporting;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
-using Timberborn.Common;
 
 namespace BeaverBuddies.DesyncDetecter
 {

@@ -1,7 +1,5 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using Timberborn.BaseComponentSystem;
 using Timberborn.BlockObjectTools;
@@ -14,16 +12,12 @@ using Timberborn.DuplicationSystem;
 using Timberborn.EntitySystem;
 using Timberborn.Forestry;
 using Timberborn.PlantingUI;
-using Timberborn.RootProviders;
 using Timberborn.ScienceSystem;
-using Timberborn.SingletonSystem;
 using Timberborn.TemplateInstantiation;
-using Timberborn.TemplateSystem;
 using Timberborn.ToolButtonSystem;
 using Timberborn.ToolSystem;
 using Timberborn.WorkSystemUI;
 using UnityEngine;
-using UnityEngine.UIElements.Collections;
 
 namespace BeaverBuddies.Events
 {
