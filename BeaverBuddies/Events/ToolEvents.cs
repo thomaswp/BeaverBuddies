@@ -382,6 +382,7 @@ namespace BeaverBuddies.Events
             context.GetSingleton<BuildingUnlockingService>().Unlock(building);
 
             var toolButtonService = context.GetSingleton<ToolButtonService>();
+            var toolUnlockingService = Traverse.Create(toolButtonService).Field<ToolUnlockingService>("_toolUnlockingService").Value;
 
             foreach (ToolButton toolButton in toolButtonService.ToolButtons)
             {
@@ -396,7 +397,11 @@ namespace BeaverBuddies.Events
                 {
                     Plugin.Log("Unlocking tool for building: " + buildingName);
                     context.GetSingleton<UnlockedPlantableGroupsRegistry>().AddUnlockedPlantableGroups(toolBuilding);
-                    toolButton.OnToolUnlocked(new ToolUnlockedEvent(tool));
+                    // Call Unlock to remove from _activeLockers and post ToolUnlockedEvent
+                    if (toolUnlockingService != null && toolUnlockingService.IsLocked(tool))
+                    {
+                        toolUnlockingService.Unlock(tool);
+                    }
                 }
             }
         }
