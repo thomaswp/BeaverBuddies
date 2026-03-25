@@ -1395,6 +1395,55 @@ namespace BeaverBuddies.Events
     }
 
     [Serializable]
+    class WaterMoverModeChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        // could represent this in a different way, but this is consistent with the game
+        public bool moveCleanWater;
+        public bool moveContaminatedWater;
+
+        public override void Replay(IReplayContext context)
+        {
+            var waterMover = GetComponent<WaterMover>(context, entityID);
+            if (waterMover == null) return;
+            waterMover.CleanWaterMovement = moveCleanWater;
+            waterMover.ContaminatedWaterMovement = moveContaminatedWater;
+        }
+
+        public override string ToActionString()
+        {
+            string mode = (moveCleanWater, moveContaminatedWater) switch
+            {
+                (true, true) => "All Fluid",
+                (true, false) => "Clean Water Only",
+                (false, true) => "Badwater Only",
+                _ => throw new InvalidOperationException("Invalid water mover mode")
+            };
+            return $"Setting water mover {entityID} mode to: {mode}";
+        }
+    }
+
+    [HarmonyPatch(typeof(WaterMoverToggle), "SetWaterMovement")]
+    class WaterMoverToggleSetWaterMovementPatcher
+    {
+        public static bool Prefix(WaterMoverToggle __instance, bool moveCleanWater, bool moveContaminatedWater)
+        {
+            if (__instance._waterMover == null) return true;
+            if (__instance._waterMover.CleanWaterMovement == moveCleanWater &&
+                __instance._waterMover.ContaminatedWaterMovement == moveContaminatedWater) return true;
+            return ReplayEvent.DoEntityPrefix(__instance._waterMover, entityID =>
+            {
+                return new WaterMoverModeChangedEvent()
+                {
+                    entityID = entityID,
+                    moveCleanWater = moveCleanWater,
+                    moveContaminatedWater = moveContaminatedWater,
+                };
+            });
+        }
+    }
+
+    [Serializable]
     class ZiplineConnectionChangedEvent : ReplayEvent
     {
         public string currentTowerEntityID;
