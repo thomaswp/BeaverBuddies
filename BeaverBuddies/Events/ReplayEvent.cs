@@ -1,15 +1,11 @@
-﻿using System;
-using HarmonyLib;
-using Timberborn.Buildings;
-using Timberborn.TimeSystem;
-using Timberborn.EntitySystem;
+﻿using BeaverBuddies.IO;
+using System;
 using Timberborn.BaseComponentSystem;
-using static BeaverBuddies.SingletonManager;
-using Timberborn.OptionsGame;
-using Timberborn.Options;
-using BeaverBuddies.IO;
-using Timberborn.TemplateSystem;
 using Timberborn.BlueprintSystem;
+using Timberborn.Buildings;
+using Timberborn.EntitySystem;
+using Timberborn.TemplateSystem;
+using static BeaverBuddies.SingletonManager;
 
 namespace BeaverBuddies.Events
 {
@@ -45,7 +41,7 @@ namespace BeaverBuddies.Events
             return $"Doing: {type}";
         }
 
-        protected EntityComponent GetEntityComponent(IReplayContext context, string entityID)
+        public static EntityComponent GetEntityComponent(IReplayContext context, string entityID)
         {
             if (!Guid.TryParse(entityID, out Guid guid))
             {
@@ -60,7 +56,7 @@ namespace BeaverBuddies.Events
             return entity;
         }
 
-        protected T GetComponent<T>(IReplayContext context, string entityID)
+        public static T GetComponent<T>(IReplayContext context, string entityID)
         {
             var entity = GetEntityComponent(context, entityID);
             if (entity == null) return default;
@@ -113,6 +109,10 @@ namespace BeaverBuddies.Events
         /// <returns>True if the method should use default behavior</returns>
         public static bool DoPrefix(Func<ReplayEvent> getEvent)
         {
+            // If we're already replaying events, just let the original method run.
+            // This handles nested calls (e.g., Replay() calls Unlock() which triggers this prefix again)
+            if (ReplayService.IsReplayingEvents) return true;
+
             // If the replay service is not available, just use default behavior
             ReplayService replayService = GetReplayServiceIfReady();
             if (replayService == null) return true;
