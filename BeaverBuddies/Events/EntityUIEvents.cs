@@ -1417,7 +1417,8 @@ namespace BeaverBuddies.Events
                 (true, true) => "All Fluid",
                 (true, false) => "Clean Water Only",
                 (false, true) => "Badwater Only",
-                _ => throw new InvalidOperationException("Invalid water mover mode")
+                // Let the game handle invalid state, rather than in this method
+                _ => "Invalid water mover mode"
             };
             return $"Setting water mover {entityID} mode to: {mode}";
         }
