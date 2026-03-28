@@ -70,6 +70,7 @@ namespace BeaverBuddies.Events
             {
                 throw new Exception($"GetComponent method not found or has incorrect parameters: {methodInfo?.GetParameters().Length}.");
             }
+            getComponentMethodInfo = methodInfo;
             return methodInfo;
         }
 
