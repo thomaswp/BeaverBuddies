@@ -1,6 +1,7 @@
 ﻿using BeaverBuddies.Connect;
 using BeaverBuddies.DesyncDetecter;
 using BeaverBuddies.Editor;
+using BeaverBuddies.Events;
 using BeaverBuddies.Fixes;
 using BeaverBuddies.IO;
 using BeaverBuddies.MultiStart;
@@ -120,6 +121,7 @@ namespace BeaverBuddies
             // apply all harmony patches automatically.
             Harmony harmony = new Harmony(ID);
             harmony.PatchAll();
+            AutomationEvent.ApplyAutomationPatches(harmony);
 
             // apply each advanced monomod patch manually.
             GameSaverSavePatcher.Install();
