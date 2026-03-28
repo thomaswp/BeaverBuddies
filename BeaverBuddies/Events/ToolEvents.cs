@@ -382,7 +382,7 @@ namespace BeaverBuddies.Events
             context.GetSingleton<BuildingUnlockingService>().Unlock(building);
 
             var toolButtonService = context.GetSingleton<ToolButtonService>();
-            var toolUnlockingService = Traverse.Create(toolButtonService).Field<ToolUnlockingService>("_toolUnlockingService").Value;
+            var toolUnlockingService = toolButtonService._toolUnlockingService;
 
             foreach (ToolButton toolButton in toolButtonService.ToolButtons)
             {
