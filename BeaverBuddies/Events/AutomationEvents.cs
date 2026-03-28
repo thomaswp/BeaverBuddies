@@ -9,6 +9,7 @@ using Timberborn.AutomationBuildingsUI;
 using Timberborn.AutomationUI;
 using Timberborn.BaseComponentSystem;
 using Timberborn.FireworkSystem;
+using UnityEngine.UIElements;
 
 namespace BeaverBuddies.Events
 {
@@ -81,7 +82,7 @@ namespace BeaverBuddies.Events
             return genericMethod.Invoke(null, new object[] { context, entityID });
         }
 
-        public static void PatchAll(Harmony harmony)
+        public static void ApplyAutomationPatches(Harmony harmony)
         {
             // Important: We can only override methods like this if they:
             // 1) Are only ever called from the UI (not from step logic)
@@ -149,9 +150,6 @@ namespace BeaverBuddies.Events
                 (typeof(Timer), nameof(Timer.SetInput)),
                 (typeof(Timer), nameof(Timer.SetMode)),
                 (typeof(Timer), nameof(Timer.SetResetInput)),
-                // TODO: For some reason this one event doesn't seem to replay correctly.
-                // It's sent and received, but the replay doesn't successfully activate it.
-                (typeof(WeatherStation), nameof(WeatherStation.SetEarlyActivationEnabled)),
                 (typeof(WeatherStation), nameof(WeatherStation.SetEarlyActivationHours)),
                 (typeof(WeatherStation), nameof(WeatherStation.SetMode)),
                 // Note: this intentionally omits the HTTPApi system because, well, that
@@ -363,10 +361,18 @@ namespace BeaverBuddies.Events
     [HarmonyPatch(typeof(TimerFragment), nameof(TimerFragment.ShowFragment))]
     static class TimerFragmentShowFragmentPatch
     {
-        public static Timer CurrentEditingTimer { get; private set; }
         static void Prefix(BaseComponent entity)
         {
-            CurrentEditingTimer = entity.GetComponent<Timer>();
+            TimerIntervalElementSetTimeIntervalPatch.CurrentEditingTimer = entity.GetComponent<Timer>();
+        }
+    }
+
+    [HarmonyPatch(typeof(TimerFragment), nameof(TimerFragment.ClearFragment))]
+    static class TimerFragmentClearFragmentPatch
+    {
+        static void Prefix()
+        {
+            TimerIntervalElementSetTimeIntervalPatch.CurrentEditingTimer = null;
         }
     }
 
@@ -374,9 +380,11 @@ namespace BeaverBuddies.Events
     [HarmonyPatch(typeof(TimerIntervalElement), nameof(TimerIntervalElement.SetTimeInterval))]
     static class TimerIntervalElementSetTimeIntervalPatch
     {
+        public static Timer CurrentEditingTimer { get; set; }
+
         static bool Prefix(TimerIntervalElement __instance, float time, IntervalType intervalType)
         {
-            Timer timer = TimerFragmentShowFragmentPatch.CurrentEditingTimer;
+            Timer timer = CurrentEditingTimer;
             if (timer == null) return true;
             TimerIntervalInput input = timer.TimerIntervalA == __instance._timerInterval ? TimerIntervalInput.A : TimerIntervalInput.B;
             return ReplayEvent.DoEntityPrefix(timer, entityID =>
@@ -446,6 +454,54 @@ namespace BeaverBuddies.Events
                 {
                     entityID = entityID,
                     resetAll = true,
+                };
+            });
+        }
+    }
+
+    public class WeatherStationSetActivateEarlyEvent : ReplayEvent
+    {
+        public string entityID;
+        public bool activateEarly;
+
+        public override void Replay(IReplayContext context)
+        {
+            WeatherStation station = GetComponent<WeatherStation>(context, entityID);
+            if (station == null) return;
+            station.SetEarlyActivationEnabled(activateEarly);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting WeatherStation {entityID} to activate early: {activateEarly}";
+        }
+    }
+
+    /*
+     * For this method we have to directly capture the UI event, since SetEarlyActivationEnabled gets called
+     * during the UI component's update method, which resets the value before the server can play the event.
+     */
+    [HarmonyPatch(typeof(WeatherStationFragment), nameof(WeatherStationFragment.OnEarlyActivationToggleChanged))]
+    static class WeatherStationFragmentOnEarlyActivationToggleChangedPatch
+    {
+        static bool Prefix(WeatherStationFragment __instance, ChangeEvent<bool> evt)
+        {
+            if (evt.newValue == __instance._weatherStation.EarlyActivationEnabled)
+            {
+                // If there's no change, don't capture the event. We may be waiting on the event
+                // to propagte.
+                return true;
+            }
+
+            return ReplayEvent.DoEntityPrefix(__instance._weatherStation, entityID =>
+            {
+                // Revert the toggle for a cleaner UI experience, since we're not update the state yet,
+                // and the UpdateFragment method will just toggle it back.
+                __instance._earlyActivationToggle.SetValueWithoutNotify(!evt.newValue);
+                return new WeatherStationSetActivateEarlyEvent
+                {
+                    entityID = entityID,
+                    activateEarly = evt.newValue,
                 };
             });
         }

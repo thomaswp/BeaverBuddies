@@ -120,7 +120,7 @@ namespace BeaverBuddies
 
             Harmony harmony = new Harmony(ID);
             harmony.PatchAll();
-            AutomationEvent.PatchAll(harmony);
+            AutomationEvent.ApplyAutomationPatches(harmony);
 
             Log(UnityEngine.Application.consoleLogPath);
         }
