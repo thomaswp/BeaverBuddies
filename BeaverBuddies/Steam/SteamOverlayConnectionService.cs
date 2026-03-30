@@ -1,6 +1,4 @@
-﻿#define IS_STEAM
-
-#if IS_STEAM
+﻿#if IS_STEAM
 using Timberborn.SteamStoreSystem;
 #endif
 
@@ -13,8 +11,6 @@ using Timberborn.SingletonSystem;
 using UnityEngine;
 using Timberborn.SteamOverlaySystem;
 using Timberborn.CoreUI;
-using JetBrains.Annotations;
-using UnityEngine.UIElements;
 
 namespace BeaverBuddies.Steam
 {
