@@ -23,6 +23,7 @@ using Timberborn.Brushes;
 using Timberborn.CharacterMovementSystem;
 using Timberborn.Common;
 using Timberborn.CoreSound;
+using Timberborn.EntityNaming;
 using Timberborn.EntitySystem;
 using Timberborn.ForestryEffects;
 using Timberborn.GameSaveRuntimeSystem;
@@ -120,18 +121,18 @@ namespace BeaverBuddies
         public Thread UnityThread;
 
         public static bool IsTicking = false;
+        public static bool IsEntityInitializing = false;
         public static bool IsNonGameplay = false;
         private static System.Random random = new System.Random();
         private static HashSet<Type> activeNonGamePatchers = new HashSet<Type>();
-        private static HashSet<Type> activeGamePatchers = new HashSet<Type>();
         private static int? nextSeedOnLoad;
 
         public void Reset()
         {
             IsNonGameplay = false;
             IsTicking = false;
+            IsEntityInitializing = false;
             activeNonGamePatchers.Clear();
-            activeGamePatchers.Clear();
             // No need to reset random
             // Don't reset seed, since it's set before the Reset
         }
@@ -207,13 +208,16 @@ namespace BeaverBuddies
                     return true;
                 }
 
-                // If this is explicitly marked as game code, use game RNG
-                if (activeGamePatchers.Count > 0) return false;
-
                 bool areActiveNonGamePatchers = activeNonGamePatchers.Count > 0;
 
                 // If this is non-game code, don't use the Game's random
                 if (areActiveNonGamePatchers) return true;
+
+                // Entity initialization (e.g. naming) happens in Unity's
+                // Start() outside the tick, but the RNG state is
+                // deterministic because ShouldInterruptTicking was set
+                // during entity creation.
+                if (IsEntityInitializing) return false;
 
                 // If we're ticking, it's likely game code, and hopefully
                 // we've caught any non-game code that can run during a tick!
@@ -224,7 +228,7 @@ namespace BeaverBuddies
                     {
                         DesyncDetecterService.Trace($"Tick RNG; " +
                         $"s0 before: {UnityEngine.Random.state.s0:X8}; " +
-                        $"Last entity: {entity?.Name} - {entity?.EntityId}");
+                        $"Last entity: {entity?.EntityId}");
                     }
                     return false;
                 }
@@ -270,18 +274,6 @@ namespace BeaverBuddies
             else
             {
                 return activeNonGamePatchers.Remove(patcherType);
-            }
-        }
-
-        public static bool SetGamePatcherActive(System.Type patcherType, bool active)
-        {
-            if (active)
-            {
-                return activeGamePatchers.Add(patcherType);
-            }
-            else
-            {
-                return activeGamePatchers.Remove(patcherType);
             }
         }
 
@@ -583,23 +575,6 @@ namespace BeaverBuddies
         }
     }
 
-    // BeaverNameService.RandomName uses RNG to pick beaver names. This can happen
-    // outside of a tick (during entity initialization via Unity's Start()), but it needs
-    // to be deterministic for consistency.
-    [HarmonyPatch(typeof(BeaverNameService), nameof(BeaverNameService.RandomName))]
-    public class BeaverNameServiceRandomNamePatcher
-    {
-        static void Prefix()
-        {
-            DeterminismService.SetGamePatcherActive(typeof(BeaverNameServiceRandomNamePatcher), true);
-        }
-
-        static void Postfix()
-        {
-            DeterminismService.SetGamePatcherActive(typeof(BeaverNameServiceRandomNamePatcher), false);
-        }
-    }
-
     [HarmonyPatch(typeof(PlantableDescriber), nameof(PlantableDescriber.GetPreviewFromTemplate))]
     public class PlantableDescriberPatcher
     {
@@ -684,6 +659,20 @@ namespace BeaverBuddies
         }
     }
 
+
+    [HarmonyPatch(typeof(NamedEntity), nameof(NamedEntity.InitializeEntity))]
+    public class NamedEntityInitializePatcher
+    {
+        static void Prefix()
+        {
+            DeterminismService.IsEntityInitializing = true;
+        }
+
+        static void Postfix()
+        {
+            DeterminismService.IsEntityInitializing = false;
+        }
+    }
 
     [HarmonyPatch(typeof(BeaverTextureSetter), nameof(BeaverTextureSetter.Start))]
     public class BeaverTextureSetterStartPatcher
