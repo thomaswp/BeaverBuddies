@@ -934,7 +934,8 @@ namespace BeaverBuddies
 
                 var entityComponent = entity._entityComponent;
                 var pathFollower = entityComponent.GetComponent<Walker>()?.PathFollower;
-                var animatedPathFollower = entityComponent.GetComponent<MovementAnimator>()?._animatedPathFollower;
+                MovementAnimator movementAnimator = entityComponent.GetComponent<MovementAnimator>();
+                var animatedPathFollower = movementAnimator?._animatedPathFollower;
                 if (pathFollower != null && animatedPathFollower != null)
                 {
                     // Update the animated path follower to the path follower's
@@ -942,17 +943,31 @@ namespace BeaverBuddies
                     var targetPos = pathFollower._transform.position;
                     animatedPathFollower.CurrentPosition = targetPos;
                     PositionHash = TimberNetBase.CombineHash(PositionHash, targetPos.GetHashCode());
+
+                    // Between ticks, MovementAnimator.Update() runs every
+                    // frame and may change the group ID at different times
+                    // on different machines depending on frame rate. This
+                    // causes ZiplineVisitor.IsOnZipline to desync, which
+                    // can happen if you zipline toward a station that is flooded
+                    if (pathFollower._pathCorners != null)
+                    {
+                        int deterministicGroupId = pathFollower._pathCorners[pathFollower._nextCornerIndex - 1].GroupId;
+                        if (movementAnimator._groupId != deterministicGroupId)
+                        {
+                            movementAnimator._groupId = deterministicGroupId;
+                            movementAnimator.NotifyGroupIdUpdated();
+                        }
+                    }
                 }
                 // Make sure it updates the model's position as well
                 try
                 {
-                    MovementAnimator anim = entityComponent.GetComponent<MovementAnimator>();
                     CharacterRotator rotator = entityComponent.GetComponent<CharacterRotator>();
                     // The CharacterRotator seems to sometimes not be initialized when this is caused, and
                     // therefore something is null, likely _animatedPathFollower.
-                    if (anim != null && rotator != null && rotator.Started && rotator._animatedPathFollower != null)
+                    if (movementAnimator != null && rotator != null && rotator.Started && rotator._animatedPathFollower != null)
                     {
-                        anim.UpdateTransform(0);
+                        movementAnimator.UpdateTransform(0);
                     }
                 } catch (Exception e)
                 {
