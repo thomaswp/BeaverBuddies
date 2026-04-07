@@ -1650,4 +1650,406 @@ namespace BeaverBuddies.Events
             return WaterSourceRegulatorStateChangedEvent.DoPrefix(__instance, false);
         }
     }
+
+    // ========== FillValve Events ==========
+    // FillValve controls water fill target height (reported as not syncing by players)
+
+    [Serializable]
+    class FillValveTargetHeightChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public float height;
+
+        public override void Replay(IReplayContext context)
+        {
+            var fillValve = GetComponent<FillValve>(context, entityID);
+            if (fillValve == null) return;
+            fillValve.SetTargetHeightAndSynchronize(height);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting fill valve {entityID} target height to: {height}";
+        }
+    }
+
+    [HarmonyPatch(typeof(FillValve), nameof(FillValve.SetTargetHeightAndSynchronize))]
+    class FillValveSetTargetHeightPatcher
+    {
+        static bool Prefix(FillValve __instance, float value)
+        {
+            if (__instance.TargetHeight == value) return true;
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new FillValveTargetHeightChangedEvent()
+                {
+                    entityID = entityID,
+                    height = value,
+                };
+            });
+        }
+    }
+
+    [Serializable]
+    class FillValveTargetHeightEnabledChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public bool enabled;
+
+        public override void Replay(IReplayContext context)
+        {
+            var fillValve = GetComponent<FillValve>(context, entityID);
+            if (fillValve == null) return;
+            fillValve.SetTargetHeightEnabledAndSynchronize(enabled);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting fill valve {entityID} target height enabled to: {enabled}";
+        }
+    }
+
+    [HarmonyPatch(typeof(FillValve), nameof(FillValve.SetTargetHeightEnabledAndSynchronize))]
+    class FillValveSetTargetHeightEnabledPatcher
+    {
+        static bool Prefix(FillValve __instance, bool value)
+        {
+            if (__instance.TargetHeightEnabled == value) return true;
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new FillValveTargetHeightEnabledChangedEvent()
+                {
+                    entityID = entityID,
+                    enabled = value,
+                };
+            });
+        }
+    }
+
+    [Serializable]
+    class FillValveAutomationTargetHeightChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public float height;
+
+        public override void Replay(IReplayContext context)
+        {
+            var fillValve = GetComponent<FillValve>(context, entityID);
+            if (fillValve == null) return;
+            fillValve.SetAutomationTargetHeightAndSynchronize(height);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting fill valve {entityID} automation target height to: {height}";
+        }
+    }
+
+    [HarmonyPatch(typeof(FillValve), nameof(FillValve.SetAutomationTargetHeightAndSynchronize))]
+    class FillValveSetAutomationTargetHeightPatcher
+    {
+        static bool Prefix(FillValve __instance, float value)
+        {
+            if (__instance.AutomationTargetHeight == value) return true;
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new FillValveAutomationTargetHeightChangedEvent()
+                {
+                    entityID = entityID,
+                    height = value,
+                };
+            });
+        }
+    }
+
+    [Serializable]
+    class FillValveAutomationTargetHeightEnabledChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public bool enabled;
+
+        public override void Replay(IReplayContext context)
+        {
+            var fillValve = GetComponent<FillValve>(context, entityID);
+            if (fillValve == null) return;
+            fillValve.SetAutomationTargetHeightEnabledAndSynchronize(enabled);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting fill valve {entityID} automation target height enabled to: {enabled}";
+        }
+    }
+
+    [HarmonyPatch(typeof(FillValve), nameof(FillValve.SetAutomationTargetHeightEnabledAndSynchronize))]
+    class FillValveSetAutomationTargetHeightEnabledPatcher
+    {
+        static bool Prefix(FillValve __instance, bool value)
+        {
+            if (__instance.AutomationTargetHeightEnabled == value) return true;
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new FillValveAutomationTargetHeightEnabledChangedEvent()
+                {
+                    entityID = entityID,
+                    enabled = value,
+                };
+            });
+        }
+    }
+
+    [Serializable]
+    class FillValveSynchronizationChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public bool isSynchronized;
+
+        public override void Replay(IReplayContext context)
+        {
+            var fillValve = GetComponent<FillValve>(context, entityID);
+            if (fillValve == null) return;
+            fillValve.ToggleSynchronization(isSynchronized);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting fill valve {entityID} synchronization to: {isSynchronized}";
+        }
+    }
+
+    [HarmonyPatch(typeof(FillValve), nameof(FillValve.ToggleSynchronization))]
+    class FillValveToggleSynchronizationPatcher
+    {
+        static bool Prefix(FillValve __instance, bool value)
+        {
+            if (__instance.IsSynchronized == value) return true;
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new FillValveSynchronizationChangedEvent()
+                {
+                    entityID = entityID,
+                    isSynchronized = value,
+                };
+            });
+        }
+    }
+
+    // ========== Valve Events ==========
+    // Valve controls water outflow limits (reported as not syncing by players)
+
+    [Serializable]
+    class ValveOutflowLimitChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public float outflowLimit;
+
+        public override void Replay(IReplayContext context)
+        {
+            var valve = GetComponent<Valve>(context, entityID);
+            if (valve == null) return;
+            valve.SetOutflowLimitAndSynchronize(outflowLimit);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting valve {entityID} outflow limit to: {outflowLimit}";
+        }
+    }
+
+    [HarmonyPatch(typeof(Valve), nameof(Valve.SetOutflowLimitAndSynchronize))]
+    class ValveSetOutflowLimitPatcher
+    {
+        static bool Prefix(Valve __instance, float value)
+        {
+            if (__instance.OutflowLimit == value) return true;
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new ValveOutflowLimitChangedEvent()
+                {
+                    entityID = entityID,
+                    outflowLimit = value,
+                };
+            });
+        }
+    }
+
+    [Serializable]
+    class ValveOutflowLimitEnabledChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public bool enabled;
+
+        public override void Replay(IReplayContext context)
+        {
+            var valve = GetComponent<Valve>(context, entityID);
+            if (valve == null) return;
+            valve.SetOutflowLimitEnabledAndSynchronize(enabled);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting valve {entityID} outflow limit enabled to: {enabled}";
+        }
+    }
+
+    [HarmonyPatch(typeof(Valve), nameof(Valve.SetOutflowLimitEnabledAndSynchronize))]
+    class ValveSetOutflowLimitEnabledPatcher
+    {
+        static bool Prefix(Valve __instance, bool value)
+        {
+            if (__instance.OutflowLimitEnabled == value) return true;
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new ValveOutflowLimitEnabledChangedEvent()
+                {
+                    entityID = entityID,
+                    enabled = value,
+                };
+            });
+        }
+    }
+
+    [Serializable]
+    class ValveAutomationOutflowLimitChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public float outflowLimit;
+
+        public override void Replay(IReplayContext context)
+        {
+            var valve = GetComponent<Valve>(context, entityID);
+            if (valve == null) return;
+            valve.SetAutomationOutflowLimitAndSynchronize(outflowLimit);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting valve {entityID} automation outflow limit to: {outflowLimit}";
+        }
+    }
+
+    [HarmonyPatch(typeof(Valve), nameof(Valve.SetAutomationOutflowLimitAndSynchronize))]
+    class ValveSetAutomationOutflowLimitPatcher
+    {
+        static bool Prefix(Valve __instance, float value)
+        {
+            if (__instance.AutomationOutflowLimit == value) return true;
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new ValveAutomationOutflowLimitChangedEvent()
+                {
+                    entityID = entityID,
+                    outflowLimit = value,
+                };
+            });
+        }
+    }
+
+    [Serializable]
+    class ValveAutomationOutflowLimitEnabledChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public bool enabled;
+
+        public override void Replay(IReplayContext context)
+        {
+            var valve = GetComponent<Valve>(context, entityID);
+            if (valve == null) return;
+            valve.SetAutomationOutflowLimitEnabledAndSynchronize(enabled);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting valve {entityID} automation outflow limit enabled to: {enabled}";
+        }
+    }
+
+    [HarmonyPatch(typeof(Valve), nameof(Valve.SetAutomationOutflowLimitEnabledAndSynchronize))]
+    class ValveSetAutomationOutflowLimitEnabledPatcher
+    {
+        static bool Prefix(Valve __instance, bool value)
+        {
+            if (__instance.AutomationOutflowLimitEnabled == value) return true;
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new ValveAutomationOutflowLimitEnabledChangedEvent()
+                {
+                    entityID = entityID,
+                    enabled = value,
+                };
+            });
+        }
+    }
+
+    [Serializable]
+    class ValveReactionSpeedChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public float reactionSpeed;
+
+        public override void Replay(IReplayContext context)
+        {
+            var valve = GetComponent<Valve>(context, entityID);
+            if (valve == null) return;
+            valve.SetReactionSpeedAndSynchronize(reactionSpeed);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting valve {entityID} reaction speed to: {reactionSpeed}";
+        }
+    }
+
+    [HarmonyPatch(typeof(Valve), nameof(Valve.SetReactionSpeedAndSynchronize))]
+    class ValveSetReactionSpeedPatcher
+    {
+        static bool Prefix(Valve __instance, float value)
+        {
+            if (__instance.ReactionSpeed == value) return true;
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new ValveReactionSpeedChangedEvent()
+                {
+                    entityID = entityID,
+                    reactionSpeed = value,
+                };
+            });
+        }
+    }
+
+    [Serializable]
+    class ValveSynchronizationChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public bool isSynchronized;
+
+        public override void Replay(IReplayContext context)
+        {
+            var valve = GetComponent<Valve>(context, entityID);
+            if (valve == null) return;
+            valve.ToggleSynchronization(isSynchronized);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting valve {entityID} synchronization to: {isSynchronized}";
+        }
+    }
+
+    [HarmonyPatch(typeof(Valve), nameof(Valve.ToggleSynchronization))]
+    class ValveToggleSynchronizationPatcher
+    {
+        static bool Prefix(Valve __instance, bool value)
+        {
+            if (__instance.IsSynchronized == value) return true;
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new ValveSynchronizationChangedEvent()
+                {
+                    entityID = entityID,
+                    isSynchronized = value,
+                };
+            });
+        }
+    }
 }
