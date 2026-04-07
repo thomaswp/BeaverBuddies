@@ -1,4 +1,7 @@
 ﻿// If defined, parallel actions occur on the main thread
+// Disabled: the game's parallelizer is too tightly integrated in v1.0.12
+// to safely override. The parallel singletons (water, soil) should still
+// be deterministic as they write to separate buffers.
 //#define NO_PARALLEL
 // If defined, the game will use constant values instead of random
 // numbers, making it as deterministic as possible w.r.t random
@@ -41,6 +44,12 @@ using Timberborn.TimeSystem;
 using Timberborn.ToolSystem;
 using Timberborn.WalkingSystem;
 using Timberborn.WaterBuildings;
+using Timberborn.CharacterModelSystem;
+using Timberborn.DeconstructionSystem;
+using Timberborn.Healthcare;
+using Timberborn.NaturalResourcesMoisture;
+using Timberborn.SlotSystem;
+using Timberborn.Wandering;
 using Timberborn.WorkshopsEffects;
 using TimberNet;
 using UnityEngine;
@@ -463,6 +472,15 @@ namespace BeaverBuddies
             typeof(TerrainBlockRandomizer),
             typeof(ObservatoryAnimator),
             typeof(WaterInputPipeSegmentCreator),
+            // New in game v1.0.12 - visual/non-gameplay classes that use RNG
+            typeof(CharacterTextureSetter),
+            typeof(DeconstructionParticleFactory),
+            typeof(BeaverInjuryTextureSetter),
+            typeof(VariedIdleAnimation),
+            // Pile is a nested class in GoodPileVariantsService (already blacklisted)
+            typeof(PatrollingSlot),
+            typeof(TransformSlot),
+            typeof(SlotAnimationSynchronizer),
         };
 
         // Currently unused - could be used for warnings on items we don't
@@ -990,14 +1008,21 @@ namespace BeaverBuddies
         static bool Prefix(TickableSingletonService __instance)
         {
             if (EventIO.IsNull) return true;
-            ImmutableArray<IParallelTickableSingleton>.Enumerator enumerator = 
+            // Reproduce the original method's setup, but run sequentially
+            // instead of via the thread pool for determinism
+            __instance.ParalleTicklIsFinished = false;
+            __instance.IsStartingParallelTick = true;
+            __instance._parallelizer.StartScheduling();
+            ImmutableArray<IParallelTickableSingleton>.Enumerator enumerator =
                 __instance._parallelTickableSingletons.GetEnumerator();
             while (enumerator.MoveNext())
             {
                 // Run directly rather than using the thread pool
                 IParallelTickableSingleton parallelTickable = enumerator.Current;
-                parallelTickable.ParallelTick();
+                parallelTickable.StartParallelTick();
             }
+            __instance._parallelizer.StopScheduling();
+            __instance.IsStartingParallelTick = false;
             return false;
         }
     }

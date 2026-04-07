@@ -1,61 +1,138 @@
-﻿= Fully addressed
-# Verified game logic or irrelevant
+= Fully addressed (blacklisted or patched)
+# Verified game logic - runs during tick, deterministic
 > At least partially addressed
 ~ Needs investigation
 + Unaddressed concern
 
+Last updated: 2026-04-05 for game v1.0.12.6
+
+=== Gameplay classes (run during ticks, use game RNG deterministically) ===
 # Timberborn.BeaverContaminationSystem.ContaminationApplier
   * In Tick
+# Timberborn.Beavers.BeaverLongevity
+  * In Tick (longevity calculation)
 # Timberborn.Beavers.BeaverNameService
-  * In RandomName
-> Timberborn.Beavers.BeaverTextureSetter
-Timberborn.BeaversUI.BeaverGeneratorTool
-> Timberborn.BotUpkeep.BotManufactoryAnimationController
+  * In RandomName - called from EntityComponent.Start() outside tick
+  * Intercepted by ShouldUseNonGameRNG() default case -> uses non-game RNG
+# Timberborn.HazardousWeatherSystem.BadtideWeather
+  * In Tick (weather cycle)
+# Timberborn.HazardousWeatherSystem.DroughtWeather
+  * In Tick (weather cycle)
+# Timberborn.HazardousWeatherSystem.HazardousWeatherRandomizer
+  * In Tick (weather randomization)
+# Timberborn.MortalSystem.CharacterKiller
+  * In Tick
+# Timberborn.MortalSystem.Mortal
+  * In Tick
+# Timberborn.NaturalResources.CoordinatesOffseter
+  * In Tick (resource positioning)
+# Timberborn.NaturalResourcesContamination.ContaminatedNaturalResource
+  * In Tick
+# Timberborn.NaturalResourcesMoisture.LivingWaterNaturalResource
+  * In Tick/Awake - Awake addressed via map hash seed
+# Timberborn.NaturalResourcesMoisture.WateredNaturalResource
+  * In Tick/Awake - Awake addressed via map hash seed
+# Timberborn.NaturalResourcesReproduction.NaturalResourceReproducer
+  * In Tick
+# Timberborn.Navigation.DistrictRandomDestinationPicker
+  * In Tick (renamed from DistrictDestinationPicker in v1.0.12)
+# Timberborn.NeedApplication.EffectProbabilityService
+  * In Tick
+# Timberborn.NeedApplication.WorkshopRandomNeedApplier
+  * In Tick
+# Timberborn.Pollination.Hive
+  * In Tick
+# Timberborn.Reproduction.ProcreationHouse
+  * In Tick
+# Timberborn.SleepSystem.Sleeper
+  * In Tick
+# Timberborn.Terraforming.Drill
+  * In Tick
+# Timberborn.WalkingSystem.RandomDestinationPicker
+  * In Tick
+# Timberborn.Wandering.StrandedRootBehavior
+  * In Tick
+# Timberborn.Wandering.WanderRootBehavior
+  * In Tick
+# Timberborn.WeatherSystem.TemperateWeatherDurationService
+  * In Tick (weather duration)
+# Timberborn.WindSystem.WindService
+  * In Tick
+# Timberborn.Yielding.YieldRemovalChanceBonusService
+  * In Tick
+
+=== Visual/Non-gameplay classes (blacklisted -> use NonTickRNG) ===
+= Timberborn.Beavers.BeaverTextureSetter
+= Timberborn.BotsUpkeep.BotManufactoryAnimationController
 = Timberborn.Brushes.BrushProbabilityMap
+= Timberborn.CharacterModelSystem.CharacterTextureSetter
+  * NEW in v1.0.12 - added to blacklist
 = Timberborn.CoreSound.BasicSelectionSound
+= Timberborn.DeconstructionSystem.DeconstructionParticleFactory
+  * NEW in v1.0.12 - added to blacklist
 = Timberborn.ForestryEffects.TreeCutterSideRandomizer
+  * Whitelisted - only runs during tick
 = Timberborn.ForestryEffects.TreeShaker
+  * Visual only
 = Timberborn.GameScene.DateSalter
+= Timberborn.GameSceneLoading.GameSceneLoader
+  * GetTip() uses RNG for loading tips - outside tick, intercepted
 = Timberborn.GameSound.GameMusicPlayer
-Timberborn.HazardousWeatherSystem.BadtideWeather
-Timberborn.HazardousWeatherSystem.DroughtWeather
-Timberborn.HazardousWeatherSystem.HazardousWeatherRandomizer
-~ Timberborn.Healthcare.BeaverInjuryTextureSetter
-Timberborn.MortalSystem.CharacterKiller
-Timberborn.MortalSystem.Mortal
-Timberborn.NaturalResources.CoordinatesOffseter
-Timberborn.NaturalResourcesContamination.ContaminatedNaturalResource
-~ Timberborn.NaturalResourcesModelSystem.NaturalResourceModelRandomizer
-Timberborn.NaturalResourcesMoisture.LivingWaterNaturalResource
-Timberborn.NaturalResourcesMoisture.WateredNaturalResource
-Timberborn.NaturalResourcesReproduction.NaturalResourceReproducer
-Timberborn.Navigation.DistrictDestinationPicker
-Timberborn.NeedApplication.EffectProbabilityService
-Timberborn.NeedApplication.WorkshopRandomNeedApplier
-Timberborn.Pollination.Hive
-Timberborn.RecoveredGoodSystem.RecoveredGoodStackCoordinatesFinder
-> Timberborn.RecoveredGoodSystem.RecoveredGoodStackFactory
-Timberborn.Reproduction.ProcreationHouse
-~ Timberborn.Ruins.RuinModelFactory
-~ Timberborn.Ruins.RuinModelUpdater
-Timberborn.SleepSystem.Sleeper
-Timberborn.SlotSystem.PatrollingSlotFactory
-Timberborn.SlotSystem.SlotAnimationSynchronizer
-Timberborn.SlotSystem.SlotManager
-Timberborn.SlotSystem.TransformSlotFactory
-> Timberborn.SoundSystem.LoopingSoundPlayer
-> Timberborn.SoundSystem.Sounds
-~ Timberborn.StockpileVisualization.GoodColumnVariantsService
-~ Timberborn.StockpileVisualization.GoodPileVariantsService
-> Timberborn.StockpileVisualization.StockpileGoodPileVisualizer
-Timberborn.Terraforming.Drill
-> Timberborn.TerrainSystem.TerrainBlockRandomizer
-Timberborn.WalkingSystem.RandomDestinationPicker
-Timberborn.Wandering.StrandedRootBehavior
-Timberborn.Wandering.WanderRootBehavior
-+ Timberborn.WaterBuildings.WaterInputPipeSegmentFactory
-Timberborn.WeatherSystem.TemperateWeatherDurationService
-Timberborn.WindSystem.WindService
-~ Timberborn.WorkshopsEffects.ObservatoryAnimator
-  * Cannot currently address because of outdated library
-Timberborn.Yielding.YieldRemovalChanceBonusService
+= Timberborn.Healthcare.BeaverInjuryTextureSetter
+  * NEW in v1.0.12 - added to blacklist
+= Timberborn.NaturalResourcesModelSystem.NaturalResourceModelRandomizer
+= Timberborn.RecoveredGoodSystem.RecoveredGoodStackCoordinatesFinder
+  * Visual positioning
+= Timberborn.RecoveredGoodSystem.RecoveredGoodStackFactory
+  * Patched via SetNonGamePatcherActive for RandomizeRotation
+= Timberborn.Ruins.RuinModelFactory
+= Timberborn.Ruins.RuinModelUpdater
+= Timberborn.SlotSystem.PatrollingSlot
+  * NEW in v1.0.12 - added to blacklist
+= Timberborn.SlotSystem.PatrollingSlotFactory
+  * Addressed via PatrollingSlot blacklist
+= Timberborn.SlotSystem.SlotAnimationSynchronizer
+  * NEW in v1.0.12 - added to blacklist
+= Timberborn.SlotSystem.SlotManager
+  * Addressed via slot blacklists
+= Timberborn.SlotSystem.TransformSlot
+  * NEW in v1.0.12 - added to blacklist
+= Timberborn.SlotSystem.TransformSlotFactory
+  * Addressed via TransformSlot blacklist
+= Timberborn.SoundSystem.LoopingSoundPlayer
+= Timberborn.SoundSystem.Sounds
+= Timberborn.StockpileVisualization.GoodColumnVariantsService
+= Timberborn.StockpileVisualization.GoodPileVariantsService
+= Timberborn.StockpileVisualization.Pile
+  * NEW in v1.0.12 - addressed via existing StockpileVisualization blacklists
+= Timberborn.StockpileVisualization.StockpileGoodPileVisualizer
+= Timberborn.TerrainSystemRendering.TerrainBlockRandomizer
+= Timberborn.Wandering.VariedIdleAnimation
+  * NEW in v1.0.12 - added to blacklist
+= Timberborn.WaterBuildings.WaterInputPipeSegmentCreator
+= Timberborn.WorkshopsEffects.ObservatoryAnimator
+
+=== Map Editor only (not relevant for multiplayer gameplay) ===
+# Timberborn.BeaversUI.BeaverGeneratorTool
+  * Map editor tool
+# Timberborn.MapEditorNaturalResources.NaturalResourceSpawner
+  * Map editor only
+# Timberborn.MapEditorPlacementRandomizing.BlockObjectPlacementRandomizer
+  * Map editor only
+# Timberborn.MapEditorSceneLoading.MapEditorSceneLoader
+  * Map editor only
+
+=== Internal/Framework (not directly relevant) ===
+# Timberborn.Common.CommonConfigurator
+  * DI configuration
+# Timberborn.Common.FakeRandomNumberGeneratorFactory
+  * Testing utility
+# Timberborn.Common.RandomNumberGenerator
+  * The RNG implementation itself
+
+=== IParallelTickableSingleton implementations ===
+(These run in parallel during ticks - now forced sequential via NO_PARALLEL)
+= Timberborn.SoilContaminationSystem.SoilContaminationSimulator
+= Timberborn.SoilMoistureSystem.SoilMoistureSimulator
+= Timberborn.WaterSystem.WaterSimulator
+= Timberborn.WaterSystemRendering.WaterRenderer
