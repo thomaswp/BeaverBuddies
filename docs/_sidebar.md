@@ -1,4 +1,8 @@
 - [Home](/)
+- **Player Guide**
+- [User Guide](user-guide)
+- [Port Forwarding](port-forwarding)
+- **Developer Guide**
 - [Getting Started](getting-started)
 - [Contributing](contributing)
 - **Architecture**

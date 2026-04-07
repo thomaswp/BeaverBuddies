@@ -2,6 +2,12 @@
 
 This guide covers how to contribute to BeaverBuddies, including code conventions, common workflows, and how to add new synchronized actions.
 
+## Resources
+
+- [Video tutorial](https://www.youtube.com/watch?v=xD7x8R580N0) - Walkthrough of fixing a desync caused by an unimplemented UI event
+- [Issue tracker](https://github.com/thomaswp/BeaverBuddies/issues) - Find issues to work on
+- [Timberborn modding guide](https://timberborn.wiki.gg/wiki/Creating_Mods) - Helpful background, though BeaverBuddies doesn't use a typical modding workflow
+
 ## Development Workflow
 
 1. Fork the repository and clone your fork

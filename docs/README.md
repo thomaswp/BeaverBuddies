@@ -4,7 +4,11 @@
 
 BeaverBuddies transforms Timberborn from a single-player city builder into a cooperative multiplayer experience. Multiple players can build and manage a beaver settlement together in real-time.
 
-> This documentation is for **developers** working on the BeaverBuddies mod. If you're a player looking to install and use the mod, please visit the [player wiki](https://github.com/thomaswp/BeaverBuddies/wiki).
+[![BeaverBuddies Demo](https://github.com/thomaswp/BeaverBuddies/assets/1750176/41bb5d71-ff64-493c-a362-3c2483910b7d)](https://www.youtube.com/watch?v=m56GVA7XbI8)
+
+> **Players**: Check the [User Guide](user-guide) for installation and setup instructions.
+>
+> **Developers**: This documentation covers the full codebase architecture and internals.
 
 ## Quick Links
 
