@@ -105,6 +105,8 @@ namespace BeaverBuddies.Events
                 (typeof(FireworkLauncher), nameof(FireworkLauncher.SetPitch)),
                 (typeof(FlowSensor), nameof(FlowSensor.SetMode)),
                 (typeof(FlowSensor), nameof(FlowSensor.SetThreshold)),
+                (typeof(Gate), nameof(Gate.EnableConflict)),
+                (typeof(Gate), nameof(Gate.DisableConflict)),
                 (typeof(Gate), nameof(Gate.SetOpeningMode)),
                 (typeof(Indicator), nameof(Indicator.SetColorReplicationEnabled)),
                 (typeof(Indicator), nameof(Indicator.SetJournalEntryEnabled)),
@@ -118,10 +120,12 @@ namespace BeaverBuddies.Events
                 // this an event, which will make the UI laggy, but I think that's
                 // unavoidable.
                 (typeof(Lever), nameof(Lever.SwitchState)),
+                (typeof(Lever), nameof(Lever.Toggle)),
                 (typeof(Memory), nameof(Memory.SetMode)),
                 (typeof(Memory), nameof(Memory.SetInputA)),
                 (typeof(Memory), nameof(Memory.SetInputB)),
                 (typeof(Memory), nameof(Memory.SetResetInput)),
+                (typeof(Memory), nameof(Memory.Reset)),
                 (typeof(PopulationCounter), nameof(PopulationCounter.SetComparisonMode)),
                 (typeof(PopulationCounter), nameof(PopulationCounter.SetCountBeavers)),
                 (typeof(PopulationCounter), nameof(PopulationCounter.SetCountBots)),
@@ -150,7 +154,9 @@ namespace BeaverBuddies.Events
                 (typeof(Timer), nameof(Timer.SetInput)),
                 (typeof(Timer), nameof(Timer.SetMode)),
                 (typeof(Timer), nameof(Timer.SetResetInput)),
+                (typeof(Timer), nameof(Timer.Reset)),
                 (typeof(WeatherStation), nameof(WeatherStation.SetEarlyActivationHours)),
+                (typeof(WeatherStation), nameof(WeatherStation.SetEarlyActivationEnabled)),
                 (typeof(WeatherStation), nameof(WeatherStation.SetMode)),
                 // Note: this intentionally omits the HTTPApi system because, well, that
                 // doesn't really make sense in multiplayer... at the very least it'd be
