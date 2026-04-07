@@ -130,3 +130,25 @@ The solution contains four projects:
 - **Steamworks.NET** - Steam API wrapper (Steam builds only)
 - **Newtonsoft.Json** - JSON serialization (included via TimberNet)
 - **System.Collections.Immutable** - Immutable collections (NuGet)
+
+## Previewing Documentation
+
+The documentation site in `docs/` uses [Docsify](https://docsify.js.org/). To preview it locally:
+
+**Option 1: docsify-cli (recommended)**
+
+```bash
+npm install -g docsify-cli
+docsify serve docs
+```
+
+Then open `http://localhost:3000`.
+
+**Option 2: Python**
+
+```bash
+cd docs
+python -m http.server 8000
+```
+
+Then open `http://localhost:8000`.
