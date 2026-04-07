@@ -47,6 +47,7 @@ using Timberborn.WaterBuildings;
 using Timberborn.CharacterModelSystem;
 using Timberborn.DeconstructionSystem;
 using Timberborn.Healthcare;
+using Timberborn.NaturalResourcesContamination;
 using Timberborn.NaturalResourcesMoisture;
 using Timberborn.SlotSystem;
 using Timberborn.Wandering;
@@ -696,6 +697,35 @@ namespace BeaverBuddies
             if (EventIO.IsNull) return true;
             // Use fixed multiplier instead of random 0.9-1.1 range
             __result = __instance._wateredNaturalResourceSpec.DaysToDieDry;
+            return false;
+        }
+    }
+
+    // Fix for flooding desync: LivingWaterNaturalResource.GenerateRandomDaysToDie uses
+    // non-deterministic random (0.9-1.1 multiplier) when plants are submerged/flooded.
+    // Same pattern as WateredNaturalResource above.
+    [HarmonyPatch(typeof(LivingWaterNaturalResource), nameof(LivingWaterNaturalResource.GenerateRandomDaysToDie))]
+    class LivingWaterNaturalResourceGenerateRandomDaysToDiePatcher
+    {
+        static bool Prefix(LivingWaterNaturalResource __instance, ref float __result)
+        {
+            if (EventIO.IsNull) return true;
+            __result = __instance._floodableNaturalResourceSpec.DaysToDie;
+            return false;
+        }
+    }
+
+    // Fix for contamination desync: ContaminatedNaturalResource.GetDaysToDie uses
+    // non-deterministic random (Range(0.2, 0.3)) when natural resources get contaminated
+    // by badtide water. Replace with the midpoint value.
+    [HarmonyPatch(typeof(ContaminatedNaturalResource), nameof(ContaminatedNaturalResource.GetDaysToDie))]
+    class ContaminatedNaturalResourceGetDaysToDiePatcher
+    {
+        static bool Prefix(ref float __result)
+        {
+            if (EventIO.IsNull) return true;
+            // Use midpoint of MinDaysToDie (0.2) and MaxDaysToDie (0.3)
+            __result = 0.25f;
             return false;
         }
     }
