@@ -163,9 +163,12 @@ namespace BeaverBuddies.Events
         {
             bool result = ReplayEvent.DoPrefix(() =>
             {
-                // TODO: If this does work, it may affect other deletions too :(
+                // Filter out null/destroyed components (e.g. paths on platforms
+                // that get destroyed when the platform is queued for deletion)
                 List<string> entityIDs = __instance._temporaryBlockObjects
+                        .Where(obj => obj != null && obj.GetComponent<EntityComponent>() != null)
                         .Select(ReplayEvent.GetEntityID)
+                        .Where(id => id != null)
                         .ToList();
 
                 return new BuildingsDeconstructedEvent()
