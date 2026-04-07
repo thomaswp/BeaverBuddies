@@ -685,6 +685,21 @@ namespace BeaverBuddies
         }
     }
 
+    // Fix for issue #158: GenerateRandomDaysToDry uses non-deterministic random
+    // that causes desync when plants/trees dry out after being flooded.
+    // Replace the random multiplier (0.9-1.1) with a fixed value (1.0).
+    [HarmonyPatch(typeof(WateredNaturalResource), nameof(WateredNaturalResource.GenerateRandomDaysToDry))]
+    class WateredNaturalResourceGenerateRandomDaysToDryPatcher
+    {
+        static bool Prefix(WateredNaturalResource __instance, ref float __result)
+        {
+            if (EventIO.IsNull) return true;
+            // Use fixed multiplier instead of random 0.9-1.1 range
+            __result = __instance._wateredNaturalResourceSpec.DaysToDieDry;
+            return false;
+        }
+    }
+
     // This was removed when the method was removed: may need to revisit
     // Sometimes tool descriptions need an instance of the object they describe to describe it
     // and when it activates this can use randomness (e.g. WateredNaturalResource), which should
