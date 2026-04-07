@@ -2052,4 +2052,82 @@ namespace BeaverBuddies.Events
             });
         }
     }
+
+    // ========== Floodgate Automation Events ==========
+    // Floodgate automation height was not synced (reported by players)
+
+    [Serializable]
+    class FloodgateAutomationHeightChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public float height;
+
+        public override void Replay(IReplayContext context)
+        {
+            Floodgate floodgate = GetComponent<Floodgate>(context, entityID);
+            if (!floodgate) return;
+            floodgate.SetAutomationHeightAndSynchronize(height);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting floodgate {entityID} automation height to: {height}";
+        }
+    }
+
+    [HarmonyPatch(typeof(Floodgate), nameof(Floodgate.SetAutomationHeightAndSynchronize))]
+    class FloodgateSetAutomationHeightPatcher
+    {
+        static bool Prefix(Floodgate __instance, float newAutomationHeight)
+        {
+            if (__instance.AutomationHeight == newAutomationHeight) return true;
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new FloodgateAutomationHeightChangedEvent()
+                {
+                    entityID = entityID,
+                    height = newAutomationHeight,
+                };
+            });
+        }
+    }
+
+    // ========== SluiceState Additional Events ==========
+    // SluiceState toggle sync and auto-close toggles need patching too
+
+    [Serializable]
+    class SluiceStateSynchronizationChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public bool isSynchronized;
+
+        public override void Replay(IReplayContext context)
+        {
+            var sluice = GetComponent<Sluice>(context, entityID);
+            if (!sluice) return;
+            sluice._sluiceState.ToggleSynchronization(isSynchronized);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting sluice {entityID} synchronization to: {isSynchronized}";
+        }
+    }
+
+    [HarmonyPatch(typeof(SluiceState), nameof(SluiceState.ToggleSynchronization))]
+    class SluiceStateToggleSynchronizationPatcher
+    {
+        static bool Prefix(SluiceState __instance, bool newValue)
+        {
+            if (__instance.IsSynchronized == newValue) return true;
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new SluiceStateSynchronizationChangedEvent()
+                {
+                    entityID = entityID,
+                    isSynchronized = newValue,
+                };
+            });
+        }
+    }
 }
