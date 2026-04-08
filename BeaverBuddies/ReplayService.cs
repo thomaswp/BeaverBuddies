@@ -329,9 +329,11 @@ namespace BeaverBuddies
                     int randomS0Before = (int)replayEvent.randomS0Before;
                     if (s0 != randomS0Before)
                     {
-                        Plugin.LogWarning($"Random state mismatch: {s0:X8} != {randomS0Before:X8}");
-                        HandleDesync();
-                        break;
+                        Plugin.LogWarning($"Random state mismatch: {s0:X8} != {randomS0Before:X8} - resyncing");
+                        var state = UnityEngine.Random.state;
+                        state.s0 = randomS0Before;
+                        UnityEngine.Random.state = state;
+                        // Continue replaying - don't disconnect
                     }
                 }
                 try

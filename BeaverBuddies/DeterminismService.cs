@@ -1,7 +1,8 @@
 ﻿// If defined, parallel actions occur on the main thread
-// Disabled: the game's parallelizer is too tightly integrated in v1.0.12
-// to safely override. The parallel singletons (water, soil) should still
-// be deterministic as they write to separate buffers.
+// The parallel simulation (water, soil) is non-deterministic between
+// different machines, but enabling this may cause issues with the game's
+// internal state. Disabled for now; desync is handled via lightweight
+// RNG resync instead.
 //#define NO_PARALLEL
 // If defined, the game will use constant values instead of random
 // numbers, making it as deterministic as possible w.r.t random
