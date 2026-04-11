@@ -123,6 +123,7 @@ namespace BeaverBuddies
         public static bool IsNonGameplay = false;
         private static System.Random random = new System.Random();
         private static HashSet<Type> activeNonGamePatchers = new HashSet<Type>();
+        private static HashSet<Type> activeGamePatchers = new HashSet<Type>();
         private static int? nextSeedOnLoad;
 
         public void Reset()
@@ -130,6 +131,7 @@ namespace BeaverBuddies
             IsNonGameplay = false;
             IsTicking = false;
             activeNonGamePatchers.Clear();
+            activeGamePatchers.Clear();
             // No need to reset random
             // Don't reset seed, since it's set before the Reset
         }
@@ -205,6 +207,9 @@ namespace BeaverBuddies
                     return true;
                 }
 
+                // If this is explicitly marked as game code, use game RNG
+                if (activeGamePatchers.Count > 0) return false;
+
                 bool areActiveNonGamePatchers = activeNonGamePatchers.Count > 0;
 
                 // If this is non-game code, don't use the Game's random
@@ -265,6 +270,18 @@ namespace BeaverBuddies
             else
             {
                 return activeNonGamePatchers.Remove(patcherType);
+            }
+        }
+
+        public static bool SetGamePatcherActive(System.Type patcherType, bool active)
+        {
+            if (active)
+            {
+                return activeGamePatchers.Add(patcherType);
+            }
+            else
+            {
+                return activeGamePatchers.Remove(patcherType);
             }
         }
 
@@ -563,6 +580,23 @@ namespace BeaverBuddies
         static void Postfix()
         {
             DeterminismService.SetNonGamePatcherActive(typeof(DateSalterPatcher), false);
+        }
+    }
+
+    // BeaverNameService.RandomName uses RNG to pick beaver names. This can happen
+    // outside of a tick (during entity initialization via Unity's Start()), but it needs
+    // to be deterministic for consistency.
+    [HarmonyPatch(typeof(BeaverNameService), nameof(BeaverNameService.RandomName))]
+    public class BeaverNameServiceRandomNamePatcher
+    {
+        static void Prefix()
+        {
+            DeterminismService.SetGamePatcherActive(typeof(BeaverNameServiceRandomNamePatcher), true);
+        }
+
+        static void Postfix()
+        {
+            DeterminismService.SetGamePatcherActive(typeof(BeaverNameServiceRandomNamePatcher), false);
         }
     }
 

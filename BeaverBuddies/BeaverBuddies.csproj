@@ -17,7 +17,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>BeaverBuddies</AssemblyName>
     <Description>TimberModTest</Description>
-    <Version>1.6.5</Version>
+    <Version>1.6.6</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
@@ -29,7 +29,12 @@
     <TimberbornManagedPath>$(TimberbornDataPath)Managed\</TimberbornManagedPath>
     <!-- Include HarmonyX file inside $(BeaverBuddiesModsPath) -->
     <NuGetPackagesDir>$(UserProfile)\.nuget\packages\</NuGetPackagesDir>
+    <Configurations>Debug;Release;Debug Steam;Release Steam</Configurations>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug Steam' OR '$(Configuration)' == 'Release Steam'">
+    <DefineConstants>$(DefineConstants);IS_STEAM</DefineConstants>
   </PropertyGroup>
 
   <Target Name="CheckEnv" BeforeTargets="BeforeBuild">
