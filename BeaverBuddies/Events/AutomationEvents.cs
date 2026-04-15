@@ -9,6 +9,7 @@ using Timberborn.AutomationBuildingsUI;
 using Timberborn.AutomationUI;
 using Timberborn.BaseComponentSystem;
 using Timberborn.FireworkSystem;
+using Timberborn.WaterBuildings;
 using UnityEngine.UIElements;
 
 namespace BeaverBuddies.Events
@@ -155,6 +156,24 @@ namespace BeaverBuddies.Events
                 // Note: this intentionally omits the HTTPApi system because, well, that
                 // doesn't really make sense in multiplayer... at the very least it'd be
                 // a larger project.
+
+                // Some building also have special automation UIs that exist when automated
+                (typeof(Floodgate), nameof(Floodgate.SetAutomationHeightAndSynchronize)),
+                (typeof(Valve), nameof(Valve.SetAutomationOutflowLimitAndSynchronize)),
+                (typeof(Valve), nameof(Valve.SetAutomationOutflowLimitEnabledAndSynchronize)),
+                (typeof(Valve), nameof(Valve.SetReactionSpeedAndSynchronize)),
+                (typeof(FillValve), nameof(FillValve.SetAutomationTargetHeightAndSynchronize)),
+                (typeof(FillValve), nameof(FillValve.SetAutomationTargetHeightEnabledAndSynchronize)),
+
+                // TODO: These are not automation-related events, but they are "automated" events
+                // so I need to refactor this class to separate these two ideas
+                (typeof(Valve), nameof(Valve.SetOutflowLimitAndSynchronize)),
+                (typeof(Valve), nameof(Valve.SetOutflowLimitEnabledAndSynchronize)),
+                (typeof(Valve), nameof(Valve.ToggleSynchronization)),
+                (typeof(FillValve), nameof(FillValve.SetTargetHeightAndSynchronize)),
+                (typeof(FillValve), nameof(FillValve.SetTargetHeightEnabledAndSynchronize)),
+                (typeof(FillValve), nameof(FillValve.ToggleSynchronization)),
+
             ];
             var methodsToPatch = methodsToPatchInfo.Select(
                 info => info.Item1.GetMethod(
