@@ -38,16 +38,16 @@
   </PropertyGroup>
 
   <Target Name="CheckEnv" BeforeTargets="BeforeBuild">
-    <Warning Text="TimberbornPath property is deprecated, use the more specific TimberbornDataPath instead" Condition="'$(TimberbornDataPath)' == ''"/>
-    <Error Text="TimberbornDataPath property directory not found" Condition="!Exists('$(TimberbornDataPath)')"/>
-    <Error Text="HarmonyPath property directory not found" Condition="!Exists('$(HarmonyPath)')"/>
-    <Error Text="ModSettingsPath property directory not found" Condition="!Exists('$(ModSettingsPath)')"/>
-    <Error Text="DocumentsPath property directory not found" Condition="!Exists('$(DocumentsPath)')"/>
+    <Warning Text="TimberbornPath property is deprecated, use the more specific TimberbornDataPath instead" Condition="'$(TimberbornDataPath)' == ''" />
+    <Error Text="TimberbornDataPath property directory not found" Condition="!Exists('$(TimberbornDataPath)')" />
+    <Error Text="HarmonyPath property directory not found" Condition="!Exists('$(HarmonyPath)')" />
+    <Error Text="ModSettingsPath property directory not found" Condition="!Exists('$(ModSettingsPath)')" />
+    <Error Text="DocumentsPath property directory not found" Condition="!Exists('$(DocumentsPath)')" />
   </Target>
 
   <!-- NuGet -->
   <ItemGroup>
-    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3">
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3" ExcludeAssets="runtime">
       <PrivateAssets>all</PrivateAssets>
       <PublicizeCompilerGenerated>false</PublicizeCompilerGenerated>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
