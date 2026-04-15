@@ -167,6 +167,7 @@ namespace BeaverBuddies.Events
                 // so I need to refactor this class to separate these two ideas
                 (typeof(Valve), nameof(Valve.SetOutflowLimitAndSynchronize)),
                 (typeof(Valve), nameof(Valve.SetOutflowLimitEnabledAndSynchronize)),
+                (typeof(Valve), nameof(Valve.ToggleSynchronization)),
             ];
             var methodsToPatch = methodsToPatchInfo.Select(
                 info => info.Item1.GetMethod(
