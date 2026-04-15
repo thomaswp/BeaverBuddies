@@ -161,6 +161,12 @@ namespace BeaverBuddies.Events
                 (typeof(Floodgate), nameof(Floodgate.SetAutomationHeightAndSynchronize)),
                 (typeof(Valve), nameof(Valve.SetAutomationOutflowLimitAndSynchronize)),
                 (typeof(Valve), nameof(Valve.SetAutomationOutflowLimitEnabledAndSynchronize)),
+                (typeof(Valve), nameof(Valve.SetReactionSpeedAndSynchronize)),
+
+                // TODO: These are not automation-related events, but they are "automated" events
+                // so I need to refactor this class to separate these two ideas
+                (typeof(Valve), nameof(Valve.SetOutflowLimitAndSynchronize)),
+                (typeof(Valve), nameof(Valve.SetOutflowLimitEnabledAndSynchronize)),
             ];
             var methodsToPatch = methodsToPatchInfo.Select(
                 info => info.Item1.GetMethod(
