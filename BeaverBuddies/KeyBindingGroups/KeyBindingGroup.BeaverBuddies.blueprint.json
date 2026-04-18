@@ -1,0 +1,7 @@
+{
+  "KeyBindingGroupSpec": {
+    "Id": "KeyBindingGroup.BeaverBuddies",
+    "Order": 1000,
+    "LocKey": "BeaverBuddies.KeyBindings.Group"
+  }
+}

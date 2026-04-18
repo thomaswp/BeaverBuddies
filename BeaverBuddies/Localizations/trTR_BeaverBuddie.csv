@@ -71,3 +71,9 @@ BeaverBuddies.JoinCoopGame.Error.InvalidFormat,"Geçersiz adres biçimi. Port ç
 BeaverBuddies.JoinCoopGame.Error.InvalidAddress,"Adres geçerli bir IP adresi değildi.
 Ana bilgisayar adı olarak çözümlemeye çalışıldı, ancak bir IP adresine çözümlenmedi.",""
 BeaverBuddies.JoinCoopGame.Error.CouldNotConnect,"Ana bilgisayara bağlanılamadı. Adresi ve portu kontrol edin ve ana bilgisayarın gerçekten sunucuyu barındırdığından ve gerekiyorsa port yönlendirmesinin etkin olduğundan emin olun. Hata ayrıntıları:",""
+BeaverBuddies.KeyBindings.Group,"BeaverBuddies",""
+BeaverBuddies.KeyBindings.Ping,"Konum işaretle",""
+BeaverBuddies.Settings.PingPlayerName,"İşaret görünen ad",""
+BeaverBuddies.Settings.PingPlayerName.Tooltip,"Diğer oyunculara işaretlerinizin yanında gösterilen ad.",""
+BeaverBuddies.Settings.PingColor,"İşaret rengi",""
+BeaverBuddies.Settings.PingColor.Tooltip,"İşaretlerinizin her oyuncunun ekranında çizilirken kullanılacak renk.",""

@@ -1,0 +1,10 @@
+{
+  "KeyBindingSpec": {
+    "Id": "BeaverBuddies.KeyBind.Ping",
+    "GroupId": "KeyBindingGroup.BeaverBuddies",
+    "LocKey": "BeaverBuddies.KeyBindings.Ping",
+    "Order": 0,
+    "AllowOtherModifiers": false,
+    "DevModeOnly": false
+  }
+}
