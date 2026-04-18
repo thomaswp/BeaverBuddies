@@ -71,3 +71,9 @@ BeaverBuddies.JoinCoopGame.Error.InvalidFormat,"Formato de endereço inválido. 
 BeaverBuddies.JoinCoopGame.Error.InvalidAddress,"O endereço não era um endereço IP válido.
 Tentou-se resolvê-lo como um nome de host, mas ele não foi convertido em um endereço IP.",""
 BeaverBuddies.JoinCoopGame.Error.CouldNotConnect,"Não foi possível conectar ao host. Verifique o endereço e a porta, e certifique-se de que o host esteja hospedando e com o redirecionamento de porta configurado, se necessário. Detalhes do erro:",""
+BeaverBuddies.KeyBindings.Group,"BeaverBuddies",""
+BeaverBuddies.KeyBindings.Ping,"Marcar localização",""
+BeaverBuddies.Settings.PingPlayerName,"Nome exibido nos marcadores",""
+BeaverBuddies.Settings.PingPlayerName.Tooltip,"O nome exibido aos outros jogadores ao lado dos seus marcadores.",""
+BeaverBuddies.Settings.PingColor,"Cor do marcador",""
+BeaverBuddies.Settings.PingColor.Tooltip,"A cor usada para desenhar seus marcadores na tela de cada jogador.",""
