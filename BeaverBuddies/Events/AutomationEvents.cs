@@ -301,8 +301,8 @@ namespace BeaverBuddies.Events
         public override void Replay(IReplayContext context)
         {
             Automatable automatable = GetComponent<Automatable>(context, automatableID);
-            Automator automator = GetComponent<Automator>(context, inputID);
-            if (automatable == null || automator == null) return;
+            if (automatable == null) return;
+            Automator automator = inputID == null ? null : GetComponent<Automator>(context, inputID);
             automatable.SetInput(automator);
         }
 
