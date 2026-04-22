@@ -69,8 +69,9 @@ namespace BeaverBuddies
 
         // ---- Ping Settings ----
 
+        public const string DefaultPingPlayerName = "Player";
         public ModSetting<string> PingPlayerName { get; } =
-            new("Player",
+            new(DefaultPingPlayerName,
                 ModSettingDescriptor.CreateLocalized(
                     "BeaverBuddies.Settings.PingPlayerName"
                 ).SetLocalizedTooltip("BeaverBuddies.Settings.PingPlayerName.Tooltip")
@@ -104,7 +105,7 @@ namespace BeaverBuddies
         public static bool EnableSteam => instance?.EnableSteamConnection.Value ?? true;
         public static bool LobbyJoinable => instance?.FriendsCanJoinSteamGame.Value ?? true;
 
-        public static string PingDisplayName => instance?.PingPlayerName.Value ?? "Player";
+        public static string PingDisplayName => instance?.PingPlayerName.Value ?? DefaultPingPlayerName;
 
         public static UnityEngine.Color PingColorValue => instance?.PingColor.Color ?? UnityEngine.Color.white;
 
