@@ -1,5 +1,4 @@
-﻿using BeaverBuddies.DesyncDetecter;
-using Bindito.Core.Internal;
+﻿using ModSettings.Common;
 using ModSettings.Core;
 using Timberborn.Modding;
 using Timberborn.SettingsSystem;
@@ -108,20 +107,6 @@ namespace BeaverBuddies
         public static string PingDisplayName => instance?.PingPlayerName.Value ?? "Player";
 
         public static UnityEngine.Color PingColorValue => instance?.PingColor.Color ?? UnityEngine.Color.white;
-
-        public static int PauseReductionLevel
-        {
-            get
-            {
-                if (instance?.PauseReduction?.Value == null)
-                    return 0;
-
-                if (int.TryParse(instance.PauseReduction.Value, out int level))
-                    return level;
-
-                return 0;
-            }
-        }
 
         public Settings(ISettings settings,
                         ModSettingsOwnerRegistry modSettingsOwnerRegistry,
