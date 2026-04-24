@@ -100,14 +100,9 @@ namespace BeaverBuddies.Ping
         private Camera TryGetCamera()
         {
             if (CameraService == null) return null;
-            try
-            {
-                var t = CameraService.Transform;
-                if (t == null || (Object)t == null) return null;
-                return t.GetComponent<Camera>();
-            }
-            catch (System.NullReferenceException) { return null; }
-            catch (MissingReferenceException) { return null; }
+            var t = CameraService.Transform;
+            if (t == null || (Object)t == null) return null;
+            return t.GetComponent<Camera>();
         }
 
         private static Vector2 ClampToEdge(Vector2 center, Vector2 dir, float w, float h, float margin)
