@@ -11,6 +11,8 @@ using Timberborn.BuildingsUI;
 using Timberborn.Characters;
 using Timberborn.CharactersUI;
 using Timberborn.CoreUI;
+using Timberborn.DecalSystem;
+using Timberborn.DecalSystemUI;
 using Timberborn.Demolishing;
 using Timberborn.DemolishingUI;
 using Timberborn.Emptying;
@@ -1648,6 +1650,102 @@ namespace BeaverBuddies.Events
         public static bool Prefix(WaterSourceRegulator __instance)
         {
             return WaterSourceRegulatorStateChangedEvent.DoPrefix(__instance, false);
+        }
+    }
+
+    [Serializable]
+    class DecalSupplierActiveDecalChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public string decalId;
+        public string category;
+
+        public override void Replay(IReplayContext context)
+        {
+            var supplier = GetComponent<DecalSupplier>(context, entityID);
+            if (!supplier) return;
+            supplier.SetActiveDecal(new Decal(decalId, category));
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting decal for {entityID} to: {decalId}";
+        }
+    }
+
+    [HarmonyPatch(typeof(DecalSupplier), nameof(DecalSupplier.SetActiveDecal))]
+    class DecalSupplierSetActiveDecalPatcher
+    {
+        static bool Prefix(DecalSupplier __instance, Decal decal)
+        {
+            if (__instance.ActiveDecal.Equals(decal)) return true;
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new DecalSupplierActiveDecalChangedEvent()
+                {
+                    entityID = entityID,
+                    decalId = decal.Id,
+                    category = decal.Category,
+                };
+            });
+        }
+    }
+
+    [Serializable]
+    class FlippableDecalFlipChangedEvent : ReplayEvent
+    {
+        public string entityID;
+        public bool isFlipped;
+
+        public override void Replay(IReplayContext context)
+        {
+            var flippable = GetComponent<FlippableDecal>(context, entityID);
+            if (!flippable) return;
+            flippable.SetFlip(isFlipped);
+        }
+
+        public override string ToActionString()
+        {
+            return $"Setting decal flip for {entityID} to: {isFlipped}";
+        }
+    }
+
+    [HarmonyPatch(typeof(FlippableDecal), nameof(FlippableDecal.SetFlip))]
+    class FlippableDecalSetFlipPatcher
+    {
+        static bool Prefix(FlippableDecal __instance, bool value)
+        {
+            if (__instance.IsFlipped == value) return true;
+            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
+            {
+                return new FlippableDecalFlipChangedEvent()
+                {
+                    entityID = entityID,
+                    isFlipped = value,
+                };
+            });
+        }
+    }
+
+    // Disabling custom patterns for now - if someone is ambitious they can
+    // figure out a solution for how to sync custom textures across clients.
+    [HarmonyPatch(typeof(UserDecalService), nameof(UserDecalService.GetCustomDecals))]
+    class UserDecalServiceGetCustomDecalsPatcher
+    {
+        static bool Prefix(ref IEnumerable<DecalSpec> __result)
+        {
+            __result = Enumerable.Empty<DecalSpec>();
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(DecalSupplierFragment), nameof(DecalSupplierFragment.ShowFragment))]
+    class DecalSupplierFragmentShowFragmentPatcher
+    {
+        static void Postfix(DecalSupplierFragment __instance, VisualElement ____root)
+        {
+            ____root.Q<Button>("BrowseButton")?.ToggleDisplayStyle(false);
+            ____root.Q<Button>("RefreshButton")?.ToggleDisplayStyle(false);
         }
     }
 }
