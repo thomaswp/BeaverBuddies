@@ -181,25 +181,25 @@ namespace BeaverBuddies.Events
             // This would make options menu unsynced and non-pausing,
             // but I think it's dangerous to open the menu outside of a synced pause.
             // So we will only do this if the user explicitly opts into it
-            if (Settings.PauseReductionLevel == 2 ) return true;
+            if (Settings.PauseReductionSetting == PauseReductionLevel.NeverAutoPause) return true;
 
             return ReplayEvent.DoPrefix(() => new ShowOptionsMenuEvent());
         }
     }
 
     // OverlayPanelSpeedLocker is triggering ChangeAndLockSpeed via OnPanelShown
-    // This is now configurable via Settings.PauseReduction. If we don't freeze, it could
-    // definitely cause some possible invalid operations (e.g. deleting a building
-    // that's not there anymore), but in theory these errors get caught before
-    // sending to the server. In practice, though, there could be side-effects of
-    // and aborted event. For clients, I think this is always a possibility, regardless
-    // of whether we freeze, since it's always happening at a delay.
+    // This is now configurable via Settings.PauseReduction. If we don't freeze, it could in theory
+    // cause invalid operations (e.g. deleting a building that's not there anymore).
+    // Event creation could crash if it expects state that has changed, or it could
+    // send an invalid event to the server. The server is robust to invalid actions
+    // (they're always a possibility)e. For clients, stale-state
+    // issues are inherent regardless of freezing, since actions always happen at a delay.
     [HarmonyPatch(typeof(OverlayPanelSpeedLocker), nameof(OverlayPanelSpeedLocker.OnPanelShown))]
     public class OverlayPanelSpeedLockerShowPatcher
     {
         public static bool Prefix()
         {
-            return Settings.PauseReductionLevel == 0;
+            return Settings.PauseReductionSetting == PauseReductionLevel.Off;
         }
     }
 }

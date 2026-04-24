@@ -65,11 +65,11 @@ BeaverBuddies.Settings.PauseReduction,"강제 일시정지 횟수 줄이기",""
 BeaverBuddies.Settings.PauseReduction.Tooltip,"최적의 경험을 위해 모든 플레이어가 동일한 설정을 사용하는 것이 좋습니다.
 
 끄기 - 기본 동작
-권장 - 해체 시 게임이 일시정지되지 않습니다
-높은 위험 - 권장에 더해 메뉴를 열 때도 게임이 일시정지되지 않습니다. 저장하기 전에 게임을 일시정지하지 않으면 저장 파일이 손상될 수 있습니다.",""
+메뉴만 - 메뉴를 열 때만 자동 일시정지 (해체 시에는 일시정지하지 않음)
+자동 일시정지 안 함 - 메뉴를 열 때를 포함하여 게임이 자동으로 일시정지되지 않습니다. 저장하기 전에 게임을 일시정지하지 않으면 저장 파일이 손상될 수 있습니다.",""
 BeaverBuddies.Settings.PauseReduction.Off,"끄기",""
-BeaverBuddies.Settings.PauseReduction.LowRisk,"권장",""
-BeaverBuddies.Settings.PauseReduction.HighRisk,"높은 위험",""
+BeaverBuddies.Settings.PauseReduction.LowRisk,"메뉴만",""
+BeaverBuddies.Settings.PauseReduction.HighRisk,"자동 일시정지 안 함",""
 BeaverBuddies.Host.ConnectedClients,"클라이언트 연결 대기 중…
 현재 연결된 클라이언트:",""
 BeaverBuddies.Host.DirectConnectClient,"다이렉트 연결 클라이언트",""

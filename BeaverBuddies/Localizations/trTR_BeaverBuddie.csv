@@ -65,11 +65,11 @@ BeaverBuddies.Settings.PauseReduction,"Zorunlu duraklamaların sayısını azalt
 BeaverBuddies.Settings.PauseReduction.Tooltip,"En iyi deneyim için tüm oyuncuların aynı ayarı kullanması önerilir.
 
 Kapalı - Varsayılan davranış
-Önerilen - Oyun yıkımlar sırasında duraklatılmayacak
-Yüksek Riskli - Önerilen'e ek olarak, menü açılırken oyun duraklatılmayacak. Kaydetmeden önce oyunu duraklatmazsanız kayıt bozulmalarına yol açabilir.",""
+Yalnızca menü - Otomatik duraklatma yalnızca menü açılırken (yıkımlar sırasında değil)
+Otomatik duraklatma yok - Oyun, menü açılırken dahil hiçbir zaman otomatik duraklatmayacak. Kaydetmeden önce oyunu duraklatmazsanız kayıt bozulmalarına yol açabilir.",""
 BeaverBuddies.Settings.PauseReduction.Off,"Kapalı",""
-BeaverBuddies.Settings.PauseReduction.LowRisk,"Önerilen",""
-BeaverBuddies.Settings.PauseReduction.HighRisk,"Yüksek Riskli",""
+BeaverBuddies.Settings.PauseReduction.LowRisk,"Yalnızca menü",""
+BeaverBuddies.Settings.PauseReduction.HighRisk,"Otomatik duraklatma yok",""
 BeaverBuddies.Host.ConnectedClients,"Müşterilerin bağlanması bekleniyor…
 Şu anda bağlı müşteriler:",""
 BeaverBuddies.Host.DirectConnectClient,"Doğrudan Bağlantı İstemcisi",""

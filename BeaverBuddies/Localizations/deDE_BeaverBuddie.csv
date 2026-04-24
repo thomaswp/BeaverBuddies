@@ -65,11 +65,11 @@ BeaverBuddies.Settings.PauseReduction,"Anzahl der erzwungenen Pausen reduzieren"
 BeaverBuddies.Settings.PauseReduction.Tooltip,"Für ein optimales Erlebnis sollten alle Spieler die gleiche Einstellung verwenden.
 
 Aus - Standardverhalten
-Empfohlen - Das Spiel wird bei Abrissen nicht pausiert
-Hohes Risiko - Zusätzlich zu Empfohlen wird das Spiel auch beim Öffnen des Menüs nicht pausiert. Dies kann zu Speicherschäden führen, wenn du das Spiel vor dem Speichern nicht pausierst.",""
+Nur Menü - Automatische Pause nur beim Öffnen des Menüs (nicht bei Abrissen)
+Nie automatisch pausieren - Das Spiel wird nie automatisch pausiert, auch nicht beim Öffnen des Menüs. Dies kann zu Speicherschäden führen, wenn du das Spiel vor dem Speichern nicht pausierst.",""
 BeaverBuddies.Settings.PauseReduction.Off,"Aus",""
-BeaverBuddies.Settings.PauseReduction.LowRisk,"Empfohlen",""
-BeaverBuddies.Settings.PauseReduction.HighRisk,"Hohes Risiko",""
+BeaverBuddies.Settings.PauseReduction.LowRisk,"Nur Menü",""
+BeaverBuddies.Settings.PauseReduction.HighRisk,"Nie automatisch pausieren",""
 BeaverBuddies.Host.ConnectedClients,"Warte auf Clients…
 Derzeit verbundene Clients:",""
 BeaverBuddies.Host.DirectConnectClient,"Direkt‑Connect‑Client",""

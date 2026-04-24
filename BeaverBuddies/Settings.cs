@@ -7,6 +7,13 @@ using Timberborn.SettingsSystem;
 
 namespace BeaverBuddies
 {
+    public enum PauseReductionLevel
+    {
+        Off = 0,
+        MenuOnly = 1,
+        NeverAutoPause = 2,
+    }
+
     public class Settings : ModSettingsOwner
     {
         public ModSetting<string> ClientConnectionAddress { get; } =
@@ -100,17 +107,17 @@ namespace BeaverBuddies
         public static bool EnableSteam => instance?.EnableSteamConnection.Value ?? true;
         public static bool LobbyJoinable => instance?.FriendsCanJoinSteamGame.Value ?? true;
 
-        public static int PauseReductionLevel
+        public static PauseReductionLevel PauseReductionSetting
         {
             get
             {
                 if (instance?.PauseReduction?.Value == null)
-                    return 0;
+                    return PauseReductionLevel.Off;
 
                 if (int.TryParse(instance.PauseReduction.Value, out int level))
-                    return level;
+                    return (PauseReductionLevel)level;
 
-                return 0;
+                return PauseReductionLevel.Off;
             }
         }
 

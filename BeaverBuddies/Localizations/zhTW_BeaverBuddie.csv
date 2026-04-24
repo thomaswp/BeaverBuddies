@@ -65,11 +65,11 @@ BeaverBuddies.Settings.PauseReduction,"減少強制暫停的次數",""
 BeaverBuddies.Settings.PauseReduction.Tooltip,"為獲得最佳體驗，建議所有玩家使用相同設定。
 
 關閉 - 預設行為
-建議 - 拆除建築時遊戲不會暫停
-高風險 - 在建議模式的基礎上，打開選單時遊戲也不會暫停。若在儲存前不暫停遊戲，可能導致存檔損壞。",""
+僅選單 - 僅在打開選單時自動暫停（拆除建築時不暫停）
+從不自動暫停 - 遊戲永遠不會自動暫停，包括打開選單時。若在儲存前不暫停遊戲，可能導致存檔損壞。",""
 BeaverBuddies.Settings.PauseReduction.Off,"關閉",""
-BeaverBuddies.Settings.PauseReduction.LowRisk,"建議",""
-BeaverBuddies.Settings.PauseReduction.HighRisk,"高風險",""
+BeaverBuddies.Settings.PauseReduction.LowRisk,"僅選單",""
+BeaverBuddies.Settings.PauseReduction.HighRisk,"從不自動暫停",""
 BeaverBuddies.Host.ConnectedClients,"等待客戶端連接…
 目前已連接客戶端：",""
 BeaverBuddies.Host.DirectConnectClient,"直接連接客戶端",""

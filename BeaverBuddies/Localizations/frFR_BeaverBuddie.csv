@@ -67,11 +67,11 @@ BeaverBuddies.Settings.PauseReduction,"Réduire le nombre de pauses forcées",""
 BeaverBuddies.Settings.PauseReduction.Tooltip,"Pour une expérience optimale, tous les joueurs devraient utiliser le même réglage.
 
 Désactivé - Comportement par défaut
-Recommandé - Le jeu ne sera pas mis en pause lors des déconstructions
-Risque élevé - En plus de Recommandé, le jeu ne sera pas non plus mis en pause lors de l'ouverture du menu. Cela peut entraîner une corruption de sauvegarde si vous ne mettez pas le jeu en pause avant de sauvegarder.",""
+Menu uniquement - Pause automatique uniquement lors de l'ouverture du menu (pas lors des déconstructions)
+Jamais de pause automatique - Le jeu ne se mettra jamais automatiquement en pause, y compris lors de l'ouverture du menu. Cela peut entraîner une corruption de sauvegarde si vous ne mettez pas le jeu en pause avant de sauvegarder.",""
 BeaverBuddies.Settings.PauseReduction.Off,"Désactivé",""
-BeaverBuddies.Settings.PauseReduction.LowRisk,"Recommandé",""
-BeaverBuddies.Settings.PauseReduction.HighRisk,"Risque élevé",""
+BeaverBuddies.Settings.PauseReduction.LowRisk,"Menu uniquement",""
+BeaverBuddies.Settings.PauseReduction.HighRisk,"Jamais de pause automatique",""
 BeaverBuddies.Host.ConnectedClients,"En attente des clients…
 Clients actuellement connectés :",""
 BeaverBuddies.Host.ConnectedClients,"En attente des clients…
