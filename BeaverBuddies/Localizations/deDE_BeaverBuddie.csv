@@ -61,6 +61,15 @@ Hinweis: Diese Funktion funktioniert möglicherweise nicht, wenn dein Netzwerk P
 Außerdem können Peer‑to‑Peer‑Verbindungen langsamer sein als direkte Verbindungen.",""
 BeaverBuddies.Settings.FriendsCanJoinSteamGame,"Freunde direkt über Steam beitreten lassen",""
 BeaverBuddies.Settings.FriendsCanJoinSteamGame.Tooltip,"Wenn aktiviert, können deine Freunde direkt über Steam deinem Spiel beitreten, ohne dass du sie einladen musst.",""
+BeaverBuddies.Settings.PauseReduction,"Anzahl der erzwungenen Pausen reduzieren",""
+BeaverBuddies.Settings.PauseReduction.Tooltip,"Für ein optimales Erlebnis sollten alle Spieler die gleiche Einstellung verwenden.
+
+Aus - Standardverhalten
+Nur Menü - Automatische Pause nur beim Öffnen des Menüs (nicht bei Abrissen)
+Nie automatisch pausieren - Das Spiel wird nie automatisch pausiert, auch nicht beim Öffnen des Menüs. Dies kann zu Speicherschäden führen, wenn du das Spiel vor dem Speichern nicht pausierst.",""
+BeaverBuddies.Settings.PauseReduction.Off,"Aus",""
+BeaverBuddies.Settings.PauseReduction.LowRisk,"Nur Menü",""
+BeaverBuddies.Settings.PauseReduction.HighRisk,"Nie automatisch pausieren",""
 BeaverBuddies.Host.ConnectedClients,"Warte auf Clients…
 Derzeit verbundene Clients:",""
 BeaverBuddies.Host.DirectConnectClient,"Direkt‑Connect‑Client",""

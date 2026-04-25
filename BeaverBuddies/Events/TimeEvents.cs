@@ -2,10 +2,10 @@
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Timberborn.Options;
 using Timberborn.OptionsGame;
 using Timberborn.TimeSystem;
+using Timberborn.UILayoutSystem;
 using static BeaverBuddies.SingletonManager;
 
 namespace BeaverBuddies.Events
@@ -83,13 +83,6 @@ namespace BeaverBuddies.Events
         }
     }
 
-    // TODO: It might be nice to make this configurable: whether the host
-    // should freeze the game for these pop-ups. If we don't freeze, it could
-    // definitely cause some possible invalid operations (e.g. deleting a building
-    // that's not there anymore), but in theory these errors get caught before
-    // sending to the server. In practice, though, there could be side-effects of
-    // and aborted event. For clients, I think this is always a possibility, regardless
-    // of whether we freeze, since it's always happening at a delay.
     [ManualMethodOverwrite]
     /*
         04/19/2025
@@ -170,25 +163,43 @@ namespace BeaverBuddies.Events
         }
     }
 
-    // We make showing the options menu a synced game event, rather than
+    // By default, we make showing the options menu a synced game event, rather than
     // a non-synced UI action, for two reasons:
     // 1) This ensures that the Options menu is always shown when a full
     //    tick has been completed.
-    // 2) This will give other plays a visual clue about why the game has
+    // 2) This will give other players a visual clue about why the game has
     //    paused.
     // However, only the host will be able to unpause, and only by manually
     // setting the game speed, since they won't process any events by clients
     // while they have a panel (including this one) up (I think...).
-    // TODO: Should allow client to bring up menu, even if they don't pause
     [HarmonyPatch(typeof(GameOptionsBox), nameof(GameOptionsBox.Show))]
     public class GameOptionsBoxShowPatcher
     {
         static bool Prefix()
         {
-            return ReplayEvent.DoPrefix(() =>
-            {
-                return new ShowOptionsMenuEvent();
-            });
+
+            // This would make options menu unsynced and non-pausing,
+            // but I think it's dangerous to open the menu outside of a synced pause.
+            // So we will only do this if the user explicitly opts into it
+            if (Settings.PauseReductionSetting == PauseReductionLevel.NeverAutoPause) return true;
+
+            return ReplayEvent.DoPrefix(() => new ShowOptionsMenuEvent());
+        }
+    }
+
+    // OverlayPanelSpeedLocker is triggering ChangeAndLockSpeed via OnPanelShown
+    // This is now configurable via Settings.PauseReduction. If we don't freeze, it could in theory
+    // cause invalid operations (e.g. deleting a building that's not there anymore).
+    // Event creation could crash if it expects state that has changed, or it could
+    // send an invalid event to the server. The server is robust to invalid actions
+    // (they're always a possibility)e. For clients, stale-state
+    // issues are inherent regardless of freezing, since actions always happen at a delay.
+    [HarmonyPatch(typeof(OverlayPanelSpeedLocker), nameof(OverlayPanelSpeedLocker.OnPanelShown))]
+    public class OverlayPanelSpeedLockerShowPatcher
+    {
+        public static bool Prefix()
+        {
+            return Settings.PauseReductionSetting == PauseReductionLevel.Off;
         }
     }
 }
