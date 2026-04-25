@@ -121,8 +121,15 @@ namespace BeaverBuddies.Ping
                 worldZ = worldPos.z,
                 senderName = senderName,
                 colorHex = ColorUtility.ToHtmlStringRGB(color),
+
+                // We mark this ping as local so it doesn't play back for this player
+                // since we play the ping immediately (it has no gameplay impact and doesn't
+                // need to sync).
+                IsLocal = true,
             });
 
+            // Play the ping immediately locally, since it looks better not
+            // to have any delay
             AddPing(worldPos, senderName, color);
         }
 

@@ -32,7 +32,7 @@ namespace BeaverBuddies.Ping
             }
         }
 
-        private void OnGUI()
+        public void OnGUI()
         {
             if (Service == null) return;
 

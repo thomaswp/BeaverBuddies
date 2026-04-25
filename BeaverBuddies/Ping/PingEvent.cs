@@ -13,10 +13,17 @@ namespace BeaverBuddies.Ping
         public string senderName;
         public string colorHex;
 
+        [NonSerialized]
+        public bool IsLocal = false;
+
         public Vector3 WorldPosition => new Vector3(worldX, worldY, worldZ);
 
         public override void Replay(IReplayContext context)
         {
+            // If the ping came from this player, just ignore it,
+            // since we've already added it locally when it was created.
+            if (IsLocal) return;
+
             var pingService = context.GetSingleton<PingService>();
             if (pingService == null) return;
 
