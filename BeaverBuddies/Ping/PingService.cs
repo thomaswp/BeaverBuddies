@@ -84,15 +84,19 @@ namespace BeaverBuddies.Ping
             if (EventIO.IsNull) return false;
             if (_inputService.MouseOverUI) return false;
 
-            TryRecordPingAtCursor();
+
+            PingEvent pingEvent = CreatePingEventAndPing();
+            // Use DoPrefix to only send events when appropriate
+            ReplayEvent.DoPrefix(() =>
+            {
+                return pingEvent;
+            });
+
             return false;
         }
 
-        private void TryRecordPingAtCursor()
+        private PingEvent CreatePingEventAndPing()
         {
-            var replayService = ReplayEvent.GetReplayServiceIfReady();
-            if (replayService == null) return;
-
             Vector2 mouseScreen = _inputService.MousePosition;
             Ray gridRay = _cameraService.ScreenPointToRayInGridSpace(mouseScreen);
 
@@ -106,7 +110,7 @@ namespace BeaverBuddies.Ping
             {
                 // Fall back to the y=0 plane so off-map clicks still register.
                 Ray worldRay = _cameraService.ScreenPointToRayInWorldSpace(mouseScreen);
-                if (worldRay.direction.y >= -0.0001f) return;
+                if (worldRay.direction.y >= -0.0001f) return null;
                 float t = -worldRay.origin.y / worldRay.direction.y;
                 worldPos = worldRay.origin + worldRay.direction * t;
             }
@@ -114,18 +118,18 @@ namespace BeaverBuddies.Ping
             string senderName = Settings.PingDisplayName;
             Color color = Settings.PingColorValue;
 
-            replayService.RecordEvent(new PingEvent
+            // Play the ping immediately locally, since it looks better not
+            // to have any delay
+            AddPing(worldPos, senderName, color);
+
+            return new PingEvent
             {
                 worldX = worldPos.x,
                 worldY = worldPos.y,
                 worldZ = worldPos.z,
                 senderName = senderName,
                 colorHex = ColorUtility.ToHtmlStringRGB(color),
-            });
-
-            // Play the ping immediately locally, since it looks better not
-            // to have any delay
-            AddPing(worldPos, senderName, color);
+            };
         }
 
         public void AddPing(Vector3 worldPosition, string senderName, Color color)
