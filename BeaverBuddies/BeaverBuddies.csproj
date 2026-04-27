@@ -85,8 +85,12 @@
     <Message Importance="high" Text="pat.properties was NOT found. Please ensure the file exists if required." Condition="!Exists('pat.properties')" />
   </Target>
   <ItemGroup>
+    <None Remove="changelog.txt" />
     <None Remove="pat.properties" />
     <EmbeddedResource Include="pat.properties" Condition="Exists('pat.properties')" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="changelog.txt" />
   </ItemGroup>
 
   <!-- Add files to Output folder -->
@@ -99,6 +103,19 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Localizations\*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
   <!-- PreBuild -->

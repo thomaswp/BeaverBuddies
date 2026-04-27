@@ -1,7 +1,5 @@
-﻿using BeaverBuddies.DesyncDetecter;
-using Bindito.Core.Internal;
+﻿using ModSettings.Common;
 using ModSettings.Core;
-using ModSettings.Common;
 using Timberborn.Modding;
 using Timberborn.SettingsSystem;
 
@@ -106,6 +104,7 @@ namespace BeaverBuddies
         public static int Port => instance?.DefaultPort.Value ?? 25565;
         public static bool EnableSteam => instance?.EnableSteamConnection.Value ?? true;
         public static bool LobbyJoinable => instance?.FriendsCanJoinSteamGame.Value ?? true;
+        public static bool ShouldShowFirstTimerMessage => instance?.ShowFirstTimerMessage.Value ?? true;
 
         public static PauseReductionLevel PauseReductionSetting
         {
