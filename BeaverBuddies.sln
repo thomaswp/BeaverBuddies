@@ -8,13 +8,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeaverBuddies", "BeaverBudd
 		{BA028DE9-5C9C-40F1-B102-A7C9B422F44E} = {BA028DE9-5C9C-40F1-B102-A7C9B422F44E}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientServerSimulator", "ClientServerSimulator\ClientServerSimulator.csproj", "{0F311118-A364-48DE-82FD-0C6326DB51B8}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TimberNet", "TimberNet\TimberNet.csproj", "{BA028DE9-5C9C-40F1-B102-A7C9B422F44E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{818CBCAA-11F9-44CA-9C38-2E98396E0FFB}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		BeaverBuddies\changelog.txt = BeaverBuddies\changelog.txt
 		License.txt = License.txt
 		README.md = README.md
 	EndProjectSection
@@ -23,24 +22,34 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Inspector", "Inspector\Insp
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug Steam|Any CPU = Debug Steam|Any CPU
 		Debug|Any CPU = Debug|Any CPU
+		Release Steam|Any CPU = Release Steam|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1D3DCBB4-E006-45BA-A5CE-E7F5007AED10}.Debug Steam|Any CPU.ActiveCfg = Debug Steam|Any CPU
+		{1D3DCBB4-E006-45BA-A5CE-E7F5007AED10}.Debug Steam|Any CPU.Build.0 = Debug Steam|Any CPU
 		{1D3DCBB4-E006-45BA-A5CE-E7F5007AED10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1D3DCBB4-E006-45BA-A5CE-E7F5007AED10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D3DCBB4-E006-45BA-A5CE-E7F5007AED10}.Release Steam|Any CPU.ActiveCfg = Release Steam|Any CPU
+		{1D3DCBB4-E006-45BA-A5CE-E7F5007AED10}.Release Steam|Any CPU.Build.0 = Release Steam|Any CPU
 		{1D3DCBB4-E006-45BA-A5CE-E7F5007AED10}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D3DCBB4-E006-45BA-A5CE-E7F5007AED10}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0F311118-A364-48DE-82FD-0C6326DB51B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0F311118-A364-48DE-82FD-0C6326DB51B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0F311118-A364-48DE-82FD-0C6326DB51B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0F311118-A364-48DE-82FD-0C6326DB51B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA028DE9-5C9C-40F1-B102-A7C9B422F44E}.Debug Steam|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA028DE9-5C9C-40F1-B102-A7C9B422F44E}.Debug Steam|Any CPU.Build.0 = Debug|Any CPU
 		{BA028DE9-5C9C-40F1-B102-A7C9B422F44E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BA028DE9-5C9C-40F1-B102-A7C9B422F44E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA028DE9-5C9C-40F1-B102-A7C9B422F44E}.Release Steam|Any CPU.ActiveCfg = Release|Any CPU
+		{BA028DE9-5C9C-40F1-B102-A7C9B422F44E}.Release Steam|Any CPU.Build.0 = Release|Any CPU
 		{BA028DE9-5C9C-40F1-B102-A7C9B422F44E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA028DE9-5C9C-40F1-B102-A7C9B422F44E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0515AAAB-9D23-4433-A179-AE5064C7A04A}.Debug Steam|Any CPU.ActiveCfg = Debug|Any CPU
+		{0515AAAB-9D23-4433-A179-AE5064C7A04A}.Debug Steam|Any CPU.Build.0 = Debug|Any CPU
 		{0515AAAB-9D23-4433-A179-AE5064C7A04A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0515AAAB-9D23-4433-A179-AE5064C7A04A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0515AAAB-9D23-4433-A179-AE5064C7A04A}.Release Steam|Any CPU.ActiveCfg = Release|Any CPU
+		{0515AAAB-9D23-4433-A179-AE5064C7A04A}.Release Steam|Any CPU.Build.0 = Release|Any CPU
 		{0515AAAB-9D23-4433-A179-AE5064C7A04A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0515AAAB-9D23-4433-A179-AE5064C7A04A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection

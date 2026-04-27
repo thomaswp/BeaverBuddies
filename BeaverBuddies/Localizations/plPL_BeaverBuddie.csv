@@ -61,6 +61,15 @@ Uwaga: ta funkcja może nie działać, jeśli twoja sieć nie obsługuje P2P.
 Ponadto połączenia P2P mogą być wolniejsze niż bezpośrednie.",""
 BeaverBuddies.Settings.FriendsCanJoinSteamGame,"Pozwól znajomym na dołączenie przez Steam",""
 BeaverBuddies.Settings.FriendsCanJoinSteamGame.Tooltip,"Po włączeniu twoi znajomi mogą dołączyć do twojej gry bez zaproszenia, korzystając ze Steam.",""
+BeaverBuddies.Settings.PauseReduction,"Zmniejsz liczbę wymuszonych pauz",""
+BeaverBuddies.Settings.PauseReduction.Tooltip,"Dla najlepszego efektu wszyscy gracze powinni mieć to samo ustawienie.
+
+Wyłączone - Domyślne zachowanie
+Tylko menu - Automatyczna pauza tylko przy otwieraniu menu (nie podczas rozbiórek)
+Nigdy nie pauzuj automatycznie - Gra nigdy nie będzie automatycznie wstrzymywana, nawet przy otwieraniu menu. Może to prowadzić do uszkodzenia zapisów, jeśli nie zatrzymasz gry przed zapisaniem.",""
+BeaverBuddies.Settings.PauseReduction.Off,"Wyłączone",""
+BeaverBuddies.Settings.PauseReduction.LowRisk,"Tylko menu",""
+BeaverBuddies.Settings.PauseReduction.HighRisk,"Nigdy nie pauzuj automatycznie",""
 BeaverBuddies.Host.ConnectedClients,"Oczekiwanie na klientów…
 Obecnie połączeni klienci:",""
 BeaverBuddies.Host.DirectConnectClient,"Klient połączenia bezpośredniego",""

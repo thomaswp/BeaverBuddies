@@ -1,15 +1,11 @@
-﻿using BeaverBuddies.IO;
-using BeaverBuddies.Util;
+﻿using BeaverBuddies.Util;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Timberborn.CoreUI;
 using Timberborn.Localization;
 using Timberborn.SingletonSystem;
 using Timberborn.WebNavigation;
 
-namespace BeaverBuddies.Connect
+namespace BeaverBuddies.Help
 {
     public class FirstTimerService : IPostLoadableSingleton
     {
@@ -20,9 +16,7 @@ namespace BeaverBuddies.Connect
         internal FirstTimerService(
             DialogBoxShower dialogBoxShower,
             UrlOpener urlOpener,
-            ConfigIOService configIOService,
-            Settings settings,
-            SingletonListener singletonListener
+            Settings settings
         )
         {
             _dialogBoxShower = dialogBoxShower;
@@ -30,10 +24,9 @@ namespace BeaverBuddies.Connect
             _settings = settings;
         }
 
-        // TODO: Ideally, wait to show until after OK is clicked.
         public void PostLoad()
         {
-            if (!_settings.ShowFirstTimerMessage.Value)
+            if (!Settings.ShouldShowFirstTimerMessage)
             {
                 return;
             }

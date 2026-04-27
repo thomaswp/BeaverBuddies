@@ -1,7 +1,9 @@
 ﻿using BeaverBuddies.Connect;
 using BeaverBuddies.DesyncDetecter;
 using BeaverBuddies.Editor;
+using BeaverBuddies.Events;
 using BeaverBuddies.Fixes;
+using BeaverBuddies.Help;
 using BeaverBuddies.IO;
 using BeaverBuddies.MultiStart;
 using BeaverBuddies.Reporting;
@@ -9,18 +11,10 @@ using BeaverBuddies.Steam;
 using BeaverBuddies.Util;
 using BeaverBuddies.Util.Logging;
 using Bindito.Core;
-using Bindito.Core.Internal;
 using HarmonyLib;
 using System.Diagnostics;
 using System.Reflection;
-using Timberborn.EntityPanelSystem;
-using Timberborn.GameDistrictsUI;
 using Timberborn.ModManagerScene;
-using Timberborn.SceneLoading;
-using Timberborn.StartingLocationSystem;
-using Timberborn.TemplateSystem;
-using Timberborn.TutorialSystemUI;
-using Timberborn.WondersUI;
 
 namespace BeaverBuddies
 {
@@ -81,7 +75,7 @@ namespace BeaverBuddies
             containerDefinition.Bind<ClientConnectionService>().AsSingleton();
             containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
             containerDefinition.Bind<FirstTimerService>().AsSingleton();
-            containerDefinition.Bind<ConfigIOService>().AsSingleton();
+            containerDefinition.Bind<ChangeLogService>().AsSingleton();
             containerDefinition.Bind<RegisteredLocalizationService>().AsSingleton();
             containerDefinition.Bind<MultiplayerMapMetadataService>().AsSingleton();
             containerDefinition.Bind<Settings>().AsSingleton();
@@ -117,8 +111,14 @@ namespace BeaverBuddies
 
             Log($"{Name} v{Version} is loaded!");
 
+            // apply all harmony patches automatically.
             Harmony harmony = new Harmony(ID);
             harmony.PatchAll();
+            AutomationEvent.ApplyAutomationPatches(harmony);
+
+            // apply each advanced monomod patch manually.
+            GameSaverSavePatcher.Install();
+            TimeTimePatcher.Install();
 
             Log(UnityEngine.Application.consoleLogPath);
         }

@@ -61,6 +61,15 @@ BeaverBuddies.Settings.EnableSteamConnection.Tooltip,"SteamのP2Pネットワー
 また、P2P接続は直接接続より遅くなる場合があります。",""
 BeaverBuddies.Settings.FriendsCanJoinSteamGame,"Steam経由で友達が参加可能に",""
 BeaverBuddies.Settings.FriendsCanJoinSteamGame.Tooltip,"有効にすると、あなたの友達がSteam経由で招待なしで直接参加できます。",""
+BeaverBuddies.Settings.PauseReduction,"強制一時停止の回数を減らす",""
+BeaverBuddies.Settings.PauseReduction.Tooltip,"最適な体験のため、全プレイヤーが同じ設定を使用することを推奨します。
+
+オフ - デフォルトの動作
+メニューのみ - メニューを開いた時のみ自動一時停止します（解体時は一時停止しません）
+自動一時停止なし - メニューを開いた時を含め、ゲームが自動で一時停止することはありません。保存前にゲームを一時停止しないとセーブデータが破損する可能性があります。",""
+BeaverBuddies.Settings.PauseReduction.Off,"オフ",""
+BeaverBuddies.Settings.PauseReduction.LowRisk,"メニューのみ",""
+BeaverBuddies.Settings.PauseReduction.HighRisk,"自動一時停止なし",""
 BeaverBuddies.Host.ConnectedClients,"クライアントを待っています…
 現在接続中のクライアント：",""
 BeaverBuddies.Host.DirectConnectClient,"ダイレクト接続クライアント",""
