@@ -35,7 +35,7 @@ namespace BeaverBuddies
             containerDefinition.Bind<ClientConnectionService>().AsSingleton();
             containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
             containerDefinition.Bind<SteamOverlayConnectionService>().AsSingleton();
-            containerDefinition.Bind<RegisteredLocalizationService>().AsSingleton(); 
+            containerDefinition.Bind<RegisteredLocalizationService>().AsSingleton();
             containerDefinition.Bind<Settings>().AsSingleton();
 
             MultiStartConfigurator.Configure(containerDefinition);
@@ -83,7 +83,7 @@ namespace BeaverBuddies
             //new ReportingService().PostDesync("test").ContinueWith(result => Plugin.Log($"Posted: {result.Result}"));
             containerDefinition.Bind<SteamOverlayConnectionService>().AsSingleton();
 
-            //ReflectionUtils.PrintChildClasses(typeof(MonoBehaviour), 
+            //ReflectionUtils.PrintChildClasses(typeof(MonoBehaviour),
             //    "Start", "Awake", "Update", "FixedUpdate", "LateUpdate", "OnEnable", "OnDisable", "OnDestroy");
             //ReflectionUtils.PrintChildClasses(typeof(IUpdatableSingleton));
             //ReflectionUtils.PrintChildClasses(typeof(ILateUpdatableSingleton));
@@ -108,7 +108,7 @@ namespace BeaverBuddies
         public void StartMod(IModEnvironment modEnvironment)
         {
             logger = new UnityLogger();
-            
+
             Log($"{Name} v{Version} is loaded!");
 
             // apply all harmony patches automatically.
