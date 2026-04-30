@@ -10,6 +10,7 @@ using Timberborn.AutomationUI;
 using Timberborn.BaseComponentSystem;
 using Timberborn.FireworkSystem;
 using Timberborn.WaterBuildings;
+using Timberborn.WaterSourceSystem;
 using UnityEngine.UIElements;
 
 namespace BeaverBuddies.Events
@@ -173,6 +174,9 @@ namespace BeaverBuddies.Events
                 (typeof(FillValve), nameof(FillValve.SetTargetHeightAndSynchronize)),
                 (typeof(FillValve), nameof(FillValve.SetTargetHeightEnabledAndSynchronize)),
                 (typeof(FillValve), nameof(FillValve.ToggleSynchronization)),
+                (typeof(WaterSourceRegulator), nameof(WaterSourceRegulator.Open)),
+                (typeof(WaterSourceRegulator), nameof(WaterSourceRegulator.Close)),
+                (typeof(WaterSourceRegulator), nameof(WaterSourceRegulator.Automate)),
 
             ];
             var methodsToPatch = methodsToPatchInfo.Select(
