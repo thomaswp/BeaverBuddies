@@ -80,3 +80,9 @@ BeaverBuddies.JoinCoopGame.Error.InvalidFormat,"Ungültiges Adressformat. Port k
 BeaverBuddies.JoinCoopGame.Error.InvalidAddress,"Die Adresse war keine gültige IP-Adresse.
 Es wurde versucht, sie als Hostnamen aufzulösen, aber sie konnte keiner IP-Adresse zugeordnet werden.",""
 BeaverBuddies.JoinCoopGame.Error.CouldNotConnect,"Verbindung zum Host konnte nicht hergestellt werden. Bitte überprüfen Sie die Adresse und den Port und stellen Sie sicher, dass der Host das Spiel hostet und die Portweiterleitung aktiviert ist, falls erforderlich. Fehlerinformationen:",""
+BeaverBuddies.KeyBindings.Group,"BeaverBuddies",""
+BeaverBuddies.KeyBindings.Ping,"Ort markieren",""
+BeaverBuddies.Settings.PingPlayerName,"Anzeigename für Markierungen",""
+BeaverBuddies.Settings.PingPlayerName.Tooltip,"Der Name, der anderen Spielern neben deinen Markierungen angezeigt wird.",""
+BeaverBuddies.Settings.PingColor,"Markierungsfarbe",""
+BeaverBuddies.Settings.PingColor.Tooltip,"Die Farbe, mit der deine Markierungen auf den Bildschirmen aller Spieler gezeichnet werden.",""

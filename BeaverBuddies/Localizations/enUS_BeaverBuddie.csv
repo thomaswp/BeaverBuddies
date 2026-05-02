@@ -80,3 +80,9 @@ BeaverBuddies.JoinCoopGame.Error.InvalidFormat,"Invalid address format. Could no
 BeaverBuddies.JoinCoopGame.Error.InvalidAddress,"Address was not a valid IP address.
 Attempted to resolve it as a host name, but it did not resolve to an IP address.",""
 BeaverBuddies.JoinCoopGame.Error.CouldNotConnect,"Could not connect to Host. Please check the address and port, and make sure the Host is hosting and has port forwarded if needed. Error details:",""
+BeaverBuddies.KeyBindings.Group,"BeaverBuddies",""
+BeaverBuddies.KeyBindings.Ping,"Ping Location",""
+BeaverBuddies.Settings.PingPlayerName,"Ping Display Name",""
+BeaverBuddies.Settings.PingPlayerName.Tooltip,"The name shown to other players next to your pings.",""
+BeaverBuddies.Settings.PingColor,"Ping Color",""
+BeaverBuddies.Settings.PingColor.Tooltip,"The color used to draw your pings on every player's screen.",""

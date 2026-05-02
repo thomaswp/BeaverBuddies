@@ -80,3 +80,9 @@ BeaverBuddies.JoinCoopGame.Error.InvalidFormat,"Неверный формат а
 BeaverBuddies.JoinCoopGame.Error.InvalidAddress,"Адрес не является допустимым IP-адресом.
 Была предпринята попытка разрешить его как имя хоста, но оно не разрешилось в IP-адрес.",""
 BeaverBuddies.JoinCoopGame.Error.CouldNotConnect,"Не удалось подключиться к хосту. Проверьте адрес и порт, убедитесь, что хост запущен и, при необходимости, настроена переадресация порта. Подробности ошибки:",""
+BeaverBuddies.KeyBindings.Group,"BeaverBuddies",""
+BeaverBuddies.KeyBindings.Ping,"Отметить место",""
+BeaverBuddies.Settings.PingPlayerName,"Отображаемое имя меток",""
+BeaverBuddies.Settings.PingPlayerName.Tooltip,"Имя, отображаемое другим игрокам рядом с вашими метками.",""
+BeaverBuddies.Settings.PingColor,"Цвет метки",""
+BeaverBuddies.Settings.PingColor.Tooltip,"Цвет, используемый для отрисовки ваших меток на экране каждого игрока.",""

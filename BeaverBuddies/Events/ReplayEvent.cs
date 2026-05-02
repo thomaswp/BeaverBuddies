@@ -16,6 +16,8 @@ namespace BeaverBuddies.Events
 
     public abstract class ReplayEvent : IComparable<ReplayEvent>
     {
+        public static readonly string LocalPlayerID = GuidPatcher.RealNewGuid().ToString();
+
         public int ticksSinceLoad;
         public int? randomS0Before;
 

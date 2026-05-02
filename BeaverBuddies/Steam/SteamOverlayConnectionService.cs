@@ -24,6 +24,7 @@ namespace BeaverBuddies.Steam
         private PanelStack _panelStack;
         private SteamOverlayInputBlocker _inputBlocker;
         private EventBus _eventBus;
+        private Settings _settings;
 
         private bool? _lastSuccess = null;
 
@@ -34,7 +35,8 @@ namespace BeaverBuddies.Steam
             ClientConnectionService clientConnectionService,
             SteamOverlayInputBlocker steamOverlayInputBlocker,
             PanelStack panelStack,
-            EventBus eventBus
+            EventBus eventBus,
+            Settings settings
             )
         {
             _steamManager = steamManager;
@@ -42,6 +44,7 @@ namespace BeaverBuddies.Steam
             _panelStack = panelStack;
             _inputBlocker = steamOverlayInputBlocker;
             _eventBus = eventBus;
+            _settings = settings;
         }
 
         bool done = false;
@@ -70,6 +73,7 @@ namespace BeaverBuddies.Steam
 
                     //SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 4);
 
+                    TrySetPingName();
                 }
                 else
                 {
@@ -77,6 +81,22 @@ namespace BeaverBuddies.Steam
                 }
             }
             //ReceiveMessages();
+        }
+
+        private void TrySetPingName()
+        {
+            if (Settings.PingDisplayName != Settings.DefaultPingPlayerName) return;
+            try
+            {
+                string steamName = SteamFriends.GetFriendPersonaName(SteamUser.GetSteamID());
+                if (!string.IsNullOrEmpty(steamName))
+                {
+                    _settings.PingPlayerName.SetValue(steamName);
+                }
+            }
+            catch (Exception)
+            {
+            }
         }
 
         private void OnLobbyJoinRequested(GameLobbyJoinRequested_t callback)

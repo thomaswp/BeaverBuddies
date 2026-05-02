@@ -85,6 +85,24 @@ namespace BeaverBuddies
                 ).SetLocalizedTooltip("BeaverBuddies.Settings.SilenceLogging.Tooltip")
         );
 
+        // ---- Ping Settings ----
+
+        public const string DefaultPingPlayerName = "Player";
+        public ModSetting<string> PingPlayerName { get; } =
+            new(DefaultPingPlayerName,
+                ModSettingDescriptor.CreateLocalized(
+                    "BeaverBuddies.Settings.PingPlayerName"
+                ).SetLocalizedTooltip("BeaverBuddies.Settings.PingPlayerName.Tooltip")
+        );
+
+        public ColorModSetting PingColor { get; } =
+            new(UnityEngine.Color.yellow,
+                ModSettingDescriptor.CreateLocalized(
+                    "BeaverBuddies.Settings.PingColor"
+                ).SetLocalizedTooltip("BeaverBuddies.Settings.PingColor.Tooltip"),
+                useAlpha: false
+        );
+
         // We keep a static instance because
         // 1) The settings are saved in a static manner, so all instances
         //    should be identical, and
@@ -119,6 +137,10 @@ namespace BeaverBuddies
                 return PauseReductionLevel.Off;
             }
         }
+
+        public static string PingDisplayName => instance?.PingPlayerName.Value ?? DefaultPingPlayerName;
+
+        public static UnityEngine.Color PingColorValue => instance?.PingColor.Color ?? UnityEngine.Color.white;
 
         public Settings(ISettings settings,
                         ModSettingsOwnerRegistry modSettingsOwnerRegistry,
