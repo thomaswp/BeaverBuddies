@@ -3,6 +3,7 @@ using BeaverBuddies.DesyncDetecter;
 using BeaverBuddies.Editor;
 using BeaverBuddies.Events;
 using BeaverBuddies.Fixes;
+using BeaverBuddies.Help;
 using BeaverBuddies.IO;
 using BeaverBuddies.MultiStart;
 using BeaverBuddies.Reporting;
@@ -10,18 +11,10 @@ using BeaverBuddies.Steam;
 using BeaverBuddies.Util;
 using BeaverBuddies.Util.Logging;
 using Bindito.Core;
-using Bindito.Core.Internal;
 using HarmonyLib;
 using System.Diagnostics;
 using System.Reflection;
-using Timberborn.EntityPanelSystem;
-using Timberborn.GameDistrictsUI;
 using Timberborn.ModManagerScene;
-using Timberborn.SceneLoading;
-using Timberborn.StartingLocationSystem;
-using Timberborn.TemplateSystem;
-using Timberborn.TutorialSystemUI;
-using Timberborn.WondersUI;
 
 namespace BeaverBuddies
 {
@@ -42,7 +35,7 @@ namespace BeaverBuddies
             containerDefinition.Bind<ClientConnectionService>().AsSingleton();
             containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
             containerDefinition.Bind<SteamOverlayConnectionService>().AsSingleton();
-            containerDefinition.Bind<RegisteredLocalizationService>().AsSingleton(); 
+            containerDefinition.Bind<RegisteredLocalizationService>().AsSingleton();
             containerDefinition.Bind<Settings>().AsSingleton();
 
             MultiStartConfigurator.Configure(containerDefinition);
@@ -82,7 +75,7 @@ namespace BeaverBuddies
             containerDefinition.Bind<ClientConnectionService>().AsSingleton();
             containerDefinition.Bind<ClientConnectionUI>().AsSingleton();
             containerDefinition.Bind<FirstTimerService>().AsSingleton();
-            containerDefinition.Bind<ConfigIOService>().AsSingleton();
+            containerDefinition.Bind<ChangeLogService>().AsSingleton();
             containerDefinition.Bind<RegisteredLocalizationService>().AsSingleton();
             containerDefinition.Bind<MultiplayerMapMetadataService>().AsSingleton();
             containerDefinition.Bind<Settings>().AsSingleton();
@@ -90,7 +83,7 @@ namespace BeaverBuddies
             //new ReportingService().PostDesync("test").ContinueWith(result => Plugin.Log($"Posted: {result.Result}"));
             containerDefinition.Bind<SteamOverlayConnectionService>().AsSingleton();
 
-            //ReflectionUtils.PrintChildClasses(typeof(MonoBehaviour), 
+            //ReflectionUtils.PrintChildClasses(typeof(MonoBehaviour),
             //    "Start", "Awake", "Update", "FixedUpdate", "LateUpdate", "OnEnable", "OnDisable", "OnDestroy");
             //ReflectionUtils.PrintChildClasses(typeof(IUpdatableSingleton));
             //ReflectionUtils.PrintChildClasses(typeof(ILateUpdatableSingleton));
@@ -115,7 +108,7 @@ namespace BeaverBuddies
         public void StartMod(IModEnvironment modEnvironment)
         {
             logger = new UnityLogger();
-            
+
             Log($"{Name} v{Version} is loaded!");
 
             // apply all harmony patches automatically.

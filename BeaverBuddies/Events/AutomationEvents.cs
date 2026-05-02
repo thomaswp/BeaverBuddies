@@ -9,6 +9,7 @@ using Timberborn.AutomationBuildingsUI;
 using Timberborn.AutomationUI;
 using Timberborn.BaseComponentSystem;
 using Timberborn.FireworkSystem;
+using Timberborn.PowerManagement;
 using Timberborn.WaterBuildings;
 using Timberborn.WaterSourceSystem;
 using UnityEngine.UIElements;
@@ -177,6 +178,7 @@ namespace BeaverBuddies.Events
                 (typeof(WaterSourceRegulator), nameof(WaterSourceRegulator.Open)),
                 (typeof(WaterSourceRegulator), nameof(WaterSourceRegulator.Close)),
                 (typeof(WaterSourceRegulator), nameof(WaterSourceRegulator.Automate)),
+                (typeof(Clutch), nameof(Clutch.SetMode)),
 
             ];
             var methodsToPatch = methodsToPatchInfo.Select(

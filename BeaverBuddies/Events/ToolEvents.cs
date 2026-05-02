@@ -44,7 +44,9 @@ namespace BeaverBuddies.Events
             var placer = context.GetSingleton<BlockObjectPlacerService>().GetMatchingPlacer(blockObjectSpec);
             Placement placement = new Placement(coordinates, orientation,
                 isFlipped ? FlipMode.Flipped : FlipMode.Unflipped);
-            if (!IsPlacementValid(context, placement, buildingSpec))
+            // Skip validation for district centers - the preview object interferes with nav mesh
+            bool isDistrictCenter = prefabName != null && prefabName.StartsWith("DistrictCenter.");
+            if (!isDistrictCenter && !IsPlacementValid(context, placement, buildingSpec))
             {
                 Plugin.LogWarning($"Invalid placement for {prefabName} at {coordinates}");
                 return;
