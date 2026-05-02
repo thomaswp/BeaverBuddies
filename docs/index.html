@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BeaverBuddies - Developer Documentation</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/dark.css">
+    <style>
+        /* Fix table row backgrounds for dark theme */
+        .markdown-section table tr {
+            background-color: transparent;
+        }
+        .markdown-section table tr:nth-child(2n) {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .markdown-section table td, .markdown-section table th {
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        /* Brighter bold text for dark theme */
+        .markdown-section strong {
+            color: #e8e8e8;
+        }
+
+        /* Brighten code block text for dark theme */
+        .markdown-section code[class*="language-"],
+        .markdown-section pre[class*="language-"] {
+            color: #c8ccd4;
+        }
+        .token.punctuation {
+            color: #abb2bf;
+        }
+        .token.operator {
+            color: #c678dd;
+        }
+        .token.class-name {
+            color: #e5c07b;
+        }
+        .token.function {
+            color: #61afef;
+        }
+        .token.keyword {
+            color: #c678dd;
+        }
+        .token.string {
+            color: #98c379;
+        }
+        .token.comment {
+            color: #7f848e;
+        }
+        .token.number {
+            color: #d19a66;
+        }
+        .markdown-section pre,
+        .markdown-section pre code {
+            color: #c8ccd4;
+        }
+        .markdown-section code {
+            color: #e06c75;
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Sidebar toggle: move to top-left, above sidebar's stacking context */
+        .sidebar-toggle {
+            bottom: auto;
+            top: 12px;
+            z-index: 30;
+        }
+
+        /* Sticky search bar below toggle, with background so nav scrolls under */
+        .sidebar .search {
+            position: sticky;
+            top: 0;
+            z-index: 4;
+            background-color: inherit;
+            padding-top: 3.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+    <script>
+        window.$docsify = {
+            name: 'BeaverBuddies',
+            repo: 'https://github.com/matthewwachter/BeaverBuddies',
+            loadSidebar: true,
+            subMaxLevel: 3,
+            auto2top: true,
+            search: {
+                placeholder: 'Search docs...',
+                noData: 'No results.',
+                depth: 6
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/docsify@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docsify-copy-code@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-csharp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-xml-doc.min.js"></script>
+</body>
+</html>
