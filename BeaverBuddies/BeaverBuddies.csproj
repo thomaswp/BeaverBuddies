@@ -51,7 +51,7 @@
       <PrivateAssets>all</PrivateAssets>
       <PublicizeCompilerGenerated>false</PublicizeCompilerGenerated>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference> 
+    </PackageReference>
     <PackageReference Include="System.Collections.Immutable" Version="9.0.0" />
     <PackageReference Include="MonoMod.Core" Version="1.3.4" />
     <PackageReference Include="MonoMod.RuntimeDetour" Version="25.3.4" />
@@ -73,6 +73,7 @@
     <Reference Include="$(TimberbornManagedPath)Bindito.Core.dll" Private="false" />
     <Reference Include="$(TimberbornManagedPath)Bindito.Unity.dll" Private="false" />
     <Reference Include="$(TimberbornManagedPath)UnityEngine.*.dll" Publicize="true" Private="false" />
+    <Reference Include="$(TimberbornManagedPath)Unity.InputSystem.dll" Publicize="true" Private="false" />
     <Reference Include="$(TimberbornManagedPath)Timberborn.*.dll" Publicize="true" Private="false" />
     <Reference Include="$(ModSettingsPath)ModSettings.*.dll" Private="false" />
     <Compile Remove="Fixes\TestingStrategies_Scrap.cs" />
@@ -103,6 +104,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Localizations\*" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="KeyBindings\*" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="KeyBindingGroups\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Resources.Designer.cs">
@@ -132,12 +135,16 @@
       <!-- For copy -->
       <FilesToCopy Include="$(ProjectDir)$(OutDir)*" />
       <LocalizationFileToCopy Include="$(ProjectDir)$(OutDir)Localizations\*" />
+      <KeyBindingFileToCopy Include="$(ProjectDir)$(OutDir)KeyBindings\*" />
+      <KeyBindingGroupFileToCopy Include="$(ProjectDir)$(OutDir)KeyBindingGroups\*" />
     </ItemGroup>
     <!-- Clear BeaverBuddiesModsPath Directory & Copy Output files inside -->
     <RemoveDir Directories="$(BeaverBuddiesModsPath)" />
     <MakeDir Directories="$(BeaverBuddiesModsPath)" />
     <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(BeaverBuddiesModsPath)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(LocalizationFileToCopy)" DestinationFolder="$(BeaverBuddiesModsPath)\Localizations" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(KeyBindingFileToCopy)" DestinationFolder="$(BeaverBuddiesModsPath)\KeyBindings" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(KeyBindingGroupFileToCopy)" DestinationFolder="$(BeaverBuddiesModsPath)\KeyBindingGroups" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>

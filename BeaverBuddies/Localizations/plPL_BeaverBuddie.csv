@@ -80,3 +80,9 @@ BeaverBuddies.JoinCoopGame.Error.InvalidFormat,"Nieprawidłowy format adresu. Ni
 BeaverBuddies.JoinCoopGame.Error.InvalidAddress,"Adres nie był prawidłowym adresem IP.
 Podjęto próbę rozwiązania go jako nazwy hosta, ale nie został przetłumaczony na adres IP.",""
 BeaverBuddies.JoinCoopGame.Error.CouldNotConnect,"Nie udało się połączyć z hostem. Sprawdź adres i port oraz upewnij się, że host faktycznie hostuje i ma przekierowany port, jeśli to konieczne. Szczegóły błędu:",""
+BeaverBuddies.KeyBindings.Group,"BeaverBuddies",""
+BeaverBuddies.KeyBindings.Ping,"Oznacz lokalizację",""
+BeaverBuddies.Settings.PingPlayerName,"Wyświetlana nazwa pingów",""
+BeaverBuddies.Settings.PingPlayerName.Tooltip,"Nazwa wyświetlana innym graczom obok twoich pingów.",""
+BeaverBuddies.Settings.PingColor,"Kolor pinga",""
+BeaverBuddies.Settings.PingColor.Tooltip,"Kolor używany do rysowania twoich pingów na ekranie każdego gracza.",""
