@@ -61,7 +61,18 @@ namespace BeaverBuddies {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This is a test....
+        ///   Looks up a localized string similar to v1.7.0
+        ///* This mod now uses the Harmony mod (it is no longer bundled). This means you *must* now subscribe and activate Harmony to play it (thanks @robinplace)
+        ///* Fixed various desyncs
+        ///* Added synchronization for Floodgate automation and Valves/FillValves (thanks @SamuZad and @JoeStead)
+        ///
+        ///v1.6.6
+        ///* Added support for automation! (except HTTP)
+        ///* Fixed a bug where unlocks would not sync (thanks @SamuZad)
+        ///* Fixed a bug where water pump filter settings would not sync (thanks @SaumZad)
+        ///
+        ///v1.6.5
+        ///* Fix for st [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string ChangeLog {
             get {
