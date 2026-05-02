@@ -1,3 +1,14 @@
+v1.7.1
+* A changelog will now appear on version updates (that's this window!).
+* New Feature: Players can now ping the map. Open Settings->Keybindings and choose a binding for "Ping Location" to ping in game and all players will see it. Credit: @SamuZad
+* You can change the player name and color associated with your ping under Mods->BeaverBuddies (settings button).
+* New Setting: "Reduce the number of forced pauses" stops the game from auto-pausing when deconstructing/researching, or optionally when opening the menu. Change settings with Mods->BeaverBuddies (settings button). Credit: @SamuZad
+* Desync fixes:
+  * Setting Automatable inputs to (None)
+  * Power Clutch settings. Credit: @JoeStead
+  * Badwater Discharge automation Credit: @JoeStead
+* Placing district centers and connections should cause fewer crashes and desyncs (some may still occur, so consider saving beforehand). Credit: @SamuZad
+
 v1.7.0
 * This mod now uses the Harmony mod (it is no longer bundled). This means you *must* now subscribe and activate Harmony to play it (thanks @robinplace)
 * Fixed various desyncs
