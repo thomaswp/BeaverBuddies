@@ -13,12 +13,15 @@ using Timberborn.DemolishingUI;
 using Timberborn.DuplicationSystem;
 using Timberborn.EntitySystem;
 using Timberborn.Forestry;
+using Timberborn.LevelVisibilitySystem;
 using Timberborn.PlantingUI;
 using Timberborn.RootProviders;
 using Timberborn.ScienceSystem;
 using Timberborn.SingletonSystem;
 using Timberborn.TemplateInstantiation;
 using Timberborn.TemplateSystem;
+using Timberborn.TerrainQueryingSystem;
+using Timberborn.TerrainSystem;
 using Timberborn.ToolButtonSystem;
 using Timberborn.ToolSystem;
 using Timberborn.WorkSystemUI;
@@ -186,25 +189,40 @@ namespace BeaverBuddies.Events
         }
     }
 
+    // MarkArea/UnmarkArea derive the planting height by raycasting the planter's
+    // camera, which picks the wrong terrain layer when replayed by a player with
+    // a different view. We resolve the level and inject it during replay to solve
+    // this issue.
     [Serializable]
     class PlantingAreaMarkedEvent : ReplayEvent
     {
         public List<Vector3Int> inputBlocks;
-        public Ray ray;
+        public int level;
         public string prefabName;
+        public bool unmark;
 
-        public const string UNMARK = "Unmark";
+        internal static int? LevelOverride;
 
         public override void Replay(IReplayContext context)
         {
-            var plantingService = context.GetSingleton<PlantingSelectionService>();
-            if (prefabName == UNMARK)
+            var selection = context.GetSingleton<PlantingSelectionService>();
+            LevelOverride = level;
+            try
             {
-                plantingService.UnmarkArea(inputBlocks, ray);
+                if (unmark) selection.UnmarkArea(inputBlocks, default);
+                else selection.MarkArea(inputBlocks, default, prefabName);
             }
-            else
+            finally { LevelOverride = null; }
+
+            if (unmark) return;
+            // Hide previews above the local cut layer.
+            var preview = context.GetSingleton<PlantablePreviewService>();
+            int maxVisible = context.GetSingleton<ILevelVisibilityService>().MaxVisibleLevel;
+            bool inPlantingMode = context.GetSingleton<PlantingModeService>()._inPlantingMode;
+            foreach (var b in inputBlocks)
             {
-                plantingService.MarkArea(inputBlocks, ray, prefabName);
+                var c = new Vector3Int(b.x, b.y, level);
+                if (!inPlantingMode || c.z > maxVisible) preview.HidePreview(c);
             }
         }
 
@@ -212,21 +230,57 @@ namespace BeaverBuddies.Events
         {
             return $"Planting {inputBlocks.Count()} of {prefabName}";
         }
+
+        public static int ResolveLevel(PlantingSelectionService selection, Ray ray)
+        {
+            var traversed = selection._terrainAreaService._terrainPicker.PickTerrainCoordinates(ray);
+            return traversed.HasValue ? traversed.Value.Coordinates.z + 1 : 0;
+        }
+    }
+
+    [ManualMethodOverwrite]
+    /*
+     * 05/04/2026
+        TraversedCoordinates? traversedCoordinates = _terrainPicker.PickTerrainCoordinates(ray);
+        int startHeight = (traversedCoordinates.HasValue ? (traversedCoordinates.GetValueOrDefault().Coordinates.z + 1) : 0);
+        foreach (Vector3Int inputBlock in inputBlocks)
+        {
+            if (_terrainService.OnGround(inputBlock.Above()))
+            {
+                yield return new Vector3Int(inputBlock.x, inputBlock.y, startHeight);
+            }
+        }
+     */
+    [HarmonyPatch(typeof(TerrainAreaService), nameof(TerrainAreaService.InMapLeveledCoordinates))]
+    class InMapLeveledCoordinatesOverridePatcher
+    {
+        static bool Prefix(TerrainAreaService __instance, IEnumerable<Vector3Int> inputBlocks, ref IEnumerable<Vector3Int> __result)
+        {
+            if (PlantingAreaMarkedEvent.LevelOverride == null) return true;
+            __result = WithLevel(inputBlocks, PlantingAreaMarkedEvent.LevelOverride.Value, __instance._terrainService);
+            return false;
+        }
+
+        private static IEnumerable<Vector3Int> WithLevel(IEnumerable<Vector3Int> inputBlocks, int level, ITerrainService terrain)
+        {
+            foreach (var b in inputBlocks)
+            {
+                if (terrain.OnGround(new Vector3Int(b.x, b.y, b.z + 1)))
+                    yield return new Vector3Int(b.x, b.y, level);
+            }
+        }
     }
 
     [HarmonyPatch(typeof(PlantingSelectionService), nameof(PlantingSelectionService.MarkArea))]
     class PlantingAreaMarkedPatcher
     {
-        static bool Prefix(IEnumerable<Vector3Int> inputBlocks, Ray ray, string templateName)
+        static bool Prefix(PlantingSelectionService __instance, IEnumerable<Vector3Int> inputBlocks, Ray ray, string templateName)
         {
-            return ReplayEvent.DoPrefix(() =>
+            return ReplayEvent.DoPrefix(() => new PlantingAreaMarkedEvent()
             {
-                return new PlantingAreaMarkedEvent()
-                {
-                    prefabName = templateName,
-                    ray = ray,
-                    inputBlocks = new List<Vector3Int>(inputBlocks)
-                };
+                prefabName = templateName,
+                inputBlocks = inputBlocks.ToList(),
+                level = PlantingAreaMarkedEvent.ResolveLevel(__instance, ray),
             });
         }
     }
@@ -234,16 +288,13 @@ namespace BeaverBuddies.Events
     [HarmonyPatch(typeof(PlantingSelectionService), nameof(PlantingSelectionService.UnmarkArea))]
     class PlantingAreaUnmarkedPatcher
     {
-        static bool Prefix(IEnumerable<Vector3Int> inputBlocks, Ray ray)
+        static bool Prefix(PlantingSelectionService __instance, IEnumerable<Vector3Int> inputBlocks, Ray ray)
         {
-            return ReplayEvent.DoPrefix(() =>
+            return ReplayEvent.DoPrefix(() => new PlantingAreaMarkedEvent()
             {
-                return new PlantingAreaMarkedEvent()
-                {
-                    prefabName = PlantingAreaMarkedEvent.UNMARK,
-                    ray = ray,
-                    inputBlocks = new List<Vector3Int>(inputBlocks)
-                };
+                unmark = true,
+                inputBlocks = inputBlocks.ToList(),
+                level = PlantingAreaMarkedEvent.ResolveLevel(__instance, ray),
             });
         }
     }
