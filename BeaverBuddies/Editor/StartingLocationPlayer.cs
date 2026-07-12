@@ -41,17 +41,14 @@ namespace BeaverBuddies.Editor
                 // later on and Specs are shared between multiple entities.
                 PlayerIndex = _startingLocationPlayerSpec.PlayerIndex;
             }
-        }
 
-        public void Start()
-        {
             Plugin.Log($"Start index initialized with PlayerIndex: {PlayerIndex}");
             StartingLocationRenderer renderer = GetComponent<StartingLocationRenderer>();
-            if (renderer != null )
+            if (renderer != null)
             {
                 renderer._renderers.ForEach(r =>
                 {
-                    if (r.material != null )
+                    if (r.material != null)
                     {
                         r.material.color = PLAYER_COLORS[PlayerIndex];
                     }

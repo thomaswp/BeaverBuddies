@@ -938,7 +938,7 @@ namespace BeaverBuddies
             {
                 var entity = __instance._tickableEntities.Values[i];
                 EntityUpdateHash = TimberNetBase.CombineHash(EntityUpdateHash, entity.EntityId.GetHashCode());
-                
+
                 var entityComponent = entity._entityComponent;
                 var pathFollower = entityComponent.GetComponent<Walker>()?.PathFollower;
                 var animatedPathFollower = entityComponent.GetComponent<MovementAnimator>()?._animatedPathFollower;
