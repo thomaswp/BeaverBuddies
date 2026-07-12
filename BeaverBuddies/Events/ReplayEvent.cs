@@ -1,7 +1,6 @@
 ﻿using BeaverBuddies.IO;
 using System;
 using Timberborn.BaseComponentSystem;
-using Timberborn.BlueprintSystem;
 using Timberborn.Buildings;
 using Timberborn.EntitySystem;
 using Timberborn.TemplateSystem;
@@ -85,9 +84,10 @@ namespace BeaverBuddies.Events
             return result;
         }
 
-        public static string GetBuildingName(ComponentSpec component)
+        public static string GetBuildingName(EntitySetup.Builder entitySetupBuilder)
         {
-            return component.GetSpec<TemplateSpec>()?.TemplateName;
+            var spec = entitySetupBuilder.Template.GetSpec<BuildingSpec>();
+            return spec?.GetSpec<TemplateSpec>()?.TemplateName;
         }
 
         public static ReplayService GetReplayServiceIfReady()

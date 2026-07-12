@@ -1,7 +1,5 @@
 ﻿using Timberborn.BaseComponentSystem;
-using Timberborn.BlockSystem;
 using Timberborn.BlueprintSystem;
-using Timberborn.Coordinates;
 using Timberborn.EntitySystem;
 using Timberborn.Persistence;
 using Timberborn.StartingLocationSystem;
@@ -15,7 +13,7 @@ namespace BeaverBuddies.Editor
         public int PlayerIndex { get; init; }
     }
 
-    public class StartingLocationPlayer : BaseComponent, IAwakableComponent, IRegisteredComponent, IPersistentEntity, IStartableComponent
+    public class StartingLocationPlayer : BaseComponent, IAwakableComponent, IRegisteredComponent, IPersistentEntity
     {
         public static readonly Color[] PLAYER_COLORS =
         {

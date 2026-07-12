@@ -17,7 +17,6 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Timberborn.Autosaving;
 using Timberborn.Beavers;
-using Timberborn.BlueprintSystem;
 using Timberborn.BotUpkeep;
 using Timberborn.Brushes;
 using Timberborn.CharacterMovementSystem;
@@ -464,10 +463,12 @@ namespace BeaverBuddies
             typeof(BeaverTextureSetter),
             typeof(BotManufactoryAnimationController),
             typeof(BasicSelectionSound),
+            typeof(BeaverTextureSetter),
             typeof(BrushProbabilityMap),
             typeof(DateSalter),
             typeof(GameMusicPlayer),
             typeof(NaturalResourceModelRandomizer),
+            typeof(RecoveredGoodStack),
             typeof(RuinModelFactory),
             typeof(RuinModelUpdater),
             typeof(LoopingSoundPlayer),
@@ -628,20 +629,6 @@ namespace BeaverBuddies
         }
     }
 
-    [HarmonyPatch(typeof(RecoveredGoodStackFactory), nameof(RecoveredGoodStackFactory.RandomizeRotation))]
-    public class RecoveredGoodStackFactoryPatcher
-    {
-        static void Prefix()
-        {
-            DeterminismService.SetNonGamePatcherActive(typeof(RecoveredGoodStackFactoryPatcher), true);
-        }
-
-        static void Postfix()
-        {
-            DeterminismService.SetNonGamePatcherActive(typeof(RecoveredGoodStackFactoryPatcher), false);
-        }
-    }
-
     [HarmonyPatch(typeof(LoopingSoundPlayer), nameof(LoopingSoundPlayer.PlayLooping))]
     public class LoopingSoundPlayerPatcher
     {
@@ -681,21 +668,6 @@ namespace BeaverBuddies
         static void Postfix()
         {
             DeterminismService.SetNonGamePatcherActive(typeof(TerrainBlockRandomizerPickVariationPatcher), false);
-        }
-    }
-
-
-    [HarmonyPatch(typeof(BeaverTextureSetter), nameof(BeaverTextureSetter.Start))]
-    public class BeaverTextureSetterStartPatcher
-    {
-        static void Prefix()
-        {
-            DeterminismService.SetNonGamePatcherActive(typeof(BeaverTextureSetterStartPatcher), true);
-        }
-
-        static void Postfix()
-        {
-            DeterminismService.SetNonGamePatcherActive(typeof(BeaverTextureSetterStartPatcher), false);
         }
     }
 
@@ -840,14 +812,15 @@ namespace BeaverBuddies
     }
 
 
-    [HarmonyPatch(typeof(EntityService), nameof(EntityService.Instantiate), typeof(Blueprint), typeof(Guid))]
+    [HarmonyPatch(typeof(EntityService), nameof(EntityService.Instantiate), typeof(EntitySetup.Builder))]
     static class EntityComponentInstantiatePatcher
     {
-        static void Prefix(EntityService __instance, Blueprint template, ref Guid id)
+        static void Prefix(EntityService __instance, EntitySetup.Builder entitySetupBuilder)
         {
-            if (EventIO.IsNull) return;
+            if (EventIO.IsNull || !entitySetupBuilder._id.HasValue) return;
 
             var replayService = GetSingleton<ReplayService>();
+            Guid id = entitySetupBuilder._id.Value;
 
             // During preloading, a GUID can be generated that already exists in 
             // the save, so this guards against duplicate GUIDs.
@@ -965,7 +938,7 @@ namespace BeaverBuddies
             {
                 var entity = __instance._tickableEntities.Values[i];
                 EntityUpdateHash = TimberNetBase.CombineHash(EntityUpdateHash, entity.EntityId.GetHashCode());
-
+                
                 var entityComponent = entity._entityComponent;
                 var pathFollower = entityComponent.GetComponent<Walker>()?.PathFollower;
                 var animatedPathFollower = entityComponent.GetComponent<MovementAnimator>()?._animatedPathFollower;
@@ -984,7 +957,7 @@ namespace BeaverBuddies
                     CharacterRotator rotator = entityComponent.GetComponent<CharacterRotator>();
                     // The CharacterRotator seems to sometimes not be initialized when this is caused, and
                     // therefore something is null, likely _animatedPathFollower.
-                    if (anim != null && rotator != null && rotator.Started && rotator._animatedPathFollower != null)
+                    if (anim != null && rotator != null && rotator._animatedPathFollower != null)
                     {
                         anim.UpdateTransform(0);
                     }

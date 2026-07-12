@@ -1,7 +1,6 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using Timberborn.BaseComponentSystem;
 using Timberborn.BlockObjectTools;
@@ -14,16 +13,11 @@ using Timberborn.DuplicationSystem;
 using Timberborn.EntitySystem;
 using Timberborn.Forestry;
 using Timberborn.PlantingUI;
-using Timberborn.RootProviders;
 using Timberborn.ScienceSystem;
-using Timberborn.SingletonSystem;
 using Timberborn.TemplateInstantiation;
-using Timberborn.TemplateSystem;
 using Timberborn.ToolButtonSystem;
-using Timberborn.ToolSystem;
 using Timberborn.WorkSystemUI;
 using UnityEngine;
-using UnityEngine.UIElements.Collections;
 
 namespace BeaverBuddies.Events
 {
@@ -52,23 +46,18 @@ namespace BeaverBuddies.Events
                 return;
             }
 
-            placer.Place(blockObjectSpec, placement, (targetEntity) => {
-                // This callback is called when the object is created (which right now
-                // is just immediately after placement). If we should duplicate settings
-                // to it, the event will have a duplicationSourceID.
-                DuplicateSettingsIfNeeded(context, targetEntity);
-            });
-        }
+            BaseComponent duplicationSource = null;
+            if (!string.IsNullOrEmpty(duplicationSourceID))
+            {
+                duplicationSource = GetEntityComponent(context, duplicationSourceID);
+            }
 
-        private void DuplicateSettingsIfNeeded(IReplayContext context, BaseComponent targetEntity)
-        {
-            if (string.IsNullOrEmpty(duplicationSourceID)) return;
-
-            var sourceEntity = GetEntityComponent(context, duplicationSourceID);
-            if (sourceEntity == null) return;
-
-            var duplicator = new Duplicator();
-            duplicator.Duplicate(sourceEntity, targetEntity);
+            EntitySetup.Builder builder = new EntitySetup.Builder(buildingSpec.Blueprint);
+            if ((bool)duplicationSource)
+            {
+                builder.AddInitComponent(new DuplicationInit(duplicationSource));
+            }
+            placer.Place(builder, placement);
         }
 
         // Note: This may not catch every possible invalid placement (e.g. if terrain height changes or something)
@@ -99,31 +88,21 @@ namespace BeaverBuddies.Events
         }
     }
 
-    [HarmonyPatch(typeof(BlockObjectTool), nameof(BlockObjectTool.Place))]
-    class BlockObjectToolPlacePatcher
-    {
-        public static BaseComponent DuplicationSource { get; set; }
-
-        static void Prefix(BlockObjectTool __instance)
-        {
-            DuplicationSource = __instance._duplicationSource;
-        }
-
-        static void Postfix(BlockObjectTool __instance)
-        {
-            DuplicationSource = null;
-        }
-    }
-
-
     [HarmonyPatch(typeof(BuildingPlacer), nameof(BuildingPlacer.Place))]
     class PlacePatcher
     {
-        static bool Prefix(BlockObjectSpec template, Placement placement, Action<BaseComponent> placedCallback)
+        static bool Prefix(EntitySetup.Builder entitySetupBuilder, Placement placement)
         {
             return ReplayEvent.DoPrefix(() =>
             {
-                string prefabName = ReplayEvent.GetBuildingName(template);
+                string prefabName = ReplayEvent.GetBuildingName(entitySetupBuilder);
+                // If there's a duplication source, get the source's EntityID
+                var dupInit = (DuplicationInit)entitySetupBuilder._initComponents.Find(c => c is DuplicationInit);
+                string duplicationSourceID = dupInit == null ? null : ReplayEvent.GetEntityID(dupInit.DuplicationSource);
+                if (!string.IsNullOrEmpty(duplicationSourceID))
+                {
+                    Plugin.Log($"Found duplication source: {duplicationSourceID} for {prefabName}");
+                }
 
                 return new BuildingPlacedEvent()
                 {
@@ -131,7 +110,7 @@ namespace BeaverBuddies.Events
                     coordinates = placement.Coordinates,
                     orientation = placement.Orientation,
                     isFlipped = placement.FlipMode.IsFlipped,
-                    duplicationSourceID = ReplayEvent.GetEntityID(BlockObjectToolPlacePatcher.DuplicationSource),
+                    duplicationSourceID = duplicationSourceID,
                 };
             });
         }

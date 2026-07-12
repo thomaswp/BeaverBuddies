@@ -1,48 +1,33 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Timberborn.BaseComponentSystem;
-using Timberborn.BeaversUI;
 using Timberborn.BuilderPrioritySystem;
 using Timberborn.Buildings;
 using Timberborn.BuildingsUI;
-using Timberborn.Characters;
-using Timberborn.CharactersUI;
-using Timberborn.CoreUI;
 using Timberborn.Demolishing;
 using Timberborn.DemolishingUI;
 using Timberborn.Emptying;
 using Timberborn.EntityNaming;
 using Timberborn.EntityNamingUI;
-using Timberborn.EntityPanelSystem;
 using Timberborn.EntitySystem;
 using Timberborn.Explosions;
 using Timberborn.ExplosionsUI;
 using Timberborn.Fields;
 using Timberborn.Forestry;
 using Timberborn.GameDistrictsUI;
-using Timberborn.GameSaveRepositorySystem;
-using Timberborn.GameStartup;
 using Timberborn.Gathering;
-using Timberborn.Goods;
 using Timberborn.Hauling;
-using Timberborn.HaulingUI;
 using Timberborn.InventorySystem;
 using Timberborn.Planting;
 using Timberborn.PrioritySystem;
 using Timberborn.RecoveredGoodSystem;
 using Timberborn.RecoveredGoodSystemUI;
-using Timberborn.SettlementNameSystemUI;
-using Timberborn.SingletonSystem;
 using Timberborn.StockpilePrioritySystem;
-using Timberborn.StockpilePriorityUISystem;
 using Timberborn.TemplateSystem;
 using Timberborn.WaterBuildings;
 using Timberborn.WaterBuildingsUI;
-using Timberborn.WaterSourceSystem;
-using Timberborn.WaterSourceSystemUI;
 using Timberborn.Wonders;
 using Timberborn.WondersUI;
 using Timberborn.WorkerTypesUI;
@@ -51,8 +36,6 @@ using Timberborn.WorkSystem;
 using Timberborn.WorkSystemUI;
 using Timberborn.ZiplineSystem;
 using Timberborn.ZiplineSystemUI;
-using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace BeaverBuddies.Events
 {
@@ -1002,396 +985,11 @@ namespace BeaverBuddies.Events
         }
     }
 
-    public enum SluiceToggleType
-    {
-        WaterLevel,
-        AboveContamination,
-        BelowContamination,
-        Synchronization,
-    }
-
-    [Serializable]
-    class SluicePlainToggleUpdatedEvent : ReplayEvent
-    {
-        public string entityID;
-        public bool value;
-        public SluiceToggleType toggleType;
-
-        public override void Replay(IReplayContext context)
-        {
-            var sluice = GetComponent<Sluice>(context, entityID);
-            if (!sluice) return;
-            var sluiceState = sluice._sluiceState;
-            if (toggleType == SluiceToggleType.WaterLevel)
-            {
-                if (value)
-                {
-                    sluiceState.EnableAutoCloseOnOutflow();
-                }
-                else
-                {
-                    sluiceState.DisableAutoCloseOnOutflow();
-                }
-            }
-            else if (toggleType == SluiceToggleType.AboveContamination)
-            {
-                if (value)
-                {
-                    sluiceState.EnableAutoCloseOnAbove();
-                }
-                else
-                {
-                    sluiceState.DisableAutoCloseOnAbove();
-                }
-            }
-            else if (toggleType == SluiceToggleType.BelowContamination)
-            {
-                if (value)
-                {
-                    sluiceState.EnableAutoCloseOnBelow();
-                }
-                else
-                {
-                    sluiceState.DisableAutoCloseOnBelow();
-                }
-            }
-            else if (toggleType == SluiceToggleType.Synchronization)
-            {
-                sluiceState.ToggleSynchronization(value);
-                // This won't update the Fragment's UI like it's supposed to
-                // (I don't think we can get a reference here easily),
-                // but it should update if the user tries to slide the slider,
-                // and I don't think it affects game logic.
-            }
-        }
-
-        public override string ToActionString()
-        {
-            return $"Setting sluice {entityID} {toggleType} toggle to: {value}";
-        }
-
-        public static bool DoPrefix(Sluice __instance, bool value, SluiceToggleType toggleType)
-        {
-            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
-            {
-                return new SluicePlainToggleUpdatedEvent()
-                {
-                    entityID = entityID,
-                    value = value,
-                    toggleType = toggleType,
-                };
-            });
-        }
-    }
-
-    [HarmonyPatch(typeof(SluiceFragment), nameof(SluiceFragment.OnWaterLevelToggleChanged))]
-    class SluiceFragmentOnWaterLevelToggleChangedPatcher
-    {
-        public static bool Prefix(SluiceFragment __instance, ChangeEvent<bool> evt)
-        {
-            return SluicePlainToggleUpdatedEvent.DoPrefix(
-                __instance._sluice, evt.newValue, SluiceToggleType.WaterLevel);
-        }
-    }
-
-    [HarmonyPatch(typeof(SluiceFragment), nameof(SluiceFragment.OnAboveContaminationToggleChanged))]
-    class SluiceFragmentOnAboveContaminationToggleChangedPatcher
-    {
-        public static bool Prefix(SluiceFragment __instance, ChangeEvent<bool> evt)
-        {
-            return SluicePlainToggleUpdatedEvent.DoPrefix(
-                __instance._sluice, evt.newValue, SluiceToggleType.AboveContamination);
-        }
-    }
-
-    [HarmonyPatch(typeof(SluiceFragment), nameof(SluiceFragment.OnBelowContaminationToggleChanged))]
-    class SluiceFragmentOnBelowContaminationToggleChangedPatcher
-    {
-        public static bool Prefix(SluiceFragment __instance, ChangeEvent<bool> evt)
-        {
-            return SluicePlainToggleUpdatedEvent.DoPrefix(
-                __instance._sluice, evt.newValue, SluiceToggleType.BelowContamination);
-        }
-    }
-
-    [HarmonyPatch(typeof(SluiceFragment), nameof(SluiceFragment.ToggleSynchronization))]
-    class SluiceFragmentToggleSynchronizationChangedPatcher
-    {
-        public static bool Prefix(SluiceFragment __instance, ChangeEvent<bool> evt)
-        {
-            return SluicePlainToggleUpdatedEvent.DoPrefix(
-                __instance._sluice, evt.newValue, SluiceToggleType.Synchronization);
-        }
-    }
-
-    public enum SluiceLimitSliderType
-    {
-        Outflow,
-        AboveContamination,
-        BelowContamination,
-    }
-
-    [Serializable]
-    class SluiceSliderUpdatedEvent : ReplayEvent
-    {
-        public string entityID;
-        public SluiceLimitSliderType sliderType;
-        public float value;
-
-        public override void Replay(IReplayContext context)
-        {
-            var sluice = GetComponent<Sluice>(context, entityID);
-            if (!sluice) return;
-            var sluiceState = sluice._sluiceState;
-            switch (sliderType)
-            {
-                case SluiceLimitSliderType.Outflow:
-                    sluiceState.SetOutflowLimit(value);
-                    break;
-                case SluiceLimitSliderType.AboveContamination:
-                    sluiceState.SetAboveContaminationLimit(value);
-                    break;
-                case SluiceLimitSliderType.BelowContamination:
-                    sluiceState.SetBelowContaminationLimit(value);
-                    break;
-            }
-        }
-
-        public override string ToActionString()
-        {
-            string type = sliderType.ToString();
-            return $"Setting sluice {entityID} {type} limit to: {value}";
-        }
-
-        public static bool DoPrefix(SluiceState __instance, SluiceLimitSliderType sliderType, float value)
-        {
-            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
-            {
-                return new SluiceSliderUpdatedEvent()
-                {
-                    entityID = entityID,
-                    sliderType = sliderType,
-                    value = value,
-                };
-            });
-        }
-    }
-
-    /*
-     * Note: We override the SluiceState methods instead of the SluiceFragment methods
-     * only for contaminatoin limits, because these methods seem to only be called form the
-     * UI, which contains some additional logic we don't want to have to manually override.
-     * This is not the case for the Outflow, which is called on SluiceState.Tick(), so we
-     * have to override SluiceFragment.ChangeFlow() instead, and duplicate that logic.
-     */
-
-    [HarmonyPatch(typeof(SluiceState), nameof(SluiceState.SetBelowContaminationLimit))]
-    class SluiceStateSetBelowContaminationLimitPatcher
-    {
-        public static bool Prefix(SluiceState __instance, float contaminationLimit)
-        {
-            return SluiceSliderUpdatedEvent.DoPrefix(
-                __instance, SluiceLimitSliderType.BelowContamination, contaminationLimit
-            );
-        }
-    }
-
-    [HarmonyPatch(typeof(SluiceState), nameof(SluiceState.SetAboveContaminationLimit))]
-    class SluiceStateSetAboveContaminationLimitPatcher
-    {
-        public static bool Prefix(SluiceState __instance, float contaminationLimit)
-        {
-            return SluiceSliderUpdatedEvent.DoPrefix(
-                __instance, SluiceLimitSliderType.AboveContamination, contaminationLimit
-            );
-        }
-    }
-
-    [ManualMethodOverwrite]
-    /*
-     * 04/25/2025
-    if (WaterLevelSliderValue != newHeight)
-    {
-        _sluiceState.SetOutflowLimit(newHeight - (float)Range);
-    }
-    */
-    [HarmonyPatch(typeof(SluiceFragment), nameof(SluiceFragment.ChangeFlow))]
-    class SluiceFragmentChangeFlowPatcher
-    {
-        public static bool Prefix(SluiceFragment __instance, float newHeight)
-        {
-            // Note that UpdateWaterLevelSliderValue does modify the slider value, so this
-            // is UI logic we need to keep updated if the method changes.
-            float num = __instance.WaterLevelSliderValue;
-            if (__instance.WaterLevelSliderValue == num) return true;
-            return SluiceSliderUpdatedEvent.DoPrefix(
-                // Note: it's num - Range, not num
-                __instance._sluice._sluiceState, SluiceLimitSliderType.Outflow, num - (float)__instance.Range
-            );
-        }
-    }
-
-    public enum SluiceMode
-    {
-        Auto,
-        Open,
-        Closed
-    }
-
-    [Serializable]
-    class SluiceModeUpdatedEvent : ReplayEvent
-    {
-        public string entityID;
-        public SluiceMode mode;
-
-        public override void Replay(IReplayContext context)
-        {
-            var sluice = GetComponent<Sluice>(context, entityID);
-            if (!sluice) return;
-            var sluiceState = sluice._sluiceState;
-            switch (mode)
-            {
-                case SluiceMode.Auto:
-                    sluiceState.SetAuto();
-                    break;
-                case SluiceMode.Open:
-                    sluiceState.Open();
-                    break;
-                case SluiceMode.Closed:
-                    sluiceState.Close();
-                    break;
-            }
-        }
-
-        public override string ToActionString()
-        {
-            return $"Setting sluice {entityID} mode to: {mode}";
-        }
-
-        public static bool DoPrefix(SluiceState __instance, SluiceMode mode)
-        {
-            return ReplayEvent.DoEntityPrefix(__instance, entityID =>
-            {
-                return new SluiceModeUpdatedEvent()
-                {
-                    entityID = entityID,
-                    mode = mode,
-                };
-            });
-        }
-    }
-
-    [HarmonyPatch(typeof(SluiceState), nameof(SluiceState.SetAuto))]
-    class SluiceStateSetAutoPatcher
-    {
-        public static bool Prefix(SluiceState __instance)
-        {
-            return SluiceModeUpdatedEvent.DoPrefix(__instance, SluiceMode.Auto);
-        }
-    }
-
-    [HarmonyPatch(typeof(SluiceState), nameof(SluiceState.Open))]
-    class SluiceStateOpenPatcher
-    {
-        public static bool Prefix(SluiceState __instance)
-        {
-            return SluiceModeUpdatedEvent.DoPrefix(__instance, SluiceMode.Open);
-        }
-    }
-
-    [HarmonyPatch(typeof(SluiceState), nameof(SluiceState.Close))]
-    class SluiceStateClosePatcher
-    {
-        public static bool Prefix(SluiceState __instance)
-        {
-            return SluiceModeUpdatedEvent.DoPrefix(__instance, SluiceMode.Closed);
-        }
-    }
-
     enum WaterInputDepthAction
     {
         ToggleLimit,
         IncreaseDepthLimit,
         DecreaseDepthLimit,
-    }
-
-    [Serializable]
-    class WaterInputDepthActionEvent : ReplayEvent
-    {
-        public string entityID;
-        public WaterInputDepthAction action;
-
-        public override void Replay(IReplayContext context)
-        {
-            var waterinput = GetComponent<WaterInputCoordinates>(context, entityID);
-            var waterInputSpec = GetComponent<WaterInputSpec>(context, entityID);
-            if (waterinput == null || waterInputSpec == null) return;
-            switch (action)
-            {
-                case WaterInputDepthAction.ToggleLimit:
-                    if (waterinput.UseDepthLimit)
-                    {
-                        waterinput.DisableDepthLimit();
-                    }
-                    else
-                    {
-                        waterinput.SetDepthLimit(waterinput.Depth);
-                    }
-                    break;
-                case WaterInputDepthAction.IncreaseDepthLimit:
-                    int depthLimit = Math.Min(waterInputSpec.MaxDepth, waterinput.DepthLimit + 1);
-                    waterinput.SetDepthLimit(depthLimit);
-                    break;
-                case WaterInputDepthAction.DecreaseDepthLimit:
-                    depthLimit = Math.Max(0, waterinput.DepthLimit - 1);
-                    waterinput.SetDepthLimit(depthLimit);
-                    break;
-            }
-        }
-
-        public static bool DoPrefix(BaseComponent entityComponent, WaterInputDepthAction action)
-        {
-            return DoEntityPrefix(entityComponent, entityID =>
-            {
-                return new WaterInputDepthActionEvent()
-                {
-                    entityID = entityID,
-                    action = action,
-                };
-            });
-        }
-
-        public override string ToActionString()
-        {
-            return $"Water input {entityID} action={action}";
-        }
-    }
-
-    [HarmonyPatch(typeof(WaterInputDepthFragment), nameof(WaterInputDepthFragment.ToggleDepthLimit))]
-    class WaterInputDepthFragmentToggleDepthLimitPatcher
-    {
-        public static bool Prefix(WaterInputDepthFragment __instance)
-        {
-            return WaterInputDepthActionEvent.DoPrefix(__instance._waterInputCoordinates, WaterInputDepthAction.ToggleLimit);
-        }
-    }
-
-    [HarmonyPatch(typeof(WaterInputDepthFragment), nameof(WaterInputDepthFragment.IncreaseDepth))]
-    class WaterInputDepthFragmentIncreaseDepthPatcher
-    {
-        public static bool Prefix(WaterInputDepthFragment __instance)
-        {
-            return WaterInputDepthActionEvent.DoPrefix(__instance._waterInputCoordinates, WaterInputDepthAction.IncreaseDepthLimit);
-        }
-    }
-
-    [HarmonyPatch(typeof(WaterInputDepthFragment), nameof(WaterInputDepthFragment.DecreaseDepth))]
-    class WaterInputDepthFragmentDecreaseDepthPatcher
-    {
-        public static bool Prefix(WaterInputDepthFragment __instance)
-        {
-            return WaterInputDepthActionEvent.DoPrefix(__instance._waterInputCoordinates, WaterInputDepthAction.DecreaseDepthLimit);
-        }
     }
 
     [Serializable]

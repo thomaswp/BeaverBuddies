@@ -135,8 +135,8 @@ namespace BeaverBuddies.Events
                 (typeof(PowerMeter), nameof(PowerMeter.SetIntThreshold)),
                 (typeof(PowerMeter), nameof(PowerMeter.SetMode)),
                 (typeof(PowerMeter), nameof(PowerMeter.SetPercentThreshold)),
-                (typeof(Relay), nameof(Relay.SetInputA)),
-                (typeof(Relay), nameof(Relay.SetInputB)),
+                (typeof(Relay), nameof(Relay.SetInput)),
+                (typeof(Relay), nameof(Relay.RemoveInput)),
                 (typeof(Relay), nameof(Relay.SetMode)),
                 (typeof(ResourceCounter), nameof(ResourceCounter.SetComparisonMode)),
                 (typeof(ResourceCounter), nameof(ResourceCounter.SetFillRateThreshold)),
@@ -161,17 +161,11 @@ namespace BeaverBuddies.Events
 
                 // Some building also have special automation UIs that exist when automated
                 (typeof(Floodgate), nameof(Floodgate.SetAutomationHeightAndSynchronize)),
-                (typeof(Valve), nameof(Valve.SetAutomationOutflowLimitAndSynchronize)),
-                (typeof(Valve), nameof(Valve.SetAutomationOutflowLimitEnabledAndSynchronize)),
-                (typeof(Valve), nameof(Valve.SetReactionSpeedAndSynchronize)),
                 (typeof(FillValve), nameof(FillValve.SetAutomationTargetHeightAndSynchronize)),
                 (typeof(FillValve), nameof(FillValve.SetAutomationTargetHeightEnabledAndSynchronize)),
 
                 // TODO: These are not automation-related events, but they are "automated" events
                 // so I need to refactor this class to separate these two ideas
-                (typeof(Valve), nameof(Valve.SetOutflowLimitAndSynchronize)),
-                (typeof(Valve), nameof(Valve.SetOutflowLimitEnabledAndSynchronize)),
-                (typeof(Valve), nameof(Valve.ToggleSynchronization)),
                 (typeof(FillValve), nameof(FillValve.SetTargetHeightAndSynchronize)),
                 (typeof(FillValve), nameof(FillValve.SetTargetHeightEnabledAndSynchronize)),
                 (typeof(FillValve), nameof(FillValve.ToggleSynchronization)),
