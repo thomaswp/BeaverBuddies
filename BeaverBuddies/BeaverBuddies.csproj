@@ -18,7 +18,7 @@
     <AssemblyName>BeaverBuddies</AssemblyName>
     <Description>TimberModTest</Description>
     <Version>1.7.1</Version>
-    <TimberbornTargetVersion>1.0</TimberbornTargetVersion>
+    <TimberbornTargetVersion>1.1</TimberbornTargetVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
