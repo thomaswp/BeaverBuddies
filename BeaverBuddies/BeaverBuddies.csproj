@@ -18,16 +18,17 @@
     <AssemblyName>BeaverBuddies</AssemblyName>
     <Description>TimberModTest</Description>
     <Version>1.7.1</Version>
+    <TimberbornTargetVersion>1.0</TimberbornTargetVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     <NoWarn>$(NoWarn)</NoWarn>
     <!-- Path Config -->
     <BeaverBuddiesModsPath>$(DocumentsPath)Timberborn\Mods\BeaverBuddies\</BeaverBuddiesModsPath>
+    <VersionOutputPath>$(BeaverBuddiesModsPath)version-$(TimberbornTargetVersion)\</VersionOutputPath>
     <!-- Old env.props files use the TimberbornPath, make that compatible with the new OS-independent TimberbornPath -->
     <TimberbornDataPath Condition="'$(TimberbornDataPath)' == ''">$(TimberbornPath)Timberborn_Data\</TimberbornDataPath>
     <TimberbornManagedPath>$(TimberbornDataPath)Managed\</TimberbornManagedPath>
-    <!-- Include HarmonyX file inside $(BeaverBuddiesModsPath) -->
     <NuGetPackagesDir>$(UserProfile)\.nuget\packages\</NuGetPackagesDir>
     <Configurations>Debug;Release;Debug Steam;Release Steam</Configurations>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -98,10 +99,10 @@
   <ItemGroup>
     <None Update="manifest.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="thumbnail.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
     <None Update="workshop_data.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
     <None Update="Localizations\*" CopyToOutputDirectory="PreserveNewest" />
     <None Update="KeyBindings\*" CopyToOutputDirectory="PreserveNewest" />
@@ -128,23 +129,25 @@
 
   <!-- PostBuild -->
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Message Importance="High" Text="DestinationFolder -&gt; $(BeaverBuddiesModsPath)" />
+    <Message Importance="High" Text="DestinationFolder -&gt; $(VersionOutputPath)" />
     <!-- Create Folder -->
-    <MakeDir Directories="$(BeaverBuddiesModsPath)" />
+    <MakeDir Directories="$(VersionOutputPath)" />
     <ItemGroup>
       <!-- For copy -->
       <FilesToCopy Include="$(ProjectDir)$(OutDir)*" />
       <LocalizationFileToCopy Include="$(ProjectDir)$(OutDir)Localizations\*" />
       <KeyBindingFileToCopy Include="$(ProjectDir)$(OutDir)KeyBindings\*" />
       <KeyBindingGroupFileToCopy Include="$(ProjectDir)$(OutDir)KeyBindingGroups\*" />
+      <RootDirFilesToCopy Include="$(ProjectDir)thumbnail.png; $(ProjectDir)workshop_data.json" />
     </ItemGroup>
-    <!-- Clear BeaverBuddiesModsPath Directory & Copy Output files inside -->
-    <RemoveDir Directories="$(BeaverBuddiesModsPath)" />
-    <MakeDir Directories="$(BeaverBuddiesModsPath)" />
-    <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(BeaverBuddiesModsPath)" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(LocalizationFileToCopy)" DestinationFolder="$(BeaverBuddiesModsPath)\Localizations" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(KeyBindingFileToCopy)" DestinationFolder="$(BeaverBuddiesModsPath)\KeyBindings" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(KeyBindingGroupFileToCopy)" DestinationFolder="$(BeaverBuddiesModsPath)\KeyBindingGroups" SkipUnchangedFiles="true" />
+    <!-- Clear VersionOutputPath Directory & Copy Output files inside -->
+    <RemoveDir Directories="$(VersionOutputPath)" />
+    <MakeDir Directories="$(VersionOutputPath)" />
+    <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(VersionOutputPath)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(LocalizationFileToCopy)" DestinationFolder="$(VersionOutputPath)\Localizations" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(KeyBindingFileToCopy)" DestinationFolder="$(VersionOutputPath)\KeyBindings" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(KeyBindingGroupFileToCopy)" DestinationFolder="$(VersionOutputPath)\KeyBindingGroups" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(RootDirFilesToCopy)" DestinationFolder="$(BeaverBuddiesModsPath)" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>
