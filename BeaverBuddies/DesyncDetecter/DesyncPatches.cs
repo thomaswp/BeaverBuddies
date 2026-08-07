@@ -12,8 +12,10 @@ using UnityEngine;
 using Timberborn.WalkingSystem;
 using Timberborn.NaturalResourcesMoisture;
 using Timberborn.SoilMoistureSystem;
+using BeaverBuddies.Fixes;
 using BeaverBuddies.IO;
 using Timberborn.WaterSystem;
+using Timberborn.WaterSourceSystem;
 using Timberborn.TickSystem;
 using Timberborn.NaturalResourcesModelSystem;
 using Timberborn.ReservableSystem;
@@ -283,6 +285,90 @@ namespace BeaverBuddies.DesyncDetecter
                 DesyncDetecterService.Trace($"Adding: {tickableEntity.EntityId} at index {index}");
             }
             //Plugin.LogStackTrace();
+        }
+    }
+    
+    [HarmonyPatch(typeof(WaterSource), nameof(WaterSource.Tick))]
+    public class WaterSourceTickTracePatcher
+    {
+        public static void Postfix(WaterSource __instance)
+        {
+            if (!Settings.Debug) return;
+            // The base mod defers WaterSource.Tick via LateTickableBuffer; trace
+            // only on the deferred pass so we capture post-update state once
+            // per source per tick in deterministic order.
+            if (!LateTickableBuffer.TickingLate) return;
+            var entityID = __instance.GetComponent<EntityComponent>()?.EntityId;
+            int strengthBits = BitConverter.SingleToInt32Bits(__instance.CurrentStrength);
+            int contamBits = BitConverter.SingleToInt32Bits(__instance.Contamination);
+            DesyncDetecterService.Trace(
+                $"WaterSource {entityID} strength={strengthBits:X8} contam={contamBits:X8}");
+        }
+    }
+
+    [HarmonyPatch(typeof(BadtideWaterSourceContaminationController),
+        nameof(BadtideWaterSourceContaminationController.Tick))]
+    public class BadtideContaminationTickTracePatcher
+    {
+        public static void Postfix(BadtideWaterSourceContaminationController __instance)
+        {
+            if (!Settings.Debug) return;
+            var entityID = __instance.GetComponent<EntityComponent>()?.EntityId;
+            int contamBits = BitConverter.SingleToInt32Bits(__instance.GetCurrentContamination());
+            DesyncDetecterService.Trace(
+                $"BadtideContam {entityID} contam={contamBits:X8}");
+        }
+    }
+
+    [HarmonyPatch(typeof(WaterSource), nameof(WaterSource.AddWaterStrengthModifier))]
+    public class WaterSourceAddModifierTracePatcher
+    {
+        public static void Postfix(WaterSource __instance, IWaterStrengthModifier waterStrengthModifier)
+        {
+            if (!Settings.Debug) return;
+            if (!ReplayService.IsLoaded) return;
+            var entityID = __instance.GetComponent<EntityComponent>()?.EntityId;
+            DesyncDetecterService.Trace(
+                $"WaterSource {entityID} +modifier {waterStrengthModifier?.GetType().Name}");
+        }
+    }
+
+    [HarmonyPatch(typeof(WaterSource), nameof(WaterSource.RemoveWaterStrengthModifier))]
+    public class WaterSourceRemoveModifierTracePatcher
+    {
+        public static void Postfix(WaterSource __instance, IWaterStrengthModifier waterStrengthModifier)
+        {
+            if (!Settings.Debug) return;
+            if (!ReplayService.IsLoaded) return;
+            var entityID = __instance.GetComponent<EntityComponent>()?.EntityId;
+            DesyncDetecterService.Trace(
+                $"WaterSource {entityID} -modifier {waterStrengthModifier?.GetType().Name}");
+        }
+    }
+
+    [HarmonyPatch(typeof(BadtideWaterSourceContaminationController),
+        nameof(BadtideWaterSourceContaminationController.OnHazardousWeatherStarted))]
+    public class BadtideOnWeatherStartedTracePatcher
+    {
+        public static void Postfix(BadtideWaterSourceContaminationController __instance)
+        {
+            if (!Settings.Debug) return;
+            if (!ReplayService.IsLoaded) return;
+            var entityID = __instance.GetComponent<EntityComponent>()?.EntityId;
+            DesyncDetecterService.Trace($"HazardousWeatherStarted -> {entityID}");
+        }
+    }
+
+    [HarmonyPatch(typeof(BadtideWaterSourceContaminationController),
+        nameof(BadtideWaterSourceContaminationController.OnHazardousWeatherEnded))]
+    public class BadtideOnWeatherEndedTracePatcher
+    {
+        public static void Postfix(BadtideWaterSourceContaminationController __instance)
+        {
+            if (!Settings.Debug) return;
+            if (!ReplayService.IsLoaded) return;
+            var entityID = __instance.GetComponent<EntityComponent>()?.EntityId;
+            DesyncDetecterService.Trace($"HazardousWeatherEnded -> {entityID}");
         }
     }
 }
