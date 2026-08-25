@@ -176,8 +176,31 @@ namespace BeaverBuddies.Connect
                 .Show();
         }
 
+        // A valid Timberborn save is a ZIP archive, which always begins with the
+        // local-file-header magic "PK\x03\x04". When the connection to the host
+        // drops or is refused, the client can receive a short non-map payload
+        // (an error/handshake message) as its "first message". Feeding those
+        // bytes into the save loader throws
+        // "End of Central Directory record could not be found" *during scene
+        // load* (so it can't be caught here) and crashes the game. Reject
+        // anything that isn't a real save before we ever start loading it.
+        private static bool IsValidMap(byte[] mapBytes)
+        {
+            return mapBytes != null && mapBytes.Length >= 4 &&
+                mapBytes[0] == 0x50 && mapBytes[1] == 0x4B &&
+                mapBytes[2] == 0x03 && mapBytes[3] == 0x04;
+        }
+
         private void LoadMap(byte[] mapBytes)
         {
+            if (!IsValidMap(mapBytes))
+            {
+                Plugin.LogError($"Received invalid map data ({mapBytes?.Length ?? 0} bytes); " +
+                    "the host likely disconnected. Aborting load instead of crashing.");
+                ShowError(null);
+                return;
+            }
+
             // Clean up our current co-op state before loading,
             // so we don't, for example, end up ticking the client before
             // it's actually loaded.

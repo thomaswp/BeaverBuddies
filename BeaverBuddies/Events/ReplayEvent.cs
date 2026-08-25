@@ -72,7 +72,20 @@ namespace BeaverBuddies.Events
 
         public static string GetEntityID(BaseComponent component)
         {
-            return component?.GetComponent<EntityComponent>()?.EntityId.ToString();
+            if (component == null) return null;
+            try
+            {
+                return component.GetComponent<EntityComponent>()?.EntityId.ToString();
+            }
+            catch (Exception)
+            {
+                // The component may not be fully initialized/registered as an
+                // entity yet (e.g. a duplication source while a tool is mid-use),
+                // in which case GetComponent throws internally in ComponentCache
+                // instead of returning null. Treat that as "no entity" so the
+                // caller falls back to the base behaviour instead of crashing.
+                return null;
+            }
         }
 
         protected BuildingSpec GetBuilding(IReplayContext context, string buildingName)
