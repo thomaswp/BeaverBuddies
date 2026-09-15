@@ -377,4 +377,25 @@ namespace BeaverBuddies.DesyncDetecter
     //            $"lastCorner: {lastCornerPos}; transform: {transformPos}", true, true);
     //    }
     //}
+
+    // Hashes the per-tick snapshot the water simulation actually consumes.
+    // A divergence here precedes a "water map columns" divergence by one tick
+    // and points at water source strength/contamination (e.g. frame-time based
+    // strength modifiers) rather than the simulation itself.
+    [HarmonyPatch(typeof(WaterSourceRegistry), nameof(WaterSourceRegistry.Tick))]
+    public class WaterSourceRegistryTickPatcher
+    {
+        static void Postfix(WaterSourceRegistry __instance)
+        {
+            if (!Settings.Debug) return;
+            var sources = __instance._threadSafeWaterSources;
+            int hash = 13;
+            foreach (var source in sources)
+            {
+                hash = (hash * 7) + BitConverter.SingleToInt32Bits(source.CurrentStrength);
+                hash = (hash * 7) + BitConverter.SingleToInt32Bits(source.Contamination);
+            }
+            DesyncDetecterService.Trace($"Updating {sources.Count} water sources with hash {hash:X8}", true, true);
+        }
+    }
 }
