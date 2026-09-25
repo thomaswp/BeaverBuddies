@@ -1,9 +1,9 @@
 using BeaverBuddies.Events;
 using BeaverBuddies.IO;
+using BeaverBuddies.Util;
 using System;
 using System.Collections.Generic;
 using Timberborn.CameraSystem;
-using Timberborn.Coordinates;
 using Timberborn.InputSystem;
 using Timberborn.SceneLoading;
 using Timberborn.SingletonSystem;
@@ -98,21 +98,9 @@ namespace BeaverBuddies.Ping
         private PingEvent CreatePingEventAndPing()
         {
             Vector2 mouseScreen = _inputService.MousePosition;
-            Ray gridRay = _cameraService.ScreenPointToRayInGridSpace(mouseScreen);
-
-            Vector3 worldPos;
-            var hit = _terrainPicker.PickTerrainCoordinates(gridRay);
-            if (hit.HasValue)
+            if (!WorldPointPicker.TryPick(_cameraService, _terrainPicker, mouseScreen, out Vector3 worldPos))
             {
-                worldPos = CoordinateSystem.GridToWorld(hit.Value.Intersection);
-            }
-            else
-            {
-                // Fall back to the y=0 plane so off-map clicks still register.
-                Ray worldRay = _cameraService.ScreenPointToRayInWorldSpace(mouseScreen);
-                if (worldRay.direction.y >= -0.0001f) return null;
-                float t = -worldRay.origin.y / worldRay.direction.y;
-                worldPos = worldRay.origin + worldRay.direction * t;
+                return null;
             }
 
             string senderName = Settings.PingDisplayName;

@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using BeaverBuddies.Events;
+using Newtonsoft.Json.Linq;
 
 namespace BeaverBuddies.IO
 {
@@ -17,6 +19,13 @@ namespace BeaverBuddies.IO
         List<ReplayEvent> ReadEvents(int ticksSinceLoad);
 
         void WriteEvents(params ReplayEvent[] events);
+
+        /**
+         * Sends a message to the other players right away, outside of
+         * the tick queue. It isn't recorded or replayed, so it must not
+         * affect the game state.
+         */
+        void SendTransientMessage(JObject message);
 
         void Close();
 
@@ -43,6 +52,17 @@ namespace BeaverBuddies.IO
         bool HasEventsForTick(int tick);
 
         private static EventIO instance;
+
+        /**
+         * Raised on the main thread when another player sends a
+         * transient message.
+         */
+        public static event Action<JObject> TransientMessageReceived;
+
+        public static void RaiseTransientMessageReceived(JObject message)
+        {
+            TransientMessageReceived?.Invoke(message);
+        }
 
         public static bool IsNull => instance == null;
 

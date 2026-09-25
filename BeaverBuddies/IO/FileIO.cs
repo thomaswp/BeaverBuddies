@@ -137,6 +137,9 @@ namespace BeaverBuddies.IO
 
         public void Update() { }
 
+        // Transient messages only matter to other live players
+        public void SendTransientMessage(JObject message) { }
+
         public void WriteEvents(params ReplayEvent[] events)
         {
             for (int i = 0; i < events.Length; i++)
@@ -223,6 +226,8 @@ namespace BeaverBuddies.IO
         {
             //throw new NotImplementedException();
         }
+
+        public void SendTransientMessage(JObject message) { }
 
         public void Close()
         {

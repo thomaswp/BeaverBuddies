@@ -86,3 +86,5 @@ BeaverBuddies.Settings.PingPlayerName,"Отображаемое имя мето�
 BeaverBuddies.Settings.PingPlayerName.Tooltip,"Имя, отображаемое другим игрокам рядом с вашими метками.",""
 BeaverBuddies.Settings.PingColor,"Цвет метки",""
 BeaverBuddies.Settings.PingColor.Tooltip,"Цвет, используемый для отрисовки ваших меток на экране каждого игрока.",""
+BeaverBuddies.Settings.ShowPlayerCursors,"Показывать курсоры игроков",""
+BeaverBuddies.Settings.ShowPlayerCursors.Tooltip,"Показывает, куда указывают другие игроки, и делится с ними вашим курсором. Использует цвет ваших меток.",""

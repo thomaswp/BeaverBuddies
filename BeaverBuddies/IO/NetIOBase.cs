@@ -67,6 +67,12 @@ namespace BeaverBuddies.IO
             }
         }
 
+        public void SendTransientMessage(JObject message)
+        {
+            if (NetBase == null) return;
+            NetBase.SendTransientMessage(message);
+        }
+
         public bool HasEventsForTick(int tick)
         {
             if (NetBase == null) return false;

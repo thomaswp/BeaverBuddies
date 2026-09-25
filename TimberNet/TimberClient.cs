@@ -32,6 +32,12 @@ namespace TimberNet
             SendEvent(client, message);
         }
 
+        public override void SendTransientMessage(JObject message)
+        {
+            message[TRANSIENT_KEY] = true;
+            SendTransientMessage(client, message);
+        }
+
         protected override void ProcessReceivedEvent(JObject message)
         {
             base.ProcessReceivedEvent(message);

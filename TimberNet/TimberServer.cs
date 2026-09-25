@@ -234,6 +234,33 @@ namespace TimberNet
             }
         }
 
+        public override void SendTransientMessage(JObject message)
+        {
+            message[TRANSIENT_KEY] = true;
+            SendTransientMessageToClients(message, null);
+        }
+
+        protected override void ReceiveTransientMessage(ISocketStream source, JObject message)
+        {
+            // Relay to every other client, then handle it locally
+            SendTransientMessageToClients(message, source);
+            base.ReceiveTransientMessage(source, message);
+        }
+
+        private void SendTransientMessageToClients(JObject message, ISocketStream? except)
+        {
+            lock (queuedMessages)
+            {
+                foreach (ISocketStream client in clients)
+                {
+                    // Clients still receiving the map will catch up with
+                    // the next message, so there's no need to queue these
+                    if (client == except || !client.Connected || queuedMessages.ContainsKey(client)) continue;
+                    SendTransientMessage(client, message);
+                }
+            }
+        }
+
         public override void Close()
         {
             base.Close();

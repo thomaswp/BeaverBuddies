@@ -103,6 +103,13 @@ namespace BeaverBuddies
                 useAlpha: false
         );
 
+        public ModSetting<bool> ShowPlayerCursors { get; } =
+            new(true,
+                ModSettingDescriptor.CreateLocalized(
+                    "BeaverBuddies.Settings.ShowPlayerCursors"
+                ).SetLocalizedTooltip("BeaverBuddies.Settings.ShowPlayerCursors.Tooltip")
+        );
+
         // We keep a static instance because
         // 1) The settings are saved in a static manner, so all instances
         //    should be identical, and
@@ -141,6 +148,8 @@ namespace BeaverBuddies
         public static string PingDisplayName => instance?.PingPlayerName.Value ?? DefaultPingPlayerName;
 
         public static UnityEngine.Color PingColorValue => instance?.PingColor.Color ?? UnityEngine.Color.white;
+
+        public static bool ShowCursors => instance?.ShowPlayerCursors.Value ?? true;
 
         public Settings(ISettings settings,
                         ModSettingsOwnerRegistry modSettingsOwnerRegistry,

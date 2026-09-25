@@ -86,3 +86,5 @@ BeaverBuddies.Settings.PingPlayerName,"ชื่อที่แสดงบน�
 BeaverBuddies.Settings.PingPlayerName.Tooltip,"ชื่อที่แสดงให้ผู้เล่นคนอื่นเห็นข้างๆ การปักหมุดของคุณ",""
 BeaverBuddies.Settings.PingColor,"สีการปักหมุด",""
 BeaverBuddies.Settings.PingColor.Tooltip,"สีที่ใช้วาดการปักหมุดของคุณบนหน้าจอของผู้เล่นทุกคน",""
+BeaverBuddies.Settings.ShowPlayerCursors,"แสดงเคอร์เซอร์ของผู้เล่น",""
+BeaverBuddies.Settings.ShowPlayerCursors.Tooltip,"แสดงตำแหน่งที่ผู้เล่นคนอื่นกำลังชี้ และแชร์เคอร์เซอร์ของคุณให้พวกเขาเห็น ใช้สีการปักหมุดของคุณ",""

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Timberborn.CameraSystem;
 using UnityEngine;
+using static BeaverBuddies.Util.OverlayDrawing;
 
 namespace BeaverBuddies.Ping
 {
@@ -15,22 +16,7 @@ namespace BeaverBuddies.Ping
         private const float ArrowSize = 28f;
         private const float NameOffset = 24f;
 
-        private static Texture2D _whiteTex;
         private GUIStyle _labelStyle;
-
-        private static Texture2D WhiteTex
-        {
-            get
-            {
-                if (_whiteTex == null)
-                {
-                    _whiteTex = new Texture2D(1, 1);
-                    _whiteTex.SetPixel(0, 0, Color.white);
-                    _whiteTex.Apply();
-                }
-                return _whiteTex;
-            }
-        }
 
         public void OnGUI()
         {
@@ -39,7 +25,7 @@ namespace BeaverBuddies.Ping
             IReadOnlyList<ActivePing> pings = Service.ActivePings;
             if (pings.Count == 0) return;
 
-            Camera cam = TryGetCamera();
+            Camera cam = TryGetCamera(CameraService);
             if (cam == null || !cam.isActiveAndEnabled) return;
 
             EnsureLabelStyle();
@@ -97,14 +83,6 @@ namespace BeaverBuddies.Ping
             }
         }
 
-        private Camera TryGetCamera()
-        {
-            if (CameraService == null) return null;
-            var t = CameraService.Transform;
-            if (t == null || (Object)t == null) return null;
-            return t.GetComponent<Camera>();
-        }
-
         private static Vector2 ClampToEdge(Vector2 center, Vector2 dir, float w, float h, float margin)
         {
             float tx = float.PositiveInfinity;
@@ -147,33 +125,9 @@ namespace BeaverBuddies.Ping
             DrawLine(b, c, 3f, color);
         }
 
-        private static void DrawLine(Vector2 a, Vector2 b, float thickness, Color color)
-        {
-            Vector2 delta = b - a;
-            float length = delta.magnitude;
-            if (length < 0.001f) return;
-
-            Matrix4x4 oldMatrix = GUI.matrix;
-            Color oldColor = GUI.color;
-            GUI.color = color;
-
-            float angle = Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg;
-            GUIUtility.RotateAroundPivot(angle, a);
-            GUI.DrawTexture(new Rect(a.x, a.y - thickness * 0.5f, length, thickness), WhiteTex);
-
-            GUI.matrix = oldMatrix;
-            GUI.color = oldColor;
-        }
-
         private void DrawLabel(Vector2 pos, string text, Color color)
         {
-            if (string.IsNullOrEmpty(text)) return;
-
-            _labelStyle.normal.textColor = new Color(0, 0, 0, color.a * 0.6f);
-            GUI.Label(new Rect(pos.x - 100 + 1, pos.y + 1, 200, 20), text, _labelStyle);
-
-            _labelStyle.normal.textColor = color;
-            GUI.Label(new Rect(pos.x - 100, pos.y, 200, 20), text, _labelStyle);
+            DrawShadowedLabel(new Rect(pos.x - 100, pos.y, 200, 20), text, _labelStyle, color);
         }
     }
 }

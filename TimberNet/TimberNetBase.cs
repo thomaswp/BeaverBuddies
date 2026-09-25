@@ -22,6 +22,9 @@ namespace TimberNet
         public const string TYPE_KEY = "type";
         public const string SET_STATE_EVENT = "SetState";
         public const string HEARTBEAT_EVENT = "Heartbeat";
+        // Transient messages (e.g. cursor positions) skip the tick queue and
+        // the hash: they're handled as soon as they arrive and never replayed.
+        public const string TRANSIENT_KEY = "transient";
         public const int MAX_BUFFER_SIZE = 8192 * 4; // 32K
 
         public delegate void MessageReceived(string message);
@@ -30,8 +33,10 @@ namespace TimberNet
         public event MessageReceived? OnLog;
         public event MessageReceived? OnError;
         public event MapReceived? OnMapReceived;
+        public event Action<JObject>? OnTransientMessage;
 
-        private readonly ConcurrentQueue<string> receivedEventQueue = new ConcurrentQueue<string>();
+        private readonly ConcurrentQueue<(ISocketStream source, string message)> receivedEventQueue =
+            new ConcurrentQueue<(ISocketStream, string)>();
         private readonly ConcurrentQueue<string> logQueue = new ConcurrentQueue<string>();
         private byte[]? mapBytes = null;
 
@@ -258,7 +263,7 @@ namespace TimberNet
 
                 string message = BufferToStringMessage(buffer);
                 //Log($"Queuing message of length {messageLength} bytes");
-                receivedEventQueue.Enqueue(message);
+                receivedEventQueue.Enqueue((client, message));
                 messageCount++;
             }
         }
@@ -332,11 +337,19 @@ namespace TimberNet
 
         private void ProcessReceivedEventsQueue()
         {
-            while (receivedEventQueue.TryDequeue(out string? message))
+            while (receivedEventQueue.TryDequeue(out var received))
             {
                 try
                 {
-                    ReceiveEvent(JObject.Parse(message));
+                    JObject message = JObject.Parse(received.message);
+                    if (IsTransient(message))
+                    {
+                        ReceiveTransientMessage(received.source, message);
+                    }
+                    else
+                    {
+                        ReceiveEvent(message);
+                    }
                 } catch (Exception e)
                 {
                     Log($"Error receiving event: {e.Message}");
@@ -351,6 +364,40 @@ namespace TimberNet
         protected virtual void ReceiveEvent(JObject message)
         {
             InsertInScript(message, receivedEvents);
+        }
+
+        public static bool IsTransient(JObject message)
+        {
+            return message[TRANSIENT_KEY]?.Type == JTokenType.Boolean
+                && message[TRANSIENT_KEY]!.ToObject<bool>();
+        }
+
+        /**
+         * Called on the Update() thread when a transient message arrives
+         * from a connected Net.
+         */
+        protected virtual void ReceiveTransientMessage(ISocketStream source, JObject message)
+        {
+            OnTransientMessage?.Invoke(message);
+        }
+
+        /**
+         * Sends a message that bypasses the tick queue to all peers. It is
+         * not added to the hash and will not be replayed.
+         */
+        public abstract void SendTransientMessage(JObject message);
+
+        protected void SendTransientMessage(ISocketStream stream, JObject message)
+        {
+            // Sent frequently, so don't log each message like SendEvent does
+            try
+            {
+                SendDataWithLength(stream, MessageToBuffer(message));
+            }
+            catch (Exception e)
+            {
+                Log($"Error sending transient message: {e.Message}");
+            }
         }
 
         private void ProcessLogs()

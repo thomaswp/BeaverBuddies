@@ -32,6 +32,7 @@ namespace BeaverBuddies.IO
             NetBase = new TimberClient(socket);
             NetBase.OnMapReceived += mapReceivedCallback;
             NetBase.OnLog += Plugin.Log;
+            NetBase.OnTransientMessage += EventIO.RaiseTransientMessageReceived;
             NetBase.OnError += (error) =>
             {
                 Plugin.LogError(error);
@@ -57,6 +58,7 @@ namespace BeaverBuddies.IO
             if (NetBase == null) return;
             NetBase.OnMapReceived -= mapReceivedCallback;
             NetBase.OnLog -= Plugin.Log;
+            NetBase.OnTransientMessage -= EventIO.RaiseTransientMessageReceived;
             NetBase = null;
         }
 

@@ -80,6 +80,7 @@ namespace BeaverBuddies.IO
             }
             //netBase = new TimberServer(port, mapProvider, null);
             NetBase.OnLog += Plugin.Log;
+            NetBase.OnTransientMessage += EventIO.RaiseTransientMessageReceived;
             NetBase.OnMapReceived += NetBase_OnClientConnected;
             NetBase.Start();
         }
