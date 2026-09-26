@@ -86,3 +86,7 @@ BeaverBuddies.Settings.PingPlayerName,"Отображаемое имя мето�
 BeaverBuddies.Settings.PingPlayerName.Tooltip,"Имя, отображаемое другим игрокам рядом с вашими метками.",""
 BeaverBuddies.Settings.PingColor,"Цвет метки",""
 BeaverBuddies.Settings.PingColor.Tooltip,"Цвет, используемый для отрисовки ваших меток на экране каждого игрока.",""
+BeaverBuddies.Settings.AllowDevTools,"Разрешить инструменты разработчика в кооперативе",""
+BeaverBuddies.Settings.AllowDevTools.Tooltip,"Когда вы хост, все игроки могут пользоваться инструментами разработчика. Сделанные ими изменения синхронизируются. Инструменты, которые нельзя синхронизировать, в кооперативе всегда заблокированы.",""
+BeaverBuddies.DevTools.DisabledByHost,"Хост отключил инструменты разработчика в этой игре.",""
+BeaverBuddies.DevTools.NotSynced,"Этот инструмент разработчика нельзя использовать в кооперативе, потому что его нельзя синхронизировать.",""

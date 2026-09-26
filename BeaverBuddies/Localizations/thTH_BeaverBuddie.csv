@@ -86,3 +86,7 @@ BeaverBuddies.Settings.PingPlayerName,"ชื่อที่แสดงบน�
 BeaverBuddies.Settings.PingPlayerName.Tooltip,"ชื่อที่แสดงให้ผู้เล่นคนอื่นเห็นข้างๆ การปักหมุดของคุณ",""
 BeaverBuddies.Settings.PingColor,"สีการปักหมุด",""
 BeaverBuddies.Settings.PingColor.Tooltip,"สีที่ใช้วาดการปักหมุดของคุณบนหน้าจอของผู้เล่นทุกคน",""
+BeaverBuddies.Settings.AllowDevTools,"อนุญาตเครื่องมือนักพัฒนาในโหมดร่วมมือ",""
+BeaverBuddies.Settings.AllowDevTools.Tooltip,"เมื่อคุณเป็นโฮสต์ ผู้เล่นทุกคนจะใช้เครื่องมือนักพัฒนาได้ การเปลี่ยนแปลงที่ทำด้วยเครื่องมือเหล่านี้จะถูกซิงค์ เครื่องมือที่ซิงค์ไม่ได้จะถูกบล็อกเสมอในโหมดร่วมมือ",""
+BeaverBuddies.DevTools.DisabledByHost,"โฮสต์ได้ปิดเครื่องมือนักพัฒนาสำหรับเกมนี้",""
+BeaverBuddies.DevTools.NotSynced,"ไม่สามารถใช้เครื่องมือนักพัฒนานี้ในโหมดร่วมมือได้ เพราะไม่สามารถซิงค์ได้",""

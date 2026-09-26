@@ -1,4 +1,5 @@
 ﻿using BeaverBuddies.Connect;
+using BeaverBuddies.DevTools;
 using BeaverBuddies.IO;
 using BeaverBuddies.Reporting;
 using BeaverBuddies.Util;
@@ -22,10 +23,13 @@ namespace BeaverBuddies.Events
         public string serverGameVersion;
         //public string mapName;
         public bool isDebugMode;
+        // Defaults to true for hosts that don't send it
+        public bool allowDevTools = true;
 
         public override void Replay(IReplayContext context)
         {
             //context.GetSingleton<ReplayService>().SetServerMapName(mapName);
+            DevToolsPolicy.HostAllowsDevTools = allowDevTools;
             string warningMessage = null;
             if (serverGameVersion != GameVersions.CurrentVersion.ToString())
             {
@@ -56,6 +60,7 @@ namespace BeaverBuddies.Events
                 serverModVersion = Plugin.Version,
                 serverGameVersion = GameVersions.CurrentVersion.ToString(),
                 isDebugMode = Settings.Debug,
+                allowDevTools = Settings.AllowDevTools,
                 //mapName = mapName,
             };
             return message;

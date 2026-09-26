@@ -3,6 +3,7 @@
 //#define ONE_TICK_PER_UPDATE
 
 using BeaverBuddies.Connect;
+using BeaverBuddies.DevTools;
 using BeaverBuddies.DesyncDetecter;
 using BeaverBuddies.Events;
 using BeaverBuddies.IO;
@@ -318,6 +319,13 @@ namespace BeaverBuddies
                     Plugin.LogWarning($"Event past time: {eventTime} < {currentTick}");
                 }
                 //Plugin.Log($"Replaying event [{replayEvent.ticksSinceLoad}]: {replayEvent.type}");
+
+                // Don't play or relay dev events when the host has disabled dev tools
+                if (DevToolsPolicy.ShouldDropReplayedEvent(replayEvent))
+                {
+                    Plugin.LogWarning($"Dropping {replayEvent.type}: dev tools are disabled");
+                    continue;
+                }
                 
                 // If this event was played (e.g. on the server) and recorded a 
                 // random state, make sure we're in the same state.

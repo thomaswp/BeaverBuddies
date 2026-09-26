@@ -55,6 +55,7 @@ namespace BeaverBuddies
             containerDefinition.Bind<ReportingService>().AsSingleton();
             containerDefinition.Bind<LateTickableBuffer>().AsSingleton();
             containerDefinition.Bind<BeaverBuddies.Ping.PingService>().AsSingleton();
+            containerDefinition.Bind<BeaverBuddies.DevTools.DevToolsService>().AsSingleton();
             // We can safely add this regardless of whether tracing is enabled
             // because it will only trace if the config is set to do so.
             containerDefinition.Bind<DesyncDetecterService>().AsSingleton();

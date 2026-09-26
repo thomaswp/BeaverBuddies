@@ -15,6 +15,7 @@ using Timberborn.Forestry;
 using Timberborn.PlantingUI;
 using Timberborn.ScienceSystem;
 using Timberborn.TemplateInstantiation;
+using Timberborn.TerrainPhysics;
 using Timberborn.ToolButtonSystem;
 using Timberborn.WorkSystemUI;
 using UnityEngine;
@@ -119,6 +120,8 @@ namespace BeaverBuddies.Events
     class BuildingsDeconstructedEvent : ReplayEvent
     {
         public List<string> entityIDs = new List<string>();
+        // Only the dev mode deletion tool removes terrain
+        public List<Vector3Int> terrainCoordinates = new List<Vector3Int>();
 
         public override void Replay(IReplayContext context)
         {
@@ -128,6 +131,12 @@ namespace BeaverBuddies.Events
                 var entity = GetEntityComponent(context, entityID);
                 if (entity == null) continue;
                 entityService.Delete(entity);
+            }
+            if (terrainCoordinates == null || terrainCoordinates.Count == 0) return;
+            var terrainDestroyer = context.GetSingleton<DevTools.DevToolsService>().TerrainDestroyer;
+            foreach (Vector3Int coordinates in terrainCoordinates)
+            {
+                terrainDestroyer.DestroyTerrain(coordinates);
             }
         }
 
@@ -142,9 +151,11 @@ namespace BeaverBuddies.Events
     {
         static bool Prefix(BlockObjectDeletionTool<BuildingSpec> __instance)
         {
-            bool result = ReplayEvent.DoPrefix(() =>
+            // BlockObjectDeletionTool's code is shared by all its reference type
+            // instances, so this also runs for the dev mode EntityBlockObjectDeletionTool
+            bool isDevTool = (object)__instance is EntityBlockObjectDeletionTool;
+            bool result = (!isDevTool || DevTools.DevToolsPolicy.CheckAllowed()) && ReplayEvent.DoPrefix(() =>
             {
-                // TODO: If this does work, it may affect other deletions too :(
                 List<string> entityIDs = __instance._temporaryBlockObjects
                         .Select(ReplayEvent.GetEntityID)
                         .ToList();
@@ -152,6 +163,7 @@ namespace BeaverBuddies.Events
                 return new BuildingsDeconstructedEvent()
                 {
                     entityIDs = entityIDs,
+                    terrainCoordinates = __instance._temporaryTerrainCoords.ToList(),
                 };
             });
 
@@ -159,6 +171,7 @@ namespace BeaverBuddies.Events
             {
                 // If we cancel the event, clean up the tool
                 __instance._temporaryBlockObjects.Clear();
+                __instance._temporaryTerrainCoords.Clear();
             }
 
             return result;
