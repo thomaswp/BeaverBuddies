@@ -21,12 +21,15 @@ namespace BeaverBuddies.Fixes
         public void TickComponents()
         {
             TickingLate = true;
-            foreach (var change in buffer)
+            try
             {
-                change.Tick();
+                foreach (var change in buffer) change.Tick();
             }
-            TickingLate = false;
-            buffer.Clear();
+            finally
+            {
+                TickingLate = false;
+                buffer.Clear();
+            }
         }
 
     }
